@@ -23,6 +23,9 @@
         "php": "8.1.*||8.2.*||8.3.*",
         "symfony/console": "^6.4"
     },
+    "require-dev": {
+        "vimeo/psalm": "^5.22"
+    },
     "config": {
         "sort-packages": true,
         "preferred-install": "dist"
