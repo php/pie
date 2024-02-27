@@ -1,0 +1,30 @@
+{
+    "name": "php/pie",
+    "type": "project",
+    "description": "PIE - the PHP Installer for Extensions",
+    "license": "BSD-3-Clause",
+    "bin": ["bin/pie"],
+    "autoload": {
+        "psr-4": {
+            "Php\\Pie\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "James Titcumb",
+            "email": "asgrim@php.net"
+        },
+        {
+            "name": "PIE contributors",
+            "homepage": "https://github.com/php/pie/graphs/contributors"
+        }
+    ],
+    "require": {
+        "php": "8.1.*||8.2.*||8.3.*",
+        "symfony/console": "^6.4"
+    },
+    "config": {
+        "sort-packages": true,
+        "preferred-install": "dist"
+    }
+}
