@@ -15,7 +15,7 @@ class DownloadCommandTest extends TestCase
 {
     public function testDownloadCommand(): void
     {
-        $input = $this->createMock(InputInterface::class);
+        $input  = $this->createMock(InputInterface::class);
         $output = $this->createMock(OutputInterface::class);
 
         $output->expects(self::once())

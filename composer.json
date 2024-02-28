@@ -29,11 +29,15 @@
         "symfony/console": "^6.4"
     },
     "require-dev": {
+        "doctrine/coding-standard": "^12.0",
         "phpunit/phpunit": "^10.5",
         "vimeo/psalm": "^5.22"
     },
     "config": {
         "sort-packages": true,
-        "preferred-install": "dist"
+        "preferred-install": "dist",
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
     }
 }

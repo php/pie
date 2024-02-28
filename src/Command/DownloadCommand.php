@@ -18,6 +18,7 @@ final class DownloadCommand extends Command
     public function execute(InputInterface $input, OutputInterface $output): int
     {
         $output->writeln('<info>to do</info>'); // @todo
+
         return Command::SUCCESS;
     }
 }

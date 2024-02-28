@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<ruleset name="PIE Coding Standard">
+    <config name="php_version" value="80100"/>
+    <arg value="p"/>
+    <arg value="s"/>
+    <arg name="colors"/>
+    <arg name="cache" value=".phpcs-cache"/>
+
+    <file>bin/pie</file>
+    <file>src</file>
+    <file>test/unit</file>
+
+    <rule ref="Doctrine">
+        <exclude name="Generic.Files.LineLength.TooLong"/>
+    </rule>
+</ruleset>
