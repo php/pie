@@ -11,6 +11,7 @@ include $_composer_autoload_path ?? __DIR__ . '/../vendor/autoload.php';
 
 $application = new Application('pie', 'dev-main');
 $application->addCommands([
-    new Command\DownloadCommand(),
+    // @todo we may want to use some kind of service locator eventually
+    new Command\DownloadCommand(new \Php\Pie\DependencyResolver\ResolveDependencyWithComposer()),
 ]);
 $application->run();
