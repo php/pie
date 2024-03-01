@@ -28,7 +28,7 @@ class DownloadCommandTest extends TestCase
         $this->input  = $this->createMock(InputInterface::class);
         $this->output = new BufferedOutput();
 
-        $this->command = new DownloadCommand(new ResolveDependencyWithComposer());
+        $this->command = new DownloadCommand(ResolveDependencyWithComposer::factory());
     }
 
     public function testDownloadCommand(): void
