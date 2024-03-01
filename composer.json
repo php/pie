@@ -11,6 +11,7 @@
     },
     "autoload-dev": {
         "psr-4": {
+            "Php\\PieIntegrationTest\\": "test/integration/",
             "Php\\PieUnitTest\\": "test/unit/"
         }
     },
