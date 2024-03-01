@@ -38,7 +38,11 @@ final class ResolveDependencyWithComposerTest extends TestCase
         self::assertSame('phpunit/phpunit', $package->name);
     }
 
-    /** @return list<string, array{0: array<array-key, mixed>, 1: string, 2: string}> */
+    /**
+     * @return array<string, array{0: array<string, string>, 1: string, 2: string}>
+     *
+     * @psalm-suppress PossiblyUnusedMethod
+     */
     public static function unresolvableDependencies(): array
     {
         return [
@@ -47,7 +51,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
         ];
     }
 
-    /** @param array<array-key, mixed> $platformOverrides */
+    /** @param array<string, string> $platformOverrides */
     #[DataProvider('unresolvableDependencies')]
     public function testPackageThatCannotBeResolvedThrowsException(array $platformOverrides, string $package, string $version): void
     {

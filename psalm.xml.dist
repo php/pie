@@ -9,10 +9,15 @@
     findUnusedCode="true"
 >
     <projectFiles>
-        <file name="bin/pie" />
-        <directory name="src" />
+        <file name="bin/pie"/>
+        <directory name="src"/>
+        <directory name="test/unit"/>
+        <directory name="test/integration"/>
         <ignoreFiles>
-            <directory name="vendor" />
+            <directory name="vendor"/>
         </ignoreFiles>
     </projectFiles>
+    <plugins>
+        <pluginClass class="Psalm\PhpUnitPlugin\Plugin"/>
+    </plugins>
 </psalm>
