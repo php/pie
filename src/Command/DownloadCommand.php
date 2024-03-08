@@ -7,6 +7,7 @@ namespace Php\Pie\Command;
 use Composer\Package\Version\VersionParser;
 use InvalidArgumentException;
 use Php\Pie\DependencyResolver\DependencyResolver;
+use Php\Pie\Downloading\DownloadAndExtract;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -30,8 +31,10 @@ final class DownloadCommand extends Command
 {
     private const ARG_REQUESTED_PACKAGE_AND_VERSION = 'requested-package-and-version';
 
-    public function __construct(private readonly DependencyResolver $dependencyResolver)
-    {
+    public function __construct(
+        private readonly DependencyResolver $dependencyResolver,
+        private readonly DownloadAndExtract $downloadAndExtract,
+    ) {
         parent::__construct();
     }
 
@@ -57,7 +60,16 @@ final class DownloadCommand extends Command
 
         $output->writeln(sprintf('<info>You are running PHP %s</info>', PHP_VERSION));
         $output->writeln(sprintf('<info>Found package:</info> %s (version: %s)', $package->name, $package->version));
-        $output->writeln(sprintf('Dist download URL: %s', $package->downloadUrl ?? '(none)'));
+        $output->writeln(sprintf('<info>Dist download URL:</info> %s', $package->downloadUrl ?? '(none)'));
+
+        $downloadedPackage = ($this->downloadAndExtract)($package);
+
+        $output->writeln(sprintf(
+            '<info>Extracted %s:%s source to:</info> %s',
+            $downloadedPackage->package->name,
+            $downloadedPackage->package->version,
+            $downloadedPackage->extractedSourcePath,
+        ));
 
         return Command::SUCCESS;
     }
