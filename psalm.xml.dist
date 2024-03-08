@@ -20,9 +20,6 @@
     <plugins>
         <pluginClass class="Psalm\PhpUnitPlugin\Plugin"/>
     </plugins>
-    <stubs>
-        <file name=".php.stub"/>
-    </stubs>
     <issueHandlers>
         <PossiblyUnusedMethod>
             <errorLevel type="suppress">
