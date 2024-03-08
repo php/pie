@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace Php\Pie\Downloading;
 
-use Composer\Factory;
-use Composer\IO\NullIO;
-use Composer\Util\AuthHelper;
-use GuzzleHttp\Client;
 use Php\Pie\DependencyResolver\Package;
 
 use function file_exists;
@@ -15,27 +11,13 @@ use function mkdir;
 use function sys_get_temp_dir;
 use function uniqid;
 
+/** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class UnixDownloadAndExtract implements DownloadAndExtract
 {
     public function __construct(
         private readonly DownloadZip $downloadZip,
         private readonly ExtractZip $extractZip,
     ) {
-    }
-
-    public static function factory(): self
-    {
-        $config = Factory::createConfig();
-        $io     = new NullIO();
-        $io->loadConfiguration($config);
-
-        return new self(
-            new DownloadZip(
-                new Client(),
-                new AuthHelper($io, $config),
-            ),
-            new ExtractZip(),
-        );
     }
 
     public function __invoke(Package $package): DownloadedPackage

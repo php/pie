@@ -5,21 +5,20 @@ declare(strict_types=1);
 
 namespace Php\Pie;
 
+use Php\Pie\Command\DownloadCommand;
 use Php\Pie\DependencyResolver\ResolveDependencyWithComposer;
 use Php\Pie\Downloading\UnixDownloadAndExtract;
 use Symfony\Component\Console\Application;
+use Symfony\Component\Console\CommandLoader\ContainerCommandLoader;
 
 /** @psalm-suppress UnresolvableInclude */
 include $_composer_autoload_path ?? __DIR__ . '/../vendor/autoload.php';
 
 $application = new Application('pie', 'dev-main');
-// @todo make these lazy eventually https://symfony.com/doc/current/console/lazy_commands.html
-$application->addCommands([
-    // @todo we may want to use some kind of service locator eventually
-    new Command\DownloadCommand(
-        ResolveDependencyWithComposer::factory(),
-        // @todo detect platform
-        UnixDownloadAndExtract::factory(),
-    ),
-]);
+$application->setCommandLoader(new ContainerCommandLoader(
+    Container::factory(),
+    [
+        'download' => DownloadCommand::class,
+    ]
+));
 $application->run();

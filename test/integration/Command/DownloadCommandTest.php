@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace Php\PieIntegrationTest\Command;
 
 use Php\Pie\Command\DownloadCommand;
-use Php\Pie\DependencyResolver\ResolveDependencyWithComposer;
+use Php\Pie\Container;
 use Php\Pie\DependencyResolver\UnableToResolveRequirement;
-use Php\Pie\Downloading\UnixDownloadAndExtract;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -22,12 +21,7 @@ class DownloadCommandTest extends TestCase
 
     public function setUp(): void
     {
-        $this->commandTester = new CommandTester(
-            new DownloadCommand(
-                ResolveDependencyWithComposer::factory(),
-                UnixDownloadAndExtract::factory(),
-            ),
-        );
+        $this->commandTester = new CommandTester(Container::factory()->get(DownloadCommand::class));
     }
 
     public function testDownloadCommand(): void

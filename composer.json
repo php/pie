@@ -31,6 +31,7 @@
         "composer/composer": "^2.7",
         "guzzlehttp/guzzle": "^7.8",
         "guzzlehttp/psr7": "^2.6",
+        "illuminate/container": "^10.47",
         "psr/http-message": "^2.0",
         "symfony/console": "^6.4",
         "webmozart/assert": "^1.11"

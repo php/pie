@@ -10,6 +10,7 @@ use ZipArchive;
 use function explode;
 use function sprintf;
 
+/** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 class ExtractZip
 {
     public function to(string $zipFile, string $destination): string

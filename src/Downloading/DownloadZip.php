@@ -19,6 +19,7 @@ use function explode;
 use function file_put_contents;
 use function trim;
 
+/** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class DownloadZip
 {
     public function __construct(
