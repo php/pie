@@ -1,0 +1,9 @@
+name: "Continuous Integration"
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  ci:
+    uses: laminas/workflow-continuous-integration/.github/workflows/continuous-integration.yml@1.x

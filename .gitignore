@@ -1,0 +1,4 @@
+/vendor/
+/psalm.xml
+/.phpunit.cache/
+/.phpcs-cache
