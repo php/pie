@@ -14,6 +14,9 @@
         <testsuite name="unit">
             <directory>test/unit</directory>
         </testsuite>
+        <testsuite name="integration">
+            <directory>test/integration</directory>
+        </testsuite>
     </testsuites>
 
     <source restrictDeprecations="true" restrictNotices="true" restrictWarnings="true">

@@ -9,6 +9,7 @@
     <file>bin/pie</file>
     <file>src</file>
     <file>test/unit</file>
+    <file>test/integration</file>
 
     <rule ref="Doctrine">
         <exclude name="Generic.Files.LineLength.TooLong"/>

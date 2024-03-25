@@ -3,14 +3,24 @@
 
 declare(strict_types=1);
 
-use Php\Pie\Command;
+namespace Php\Pie;
+
+use Php\Pie\Command\DownloadCommand;
 use Symfony\Component\Console\Application;
+use Symfony\Component\Console\CommandLoader\ContainerCommandLoader;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /** @psalm-suppress UnresolvableInclude */
 include $_composer_autoload_path ?? __DIR__ . '/../vendor/autoload.php';
 
+$container = Container::factory();
+
 $application = new Application('pie', 'dev-main');
-$application->addCommands([
-    new Command\DownloadCommand(),
-]);
-$application->run();
+$application->setCommandLoader(new ContainerCommandLoader(
+    $container,
+    [
+        'download' => DownloadCommand::class,
+    ]
+));
+$application->run($container->get(InputInterface::class), $container->get(OutputInterface::class));
