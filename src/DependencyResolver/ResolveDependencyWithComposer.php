@@ -10,6 +10,8 @@ use Composer\Repository\RepositorySet;
 use Php\Pie\TargetPhp\PhpBinaryPath;
 use Php\Pie\TargetPhp\ResolveTargetPhpToPlatformRepository;
 
+use function in_array;
+
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class ResolveDependencyWithComposer implements DependencyResolver
 {
@@ -27,10 +29,13 @@ final class ResolveDependencyWithComposer implements DependencyResolver
         ))
             ->findBestCandidate($packageName, $requestedVersion);
 
-        // @todo check it is a `php-ext` or `php-ext-zend`
-
         if (! $package instanceof CompletePackageInterface) {
             throw UnableToResolveRequirement::fromRequirement($packageName, $requestedVersion);
+        }
+
+        $type = $package->getType();
+        if (! in_array($type, [Package::TYPE_PHP_MODULE, Package::TYPE_ZEND_EXTENSION])) {
+            throw UnableToResolveRequirement::toPhpOrZendExtension($package, $packageName, $requestedVersion);
         }
 
         return Package::fromComposerCompletePackage($package);

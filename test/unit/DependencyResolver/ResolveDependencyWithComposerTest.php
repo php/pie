@@ -35,16 +35,17 @@ final class ResolveDependencyWithComposerTest extends TestCase
     public function testPackageThatCanBeResolved(): void
     {
         $phpBinaryPath = $this->createMock(PhpBinaryPath::class);
-        $phpBinaryPath->expects(self::once())
+        $phpBinaryPath->expects(self::any())
             ->method('version')
-            ->willReturn('8.2.0');
+            ->willReturn('8.3.0');
 
         $package = (new ResolveDependencyWithComposer(
             $this->repositorySet,
             $this->resolveTargetPhpToPlatformRepository,
-        ))($phpBinaryPath, 'phpunit/phpunit', '^11.0');
+        ))($phpBinaryPath, 'asgrim/example-pie-extension', '1.0.0');
 
-        self::assertSame('phpunit/phpunit', $package->name);
+        self::assertSame('asgrim/example-pie-extension', $package->name);
+        self::assertSame('1.0.0', $package->version);
     }
 
     /**
@@ -55,8 +56,9 @@ final class ResolveDependencyWithComposerTest extends TestCase
     public static function unresolvableDependencies(): array
     {
         return [
-            'phpVersionTooOld' => [['php' => '8.1.0'], 'phpunit/phpunit', '^11.0'],
-            'phpVersionTooNew' => [['php' => '8.3.0'], 'roave/signature', '1.4.*'],
+            'phpVersionTooOld' => [['php' => '8.1.0'], 'asgrim/example-pie-extension', '1.0.0'],
+            'phpVersionTooNew' => [['php' => '8.4.0'], 'asgrim/example-pie-extension', '1.0.0'],
+            'notAPhpExtension' => [['php' => '8.3.0'], 'ramsey/uuid', '^4.7'],
         ];
     }
 

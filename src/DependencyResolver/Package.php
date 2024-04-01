@@ -9,6 +9,9 @@ use Composer\Package\CompletePackageInterface;
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class Package
 {
+    public const TYPE_PHP_MODULE     = 'php-ext';
+    public const TYPE_ZEND_EXTENSION = 'php-ext-zend';
+
     private function __construct(
         public readonly string $name,
         public readonly string $version,
