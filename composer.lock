@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "694d5bf1b96fcceae6af19c03eb55095",
+    "content-hash": "fb31ac50e2d4c78585e5dc67fbef9477",
     "packages": [
         {
             "name": "composer/ca-bundle",
@@ -157,16 +157,16 @@
         },
         {
             "name": "composer/composer",
-            "version": "2.7.1",
+            "version": "dev-main",
             "source": {
                 "type": "git",
                 "url": "https://github.com/composer/composer.git",
-                "reference": "aaf6ed5ccd27c23f79a545e351b4d7842a99d0bc"
+                "reference": "b12a88b7f3313e9dbae5b58085323b8328d10296"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/composer/composer/zipball/aaf6ed5ccd27c23f79a545e351b4d7842a99d0bc",
-                "reference": "aaf6ed5ccd27c23f79a545e351b4d7842a99d0bc",
+                "url": "https://api.github.com/repos/composer/composer/zipball/b12a88b7f3313e9dbae5b58085323b8328d10296",
+                "reference": "b12a88b7f3313e9dbae5b58085323b8328d10296",
                 "shasum": ""
             },
             "require": {
@@ -205,6 +205,7 @@
                 "ext-zip": "Enabling the zip extension allows you to unzip archives",
                 "ext-zlib": "Allow gzip compression of HTTP requests"
             },
+            "default-branch": true,
             "bin": [
                 "bin/composer"
             ],
@@ -251,7 +252,7 @@
                 "irc": "ircs://irc.libera.chat:6697/composer",
                 "issues": "https://github.com/composer/composer/issues",
                 "security": "https://github.com/composer/composer/security/policy",
-                "source": "https://github.com/composer/composer/tree/2.7.1"
+                "source": "https://github.com/composer/composer/tree/main"
             },
             "funding": [
                 {
@@ -267,7 +268,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-02-09T14:26:28+00:00"
+            "time": "2024-03-22T08:29:43+00:00"
         },
         {
             "name": "composer/metadata-minifier",
@@ -5740,7 +5741,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "composer/composer": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

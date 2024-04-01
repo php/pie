@@ -6,11 +6,12 @@ namespace Php\PieUnitTest\DependencyResolver;
 
 use Composer\IO\NullIO;
 use Composer\Repository\CompositeRepository;
-use Composer\Repository\PlatformRepository;
 use Composer\Repository\RepositoryFactory;
 use Composer\Repository\RepositorySet;
 use Php\Pie\DependencyResolver\ResolveDependencyWithComposer;
 use Php\Pie\DependencyResolver\UnableToResolveRequirement;
+use Php\Pie\TargetPhp\PhpBinaryPath;
+use Php\Pie\TargetPhp\ResolveTargetPhpToPlatformRepository;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
@@ -19,6 +20,7 @@ use PHPUnit\Framework\TestCase;
 final class ResolveDependencyWithComposerTest extends TestCase
 {
     private RepositorySet $repositorySet;
+    private ResolveTargetPhpToPlatformRepository $resolveTargetPhpToPlatformRepository;
 
     public function setUp(): void
     {
@@ -26,14 +28,21 @@ final class ResolveDependencyWithComposerTest extends TestCase
 
         $this->repositorySet = new RepositorySet();
         $this->repositorySet->addRepository(new CompositeRepository(RepositoryFactory::defaultReposWithDefaultManager(new NullIO())));
+
+        $this->resolveTargetPhpToPlatformRepository = new ResolveTargetPhpToPlatformRepository();
     }
 
     public function testPackageThatCanBeResolved(): void
     {
+        $phpBinaryPath = $this->createMock(PhpBinaryPath::class);
+        $phpBinaryPath->expects(self::once())
+            ->method('version')
+            ->willReturn('8.2.0');
+
         $package = (new ResolveDependencyWithComposer(
-            new PlatformRepository([], ['php' => '8.2.0']),
             $this->repositorySet,
-        ))('phpunit/phpunit', '^11.0');
+            $this->resolveTargetPhpToPlatformRepository,
+        ))($phpBinaryPath, 'phpunit/phpunit', '^11.0');
 
         self::assertSame('phpunit/phpunit', $package->name);
     }
@@ -55,12 +64,18 @@ final class ResolveDependencyWithComposerTest extends TestCase
     #[DataProvider('unresolvableDependencies')]
     public function testPackageThatCannotBeResolvedThrowsException(array $platformOverrides, string $package, string $version): void
     {
+        $phpBinaryPath = $this->createMock(PhpBinaryPath::class);
+        $phpBinaryPath->expects(self::once())
+            ->method('version')
+            ->willReturn($platformOverrides['php']);
+
         $this->expectException(UnableToResolveRequirement::class);
 
         (new ResolveDependencyWithComposer(
-            new PlatformRepository([], $platformOverrides),
             $this->repositorySet,
+            $this->resolveTargetPhpToPlatformRepository,
         ))(
+            $phpBinaryPath,
             $package,
             $version,
         );

@@ -8,8 +8,10 @@ use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
 use Webmozart\Assert\Assert;
 
+use function trim;
+
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
-final class PhpBinaryPath
+class PhpBinaryPath
 {
     /** @param non-empty-string $phpBinaryPath */
     private function __construct(readonly string $phpBinaryPath)
@@ -22,6 +24,7 @@ final class PhpBinaryPath
             ->mustRun()
             ->getOutput());
         Assert::stringNotEmpty($phpVersion, 'Could not determine PHP version');
+
         return $phpVersion;
     }
 
@@ -32,13 +35,15 @@ final class PhpBinaryPath
             ->mustRun()
             ->getOutput());
         Assert::stringNotEmpty($phpExecutable, 'Could not find path to PHP executable.');
+
         return new self($phpExecutable);
     }
 
     public static function fromCurrentProcess(): self
     {
-        $phpExecutable = trim((new PhpExecutableFinder())->find());
+        $phpExecutable = trim((string) (new PhpExecutableFinder())->find());
         Assert::stringNotEmpty($phpExecutable, 'Could not find path to PHP executable.');
+
         return new self($phpExecutable);
     }
 }

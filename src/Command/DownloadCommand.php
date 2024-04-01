@@ -8,10 +8,12 @@ use Composer\Package\Version\VersionParser;
 use InvalidArgumentException;
 use Php\Pie\DependencyResolver\DependencyResolver;
 use Php\Pie\Downloading\DownloadAndExtract;
+use Php\Pie\TargetPhp\PhpBinaryPath;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Webmozart\Assert\Assert;
 
@@ -30,6 +32,7 @@ use const PHP_VERSION;
 final class DownloadCommand extends Command
 {
     private const ARG_REQUESTED_PACKAGE_AND_VERSION = 'requested-package-and-version';
+    private const OPTION_WITH_PHP_CONFIG            = 'with-php-config';
 
     public function __construct(
         private readonly DependencyResolver $dependencyResolver,
@@ -47,18 +50,35 @@ final class DownloadCommand extends Command
             InputArgument::REQUIRED,
             'The extension name and version constraint to use, in the format {ext-name}{?:version-constraint}{?@dev-branch-name}, for example `ext-debug:^1.0`',
         );
+        $this->addOption(
+            self::OPTION_WITH_PHP_CONFIG,
+            null,
+            InputOption::VALUE_OPTIONAL,
+            'The path to `php-config` to use',
+        );
     }
 
     public function execute(InputInterface $input, OutputInterface $output): int
     {
+        $phpBinaryPath = PhpBinaryPath::fromCurrentProcess();
+
+        /** @var mixed $withPhpConfig */
+        $withPhpConfig = $input->getOption(self::OPTION_WITH_PHP_CONFIG);
+        if (is_string($withPhpConfig) && $withPhpConfig !== '') {
+            $phpBinaryPath = PhpBinaryPath::fromPhpConfigExecutable($withPhpConfig);
+        }
+
+        $output->writeln(sprintf('<info>You are running PHP %s</info>', PHP_VERSION));
+        $output->writeln(sprintf('<info>Target PHP installation: %s (from %s)</info>', $phpBinaryPath->version(), $phpBinaryPath->phpBinaryPath));
+
         $requestedNameAndVersionPair = $this->requestedNameAndVersionPair($input);
 
         $package = ($this->dependencyResolver)(
+            $phpBinaryPath,
             $requestedNameAndVersionPair['name'],
             $requestedNameAndVersionPair['version'],
         );
 
-        $output->writeln(sprintf('<info>You are running PHP %s</info>', PHP_VERSION));
         $output->writeln(sprintf('<info>Found package:</info> %s (version: %s)', $package->name, $package->version));
         $output->writeln(sprintf('<info>Dist download URL:</info> %s', $package->downloadUrl ?? '(none)'));
 

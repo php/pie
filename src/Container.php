@@ -8,10 +8,7 @@ use Composer\Composer;
 use Composer\Factory as ComposerFactory;
 use Composer\IO\ConsoleIO;
 use Composer\IO\IOInterface;
-use Composer\IO\NullIO;
 use Composer\Repository\CompositeRepository;
-use Composer\Repository\PlatformRepository;
-use Composer\Repository\RepositoryFactory;
 use Composer\Repository\RepositorySet;
 use Composer\Util\AuthHelper;
 use Composer\Util\Platform;
@@ -24,6 +21,7 @@ use Php\Pie\Downloading\DownloadAndExtract;
 use Php\Pie\Downloading\DownloadZip;
 use Php\Pie\Downloading\ExtractZip;
 use Php\Pie\Downloading\UnixDownloadAndExtract;
+use Php\Pie\TargetPhp\ResolveTargetPhpToPlatformRepository;
 use Psr\Container\ContainerInterface;
 use RuntimeException;
 use Symfony\Component\Console\Helper\HelperSet;
@@ -51,7 +49,7 @@ final class Container
         });
         $container->singleton(Composer::class, static function (ContainerInterface $container): Composer {
             $io       = $container->get(IOInterface::class);
-            $composer = ComposerFactory::create($io);
+            $composer = (new ComposerFactory())->createComposer($io, [], true);
             $io->loadConfiguration($composer->getConfig());
 
             return $composer;
@@ -59,13 +57,14 @@ final class Container
 
         $container->singleton(
             DependencyResolver::class,
-            static function (): DependencyResolver {
+            static function (ContainerInterface $container): DependencyResolver {
+                $composer      = $container->get(Composer::class);
                 $repositorySet = new RepositorySet();
-                $repositorySet->addRepository(new CompositeRepository(RepositoryFactory::defaultReposWithDefaultManager(new NullIO())));
+                $repositorySet->addRepository(new CompositeRepository($composer->getRepositoryManager()->getRepositories()));
 
                 return new ResolveDependencyWithComposer(
-                    new PlatformRepository(),
                     $repositorySet,
+                    new ResolveTargetPhpToPlatformRepository(),
                 );
             },
         );
