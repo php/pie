@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\Pie\TargetPhp;
 
+use Composer\Semver\VersionParser;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
 use Webmozart\Assert\Assert;
@@ -20,10 +21,17 @@ class PhpBinaryPath
 
     public function version(): string
     {
-        $phpVersion = trim((new Process([$this->phpBinaryPath, '-r', 'echo phpversion();']))
+        $phpVersion = trim((new Process([
+            $this->phpBinaryPath,
+            '-r',
+            'echo PHP_MAJOR_VERSION . "." . PHP_MINOR_VERSION . "." . PHP_RELEASE_VERSION;',
+        ]))
             ->mustRun()
             ->getOutput());
         Assert::stringNotEmpty($phpVersion, 'Could not determine PHP version');
+
+        // normalizing the version will throw an exception if it is not a valid version
+        (new VersionParser())->normalize($phpVersion);
 
         return $phpVersion;
     }
