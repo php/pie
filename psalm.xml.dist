@@ -19,11 +19,12 @@
     </projectFiles>
     <plugins>
         <pluginClass class="Psalm\PhpUnitPlugin\Plugin"/>
+        <pluginClass class="Psl\Psalm\Plugin"/>
     </plugins>
     <issueHandlers>
         <PossiblyUnusedMethod>
             <errorLevel type="suppress">
-                <directory name="src/Command" />
+                <directory name="src/Command"/>
             </errorLevel>
         </PossiblyUnusedMethod>
     </issueHandlers>

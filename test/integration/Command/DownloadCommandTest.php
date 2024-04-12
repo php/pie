@@ -38,6 +38,7 @@ class DownloadCommandTest extends TestCase
         $outputString = $this->commandTester->getDisplay();
         self::assertStringContainsString('Found package: asgrim/example-pie-extension (version: 1.0.0)', $outputString);
         self::assertStringContainsString('Dist download URL: https://api.github.com/repos/asgrim/example-pie-extension/zipball/', $outputString);
+        self::assertStringContainsString('Extracted asgrim/example-pie-extension:1.0.0 source', $outputString);
     }
 
     public function testDownloadCommandFailsWhenUsingIncompatiblePhpVersion(): void

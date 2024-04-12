@@ -27,7 +27,7 @@ final class ResolveDependencyWithComposer implements DependencyResolver
             $this->repositorySet,
             ($this->resolveTargetPhpToPlatformRepository)($phpBinaryPath),
         ))
-            ->findBestCandidate($packageName, $requestedVersion);
+            ->findBestCandidate($packageName, $requestedVersion, 'dev', null, RepositorySet::ALLOW_UNACCEPTABLE_STABILITIES);
 
         if (! $package instanceof CompletePackageInterface) {
             throw UnableToResolveRequirement::fromRequirement($packageName, $requestedVersion);

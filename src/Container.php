@@ -21,9 +21,9 @@ use Php\Pie\Downloading\DownloadAndExtract;
 use Php\Pie\Downloading\DownloadZip;
 use Php\Pie\Downloading\ExtractZip;
 use Php\Pie\Downloading\UnixDownloadAndExtract;
+use Php\Pie\Downloading\WindowsDownloadAndExtract;
 use Php\Pie\TargetPhp\ResolveTargetPhpToPlatformRepository;
 use Psr\Container\ContainerInterface;
-use RuntimeException;
 use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
@@ -49,7 +49,13 @@ final class Container
         });
         $container->singleton(Composer::class, static function (ContainerInterface $container): Composer {
             $io       = $container->get(IOInterface::class);
-            $composer = (new ComposerFactory())->createComposer($io, [], true);
+            $composer = (new ComposerFactory())->createComposer(
+                $io,
+                [
+                    'config' => ['lock' => false],
+                ],
+                true,
+            );
             $io->loadConfiguration($composer->getConfig());
 
             return $composer;
@@ -74,12 +80,30 @@ final class Container
                 return new UnixDownloadAndExtract(
                     new DownloadZip(
                         new Client(),
-                        new AuthHelper(
-                            $container->get(IOInterface::class),
-                            $container->get(Composer::class)->getConfig(),
-                        ),
                     ),
                     new ExtractZip(),
+                    new AuthHelper(
+                        $container->get(IOInterface::class),
+                        $container->get(Composer::class)->getConfig(),
+                    ),
+                );
+            },
+        );
+        $container->singleton(
+            WindowsDownloadAndExtract::class,
+            static function (ContainerInterface $container): WindowsDownloadAndExtract {
+                $guzzleClient = new Client();
+
+                return new WindowsDownloadAndExtract(
+                    new DownloadZip(
+                        $guzzleClient,
+                    ),
+                    new ExtractZip(),
+                    new AuthHelper(
+                        $container->get(IOInterface::class),
+                        $container->get(Composer::class)->getConfig(),
+                    ),
+                    $guzzleClient,
                 );
             },
         );
@@ -87,8 +111,7 @@ final class Container
             DownloadAndExtract::class,
             static function (ContainerInterface $container): DownloadAndExtract {
                 if (Platform::isWindows()) {
-                    // @todo add windows downloader
-                    throw new RuntimeException('Windows support not yet');
+                    return $container->get(WindowsDownloadAndExtract::class);
                 }
 
                 return $container->get(UnixDownloadAndExtract::class);
