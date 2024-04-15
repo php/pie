@@ -14,6 +14,7 @@ use function explode;
 use function sprintf;
 use function trim;
 
+/** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class AddAuthenticationHeader
 {
     public static function withAuthHeaderFromComposer(RequestInterface $request, Package $package, AuthHelper $authHelper): RequestInterface

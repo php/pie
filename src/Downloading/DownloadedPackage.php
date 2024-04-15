@@ -6,7 +6,11 @@ namespace Php\Pie\Downloading;
 
 use Php\Pie\DependencyResolver\Package;
 
-/** @immutable */
+/**
+ * @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks
+ *
+ * @immutable
+ */
 final class DownloadedPackage
 {
     private function __construct(

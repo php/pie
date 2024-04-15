@@ -6,7 +6,11 @@ namespace Php\Pie\DependencyResolver;
 
 use Composer\Package\CompletePackageInterface;
 
-/** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
+/**
+ * @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks
+ *
+ * @immutable
+ */
 final class Package
 {
     public const TYPE_PHP_MODULE     = 'php-ext';
