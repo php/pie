@@ -103,6 +103,11 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
             ->wait();
         assert($response instanceof ResponseInterface);
 
+        /** @link https://docs.github.com/en/rest/releases/releases?apiVersion=2022-11-28#get-a-release-by-tag-name */
+        if ($response->getStatusCode() === 404) {
+            throw Exception\CouldNotFindReleaseAsset::forPackageWithMissingTag($package);
+        }
+
         AssertHttp::responseStatusCode(200, $response);
 
         $releaseAssets = Json\typed(

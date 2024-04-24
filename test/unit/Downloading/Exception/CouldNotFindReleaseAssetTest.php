@@ -20,4 +20,13 @@ final class CouldNotFindReleaseAssetTest extends TestCase
 
         self::assertSame('Could not find release asset for foo/bar:1.2.3 named "something.zip"', $exception->getMessage());
     }
+
+    public function testForPackageWithMissingTag(): void
+    {
+        $package = new Package('foo/bar', '1.2.3', null);
+
+        $exception = CouldNotFindReleaseAsset::forPackageWithMissingTag($package);
+
+        self::assertSame('Could not find release by tag name for foo/bar:1.2.3', $exception->getMessage());
+    }
 }

@@ -19,4 +19,12 @@ class CouldNotFindReleaseAsset extends RuntimeException
             $expectedAssetName,
         ));
     }
+
+    public static function forPackageWithMissingTag(Package $package): self
+    {
+        return new self(sprintf(
+            'Could not find release by tag name for %s',
+            $package->prettyNameAndVersion(),
+        ));
+    }
 }
