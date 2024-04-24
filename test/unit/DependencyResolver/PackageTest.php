@@ -20,6 +20,7 @@ final class PackageTest extends TestCase
 
         self::assertSame('foo', $package->name);
         self::assertSame('1.2.3', $package->version);
+        self::assertSame('foo:1.2.3', $package->prettyNameAndVersion());
         self::assertNull($package->downloadUrl);
     }
 }

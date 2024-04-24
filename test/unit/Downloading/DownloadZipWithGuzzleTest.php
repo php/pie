@@ -9,7 +9,7 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
-use Php\Pie\Downloading\DownloadZip;
+use Php\Pie\Downloading\DownloadZipWithGuzzle;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
@@ -21,8 +21,8 @@ use function uniqid;
 
 use const DIRECTORY_SEPARATOR;
 
-#[CoversClass(DownloadZip::class)]
-final class DownloadZipTest extends TestCase
+#[CoversClass(DownloadZipWithGuzzle::class)]
+final class DownloadZipWithGuzzleTest extends TestCase
 {
     public function testDownloadZipAndReturnLocalPath(): void
     {
@@ -43,7 +43,7 @@ final class DownloadZipTest extends TestCase
 
         $localPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('pie_test_', true);
         mkdir($localPath, 0777, true);
-        $downloadedZipFile = (new DownloadZip($guzzleMockClient))
+        $downloadedZipFile = (new DownloadZipWithGuzzle($guzzleMockClient))
             ->downloadZipAndReturnLocalPath(
                 new Request('GET', 'http://test-uri/'),
                 $localPath,

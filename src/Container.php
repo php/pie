@@ -13,13 +13,17 @@ use Composer\Repository\RepositorySet;
 use Composer\Util\AuthHelper;
 use Composer\Util\Platform;
 use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
+use GuzzleHttp\RequestOptions;
 use Illuminate\Container\Container as IlluminateContainer;
 use Php\Pie\Command\DownloadCommand;
 use Php\Pie\DependencyResolver\DependencyResolver;
 use Php\Pie\DependencyResolver\ResolveDependencyWithComposer;
 use Php\Pie\Downloading\DownloadAndExtract;
 use Php\Pie\Downloading\DownloadZip;
-use Php\Pie\Downloading\ExtractZip;
+use Php\Pie\Downloading\DownloadZipWithGuzzle;
+use Php\Pie\Downloading\GithubPackageReleaseAssets;
+use Php\Pie\Downloading\PackageReleaseAssets;
 use Php\Pie\Downloading\UnixDownloadAndExtract;
 use Php\Pie\Downloading\WindowsDownloadAndExtract;
 use Php\Pie\TargetPhp\ResolveTargetPhpToPlatformRepository;
@@ -74,39 +78,23 @@ final class Container
                 );
             },
         );
-        $container->singleton(
-            UnixDownloadAndExtract::class,
-            static function (ContainerInterface $container): UnixDownloadAndExtract {
-                return new UnixDownloadAndExtract(
-                    new DownloadZip(
-                        new Client(),
-                    ),
-                    new ExtractZip(),
-                    new AuthHelper(
-                        $container->get(IOInterface::class),
-                        $container->get(Composer::class)->getConfig(),
-                    ),
-                );
+        $container->bind(
+            ClientInterface::class,
+            static function (): ClientInterface {
+                return new Client([RequestOptions::HTTP_ERRORS => false]);
             },
         );
         $container->singleton(
-            WindowsDownloadAndExtract::class,
-            static function (ContainerInterface $container): WindowsDownloadAndExtract {
-                $guzzleClient = new Client();
-
-                return new WindowsDownloadAndExtract(
-                    new DownloadZip(
-                        $guzzleClient,
-                    ),
-                    new ExtractZip(),
-                    new AuthHelper(
-                        $container->get(IOInterface::class),
-                        $container->get(Composer::class)->getConfig(),
-                    ),
-                    $guzzleClient,
+            AuthHelper::class,
+            static function (ContainerInterface $container): AuthHelper {
+                return new AuthHelper(
+                    $container->get(IOInterface::class),
+                    $container->get(Composer::class)->getConfig(),
                 );
             },
         );
+        $container->alias(DownloadZipWithGuzzle::class, DownloadZip::class);
+        $container->alias(GithubPackageReleaseAssets::class, PackageReleaseAssets::class);
         $container->singleton(
             DownloadAndExtract::class,
             static function (ContainerInterface $container): DownloadAndExtract {

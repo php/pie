@@ -79,15 +79,14 @@ final class DownloadCommand extends Command
             $requestedNameAndVersionPair['version'],
         );
 
-        $output->writeln(sprintf('<info>Found package:</info> %s (version: %s)', $package->name, $package->version));
+        $output->writeln(sprintf('<info>Found package:</info> %s', $package->prettyNameAndVersion()));
         $output->writeln(sprintf('<info>Dist download URL:</info> %s', $package->downloadUrl ?? '(none)'));
 
         $downloadedPackage = ($this->downloadAndExtract)($package);
 
         $output->writeln(sprintf(
-            '<info>Extracted %s:%s source to:</info> %s',
-            $downloadedPackage->package->name,
-            $downloadedPackage->package->version,
+            '<info>Extracted %s source to:</info> %s',
+            $downloadedPackage->package->prettyNameAndVersion(),
             $downloadedPackage->extractedSourcePath,
         ));
 

@@ -18,7 +18,6 @@ use function uniqid;
 
 use const DIRECTORY_SEPARATOR;
 
-/** @covers \Php\Pie\Downloading\ExtractZip */
 #[CoversClass(ExtractZip::class)]
 final class ExtractZipTest extends TestCase
 {

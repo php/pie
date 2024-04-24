@@ -31,4 +31,9 @@ final class Package
             $completePackage->getDistUrl(),
         );
     }
+
+    public function prettyNameAndVersion(): string
+    {
+        return $this->name . ':' . $this->version;
+    }
 }
