@@ -10,13 +10,7 @@ use Php\Pie\DependencyResolver\Package;
 use Psr\Http\Message\RequestInterface;
 use RuntimeException;
 
-use function file_exists;
-use function mkdir;
 use function sprintf;
-use function sys_get_temp_dir;
-use function uniqid;
-
-use const DIRECTORY_SEPARATOR;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class UnixDownloadAndExtract implements DownloadAndExtract
@@ -31,11 +25,7 @@ final class UnixDownloadAndExtract implements DownloadAndExtract
 
     public function __invoke(Package $package): DownloadedPackage
     {
-        // @todo extract to a static util
-        $localTempPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('pie_downloader_', true);
-        if (! file_exists($localTempPath)) {
-            mkdir($localTempPath, recursive: true);
-        }
+        $localTempPath = Path::vaguelyRandomTempPath();
 
         $tmpZipFile = $this->downloadZip->downloadZipAndReturnLocalPath(
             $this->createRequestForUnixDownloadUrl($package),

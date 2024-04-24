@@ -36,7 +36,6 @@ final class DownloadZipWithGuzzle implements DownloadZip
 
         AssertHttp::responseStatusCode(200, $response);
 
-        // @todo handle this writing better
         $tmpZipFile = $localPath . '/downloaded.zip';
         file_put_contents($tmpZipFile, $response->getBody()->__toString());
 

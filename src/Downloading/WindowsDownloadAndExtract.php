@@ -8,13 +8,6 @@ use Composer\Util\AuthHelper;
 use GuzzleHttp\Psr7\Request;
 use Php\Pie\DependencyResolver\Package;
 
-use function file_exists;
-use function mkdir;
-use function sys_get_temp_dir;
-use function uniqid;
-
-use const DIRECTORY_SEPARATOR;
-
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class WindowsDownloadAndExtract implements DownloadAndExtract
 {
@@ -31,11 +24,7 @@ final class WindowsDownloadAndExtract implements DownloadAndExtract
     {
         $windowsDownloadUrl = $this->packageReleaseAssets->findWindowsDownloadUrlForPackage($package);
 
-        // @todo extract to a static util
-        $localTempPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('pie_downloader_', true);
-        if (! file_exists($localTempPath)) {
-            mkdir($localTempPath, recursive: true);
-        }
+        $localTempPath = Path::vaguelyRandomTempPath();
 
         $tmpZipFile = $this->downloadZip->downloadZipAndReturnLocalPath(
             AddAuthenticationHeader::withAuthHeaderFromComposer(
