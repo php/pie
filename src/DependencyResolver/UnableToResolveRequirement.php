@@ -23,10 +23,10 @@ class UnableToResolveRequirement extends RuntimeException
     public static function toPhpOrZendExtension(PackageInterface $locatedComposerPackage, string $requiredPackageName, string|null $requiredVersion): self
     {
         return new self(sprintf(
-            'Package %s was not of type php-ext or php-ext-zend (requested %s%s)',
+            'Package %s was not of type php-ext or php-ext-zend (requested %s%s).',
             $locatedComposerPackage->getName(),
             $requiredPackageName,
-            $requiredVersion !== null ? sprintf(' for version %s.', $requiredVersion) : '.',
+            $requiredVersion !== null ? sprintf(' for version %s', $requiredVersion) : '',
         ));
     }
 }

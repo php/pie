@@ -16,7 +16,7 @@ final class Package
     public const TYPE_PHP_MODULE     = 'php-ext';
     public const TYPE_ZEND_EXTENSION = 'php-ext-zend';
 
-    private function __construct(
+    public function __construct(
         public readonly string $name,
         public readonly string $version,
         public readonly string|null $downloadUrl,
