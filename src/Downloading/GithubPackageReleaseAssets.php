@@ -103,7 +103,7 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
             ->wait();
         assert($response instanceof ResponseInterface);
 
-        // @todo check response was successful
+        AssertHttp::responseStatusCode(200, $response);
 
         $releaseAssets = Json\typed(
             (string) $response->getBody(),

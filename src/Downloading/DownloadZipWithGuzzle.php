@@ -34,7 +34,7 @@ final class DownloadZipWithGuzzle implements DownloadZip
             ->wait();
         assert($response instanceof ResponseInterface);
 
-        // @todo check response was successful
+        AssertHttp::responseStatusCode(200, $response);
 
         // @todo handle this writing better
         $tmpZipFile = $localPath . '/downloaded.zip';
