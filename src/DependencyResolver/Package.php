@@ -25,6 +25,7 @@ final class Package
 
     public static function fromComposerCompletePackage(CompletePackageInterface $completePackage): self
     {
+        // @todo extension name from the phpExt.extension-name or package name
         return new self(
             $completePackage->getPrettyName(),
             $completePackage->getPrettyVersion(),
