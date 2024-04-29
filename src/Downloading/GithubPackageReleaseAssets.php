@@ -24,6 +24,7 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
     public function __construct(
         private readonly AuthHelper $authHelper,
         private readonly ClientInterface $client,
+        private readonly string $githubApiBaseUrl,
     ) {
     }
 
@@ -83,10 +84,9 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
     /** @return list<array{name: non-empty-string, browser_download_url: non-empty-string, ...}> */
     private function getReleaseAssetsForPackage(Package $package): array
     {
-        // @todo dynamic URL, don't hard code it...
         // @todo confirm prettyName will always match the repo name - it might not
         $request = AddAuthenticationHeader::withAuthHeaderFromComposer(
-            new Request('GET', 'https://api.github.com/repos/' . $package->name . '/releases/tags/' . $package->version),
+            new Request('GET', $this->githubApiBaseUrl . '/repos/' . $package->name . '/releases/tags/' . $package->version),
             $package,
             $this->authHelper,
         );

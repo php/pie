@@ -45,7 +45,7 @@ final class GithubPackageReleaseAssetsTest extends TestCase
 
         $package = new Package(ExtensionName::normaliseFromString('foo'), 'asgrim/example-pie-extension', '1.2.3', 'https://test-uri/' . uniqid('downloadUrl', true));
 
-        $releaseAssets = new GithubPackageReleaseAssets($authHelper, $guzzleMockClient);
+        $releaseAssets = new GithubPackageReleaseAssets($authHelper, $guzzleMockClient, 'https://test-github-api-base-url.thephp.foundation');
 
         self::assertSame('actual_download_url', $releaseAssets->findWindowsDownloadUrlForPackage($package));
     }
@@ -68,7 +68,7 @@ final class GithubPackageReleaseAssetsTest extends TestCase
 
         $package = new Package(ExtensionName::normaliseFromString('foo'), 'asgrim/example-pie-extension', '1.2.3', 'https://test-uri/' . uniqid('downloadUrl', true));
 
-        $releaseAssets = new GithubPackageReleaseAssets($authHelper, $guzzleMockClient);
+        $releaseAssets = new GithubPackageReleaseAssets($authHelper, $guzzleMockClient, 'https://test-github-api-base-url.thephp.foundation');
 
         $this->expectException(CouldNotFindReleaseAsset::class);
         $releaseAssets->findWindowsDownloadUrlForPackage($package);
