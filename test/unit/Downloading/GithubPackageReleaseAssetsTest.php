@@ -12,6 +12,7 @@ use GuzzleHttp\Psr7\Response;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\Exception\CouldNotFindReleaseAsset;
 use Php\Pie\Downloading\GithubPackageReleaseAssets;
+use Php\Pie\ExtensionName;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
@@ -42,7 +43,7 @@ final class GithubPackageReleaseAssetsTest extends TestCase
 
         $guzzleMockClient = new Client(['handler' => HandlerStack::create($mockHandler)]);
 
-        $package = new Package('asgrim/example-pie-extension', '1.2.3', 'https://test-uri/' . uniqid('downloadUrl', true));
+        $package = new Package(ExtensionName::normaliseFromString('foo'), 'asgrim/example-pie-extension', '1.2.3', 'https://test-uri/' . uniqid('downloadUrl', true));
 
         $releaseAssets = new GithubPackageReleaseAssets($authHelper, $guzzleMockClient);
 
@@ -65,7 +66,7 @@ final class GithubPackageReleaseAssetsTest extends TestCase
 
         $guzzleMockClient = new Client(['handler' => HandlerStack::create($mockHandler)]);
 
-        $package = new Package('asgrim/example-pie-extension', '1.2.3', 'https://test-uri/' . uniqid('downloadUrl', true));
+        $package = new Package(ExtensionName::normaliseFromString('foo'), 'asgrim/example-pie-extension', '1.2.3', 'https://test-uri/' . uniqid('downloadUrl', true));
 
         $releaseAssets = new GithubPackageReleaseAssets($authHelper, $guzzleMockClient);
 

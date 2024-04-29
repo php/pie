@@ -6,6 +6,7 @@ namespace Php\PieUnitTest\Downloading\Exception;
 
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\Exception\CouldNotFindReleaseAsset;
+use Php\Pie\ExtensionName;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
@@ -14,7 +15,7 @@ final class CouldNotFindReleaseAssetTest extends TestCase
 {
     public function testForPackage(): void
     {
-        $package = new Package('foo/bar', '1.2.3', null);
+        $package = new Package(ExtensionName::normaliseFromString('foo'), 'foo/bar', '1.2.3', null);
 
         $exception = CouldNotFindReleaseAsset::forPackage($package, 'something.zip');
 
@@ -23,7 +24,7 @@ final class CouldNotFindReleaseAssetTest extends TestCase
 
     public function testForPackageWithMissingTag(): void
     {
-        $package = new Package('foo/bar', '1.2.3', null);
+        $package = new Package(ExtensionName::normaliseFromString('foo'), 'foo/bar', '1.2.3', null);
 
         $exception = CouldNotFindReleaseAsset::forPackageWithMissingTag($package);
 

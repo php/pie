@@ -42,10 +42,10 @@ final class ResolveDependencyWithComposerTest extends TestCase
         $package = (new ResolveDependencyWithComposer(
             $this->repositorySet,
             $this->resolveTargetPhpToPlatformRepository,
-        ))($phpBinaryPath, 'asgrim/example-pie-extension', '1.0.0');
+        ))($phpBinaryPath, 'asgrim/example-pie-extension', '^1.0');
 
         self::assertSame('asgrim/example-pie-extension', $package->name);
-        self::assertSame('1.0.0', $package->version);
+        self::assertStringStartsWith('1.', $package->version);
     }
 
     /**

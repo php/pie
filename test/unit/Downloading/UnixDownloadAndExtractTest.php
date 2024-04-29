@@ -9,6 +9,7 @@ use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\DownloadZip;
 use Php\Pie\Downloading\ExtractZip;
 use Php\Pie\Downloading\UnixDownloadAndExtract;
+use Php\Pie\ExtensionName;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
@@ -45,7 +46,7 @@ final class UnixDownloadAndExtractTest extends TestCase
             ->willReturn($extractedPath);
 
         $downloadUrl      = 'https://test-uri/' . uniqid('downloadUrl', true);
-        $requestedPackage = new Package('foo/bar', '1.2.3', $downloadUrl);
+        $requestedPackage = new Package(ExtensionName::normaliseFromString('foo'), 'foo/bar', '1.2.3', $downloadUrl);
 
         $downloadedPackage = $unixDownloadAndExtract->__invoke($requestedPackage);
 

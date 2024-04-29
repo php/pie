@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace Php\Pie;
 
+use Composer\Package\PackageInterface;
 use Webmozart\Assert\Assert;
 
+use function array_key_exists;
 use function assert;
+use function explode;
+use function is_string;
 use function str_starts_with;
 use function strlen;
 use function substr;
@@ -37,6 +41,27 @@ final class ExtensionName
         assert($normalisedExtensionName !== '');
 
         $this->normalisedExtensionName = $normalisedExtensionName;
+    }
+
+    public static function determineFromComposerPackage(PackageInterface $package): self
+    {
+        $phpExt = $package->getPhpExt();
+
+        /** @psalm-suppress DocblockTypeContradiction just in case runtime type is not correct */
+        if (
+            $phpExt === null
+            || ! array_key_exists('extension-name', $phpExt)
+            || ! is_string($phpExt['extension-name'])
+            || $phpExt['extension-name'] === ''
+        ) {
+            $packageNameParts = explode('/', $package->getPrettyName());
+            Assert::count($packageNameParts, 2, 'Expected a package name like vendor/package for ' . $package->getPrettyName());
+            Assert::keyExists($packageNameParts, 1);
+
+            return self::normaliseFromString($packageNameParts[1]);
+        }
+
+        return self::normaliseFromString($phpExt['extension-name']);
     }
 
     public static function normaliseFromString(string $extensionName): self
