@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Php\Pie\TargetPhp;
+namespace Php\Pie\Platform\TargetPhp;
 
 use Composer\Repository\PlatformRepository;
 

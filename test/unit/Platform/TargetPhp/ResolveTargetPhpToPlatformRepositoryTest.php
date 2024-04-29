@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Php\PieUnitTest\TargetPhp;
+namespace Php\PieUnitTest\Platform\TargetPhp;
 
 use Composer\Package\BasePackage;
-use Php\Pie\TargetPhp\PhpBinaryPath;
-use Php\Pie\TargetPhp\ResolveTargetPhpToPlatformRepository;
+use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
+use Php\Pie\Platform\TargetPhp\ResolveTargetPhpToPlatformRepository;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 

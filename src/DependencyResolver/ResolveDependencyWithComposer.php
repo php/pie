@@ -7,8 +7,8 @@ namespace Php\Pie\DependencyResolver;
 use Composer\Package\CompletePackageInterface;
 use Composer\Package\Version\VersionSelector;
 use Composer\Repository\RepositorySet;
-use Php\Pie\TargetPhp\PhpBinaryPath;
-use Php\Pie\TargetPhp\ResolveTargetPhpToPlatformRepository;
+use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
+use Php\Pie\Platform\TargetPhp\ResolveTargetPhpToPlatformRepository;
 
 use function in_array;
 

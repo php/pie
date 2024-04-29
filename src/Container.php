@@ -26,7 +26,7 @@ use Php\Pie\Downloading\GithubPackageReleaseAssets;
 use Php\Pie\Downloading\PackageReleaseAssets;
 use Php\Pie\Downloading\UnixDownloadAndExtract;
 use Php\Pie\Downloading\WindowsDownloadAndExtract;
-use Php\Pie\TargetPhp\ResolveTargetPhpToPlatformRepository;
+use Php\Pie\Platform\TargetPhp\ResolveTargetPhpToPlatformRepository;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Input\ArgvInput;

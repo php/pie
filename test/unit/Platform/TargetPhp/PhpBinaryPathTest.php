@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Php\PieUnitTest\TargetPhp;
+namespace Php\PieUnitTest\Platform\TargetPhp;
 
-use Php\Pie\TargetPhp\PhpBinaryPath;
+use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Process\Process;

@@ -8,7 +8,7 @@ use Composer\Package\Version\VersionParser;
 use InvalidArgumentException;
 use Php\Pie\DependencyResolver\DependencyResolver;
 use Php\Pie\Downloading\DownloadAndExtract;
-use Php\Pie\TargetPhp\PhpBinaryPath;
+use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
