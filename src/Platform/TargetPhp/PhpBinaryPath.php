@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace Php\Pie\Platform\TargetPhp;
 
 use Composer\Semver\VersionParser;
+use Php\Pie\Platform\Architecture;
+use Php\Pie\Platform\OperatingSystem;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
 use Webmozart\Assert\Assert;
 
+use function sprintf;
 use function trim;
 
 /**
@@ -23,6 +26,21 @@ class PhpBinaryPath
     {
     }
 
+    public function operatingSystem(): OperatingSystem
+    {
+        $winOrNot = trim((new Process([
+            $this->phpBinaryPath,
+            '-r',
+            'echo \\defined(\'PHP_WINDOWS_VERSION_BUILD\') ? \'win\' : \'not\';',
+        ]))
+            ->mustRun()
+            ->getOutput());
+        Assert::stringNotEmpty($winOrNot, 'Could not determine PHP version');
+
+        return $winOrNot === 'win' ? OperatingSystem::Windows : OperatingSystem::NonWindows;
+    }
+
+    /** @return non-empty-string */
     public function version(): string
     {
         $phpVersion = trim((new Process([
@@ -38,6 +56,35 @@ class PhpBinaryPath
         (new VersionParser())->normalize($phpVersion);
 
         return $phpVersion;
+    }
+
+    public function machineType(): Architecture
+    {
+        $phpMachineType = trim((new Process([
+            $this->phpBinaryPath,
+            '-r',
+            'echo php_uname("m");',
+        ]))
+            ->mustRun()
+            ->getOutput());
+        Assert::stringNotEmpty($phpMachineType, 'Could not determine PHP machine type');
+
+        return Architecture::parseArchitecture($phpMachineType);
+    }
+
+    /** @return non-empty-string */
+    public function phpinfo(): string
+    {
+        $phpInfo = trim((new Process([
+            $this->phpBinaryPath,
+            '-i',
+        ]))
+            ->mustRun()
+            ->getOutput());
+
+        Assert::stringNotEmpty($phpInfo, sprintf('Could not run phpinfo using %s', $this->phpBinaryPath));
+
+        return $phpInfo;
     }
 
     public static function fromPhpConfigExecutable(string $phpConfig): self

@@ -9,6 +9,7 @@ use InvalidArgumentException;
 use Php\Pie\DependencyResolver\DependencyResolver;
 use Php\Pie\Downloading\DownloadAndExtract;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
+use Php\Pie\Platform\TargetPlatform;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -68,13 +69,22 @@ final class DownloadCommand extends Command
             $phpBinaryPath = PhpBinaryPath::fromPhpConfigExecutable($withPhpConfig);
         }
 
+        $targetPlatform = TargetPlatform::fromPhpBinaryPath($phpBinaryPath);
+
         $output->writeln(sprintf('<info>You are running PHP %s</info>', PHP_VERSION));
-        $output->writeln(sprintf('<info>Target PHP installation: %s (from %s)</info>', $phpBinaryPath->version(), $phpBinaryPath->phpBinaryPath));
+        $output->writeln(sprintf('<info>Target PHP installation:</info> %s (from %s)', $phpBinaryPath->version(), $phpBinaryPath->phpBinaryPath));
+        $output->writeln(sprintf(
+            '<info>Platform:</info> %s, %s, %s%s',
+            $targetPlatform->operatingSystem->name,
+            $targetPlatform->architecture->name,
+            $targetPlatform->threadSafety->name,
+            $targetPlatform->windowsCompiler !== null ? ', ' . $targetPlatform->windowsCompiler->name : '',
+        ));
 
         $requestedNameAndVersionPair = $this->requestedNameAndVersionPair($input);
 
         $package = ($this->dependencyResolver)(
-            $phpBinaryPath,
+            $targetPlatform,
             $requestedNameAndVersionPair['name'],
             $requestedNameAndVersionPair['version'],
         );

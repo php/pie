@@ -10,8 +10,12 @@ use Composer\Repository\RepositoryFactory;
 use Composer\Repository\RepositorySet;
 use Php\Pie\DependencyResolver\ResolveDependencyWithComposer;
 use Php\Pie\DependencyResolver\UnableToResolveRequirement;
+use Php\Pie\Platform\Architecture;
+use Php\Pie\Platform\OperatingSystem;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPhp\ResolveTargetPhpToPlatformRepository;
+use Php\Pie\Platform\TargetPlatform;
+use Php\Pie\Platform\ThreadSafetyMode;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
@@ -39,10 +43,18 @@ final class ResolveDependencyWithComposerTest extends TestCase
             ->method('version')
             ->willReturn('8.3.0');
 
+        $targetPlatform = new TargetPlatform(
+            OperatingSystem::NonWindows,
+            $phpBinaryPath,
+            Architecture::x86_64,
+            ThreadSafetyMode::ThreadSafe,
+            null,
+        );
+
         $package = (new ResolveDependencyWithComposer(
             $this->repositorySet,
             $this->resolveTargetPhpToPlatformRepository,
-        ))($phpBinaryPath, 'asgrim/example-pie-extension', '^1.0');
+        ))($targetPlatform, 'asgrim/example-pie-extension', '^1.0');
 
         self::assertSame('asgrim/example-pie-extension', $package->name);
         self::assertStringStartsWith('1.', $package->version);
@@ -71,13 +83,21 @@ final class ResolveDependencyWithComposerTest extends TestCase
             ->method('version')
             ->willReturn($platformOverrides['php']);
 
+        $targetPlatform = new TargetPlatform(
+            OperatingSystem::NonWindows,
+            $phpBinaryPath,
+            Architecture::x86_64,
+            ThreadSafetyMode::ThreadSafe,
+            null,
+        );
+
         $this->expectException(UnableToResolveRequirement::class);
 
         (new ResolveDependencyWithComposer(
             $this->repositorySet,
             $this->resolveTargetPhpToPlatformRepository,
         ))(
-            $phpBinaryPath,
+            $targetPlatform,
             $package,
             $version,
         );

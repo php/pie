@@ -7,8 +7,8 @@ namespace Php\Pie\DependencyResolver;
 use Composer\Package\CompletePackageInterface;
 use Composer\Package\Version\VersionSelector;
 use Composer\Repository\RepositorySet;
-use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPhp\ResolveTargetPhpToPlatformRepository;
+use Php\Pie\Platform\TargetPlatform;
 
 use function in_array;
 
@@ -21,11 +21,11 @@ final class ResolveDependencyWithComposer implements DependencyResolver
     ) {
     }
 
-    public function __invoke(PhpBinaryPath $phpBinaryPath, string $packageName, string|null $requestedVersion): Package
+    public function __invoke(TargetPlatform $targetPlatform, string $packageName, string|null $requestedVersion): Package
     {
         $package = (new VersionSelector(
             $this->repositorySet,
-            ($this->resolveTargetPhpToPlatformRepository)($phpBinaryPath),
+            ($this->resolveTargetPhpToPlatformRepository)($targetPlatform->phpBinaryPath),
         ))
             ->findBestCandidate($packageName, $requestedVersion, 'alpha', null, RepositorySet::ALLOW_UNACCEPTABLE_STABILITIES);
 
