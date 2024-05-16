@@ -30,9 +30,14 @@ final class GithubPackageReleaseAssetsTest extends TestCase
 {
     public function testUrlIsReturnedWhenFindingWindowsDownloadUrl(): void
     {
+        $phpBinaryPath = $this->createMock(PhpBinaryPath::class);
+        $phpBinaryPath->expects(self::any())
+            ->method('majorMinorVersion')
+            ->willReturn('8.3');
+
         $targetPlatform = new TargetPlatform(
             OperatingSystem::Windows,
-            PhpBinaryPath::fromCurrentProcess(),
+            $phpBinaryPath,
             Architecture::x86,
             ThreadSafetyMode::ThreadSafe,
             WindowsCompiler::VC14,
@@ -70,9 +75,14 @@ final class GithubPackageReleaseAssetsTest extends TestCase
 
     public function testUrlIsReturnedWhenFindingWindowsDownloadUrlWithCompilerAndThreadSafetySwapped(): void
     {
+        $phpBinaryPath = $this->createMock(PhpBinaryPath::class);
+        $phpBinaryPath->expects(self::any())
+            ->method('majorMinorVersion')
+            ->willReturn('8.3');
+
         $targetPlatform = new TargetPlatform(
             OperatingSystem::Windows,
-            PhpBinaryPath::fromCurrentProcess(),
+            $phpBinaryPath,
             Architecture::x86,
             ThreadSafetyMode::ThreadSafe,
             WindowsCompiler::VC14,
