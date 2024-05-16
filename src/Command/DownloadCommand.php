@@ -69,6 +69,8 @@ final class DownloadCommand extends Command
             $phpBinaryPath = PhpBinaryPath::fromPhpConfigExecutable($withPhpConfig);
         }
 
+        // @todo Support Windows using `--with-php-path="C:\usr\php7.4.33"`
+
         $targetPlatform = TargetPlatform::fromPhpBinaryPath($phpBinaryPath);
 
         $output->writeln(sprintf('<info>You are running PHP %s</info>', PHP_VERSION));
