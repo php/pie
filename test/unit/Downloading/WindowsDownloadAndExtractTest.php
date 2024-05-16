@@ -11,6 +11,12 @@ use Php\Pie\Downloading\ExtractZip;
 use Php\Pie\Downloading\PackageReleaseAssets;
 use Php\Pie\Downloading\WindowsDownloadAndExtract;
 use Php\Pie\ExtensionName;
+use Php\Pie\Platform\Architecture;
+use Php\Pie\Platform\OperatingSystem;
+use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
+use Php\Pie\Platform\TargetPlatform;
+use Php\Pie\Platform\ThreadSafetyMode;
+use Php\Pie\Platform\WindowsCompiler;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
@@ -25,6 +31,14 @@ final class WindowsDownloadAndExtractTest extends TestCase
 {
     public function testInvoke(): void
     {
+        $targetPlatform = new TargetPlatform(
+            OperatingSystem::Windows,
+            PhpBinaryPath::fromCurrentProcess(),
+            Architecture::x86,
+            ThreadSafetyMode::ThreadSafe,
+            WindowsCompiler::VC14,
+        );
+
         $downloadZip               = $this->createMock(DownloadZip::class);
         $extractZip                = $this->createMock(ExtractZip::class);
         $authHelper                = $this->createMock(AuthHelper::class);
@@ -38,7 +52,7 @@ final class WindowsDownloadAndExtractTest extends TestCase
 
         $packageReleaseAssets->expects(self::once())
             ->method('findWindowsDownloadUrlForPackage')
-            ->with(self::isInstanceOf(Package::class))
+            ->with($targetPlatform, self::isInstanceOf(Package::class))
             ->willReturn(uniqid('windowsDownloadUrl', true));
 
         $tmpZipFile    = uniqid('tmpZipFile', true);
@@ -62,7 +76,7 @@ final class WindowsDownloadAndExtractTest extends TestCase
 
         $requestedPackage = new Package(ExtensionName::normaliseFromString('foo'), 'foo/bar', '1.2.3', 'https://test-uri/' . uniqid('downloadUrl', true));
 
-        $downloadedPackage = $windowsDownloadAndExtract->__invoke($requestedPackage);
+        $downloadedPackage = $windowsDownloadAndExtract->__invoke($targetPlatform, $requestedPackage);
 
         self::assertSame($requestedPackage, $downloadedPackage->package);
         self::assertStringContainsString(sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'pie_downloader_', $downloadedPackage->extractedSourcePath);

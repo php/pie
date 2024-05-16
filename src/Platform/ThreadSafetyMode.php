@@ -9,4 +9,12 @@ enum ThreadSafetyMode
 {
     case ThreadSafe;
     case NonThreadSafe;
+
+    public function asShort(): string
+    {
+        return match ($this) {
+            self::ThreadSafe => 'ts',
+            self::NonThreadSafe => 'nts',
+        };
+    }
 }

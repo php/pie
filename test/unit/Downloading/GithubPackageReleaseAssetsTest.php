@@ -13,6 +13,12 @@ use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\Exception\CouldNotFindReleaseAsset;
 use Php\Pie\Downloading\GithubPackageReleaseAssets;
 use Php\Pie\ExtensionName;
+use Php\Pie\Platform\Architecture;
+use Php\Pie\Platform\OperatingSystem;
+use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
+use Php\Pie\Platform\TargetPlatform;
+use Php\Pie\Platform\ThreadSafetyMode;
+use Php\Pie\Platform\WindowsCompiler;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
@@ -24,6 +30,14 @@ final class GithubPackageReleaseAssetsTest extends TestCase
 {
     public function testUrlIsReturnedWhenFindingWindowsDownloadUrl(): void
     {
+        $targetPlatform = new TargetPlatform(
+            OperatingSystem::Windows,
+            PhpBinaryPath::fromCurrentProcess(),
+            Architecture::x86,
+            ThreadSafetyMode::ThreadSafe,
+            WindowsCompiler::VC14,
+        );
+
         $authHelper = $this->createMock(AuthHelper::class);
 
         $mockHandler = new MockHandler([
@@ -33,7 +47,7 @@ final class GithubPackageReleaseAssetsTest extends TestCase
                 json_encode([
                     'assets' => [
                         [
-                            'name' => 'php_example_pie_extension-1.2.3-8.3-vs16-nts-x86.zip',
+                            'name' => 'php_foo-1.2.3-8.3-vc14-ts-x86.zip',
                             'browser_download_url' => 'actual_download_url',
                         ],
                     ],
@@ -47,11 +61,19 @@ final class GithubPackageReleaseAssetsTest extends TestCase
 
         $releaseAssets = new GithubPackageReleaseAssets($authHelper, $guzzleMockClient, 'https://test-github-api-base-url.thephp.foundation');
 
-        self::assertSame('actual_download_url', $releaseAssets->findWindowsDownloadUrlForPackage($package));
+        self::assertSame('actual_download_url', $releaseAssets->findWindowsDownloadUrlForPackage($targetPlatform, $package));
     }
 
     public function testFindWindowsDownloadUrlForPackageThrowsExceptionWhenAssetNotFound(): void
     {
+        $targetPlatform = new TargetPlatform(
+            OperatingSystem::Windows,
+            PhpBinaryPath::fromCurrentProcess(),
+            Architecture::x86,
+            ThreadSafetyMode::ThreadSafe,
+            WindowsCompiler::VC14,
+        );
+
         $authHelper = $this->createMock(AuthHelper::class);
 
         $mockHandler = new MockHandler([
@@ -71,6 +93,6 @@ final class GithubPackageReleaseAssetsTest extends TestCase
         $releaseAssets = new GithubPackageReleaseAssets($authHelper, $guzzleMockClient, 'https://test-github-api-base-url.thephp.foundation');
 
         $this->expectException(CouldNotFindReleaseAsset::class);
-        $releaseAssets->findWindowsDownloadUrlForPackage($package);
+        $releaseAssets->findWindowsDownloadUrlForPackage($targetPlatform, $package);
     }
 }

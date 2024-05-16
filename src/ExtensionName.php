@@ -22,7 +22,12 @@ use function substr;
  */
 final class ExtensionName
 {
-    /** @link https://github.com/pear/pear-core/blob/6f4c3a0b134626d238d75a44af01a2f7c4e688d9/PEAR/Common.php#L28 */
+    /**
+     * PECL extension names must contain only alphanumeric characters and underscores, and must start with an
+     * alphabetical character. PIE does not change this requirement for consistency.
+     *
+     * @link https://github.com/pear/pear-core/blob/6f4c3a0b134626d238d75a44af01a2f7c4e688d9/PEAR/Common.php#L28
+     */
     private const VALID_PACKAGE_NAME_REGEX = '#^[A-Za-z][a-zA-Z0-9_]+$#';
 
     // phpcs:disable SlevomatCodingStandard.Classes.RequireConstructorPropertyPromotion.RequiredConstructorPropertyPromotion

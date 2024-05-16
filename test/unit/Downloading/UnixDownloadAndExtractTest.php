@@ -10,6 +10,11 @@ use Php\Pie\Downloading\DownloadZip;
 use Php\Pie\Downloading\ExtractZip;
 use Php\Pie\Downloading\UnixDownloadAndExtract;
 use Php\Pie\ExtensionName;
+use Php\Pie\Platform\Architecture;
+use Php\Pie\Platform\OperatingSystem;
+use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
+use Php\Pie\Platform\TargetPlatform;
+use Php\Pie\Platform\ThreadSafetyMode;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
@@ -21,6 +26,14 @@ final class UnixDownloadAndExtractTest extends TestCase
 {
     public function testInvoke(): void
     {
+        $targetPlatform = new TargetPlatform(
+            OperatingSystem::NonWindows,
+            PhpBinaryPath::fromCurrentProcess(),
+            Architecture::x86,
+            ThreadSafetyMode::NonThreadSafe,
+            null,
+        );
+
         $downloadZip            = $this->createMock(DownloadZip::class);
         $extractZip             = $this->createMock(ExtractZip::class);
         $authHelper             = $this->createMock(AuthHelper::class);
@@ -48,7 +61,7 @@ final class UnixDownloadAndExtractTest extends TestCase
         $downloadUrl      = 'https://test-uri/' . uniqid('downloadUrl', true);
         $requestedPackage = new Package(ExtensionName::normaliseFromString('foo'), 'foo/bar', '1.2.3', $downloadUrl);
 
-        $downloadedPackage = $unixDownloadAndExtract->__invoke($requestedPackage);
+        $downloadedPackage = $unixDownloadAndExtract->__invoke($targetPlatform, $requestedPackage);
 
         self::assertSame($requestedPackage, $downloadedPackage->package);
         self::assertSame($extractedPath, $downloadedPackage->extractedSourcePath);

@@ -14,6 +14,7 @@ use function is_executable;
 use function sprintf;
 use function trim;
 
+use const PHP_INT_SIZE;
 use const PHP_MAJOR_VERSION;
 use const PHP_MINOR_VERSION;
 use const PHP_RELEASE_VERSION;
@@ -51,13 +52,21 @@ final class PhpBinaryPathTest extends TestCase
         );
     }
 
+    public function testMajorMinorVersion(): void
+    {
+        self::assertSame(
+            PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION,
+            PhpBinaryPath::fromCurrentProcess()
+                ->majorMinorVersion(),
+        );
+    }
+
     public function testPhpIntSize(): void
     {
         self::assertSame(
             PHP_INT_SIZE,
-            PhpBinaryPath
-                ::fromCurrentProcess()
-                ->phpIntSize()
+            PhpBinaryPath::fromCurrentProcess()
+                ->phpIntSize(),
         );
     }
 }

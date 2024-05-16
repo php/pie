@@ -58,6 +58,24 @@ class PhpBinaryPath
         return $phpVersion;
     }
 
+    /** @return non-empty-string */
+    public function majorMinorVersion(): string
+    {
+        $phpVersion = trim((new Process([
+            $this->phpBinaryPath,
+            '-r',
+            'echo PHP_MAJOR_VERSION . "." . PHP_MINOR_VERSION;',
+        ]))
+            ->mustRun()
+            ->getOutput());
+        Assert::stringNotEmpty($phpVersion, 'Could not determine PHP version');
+
+        // normalizing the version will throw an exception if it is not a valid version
+        (new VersionParser())->normalize($phpVersion);
+
+        return $phpVersion;
+    }
+
     public function machineType(): Architecture
     {
         $phpMachineType = trim((new Process([
@@ -82,7 +100,7 @@ class PhpBinaryPath
             ->mustRun()
             ->getOutput());
         Assert::stringNotEmpty($phpIntSize, 'Could not fetch PHP_INT_SIZE');
-        Assert::same($phpIntSize, (string)(int) $phpIntSize, 'PHP_INT_SIZE was not an integer processed %2$s from %s');
+        Assert::same($phpIntSize, (string) (int) $phpIntSize, 'PHP_INT_SIZE was not an integer processed %2$s from %s');
 
         return (int) $phpIntSize;
     }

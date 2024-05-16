@@ -9,13 +9,16 @@ use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\RequestOptions;
 use Php\Pie\DependencyResolver\Package;
+use Php\Pie\Downloading\Exception\CouldNotFindReleaseAsset;
+use Php\Pie\Platform\OperatingSystem;
+use Php\Pie\Platform\TargetPlatform;
 use Psl\Json;
 use Psl\Type;
 use Psr\Http\Message\ResponseInterface;
 
 use function assert;
 use function sprintf;
-use function str_replace;
+use function strtolower;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class GithubPackageReleaseAssets implements PackageReleaseAssets
@@ -29,9 +32,10 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
     }
 
     /** @return non-empty-string */
-    public function findWindowsDownloadUrlForPackage(Package $package): string
+    public function findWindowsDownloadUrlForPackage(TargetPlatform $targetPlatform, Package $package): string
     {
         $releaseAsset = $this->selectMatchingReleaseAsset(
+            $targetPlatform,
             $package,
             $this->getReleaseAssetsForPackage($package),
         );
@@ -40,23 +44,20 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
     }
 
     /** @return non-empty-string */
-    private function expectedWindowsAssetName(Package $package): string
+    private function expectedWindowsAssetName(TargetPlatform $targetPlatform, Package $package): string
     {
-        // @todo source these from the right places...
-        $arch          = 'x86';
-        $ts            = 'nts';
-        $compiler      = 'vs16';
-        $phpVersion    = '8.3';
-        $extensionName = str_replace('-', '_', 'example-pie-extension');
+        if ($targetPlatform->operatingSystem !== OperatingSystem::Windows || $targetPlatform->windowsCompiler === null) {
+            throw CouldNotFindReleaseAsset::forMissingWindowsCompiler($targetPlatform);
+        }
 
         return sprintf(
             'php_%s-%s-%s-%s-%s-%s.zip',
-            $extensionName,
+            $package->extensionName->name(),
             $package->version,
-            $phpVersion,
-            $compiler,
-            $ts,
-            $arch,
+            $targetPlatform->phpBinaryPath->majorMinorVersion(),
+            strtolower($targetPlatform->windowsCompiler->name),
+            $targetPlatform->threadSafety->asShort(),
+            $targetPlatform->architecture->name,
         );
     }
 
@@ -68,9 +69,9 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
      * @return array{name: non-empty-string, browser_download_url: non-empty-string, ...}
      */
     // phpcs:enable
-    private function selectMatchingReleaseAsset(Package $package, array $releaseAssets): array
+    private function selectMatchingReleaseAsset(TargetPlatform $targetPlatform, Package $package, array $releaseAssets): array
     {
-        $expectedAssetName = $this->expectedWindowsAssetName($package);
+        $expectedAssetName = $this->expectedWindowsAssetName($targetPlatform, $package);
 
         foreach ($releaseAssets as $releaseAsset) {
             if ($releaseAsset['name'] === $expectedAssetName) {

@@ -96,7 +96,7 @@ final class Container
         $container->alias(DownloadZipWithGuzzle::class, DownloadZip::class);
         $container->alias(GithubPackageReleaseAssets::class, PackageReleaseAssets::class);
         $container->when(GithubPackageReleaseAssets::class)
-            ->needs('githubApiBaseUrl')
+            ->needs('$githubApiBaseUrl')
             ->give('https://api.github.com');
         $container->singleton(
             DownloadAndExtract::class,

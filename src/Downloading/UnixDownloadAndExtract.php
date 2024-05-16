@@ -7,6 +7,7 @@ namespace Php\Pie\Downloading;
 use Composer\Util\AuthHelper;
 use GuzzleHttp\Psr7\Request;
 use Php\Pie\DependencyResolver\Package;
+use Php\Pie\Platform\TargetPlatform;
 use Psr\Http\Message\RequestInterface;
 use RuntimeException;
 
@@ -23,7 +24,7 @@ final class UnixDownloadAndExtract implements DownloadAndExtract
     ) {
     }
 
-    public function __invoke(Package $package): DownloadedPackage
+    public function __invoke(TargetPlatform $targetPlatform, Package $package): DownloadedPackage
     {
         $localTempPath = Path::vaguelyRandomTempPath();
 

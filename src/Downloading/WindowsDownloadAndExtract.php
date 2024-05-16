@@ -7,6 +7,7 @@ namespace Php\Pie\Downloading;
 use Composer\Util\AuthHelper;
 use GuzzleHttp\Psr7\Request;
 use Php\Pie\DependencyResolver\Package;
+use Php\Pie\Platform\TargetPlatform;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class WindowsDownloadAndExtract implements DownloadAndExtract
@@ -20,9 +21,9 @@ final class WindowsDownloadAndExtract implements DownloadAndExtract
     ) {
     }
 
-    public function __invoke(Package $package): DownloadedPackage
+    public function __invoke(TargetPlatform $targetPlatform, Package $package): DownloadedPackage
     {
-        $windowsDownloadUrl = $this->packageReleaseAssets->findWindowsDownloadUrlForPackage($package);
+        $windowsDownloadUrl = $this->packageReleaseAssets->findWindowsDownloadUrlForPackage($targetPlatform, $package);
 
         $localTempPath = Path::vaguelyRandomTempPath();
 
