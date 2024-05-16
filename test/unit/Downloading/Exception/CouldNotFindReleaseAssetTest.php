@@ -7,6 +7,11 @@ namespace Php\PieUnitTest\Downloading\Exception;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\Exception\CouldNotFindReleaseAsset;
 use Php\Pie\ExtensionName;
+use Php\Pie\Platform\Architecture;
+use Php\Pie\Platform\OperatingSystem;
+use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
+use Php\Pie\Platform\TargetPlatform;
+use Php\Pie\Platform\ThreadSafetyMode;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
@@ -29,5 +34,19 @@ final class CouldNotFindReleaseAssetTest extends TestCase
         $exception = CouldNotFindReleaseAsset::forPackageWithMissingTag($package);
 
         self::assertSame('Could not find release by tag name for foo/bar:1.2.3', $exception->getMessage());
+    }
+
+    public function testForMissingWindowsCompiler(): void
+    {
+        $phpBinary = PhpBinaryPath::fromCurrentProcess();
+        $exception = CouldNotFindReleaseAsset::forMissingWindowsCompiler(new TargetPlatform(
+            OperatingSystem::NonWindows,
+            $phpBinary,
+            Architecture::x86,
+            ThreadSafetyMode::NonThreadSafe,
+            null,
+        ));
+
+        self::assertSame('Could not determine Windows Compiler for PHP ' . $phpBinary->version() . ' on NonWindows', $exception->getMessage());
     }
 }

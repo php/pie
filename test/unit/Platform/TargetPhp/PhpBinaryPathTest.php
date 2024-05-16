@@ -4,13 +4,18 @@ declare(strict_types=1);
 
 namespace Php\PieUnitTest\Platform\TargetPhp;
 
+use Php\Pie\Platform\Architecture;
+use Php\Pie\Platform\OperatingSystem;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Process\Process;
 
+use function assert;
+use function defined;
 use function file_exists;
 use function is_executable;
+use function php_uname;
 use function sprintf;
 use function trim;
 
@@ -52,12 +57,32 @@ final class PhpBinaryPathTest extends TestCase
         );
     }
 
+    public function testOperatingSystem(): void
+    {
+        self::assertSame(
+            defined('PHP_WINDOWS_VERSION_BUILD') ? OperatingSystem::Windows : OperatingSystem::NonWindows,
+            PhpBinaryPath::fromCurrentProcess()
+                ->operatingSystem(),
+        );
+    }
+
     public function testMajorMinorVersion(): void
     {
         self::assertSame(
             PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION,
             PhpBinaryPath::fromCurrentProcess()
                 ->majorMinorVersion(),
+        );
+    }
+
+    public function testMachineType(): void
+    {
+        $myUnameMachineType = php_uname('m');
+        assert($myUnameMachineType !== '');
+        self::assertSame(
+            Architecture::parseArchitecture($myUnameMachineType),
+            PhpBinaryPath::fromCurrentProcess()
+                ->machineType(),
         );
     }
 
