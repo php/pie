@@ -35,6 +35,11 @@ class TargetPlatform
 
         $architecture = $phpBinaryPath->machineType();
 
+        // If we're not on ARM, a more reliable way of determining 32-bit/64-bit is to use PHP_INT_SIZE
+        if ($architecture !== Architecture::arm64) {
+            $architecture = $phpBinaryPath->phpIntSize() === 4 ? Architecture::x86 : Architecture::x86_64;
+        }
+
         /**
          * Based on xdebug.org wizard, copyright Derick Rethans, used under MIT licence
          *

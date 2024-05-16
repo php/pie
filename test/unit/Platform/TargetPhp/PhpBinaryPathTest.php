@@ -50,4 +50,14 @@ final class PhpBinaryPathTest extends TestCase
             $phpBinary->version(),
         );
     }
+
+    public function testPhpIntSize(): void
+    {
+        self::assertSame(
+            PHP_INT_SIZE,
+            PhpBinaryPath
+                ::fromCurrentProcess()
+                ->phpIntSize()
+        );
+    }
 }

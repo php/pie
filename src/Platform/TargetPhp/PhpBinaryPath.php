@@ -72,6 +72,21 @@ class PhpBinaryPath
         return Architecture::parseArchitecture($phpMachineType);
     }
 
+    public function phpIntSize(): int
+    {
+        $phpIntSize = trim((new Process([
+            $this->phpBinaryPath,
+            '-r',
+            'echo PHP_INT_SIZE;',
+        ]))
+            ->mustRun()
+            ->getOutput());
+        Assert::stringNotEmpty($phpIntSize, 'Could not fetch PHP_INT_SIZE');
+        Assert::same($phpIntSize, (string)(int) $phpIntSize, 'PHP_INT_SIZE was not an integer processed %2$s from %s');
+
+        return (int) $phpIntSize;
+    }
+
     /** @return non-empty-string */
     public function phpinfo(): string
     {
