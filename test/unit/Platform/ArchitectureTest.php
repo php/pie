@@ -15,7 +15,7 @@ final class ArchitectureTest extends TestCase
     /**
      * @return array<non-empty-string, array{0: non-empty-string, 1: Architecture}>
      *
-     * @psalm-suppress PossiblyUnusedMethod
+     * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
      */
     public static function architectureMapProvider(): array
     {

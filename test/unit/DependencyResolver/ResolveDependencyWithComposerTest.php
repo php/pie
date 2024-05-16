@@ -63,7 +63,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
     /**
      * @return array<string, array{0: array<string, string>, 1: string, 2: string}>
      *
-     * @psalm-suppress PossiblyUnusedMethod
+     * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
      */
     public static function unresolvableDependencies(): array
     {
