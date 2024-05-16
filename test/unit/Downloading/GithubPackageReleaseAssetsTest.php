@@ -47,7 +47,51 @@ final class GithubPackageReleaseAssetsTest extends TestCase
                 json_encode([
                     'assets' => [
                         [
+                            'name' => 'php_foo-1.2.3-8.3-vc14-nts-x86.zip',
+                            'browser_download_url' => 'wrong_download_url',
+                        ],
+                        [
                             'name' => 'php_foo-1.2.3-8.3-vc14-ts-x86.zip',
+                            'browser_download_url' => 'actual_download_url',
+                        ],
+                    ],
+                ]),
+            ),
+        ]);
+
+        $guzzleMockClient = new Client(['handler' => HandlerStack::create($mockHandler)]);
+
+        $package = new Package(ExtensionName::normaliseFromString('foo'), 'asgrim/example-pie-extension', '1.2.3', 'https://test-uri/' . uniqid('downloadUrl', true));
+
+        $releaseAssets = new GithubPackageReleaseAssets($authHelper, $guzzleMockClient, 'https://test-github-api-base-url.thephp.foundation');
+
+        self::assertSame('actual_download_url', $releaseAssets->findWindowsDownloadUrlForPackage($targetPlatform, $package));
+    }
+
+    public function testUrlIsReturnedWhenFindingWindowsDownloadUrlWithCompilerAndThreadSafetySwapped(): void
+    {
+        $targetPlatform = new TargetPlatform(
+            OperatingSystem::Windows,
+            PhpBinaryPath::fromCurrentProcess(),
+            Architecture::x86,
+            ThreadSafetyMode::ThreadSafe,
+            WindowsCompiler::VC14,
+        );
+
+        $authHelper = $this->createMock(AuthHelper::class);
+
+        $mockHandler = new MockHandler([
+            new Response(
+                200,
+                [],
+                json_encode([
+                    'assets' => [
+                        [
+                            'name' => 'php_foo-1.2.3-8.3-nts-vc14-x86.zip',
+                            'browser_download_url' => 'wrong_download_url',
+                        ],
+                        [
+                            'name' => 'php_foo-1.2.3-8.3-ts-vc14-x86.zip',
                             'browser_download_url' => 'actual_download_url',
                         ],
                     ],

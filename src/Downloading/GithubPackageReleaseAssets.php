@@ -17,6 +17,7 @@ use Psl\Type;
 use Psr\Http\Message\ResponseInterface;
 
 use function assert;
+use function in_array;
 use function sprintf;
 use function strtolower;
 
@@ -43,22 +44,37 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
         return $releaseAsset['browser_download_url'];
     }
 
-    /** @return non-empty-string */
-    private function expectedWindowsAssetName(TargetPlatform $targetPlatform, Package $package): string
+    /** @return non-empty-list<non-empty-string> */
+    private function expectedWindowsAssetNames(TargetPlatform $targetPlatform, Package $package): array
     {
         if ($targetPlatform->operatingSystem !== OperatingSystem::Windows || $targetPlatform->windowsCompiler === null) {
             throw CouldNotFindReleaseAsset::forMissingWindowsCompiler($targetPlatform);
         }
 
-        return sprintf(
-            'php_%s-%s-%s-%s-%s-%s.zip',
-            $package->extensionName->name(),
-            $package->version,
-            $targetPlatform->phpBinaryPath->majorMinorVersion(),
-            strtolower($targetPlatform->windowsCompiler->name),
-            $targetPlatform->threadSafety->asShort(),
-            $targetPlatform->architecture->name,
-        );
+        /**
+         * During development, we swapped compiler/ts around. It is fairly trivial to support both, so we can check
+         * both formats pretty easily, just to avoid confusion for package maintainers...
+         */
+        return [
+            strtolower(sprintf(
+                'php_%s-%s-%s-%s-%s-%s.zip',
+                $package->extensionName->name(),
+                $package->version,
+                $targetPlatform->phpBinaryPath->majorMinorVersion(),
+                $targetPlatform->threadSafety->asShort(),
+                strtolower($targetPlatform->windowsCompiler->name),
+                $targetPlatform->architecture->name,
+            )),
+            strtolower(sprintf(
+                'php_%s-%s-%s-%s-%s-%s.zip',
+                $package->extensionName->name(),
+                $package->version,
+                $targetPlatform->phpBinaryPath->majorMinorVersion(),
+                strtolower($targetPlatform->windowsCompiler->name),
+                $targetPlatform->threadSafety->asShort(),
+                $targetPlatform->architecture->name,
+            )),
+        ];
     }
 
     /** @link https://github.com/squizlabs/PHP_CodeSniffer/issues/3734 */
@@ -71,15 +87,15 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
     // phpcs:enable
     private function selectMatchingReleaseAsset(TargetPlatform $targetPlatform, Package $package, array $releaseAssets): array
     {
-        $expectedAssetName = $this->expectedWindowsAssetName($targetPlatform, $package);
+        $expectedAssetNames = $this->expectedWindowsAssetNames($targetPlatform, $package);
 
         foreach ($releaseAssets as $releaseAsset) {
-            if ($releaseAsset['name'] === $expectedAssetName) {
+            if (in_array(strtolower($releaseAsset['name']), $expectedAssetNames, true)) {
                 return $releaseAsset;
             }
         }
 
-        throw Exception\CouldNotFindReleaseAsset::forPackage($package, $expectedAssetName);
+        throw Exception\CouldNotFindReleaseAsset::forPackage($package, $expectedAssetNames);
     }
 
     /** @return list<array{name: non-empty-string, browser_download_url: non-empty-string, ...}> */

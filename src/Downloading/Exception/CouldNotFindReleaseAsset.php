@@ -8,16 +8,18 @@ use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Platform\TargetPlatform;
 use RuntimeException;
 
+use function implode;
 use function sprintf;
 
 class CouldNotFindReleaseAsset extends RuntimeException
 {
-    public static function forPackage(Package $package, string $expectedAssetName): self
+    /** @param non-empty-list<non-empty-string> $expectedAssetNames */
+    public static function forPackage(Package $package, array $expectedAssetNames): self
     {
         return new self(sprintf(
-            'Could not find release asset for %s named "%s"',
+            'Could not find release asset for %s named one of "%s"',
             $package->prettyNameAndVersion(),
-            $expectedAssetName,
+            implode(', ', $expectedAssetNames),
         ));
     }
 

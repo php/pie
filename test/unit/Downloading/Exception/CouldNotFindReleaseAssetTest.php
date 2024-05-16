@@ -17,9 +17,9 @@ final class CouldNotFindReleaseAssetTest extends TestCase
     {
         $package = new Package(ExtensionName::normaliseFromString('foo'), 'foo/bar', '1.2.3', null);
 
-        $exception = CouldNotFindReleaseAsset::forPackage($package, 'something.zip');
+        $exception = CouldNotFindReleaseAsset::forPackage($package, ['something.zip', 'something2.zip']);
 
-        self::assertSame('Could not find release asset for foo/bar:1.2.3 named "something.zip"', $exception->getMessage());
+        self::assertSame('Could not find release asset for foo/bar:1.2.3 named one of "something.zip, something2.zip"', $exception->getMessage());
     }
 
     public function testForPackageWithMissingTag(): void
