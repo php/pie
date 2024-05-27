@@ -47,9 +47,9 @@ class DownloadCommandTest extends TestCase
             [self::TEST_PACKAGE . ':~1.0.0@alpha', self::TEST_PACKAGE . ':1.0.1'],
             [self::TEST_PACKAGE . ':^1.1.0@alpha', self::TEST_PACKAGE . ':1.1.0-alpha.1'],
             [self::TEST_PACKAGE . ':~1.0.0', self::TEST_PACKAGE . ':1.0.1'],
-            // @todo in theory, these could work, on NonWindows at least
-            //[self::TEST_PACKAGE . ':dev-master', self::TEST_PACKAGE . ':???'],
-            //[self::TEST_PACKAGE . ':dev-master#769f906413d6d1e12152f6d34134cbcd347ca253', self::TEST_PACKAGE . ':???'],
+            // @todo https://github.com/php/pie/issues/13 - in theory, these could work, on NonWindows at least
+            // [self::TEST_PACKAGE . ':dev-main', self::TEST_PACKAGE . ':???'],
+            // [self::TEST_PACKAGE . ':dev-main#769f906413d6d1e12152f6d34134cbcd347ca253', self::TEST_PACKAGE . ':???'],
         ];
 
         return array_combine(
