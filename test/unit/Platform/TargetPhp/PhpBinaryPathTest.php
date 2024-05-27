@@ -11,11 +11,15 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Process\Process;
 
+use function array_combine;
+use function array_map;
 use function assert;
 use function defined;
 use function file_exists;
+use function get_loaded_extensions;
 use function is_executable;
 use function php_uname;
+use function phpversion;
 use function sprintf;
 use function trim;
 
@@ -54,6 +58,27 @@ final class PhpBinaryPathTest extends TestCase
         self::assertSame(
             sprintf('%s.%s.%s', PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION),
             $phpBinary->version(),
+        );
+    }
+
+    public function testExtensions(): void
+    {
+        $exts        = get_loaded_extensions();
+        $extVersions = array_map(
+            static function ($extension) {
+                $extVersion = phpversion($extension);
+                if ($extVersion === false) {
+                    return '0';
+                }
+
+                return $extVersion;
+            },
+            $exts,
+        );
+        self::assertSame(
+            array_combine($exts, $extVersions),
+            PhpBinaryPath::fromCurrentProcess()
+                ->extensions(),
         );
     }
 

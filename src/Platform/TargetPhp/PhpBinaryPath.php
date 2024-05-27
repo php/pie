@@ -7,6 +7,8 @@ namespace Php\Pie\Platform\TargetPhp;
 use Composer\Semver\VersionParser;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
+use Psl\Json;
+use Psl\Type;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
 use Webmozart\Assert\Assert;
@@ -24,6 +26,43 @@ class PhpBinaryPath
     /** @param non-empty-string $phpBinaryPath */
     private function __construct(readonly string $phpBinaryPath)
     {
+    }
+
+    /**
+     * Returns a map where the key is the name of the extension and the value is the version ('0' if not defined)
+     *
+     * @return array<string, string>
+     */
+    public function extensions(): array
+    {
+        $extVersionsRawJson = trim((new Process([
+            $this->phpBinaryPath,
+            '-r',
+            <<<'PHP'
+$exts = get_loaded_extensions();
+$extVersions = array_map(
+    static function ($extension) {
+        $extVersion = phpversion($extension);
+        if ($extVersion === false) {
+            return '0';
+        }
+        return $extVersion;
+    },
+    $exts
+);
+echo json_encode(array_combine($exts, $extVersions));
+PHP,
+        ]))
+            ->mustRun()
+            ->getOutput());
+
+        return Json\typed(
+            $extVersionsRawJson,
+            Type\dict(
+                Type\string(),
+                Type\string(),
+            ),
+        );
     }
 
     public function operatingSystem(): OperatingSystem
