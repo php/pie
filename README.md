@@ -26,7 +26,28 @@ with the `--with-php-config` option like:
 bin/pie download --with-php-config=/usr/bin/php-config7.2 my/extension
 ```
 
-Windows TBD
+On all platforms, you may provide a path to the `php` executable itself using the `--with-php-path` option. This is an
+example on Windows where PHP 8.1 is used to run PIE, but we want to download the extension for PHP 8.3:
+
+```shell
+> C:\php-8.1.7\php.exe bin/pie download --with-php-path=C:\php-8.3.6\php.exe asgrim/example-pie-extension
+You are running PHP 8.1.7
+Target PHP installation: 8.3.6 (from C:\php-8.3.6\php.exe)
+Platform: Windows, x86_64, ThreadSafe, VS16
+Found package: asgrim/example-pie-extension:1.0.1 which provides ext-example_pie_extension
+Extracted asgrim/example-pie-extension:1.0.1 source to: C:\path\to\temp\pie_downloader_66547faa7db3d7.06129230
+```
+
+And this is a very similar example (using PHP 8.1 to run PIE to download a PHP 8.3 extension) on a non-Windows platform:
+
+```shell
+$ php8.1 bin/pie download --with-php-path=/usr/bin/php8.3 asgrim/example-pie-extension
+You are running PHP 8.1.28
+Target PHP installation: 8.3.7 (from /usr/bin/php8.3)
+Platform: NonWindows, x86_64, NonThreadSafe
+Found package: asgrim/example-pie-extension:1.0.1 which provides ext-example_pie_extension
+Extracted asgrim/example-pie-extension:1.0.1 source to: /tmp/pie_downloader_66547da1e6c685.25242810/asgrim-example-pie-extension-769f906
+```
 
 ## Developing
 
