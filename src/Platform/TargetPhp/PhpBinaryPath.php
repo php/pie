@@ -26,6 +26,7 @@ class PhpBinaryPath
     /** @param non-empty-string $phpBinaryPath */
     private function __construct(readonly string $phpBinaryPath)
     {
+        // @todo https://github.com/php/pie/issues/12 - we could verify that the given $phpBinaryPath really is a PHP install
     }
 
     /**
@@ -161,13 +162,18 @@ PHP,
 
     public static function fromPhpConfigExecutable(string $phpConfig): self
     {
-        // @todo filter input/sanitize output
         $phpExecutable = trim((new Process([$phpConfig, '--php-binary']))
             ->mustRun()
             ->getOutput());
         Assert::stringNotEmpty($phpExecutable, 'Could not find path to PHP executable.');
 
         return new self($phpExecutable);
+    }
+
+    /** @param non-empty-string $phpBinary */
+    public static function fromPhpBinaryPath(string $phpBinary): self
+    {
+        return new self($phpBinary);
     }
 
     public static function fromCurrentProcess(): self

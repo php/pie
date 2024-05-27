@@ -34,6 +34,7 @@ final class DownloadCommand extends Command
 {
     private const ARG_REQUESTED_PACKAGE_AND_VERSION = 'requested-package-and-version';
     private const OPTION_WITH_PHP_CONFIG            = 'with-php-config';
+    private const OPTION_WITH_PHP_PATH              = 'with-php-path';
 
     public function __construct(
         private readonly DependencyResolver $dependencyResolver,
@@ -55,7 +56,13 @@ final class DownloadCommand extends Command
             self::OPTION_WITH_PHP_CONFIG,
             null,
             InputOption::VALUE_OPTIONAL,
-            'The path to `php-config` to use',
+            'The path to the `php-config` binary to find the target PHP platform, e.g. --' . self::OPTION_WITH_PHP_CONFIG . '=/usr/bin/php-config7.4',
+        );
+        $this->addOption(
+            self::OPTION_WITH_PHP_PATH,
+            null,
+            InputOption::VALUE_OPTIONAL,
+            'The path to the `php` binary to use as the target PHP platform, e.g. --' . self::OPTION_WITH_PHP_PATH . '=C:\usr\php7.4.33\php.exe',
         );
     }
 
@@ -69,7 +76,11 @@ final class DownloadCommand extends Command
             $phpBinaryPath = PhpBinaryPath::fromPhpConfigExecutable($withPhpConfig);
         }
 
-        // @todo Support Windows using `--with-php-path="C:\usr\php7.4.33"`
+        /** @var mixed $withPhpPath */
+        $withPhpPath = $input->getOption(self::OPTION_WITH_PHP_PATH);
+        if (is_string($withPhpPath) && $withPhpPath !== '') {
+            $phpBinaryPath = PhpBinaryPath::fromPhpBinaryPath($withPhpPath);
+        }
 
         $targetPlatform = TargetPlatform::fromPhpBinaryPath($phpBinaryPath);
 

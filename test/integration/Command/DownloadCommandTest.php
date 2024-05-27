@@ -98,6 +98,30 @@ class DownloadCommandTest extends TestCase
         self::assertStringContainsString('Extracted ' . $expectedVersion . ' source to', $outputString);
     }
 
+    #[DataProvider('validVersionsList')]
+    public function testDownloadingWithPhpPath(string $requestedVersion, string $expectedVersion): void
+    {
+        // @todo This test makes an assumption you're using `ppa:ondrej/php` to have multiple PHP versions. This allows
+        //       us to test scenarios where you run with PHP 8.1 but want to install to a PHP 8.3 instance, for example.
+        //       However, this test isn't very portable, and won't run in CI, so we could do with improving this later.
+        $phpBinaryPath = '/usr/bin/php8.3';
+
+        if (! file_exists($phpBinaryPath) || ! is_executable($phpBinaryPath)) {
+            self::markTestSkipped('This test can only run where "' . $phpBinaryPath . '" exists and is executable, to target PHP 8.3');
+        }
+
+        $this->commandTester->execute([
+            '--with-php-path' => $phpBinaryPath,
+            'requested-package-and-version' => $requestedVersion,
+        ]);
+
+        $this->commandTester->assertCommandIsSuccessful();
+
+        $outputString = $this->commandTester->getDisplay();
+        self::assertStringContainsString('Found package: ' . $expectedVersion . ' which provides', $outputString);
+        self::assertStringContainsString('Extracted ' . $expectedVersion . ' source to', $outputString);
+    }
+
     public function testDownloadCommandFailsWhenUsingIncompatiblePhpVersion(): void
     {
         if (PHP_VERSION_ID >= 80200) {
