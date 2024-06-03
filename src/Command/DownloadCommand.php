@@ -8,6 +8,7 @@ use Composer\Package\Version\VersionParser;
 use InvalidArgumentException;
 use Php\Pie\DependencyResolver\DependencyResolver;
 use Php\Pie\Downloading\DownloadAndExtract;
+use Php\Pie\Platform\OperatingSystem;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -57,13 +58,13 @@ final class DownloadCommand extends Command
             self::OPTION_WITH_PHP_CONFIG,
             null,
             InputOption::VALUE_OPTIONAL,
-            'The path to the `php-config` binary to find the target PHP platform, e.g. --' . self::OPTION_WITH_PHP_CONFIG . '=/usr/bin/php-config7.4',
+            'The path to the `php-config` binary to find the target PHP platform on ' . OperatingSystem::NonWindows->asFriendlyName() . ', e.g. --' . self::OPTION_WITH_PHP_CONFIG . '=/usr/bin/php-config7.4',
         );
         $this->addOption(
             self::OPTION_WITH_PHP_PATH,
             null,
             InputOption::VALUE_OPTIONAL,
-            'The path to the `php` binary to use as the target PHP platform, e.g. --' . self::OPTION_WITH_PHP_PATH . '=C:\usr\php7.4.33\php.exe',
+            'The path to the `php` binary to use as the target PHP platform on ' . OperatingSystem::Windows->asFriendlyName() . ', e.g. --' . self::OPTION_WITH_PHP_PATH . '=C:\usr\php7.4.33\php.exe',
         );
     }
 
