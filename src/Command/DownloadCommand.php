@@ -50,7 +50,7 @@ final class DownloadCommand extends Command
         $this->addArgument(
             self::ARG_REQUESTED_PACKAGE_AND_VERSION,
             InputArgument::REQUIRED,
-            'The extension name and version constraint to use, in the format {ext-name}{?:version-constraint}{?@dev-branch-name}, for example `ext-debug:^1.0`',
+            'The extension name and version constraint to use, in the format {ext-name}{?:{?version-constraint}{?@stability}}, for example `xdebug/xdebug:^3.4@alpha`, `xdebug/xdebug:@alpha`, `xdebug/xdebug:^3.4`, etc.',
         );
         $this->addOption(
             self::OPTION_WITH_PHP_CONFIG,
