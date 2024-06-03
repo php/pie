@@ -23,6 +23,7 @@ use function is_array;
 use function is_string;
 use function reset;
 use function sprintf;
+use function strtolower;
 
 use const PHP_VERSION;
 
@@ -85,13 +86,14 @@ final class DownloadCommand extends Command
         $targetPlatform = TargetPlatform::fromPhpBinaryPath($phpBinaryPath);
 
         $output->writeln(sprintf('<info>You are running PHP %s</info>', PHP_VERSION));
-        $output->writeln(sprintf('<info>Target PHP installation:</info> %s (from %s)', $phpBinaryPath->version(), $phpBinaryPath->phpBinaryPath));
         $output->writeln(sprintf(
-            '<info>Platform:</info> %s, %s, %s%s',
-            $targetPlatform->operatingSystem->name,
+            '<info>Target PHP installation:</info> %s %s%s, on %s %s (from %s)',
+            $phpBinaryPath->version(),
+            $targetPlatform->threadSafety->asShort(),
+            strtolower($targetPlatform->windowsCompiler !== null ? ', ' . $targetPlatform->windowsCompiler->name : ''),
+            $targetPlatform->operatingSystem->asFriendlyName(),
             $targetPlatform->architecture->name,
-            $targetPlatform->threadSafety->name,
-            $targetPlatform->windowsCompiler !== null ? ', ' . $targetPlatform->windowsCompiler->name : '',
+            $phpBinaryPath->phpBinaryPath,
         ));
 
         $requestedNameAndVersionPair = $this->requestedNameAndVersionPair($input);

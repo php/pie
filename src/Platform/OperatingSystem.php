@@ -9,4 +9,12 @@ enum OperatingSystem
 {
     case NonWindows;
     case Windows;
+
+    public function asFriendlyName(): string
+    {
+        return match ($this) {
+            self::Windows => 'Windows',
+            self::NonWindows => 'Linux/OSX/etc',
+        };
+    }
 }
