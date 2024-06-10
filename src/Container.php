@@ -16,6 +16,10 @@ use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\RequestOptions;
 use Illuminate\Container\Container as IlluminateContainer;
+use Php\Pie\Building\Build;
+use Php\Pie\Building\UnixBuild;
+use Php\Pie\Building\WindowsBuild;
+use Php\Pie\Command\BuildCommand;
 use Php\Pie\Command\DownloadCommand;
 use Php\Pie\DependencyResolver\DependencyResolver;
 use Php\Pie\DependencyResolver\ResolveDependencyWithComposer;
@@ -44,6 +48,7 @@ final class Container
         $container->instance(OutputInterface::class, new ConsoleOutput());
 
         $container->singleton(DownloadCommand::class);
+        $container->singleton(BuildCommand::class);
 
         $container->singleton(IOInterface::class, static function (ContainerInterface $container): IOInterface {
             return new ConsoleIO(
@@ -107,6 +112,17 @@ final class Container
                 }
 
                 return $container->get(UnixDownloadAndExtract::class);
+            },
+        );
+
+        $container->singleton(
+            Build::class,
+            static function (ContainerInterface $container): Build {
+                if (Platform::isWindows()) {
+                    return $container->get(WindowsBuild::class);
+                }
+
+                return $container->get(UnixBuild::class);
             },
         );
 
