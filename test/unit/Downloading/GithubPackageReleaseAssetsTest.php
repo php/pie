@@ -66,7 +66,13 @@ final class GithubPackageReleaseAssetsTest extends TestCase
 
         $guzzleMockClient = new Client(['handler' => HandlerStack::create($mockHandler)]);
 
-        $package = new Package(ExtensionName::normaliseFromString('foo'), 'asgrim/example-pie-extension', '1.2.3', 'https://test-uri/' . uniqid('downloadUrl', true));
+        $package = new Package(
+            ExtensionName::normaliseFromString('foo'),
+            'asgrim/example-pie-extension',
+            '1.2.3',
+            'https://test-uri/' . uniqid('downloadUrl', true),
+            [],
+        );
 
         $releaseAssets = new GithubPackageReleaseAssets($authHelper, $guzzleMockClient, 'https://test-github-api-base-url.thephp.foundation');
 
@@ -111,7 +117,13 @@ final class GithubPackageReleaseAssetsTest extends TestCase
 
         $guzzleMockClient = new Client(['handler' => HandlerStack::create($mockHandler)]);
 
-        $package = new Package(ExtensionName::normaliseFromString('foo'), 'asgrim/example-pie-extension', '1.2.3', 'https://test-uri/' . uniqid('downloadUrl', true));
+        $package = new Package(
+            ExtensionName::normaliseFromString('foo'),
+            'asgrim/example-pie-extension',
+            '1.2.3',
+            'https://test-uri/' . uniqid('downloadUrl', true),
+            [],
+        );
 
         $releaseAssets = new GithubPackageReleaseAssets($authHelper, $guzzleMockClient, 'https://test-github-api-base-url.thephp.foundation');
 
@@ -142,7 +154,13 @@ final class GithubPackageReleaseAssetsTest extends TestCase
 
         $guzzleMockClient = new Client(['handler' => HandlerStack::create($mockHandler)]);
 
-        $package = new Package(ExtensionName::normaliseFromString('foo'), 'asgrim/example-pie-extension', '1.2.3', 'https://test-uri/' . uniqid('downloadUrl', true));
+        $package = new Package(
+            ExtensionName::normaliseFromString('foo'),
+            'asgrim/example-pie-extension',
+            '1.2.3',
+            'https://test-uri/' . uniqid('downloadUrl', true),
+            [],
+        );
 
         $releaseAssets = new GithubPackageReleaseAssets($authHelper, $guzzleMockClient, 'https://test-github-api-base-url.thephp.foundation');
 

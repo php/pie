@@ -35,6 +35,8 @@ final class DownloadCommand extends Command
 
     public function execute(InputInterface $input, OutputInterface $output): int
     {
+        CommandHelper::validateInput($input, $this);
+
         $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $output);
 
         $requestedNameAndVersionPair = CommandHelper::requestedNameAndVersionPair($input);

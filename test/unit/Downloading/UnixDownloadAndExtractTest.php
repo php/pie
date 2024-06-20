@@ -59,7 +59,13 @@ final class UnixDownloadAndExtractTest extends TestCase
             ->willReturn($extractedPath);
 
         $downloadUrl      = 'https://test-uri/' . uniqid('downloadUrl', true);
-        $requestedPackage = new Package(ExtensionName::normaliseFromString('foo'), 'foo/bar', '1.2.3', $downloadUrl);
+        $requestedPackage = new Package(
+            ExtensionName::normaliseFromString('foo'),
+            'foo/bar',
+            '1.2.3',
+            $downloadUrl,
+            [],
+        );
 
         $downloadedPackage = $unixDownloadAndExtract->__invoke($targetPlatform, $requestedPackage);
 

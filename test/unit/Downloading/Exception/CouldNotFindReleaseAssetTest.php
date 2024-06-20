@@ -20,7 +20,13 @@ final class CouldNotFindReleaseAssetTest extends TestCase
 {
     public function testForPackage(): void
     {
-        $package = new Package(ExtensionName::normaliseFromString('foo'), 'foo/bar', '1.2.3', null);
+        $package = new Package(
+            ExtensionName::normaliseFromString('foo'),
+            'foo/bar',
+            '1.2.3',
+            null,
+            [],
+        );
 
         $exception = CouldNotFindReleaseAsset::forPackage($package, ['something.zip', 'something2.zip']);
 
@@ -29,7 +35,13 @@ final class CouldNotFindReleaseAssetTest extends TestCase
 
     public function testForPackageWithMissingTag(): void
     {
-        $package = new Package(ExtensionName::normaliseFromString('foo'), 'foo/bar', '1.2.3', null);
+        $package = new Package(
+            ExtensionName::normaliseFromString('foo'),
+            'foo/bar',
+            '1.2.3',
+            null,
+            [],
+        );
 
         $exception = CouldNotFindReleaseAsset::forPackageWithMissingTag($package);
 

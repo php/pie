@@ -59,6 +59,17 @@ final class CommandHelper
             InputOption::VALUE_OPTIONAL,
             'The path to the `php` binary to use as the target PHP platform on ' . OperatingSystem::Windows->asFriendlyName() . ', e.g. --' . self::OPTION_WITH_PHP_PATH . '=C:\usr\php7.4.33\php.exe',
         );
+
+        /**
+         * Allows additional options for the `./configure` command to be passed here.
+         * Note, this means you probably need to call {@see self::validateInput()} to validate the input manually...
+         */
+        $command->ignoreValidationErrors();
+    }
+
+    public static function validateInput(InputInterface $input, Command $command): void
+    {
+        $input->bind($command->getDefinition());
     }
 
     public static function determineTargetPlatformFromInputs(InputInterface $input, OutputInterface $output): TargetPlatform

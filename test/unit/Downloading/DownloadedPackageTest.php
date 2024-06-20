@@ -17,7 +17,13 @@ final class DownloadedPackageTest extends TestCase
 {
     public function testFromPackageAndExtractedPath(): void
     {
-        $package = new Package(ExtensionName::normaliseFromString('foo'), 'foo/bar', '1.2.3', null);
+        $package = new Package(
+            ExtensionName::normaliseFromString('foo'),
+            'foo/bar',
+            '1.2.3',
+            null,
+            [],
+        );
 
         $extractedSourcePath = uniqid('/path/to/downloaded/package', true);
 

@@ -98,6 +98,7 @@ final class CommandHelperTest extends TestCase
                 'php/test-pie-ext',
                 '1.2.3',
                 'https://test-uri/',
+                [],
             ));
 
         $downloadAndExtract->expects(self::once())

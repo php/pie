@@ -74,7 +74,13 @@ final class WindowsDownloadAndExtractTest extends TestCase
             )
             ->willReturn($extractedPath);
 
-        $requestedPackage = new Package(ExtensionName::normaliseFromString('foo'), 'foo/bar', '1.2.3', 'https://test-uri/' . uniqid('downloadUrl', true));
+        $requestedPackage = new Package(
+            ExtensionName::normaliseFromString('foo'),
+            'foo/bar',
+            '1.2.3',
+            'https://test-uri/' . uniqid('downloadUrl', true),
+            [],
+        );
 
         $downloadedPackage = $windowsDownloadAndExtract->__invoke($targetPlatform, $requestedPackage);
 
