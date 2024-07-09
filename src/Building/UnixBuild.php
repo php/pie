@@ -14,13 +14,15 @@ use function implode;
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class UnixBuild implements Build
 {
-    public function __invoke(DownloadedPackage $downloadedPackage, OutputInterface $output): void
-    {
+    /** {@inheritDoc} */
+    public function __invoke(
+        DownloadedPackage $downloadedPackage,
+        array $configureOptions,
+        OutputInterface $output,
+    ): void {
         $this->phpize($downloadedPackage);
         $output->writeln('<info>phpize complete</info>');
 
-        // @todo options
-        $configureOptions = [];
         $this->configure($downloadedPackage, $configureOptions);
         $optionsOutput = count($configureOptions) ? ' with options: ' . implode(' ', $configureOptions) : '.';
         $output->writeln('<info>Configure complete</info>' . $optionsOutput);

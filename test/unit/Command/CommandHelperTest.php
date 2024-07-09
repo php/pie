@@ -6,6 +6,7 @@ namespace Php\PieUnitTest\Command;
 
 use InvalidArgumentException;
 use Php\Pie\Command\CommandHelper;
+use Php\Pie\ConfigureOption;
 use Php\Pie\DependencyResolver\DependencyResolver;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\DownloadAndExtract;
@@ -16,7 +17,10 @@ use Php\Pie\Platform\TargetPlatform;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use function array_combine;
@@ -123,5 +127,42 @@ final class CommandHelperTest extends TestCase
             $downloadAndExtract,
             $output,
         ));
+    }
+
+    public function testBindingConfigurationOptionsFromPackage(): void
+    {
+        self::markTestIncomplete(__METHOD__);
+    }
+
+    public function testProcessingConfigureOptionsFromInput(): void
+    {
+        $package         = new Package(
+            ExtensionName::normaliseFromString('lolz'),
+            'foo/bar',
+            '1.0.0',
+            null,
+            [
+                ConfigureOption::fromComposerJsonDefinition([
+                    'name' => 'with-stuff',
+                    'needs-value' => true,
+                ]),
+                ConfigureOption::fromComposerJsonDefinition(['name' => 'enable-thing']),
+            ],
+        );
+        $inputDefinition = new InputDefinition();
+        $inputDefinition->addOption(new InputOption('with-stuff', null, InputOption::VALUE_REQUIRED));
+        $inputDefinition->addOption(new InputOption('enable-thing', null, InputOption::VALUE_NONE));
+
+        $input = new ArrayInput(['--with-stuff' => 'lolz', '--enable-thing' => true], $inputDefinition);
+
+        $options = CommandHelper::processConfigureOptionsFromInput($package, $input);
+
+        self::assertSame(
+            [
+                '--with-stuff=\'lolz\'',
+                '--enable-thing',
+            ],
+            $options,
+        );
     }
 }

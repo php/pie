@@ -7,6 +7,7 @@ namespace Php\Pie\Command;
 use Composer\Package\Version\VersionParser;
 use InvalidArgumentException;
 use Php\Pie\DependencyResolver\DependencyResolver;
+use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\DownloadAndExtract;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\Platform\OperatingSystem;
@@ -20,6 +21,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Webmozart\Assert\Assert;
 
 use function array_key_exists;
+use function escapeshellarg;
 use function is_array;
 use function is_string;
 use function reset;
@@ -148,5 +150,49 @@ final class CommandHelper
         $output->writeln(sprintf('<info>Found package:</info> %s which provides <info>%s</info>', $package->prettyNameAndVersion(), $package->extensionName->nameWithExtPrefix()));
 
         return ($downloadAndExtract)($targetPlatform, $package);
+    }
+
+    public static function bindConfigureOptionsFromPackage(Command $command, Package $package, InputInterface $input): void
+    {
+        foreach ($package->configureOptions as $configureOption) {
+            $command->addOption(
+                $configureOption->name,
+                null,
+                $configureOption->needsValue ? InputOption::VALUE_REQUIRED : InputOption::VALUE_NONE,
+                $configureOption->description,
+            );
+        }
+
+        self::validateInput($input, $command);
+    }
+
+    /** @return list<non-empty-string> */
+    public static function processConfigureOptionsFromInput(Package $package, InputInterface $input): array
+    {
+        $configureOptionsValues = [];
+        foreach ($package->configureOptions as $configureOption) {
+            if (! $input->hasOption($configureOption->name)) {
+                continue;
+            }
+
+            $value = $input->getOption($configureOption->name);
+
+            if ($configureOption->needsValue) {
+                if (is_string($value) && $value !== '') {
+                    $configureOptionsValues[] = '--' . $configureOption->name . '=' . escapeshellarg($value);
+                }
+
+                continue;
+            }
+
+            Assert::boolean($value);
+            if ($value !== true) {
+                continue;
+            }
+
+            $configureOptionsValues[] = '--' . $configureOption->name;
+        }
+
+        return $configureOptionsValues;
     }
 }
