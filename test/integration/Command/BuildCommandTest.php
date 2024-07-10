@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\PieIntegrationTest\Command;
 
+use Composer\Util\Platform;
 use Php\Pie\Command\BuildCommand;
 use Php\Pie\Container;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -36,8 +37,16 @@ class BuildCommandTest extends TestCase
         $this->commandTester->assertCommandIsSuccessful();
 
         $outputString = $this->commandTester->getDisplay();
+
         self::assertStringContainsString('Found package: asgrim/example-pie-extension:1.0.1 which provides ext-example_pie_extension', $outputString);
-        self::assertStringContainsString('phpize complete', $outputString);
+
+        if (Platform::isWindows()) {
+            self::assertStringContainsString('Nothing to do on Windows.', $outputString);
+
+            return;
+        }
+
+        self::assertStringContainsString('phpize complete.', $outputString);
         self::assertStringContainsString('Configure complete.', $outputString);
         self::assertStringContainsString('Build complete.', $outputString);
     }
