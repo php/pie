@@ -9,7 +9,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
 
 use function count;
+use function file_exists;
 use function implode;
+use function sprintf;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class UnixBuild implements Build
@@ -28,7 +30,22 @@ final class UnixBuild implements Build
         $output->writeln('<info>Configure complete</info>' . $optionsOutput);
 
         $this->make($downloadedPackage);
-        $output->writeln('<info>Build complete</info>.');
+
+        $expectedSoFile = $downloadedPackage->extractedSourcePath . '/modules/' . $downloadedPackage->package->extensionName->name() . '.so';
+
+        if (! file_exists($expectedSoFile)) {
+            $output->writeln(sprintf(
+                'Build complete, but expected <comment>%s</comment> does not exist - however, this may be normal if this extension outputs the .so file in a different location.',
+                $expectedSoFile,
+            ));
+
+            return;
+        }
+
+        $output->writeln(sprintf(
+            '<info>Build complete:</info> %s',
+            $expectedSoFile,
+        ));
     }
 
     private function phpize(DownloadedPackage $downloadedPackage): void

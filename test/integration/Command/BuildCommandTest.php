@@ -48,6 +48,6 @@ class BuildCommandTest extends TestCase
 
         self::assertStringContainsString('phpize complete.', $outputString);
         self::assertStringContainsString('Configure complete.', $outputString);
-        self::assertStringContainsString('Build complete.', $outputString);
+        self::assertStringContainsString('Build complete:', $outputString);
     }
 }

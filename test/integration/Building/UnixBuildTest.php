@@ -46,7 +46,8 @@ final class UnixBuildTest extends TestCase
 
         self::assertStringContainsString('phpize complete.', $outputString);
         self::assertStringContainsString('Configure complete with options: --enable-pie_test_ext', $outputString);
-        self::assertStringContainsString('Build complete.', $outputString);
+        self::assertStringContainsString('Build complete:', $outputString);
+        self::assertStringContainsString('pie_test_ext.so', $outputString);
 
         self::assertSame(
             0,
