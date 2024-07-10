@@ -45,7 +45,7 @@ class DownloadCommandTest extends TestCase
             [self::TEST_PACKAGE . ':1.0.1-alpha.3@alpha', self::TEST_PACKAGE . ':1.0.1-alpha.3'],
             [self::TEST_PACKAGE . ':*', self::TEST_PACKAGE . ':1.0.1'],
             [self::TEST_PACKAGE . ':~1.0.0@alpha', self::TEST_PACKAGE . ':1.0.1'],
-            [self::TEST_PACKAGE . ':^1.1.0@alpha', self::TEST_PACKAGE . ':1.1.0-alpha.3'],
+            [self::TEST_PACKAGE . ':^1.1.0@alpha', self::TEST_PACKAGE . ':1.1.0-alpha.4'],
             [self::TEST_PACKAGE . ':~1.0.0', self::TEST_PACKAGE . ':1.0.1'],
             // @todo https://github.com/php/pie/issues/13 - in theory, these could work, on NonWindows at least
             // [self::TEST_PACKAGE . ':dev-main', self::TEST_PACKAGE . ':???'],
