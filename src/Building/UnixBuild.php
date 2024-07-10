@@ -34,22 +34,19 @@ final class UnixBuild implements Build
     private function phpize(DownloadedPackage $downloadedPackage): void
     {
         (new Process(['phpize'], $downloadedPackage->extractedSourcePath))
-            ->mustRun()
-            ->getOutput();
+            ->mustRun();
     }
 
     /** @param list<non-empty-string> $configureOptions */
     private function configure(DownloadedPackage $downloadedPackage, array $configureOptions = []): void
     {
         (new Process(['./configure', ...$configureOptions], $downloadedPackage->extractedSourcePath))
-            ->mustRun()
-            ->getOutput();
+            ->mustRun();
     }
 
     private function make(DownloadedPackage $downloadedPackage): void
     {
         (new Process(['make'], $downloadedPackage->extractedSourcePath))
-            ->mustRun()
-            ->getOutput();
+            ->mustRun();
     }
 }
