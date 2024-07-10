@@ -21,14 +21,14 @@ final class UnixBuild implements Build
         OutputInterface $output,
     ): void {
         $this->phpize($downloadedPackage);
-        $output->writeln('<info>phpize complete</info>');
+        $output->writeln('<info>phpize complete</info>.');
 
         $this->configure($downloadedPackage, $configureOptions);
         $optionsOutput = count($configureOptions) ? ' with options: ' . implode(' ', $configureOptions) : '.';
         $output->writeln('<info>Configure complete</info>' . $optionsOutput);
 
         $this->make($downloadedPackage);
-        $output->writeln('<info>Build complete.</info>');
+        $output->writeln('<info>Build complete</info>.');
     }
 
     private function phpize(DownloadedPackage $downloadedPackage): void
