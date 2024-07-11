@@ -21,6 +21,7 @@ use Php\Pie\Building\UnixBuild;
 use Php\Pie\Building\WindowsBuild;
 use Php\Pie\Command\BuildCommand;
 use Php\Pie\Command\DownloadCommand;
+use Php\Pie\Command\InstallCommand;
 use Php\Pie\DependencyResolver\DependencyResolver;
 use Php\Pie\DependencyResolver\ResolveDependencyWithComposer;
 use Php\Pie\Downloading\DownloadAndExtract;
@@ -30,8 +31,11 @@ use Php\Pie\Downloading\GithubPackageReleaseAssets;
 use Php\Pie\Downloading\PackageReleaseAssets;
 use Php\Pie\Downloading\UnixDownloadAndExtract;
 use Php\Pie\Downloading\WindowsDownloadAndExtract;
+use Php\Pie\Installing\Install;
+use Php\Pie\Installing\UnixInstall;
 use Php\Pie\Platform\TargetPhp\ResolveTargetPhpToPlatformRepository;
 use Psr\Container\ContainerInterface;
+use RuntimeException;
 use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
@@ -49,6 +53,7 @@ final class Container
 
         $container->singleton(DownloadCommand::class);
         $container->singleton(BuildCommand::class);
+        $container->singleton(InstallCommand::class);
 
         $container->singleton(IOInterface::class, static function (ContainerInterface $container): IOInterface {
             return new ConsoleIO(
@@ -123,6 +128,17 @@ final class Container
                 }
 
                 return $container->get(UnixBuild::class);
+            },
+        );
+
+        $container->singleton(
+            Install::class,
+            static function (ContainerInterface $container): Install {
+                if (Platform::isWindows()) {
+                    throw new RuntimeException('tbc');
+                }
+
+                return $container->get(UnixInstall::class);
             },
         );
 
