@@ -92,6 +92,8 @@ final class CommandHelper
 
         $targetPlatform = TargetPlatform::fromPhpBinaryPath($phpBinaryPath);
 
+        // @todo only allow --with-php-path on Win, and --with-php-config on non-Win
+
         $output->writeln(sprintf('<info>You are running PHP %s</info>', PHP_VERSION));
         $output->writeln(sprintf(
             '<info>Target PHP installation:</info> %s %s%s, on %s %s (from %s)',

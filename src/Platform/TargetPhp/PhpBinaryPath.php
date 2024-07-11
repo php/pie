@@ -23,9 +23,14 @@ use function trim;
  */
 class PhpBinaryPath
 {
-    /** @param non-empty-string $phpBinaryPath */
-    private function __construct(readonly string $phpBinaryPath)
-    {
+    /**
+     * @param non-empty-string $phpBinaryPath
+     * @param non-empty-string|null $phpConfigPath
+     */
+    private function __construct(
+        public readonly string $phpBinaryPath,
+        private readonly string|null $phpConfigPath
+    ) {
         // @todo https://github.com/php/pie/issues/12 - we could verify that the given $phpBinaryPath really is a PHP install
     }
 
@@ -160,6 +165,18 @@ PHP,
         return $phpInfo;
     }
 
+    /**
+     * This will only be set if {@see self::fromPhpConfigExecutable()} is used to create this {@see self}, otherwise
+     * will return `null`.
+     *
+     * @return non-empty-string|null
+     */
+    public function phpConfigPath(): string|null
+    {
+        return $this->phpConfigPath;
+    }
+
+    /** @param non-empty-string $phpConfig */
     public static function fromPhpConfigExecutable(string $phpConfig): self
     {
         $phpExecutable = trim((new Process([$phpConfig, '--php-binary']))
@@ -167,13 +184,13 @@ PHP,
             ->getOutput());
         Assert::stringNotEmpty($phpExecutable, 'Could not find path to PHP executable.');
 
-        return new self($phpExecutable);
+        return new self($phpExecutable, $phpConfig);
     }
 
     /** @param non-empty-string $phpBinary */
     public static function fromPhpBinaryPath(string $phpBinary): self
     {
-        return new self($phpBinary);
+        return new self($phpBinary, null);
     }
 
     public static function fromCurrentProcess(): self
@@ -181,6 +198,6 @@ PHP,
         $phpExecutable = trim((string) (new PhpExecutableFinder())->find());
         Assert::stringNotEmpty($phpExecutable, 'Could not find path to PHP executable.');
 
-        return new self($phpExecutable);
+        return new self($phpExecutable, null);
     }
 }

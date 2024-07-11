@@ -33,10 +33,13 @@ final class PhpBinaryPathTest extends TestCase
 {
     public function testVersionFromCurrentProcess(): void
     {
+        $phpBinary = PhpBinaryPath::fromCurrentProcess();
+
         self::assertSame(
             sprintf('%s.%s.%s', PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION),
-            PhpBinaryPath::fromCurrentProcess()->version(),
+            $phpBinary->version(),
         );
+        self::assertNull($phpBinary->phpConfigPath());
     }
 
     public function testFromPhpConfigExecutable(): void
@@ -59,6 +62,8 @@ final class PhpBinaryPathTest extends TestCase
             sprintf('%s.%s.%s', PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION),
             $phpBinary->version(),
         );
+
+        self::assertSame($phpConfigExecutable, $phpBinary->phpConfigPath());
     }
 
     public function testExtensions(): void
