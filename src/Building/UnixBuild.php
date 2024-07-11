@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\Pie\Building;
 
 use Php\Pie\Downloading\DownloadedPackage;
+use Php\Pie\Platform\TargetPlatform;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
 
@@ -19,11 +20,17 @@ final class UnixBuild implements Build
     /** {@inheritDoc} */
     public function __invoke(
         DownloadedPackage $downloadedPackage,
+        TargetPlatform $targetPlatform,
         array $configureOptions,
         OutputInterface $output,
     ): void {
         $this->phpize($downloadedPackage);
         $output->writeln('<info>phpize complete</info>.');
+
+        $phpConfigPath = $targetPlatform->phpBinaryPath->phpConfigPath();
+        if ($phpConfigPath !== null) {
+            $configureOptions[] = '--with-php-config=' . $phpConfigPath;
+        }
 
         $this->configure($downloadedPackage, $configureOptions);
         $optionsOutput = count($configureOptions) ? ' with options: ' . implode(' ', $configureOptions) : '.';

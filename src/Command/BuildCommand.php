@@ -51,7 +51,7 @@ final class BuildCommand extends Command
 
         $configureOptionsValues = CommandHelper::processConfigureOptionsFromInput($downloadedPackage->package, $input);
 
-        ($this->build)($downloadedPackage, $configureOptionsValues, $output);
+        ($this->build)($downloadedPackage, $targetPlatform, $configureOptionsValues, $output);
 
         return Command::SUCCESS;
     }

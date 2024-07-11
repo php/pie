@@ -24,12 +24,12 @@ use function trim;
 class PhpBinaryPath
 {
     /**
-     * @param non-empty-string $phpBinaryPath
+     * @param non-empty-string      $phpBinaryPath
      * @param non-empty-string|null $phpConfigPath
      */
     private function __construct(
         public readonly string $phpBinaryPath,
-        private readonly string|null $phpConfigPath
+        private readonly string|null $phpConfigPath,
     ) {
         // @todo https://github.com/php/pie/issues/12 - we could verify that the given $phpBinaryPath really is a PHP install
     }

@@ -10,6 +10,8 @@ use Php\Pie\ConfigureOption;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\ExtensionName;
+use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
+use Php\Pie\Platform\TargetPlatform;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Output\BufferedOutput;
@@ -40,7 +42,12 @@ final class UnixBuildTest extends TestCase
         );
 
         $unixBuilder = new UnixBuild();
-        $unixBuilder->__invoke($downloadedPackage, ['--enable-pie_test_ext'], $output);
+        $unixBuilder->__invoke(
+            $downloadedPackage,
+            TargetPlatform::fromPhpBinaryPath(PhpBinaryPath::fromCurrentProcess()),
+            ['--enable-pie_test_ext'],
+            $output,
+        );
 
         $outputString = $output->fetch();
 

@@ -48,7 +48,7 @@ final class PhpBinaryPathTest extends TestCase
         $exitCode            = $process->run();
         $phpConfigExecutable = trim($process->getOutput());
 
-        if ($exitCode !== 0 || ! file_exists($phpConfigExecutable) || ! is_executable($phpConfigExecutable)) {
+        if ($exitCode !== 0 || ! file_exists($phpConfigExecutable) || ! is_executable($phpConfigExecutable) || $phpConfigExecutable === '') {
             self::markTestSkipped('Needs php-config in path to run this test');
         }
 
