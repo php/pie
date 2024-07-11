@@ -26,7 +26,7 @@ final class ConfigureOptionTest extends TestCase
      *
      * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
      */
-    public function composerJsonDefinitions(): array
+    public static function composerJsonDefinitions(): array
     {
         return [
             'minimal' => [
@@ -89,7 +89,7 @@ final class ConfigureOptionTest extends TestCase
      *
      * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
      */
-    public function invalidComposerJsonDefinitions(): array
+    public static function invalidComposerJsonDefinitions(): array
     {
         return [
             'no-keys' => [
