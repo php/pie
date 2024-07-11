@@ -10,6 +10,7 @@ use Php\Pie\ConfigureOption;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\ExtensionName;
+use Php\Pie\ExtensionType;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -32,6 +33,7 @@ final class UnixBuildTest extends TestCase
 
         $downloadedPackage = DownloadedPackage::fromPackageAndExtractedPath(
             new Package(
+                ExtensionType::PhpModule,
                 ExtensionName::normaliseFromString('pie_test_ext'),
                 'pie_test_ext',
                 '0.1.0',

@@ -7,6 +7,7 @@ namespace Php\Pie\DependencyResolver;
 use Composer\Package\CompletePackageInterface;
 use Php\Pie\ConfigureOption;
 use Php\Pie\ExtensionName;
+use Php\Pie\ExtensionType;
 
 use function array_key_exists;
 use function array_map;
@@ -23,6 +24,7 @@ final class Package
 
     /** @param list<ConfigureOption> $configureOptions */
     public function __construct(
+        public readonly ExtensionType $extensionType,
         public readonly ExtensionName $extensionName,
         public readonly string $name,
         public readonly string $version,
@@ -43,6 +45,7 @@ final class Package
             : [];
 
         return new self(
+            ExtensionType::tryFrom($completePackage->getType()) ?? ExtensionType::PhpModule,
             ExtensionName::determineFromComposerPackage($completePackage),
             $completePackage->getPrettyName(),
             $completePackage->getPrettyVersion(),

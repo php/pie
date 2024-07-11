@@ -7,6 +7,7 @@ namespace Php\PieUnitTest\Downloading\Exception;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\Exception\CouldNotFindReleaseAsset;
 use Php\Pie\ExtensionName;
+use Php\Pie\ExtensionType;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
@@ -21,6 +22,7 @@ final class CouldNotFindReleaseAssetTest extends TestCase
     public function testForPackage(): void
     {
         $package = new Package(
+            ExtensionType::PhpModule,
             ExtensionName::normaliseFromString('foo'),
             'foo/bar',
             '1.2.3',
@@ -36,6 +38,7 @@ final class CouldNotFindReleaseAssetTest extends TestCase
     public function testForPackageWithMissingTag(): void
     {
         $package = new Package(
+            ExtensionType::PhpModule,
             ExtensionName::normaliseFromString('foo'),
             'foo/bar',
             '1.2.3',

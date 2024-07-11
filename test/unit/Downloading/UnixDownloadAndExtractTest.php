@@ -10,6 +10,7 @@ use Php\Pie\Downloading\DownloadZip;
 use Php\Pie\Downloading\ExtractZip;
 use Php\Pie\Downloading\UnixDownloadAndExtract;
 use Php\Pie\ExtensionName;
+use Php\Pie\ExtensionType;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
@@ -60,6 +61,7 @@ final class UnixDownloadAndExtractTest extends TestCase
 
         $downloadUrl      = 'https://test-uri/' . uniqid('downloadUrl', true);
         $requestedPackage = new Package(
+            ExtensionType::PhpModule,
             ExtensionName::normaliseFromString('foo'),
             'foo/bar',
             '1.2.3',
