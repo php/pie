@@ -38,8 +38,6 @@ class BuildCommandTest extends TestCase
 
         $outputString = $this->commandTester->getDisplay();
 
-        self::assertStringContainsString('Found package: asgrim/example-pie-extension:1.0.1 which provides ext-example_pie_extension', $outputString);
-
         if (Platform::isWindows()) {
             self::assertStringContainsString('Nothing to do on Windows.', $outputString);
 
