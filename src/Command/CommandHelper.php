@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\Pie\Command;
 
 use Composer\Package\Version\VersionParser;
+use Composer\Util\Platform;
 use InvalidArgumentException;
 use Php\Pie\DependencyResolver\DependencyResolver;
 use Php\Pie\DependencyResolver\Package;
@@ -79,20 +80,29 @@ final class CommandHelper
         $phpBinaryPath = PhpBinaryPath::fromCurrentProcess();
 
         /** @var mixed $withPhpConfig */
-        $withPhpConfig = $input->getOption(self::OPTION_WITH_PHP_CONFIG);
-        if (is_string($withPhpConfig) && $withPhpConfig !== '') {
+        $withPhpConfig          = $input->getOption(self::OPTION_WITH_PHP_CONFIG);
+        $specifiedWithPhpConfig = is_string($withPhpConfig) && $withPhpConfig !== '';
+        /** @var mixed $withPhpPath */
+        $withPhpPath          = $input->getOption(self::OPTION_WITH_PHP_PATH);
+        $specifiedWithPhpPath = is_string($withPhpPath) && $withPhpPath !== '';
+
+        if (Platform::isWindows() && $specifiedWithPhpConfig) {
+            throw new InvalidArgumentException('The --with-php-config=/path/to/php-config cannot be used on Windows, use --with-php-path=/path/to/php instead.');
+        }
+
+        if (! Platform::isWindows() && $specifiedWithPhpPath && ! $specifiedWithPhpConfig) {
+            throw new InvalidArgumentException('The --with-php-path=/path/to/php cannot be used on non-Windows, use --with-php-config=/path/to/php-config instead.');
+        }
+
+        if ($specifiedWithPhpConfig) {
             $phpBinaryPath = PhpBinaryPath::fromPhpConfigExecutable($withPhpConfig);
         }
 
-        /** @var mixed $withPhpPath */
-        $withPhpPath = $input->getOption(self::OPTION_WITH_PHP_PATH);
-        if (is_string($withPhpPath) && $withPhpPath !== '') {
+        if ($specifiedWithPhpPath) {
             $phpBinaryPath = PhpBinaryPath::fromPhpBinaryPath($withPhpPath);
         }
 
         $targetPlatform = TargetPlatform::fromPhpBinaryPath($phpBinaryPath);
-
-        // @todo only allow --with-php-path on Win, and --with-php-config on non-Win
 
         $output->writeln(sprintf('<info>You are running PHP %s</info>', PHP_VERSION));
         $output->writeln(sprintf(

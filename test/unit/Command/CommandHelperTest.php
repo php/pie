@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\PieUnitTest\Command;
 
+use Composer\Util\Platform;
 use InvalidArgumentException;
 use Php\Pie\Command\CommandHelper;
 use Php\Pie\ConfigureOption;
@@ -17,10 +18,12 @@ use Php\Pie\Platform\TargetPlatform;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use function array_combine;
@@ -165,5 +168,39 @@ final class CommandHelperTest extends TestCase
             ],
             $options,
         );
+    }
+
+    public function testWindowsMachinesCannotUseWithPhpConfigOption(): void
+    {
+        if (! Platform::isWindows()) {
+            self::markTestSkipped('This test can only run on Windows');
+        }
+
+        $command = new Command();
+        $input   = new ArrayInput(['--with-php-config' => 'C:\path\to\php-config']);
+        $output  = new NullOutput();
+        CommandHelper::configureOptions($command);
+        CommandHelper::validateInput($input, $command);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('The --with-php-config=/path/to/php-config cannot be used on Windows, use --with-php-path=/path/to/php instead.');
+        CommandHelper::determineTargetPlatformFromInputs($input, $output);
+    }
+
+    public function testNonWindowsMachinesCannotUseWithPhpPathOption(): void
+    {
+        if (Platform::isWindows()) {
+            self::markTestSkipped('This test can only run on non-Windows');
+        }
+
+        $command = new Command();
+        $input   = new ArrayInput(['--with-php-path' => '/usr/bin/php']);
+        $output  = new NullOutput();
+        CommandHelper::configureOptions($command);
+        CommandHelper::validateInput($input, $command);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('The --with-php-path=/path/to/php cannot be used on non-Windows, use --with-php-config=/path/to/php-config instead.');
+        CommandHelper::determineTargetPlatformFromInputs($input, $output);
     }
 }
