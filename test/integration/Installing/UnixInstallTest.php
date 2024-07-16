@@ -18,6 +18,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\NullOutput;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 
 #[CoversClass(UnixInstall::class)]
@@ -29,6 +30,12 @@ final class UnixInstallTest extends TestCase
     {
         if (Platform::isWindows()) {
             self::markTestSkipped('Unix build test cannot be run on Windows');
+        }
+
+        try {
+            (new Process(['sudo', 'ls']))->mustRun();
+        } catch (ProcessFailedException) {
+            self::markTestSkipped('Skipping as cannot run with sudo enabled');
         }
 
         $output         = new BufferedOutput();

@@ -9,6 +9,7 @@ use Php\Pie\Container;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 
 use function array_key_exists;
@@ -35,6 +36,12 @@ class InstallCommandTest extends TestCase
     {
         if (PHP_VERSION_ID < 80300 || PHP_VERSION_ID >= 80400) {
             self::markTestSkipped('This test can only run on PHP 8.3 - you are running ' . PHP_VERSION);
+        }
+
+        try {
+            (new Process(['sudo', 'ls']))->mustRun();
+        } catch (ProcessFailedException) {
+            self::markTestSkipped('Skipping as cannot run with sudo enabled');
         }
 
         $this->commandTester->execute(['requested-package-and-version' => self::TEST_PACKAGE]);
