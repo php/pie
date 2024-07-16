@@ -22,6 +22,7 @@ final class WindowsExtensionAssetNameTest extends TestCase
 {
     private TargetPlatform $platform;
     private Package $package;
+    private string $phpVersion;
 
     public function setUp(): void
     {
@@ -34,6 +35,8 @@ final class WindowsExtensionAssetNameTest extends TestCase
             ThreadSafetyMode::ThreadSafe,
             WindowsCompiler::VC14,
         );
+
+        $this->phpVersion = $this->platform->phpBinaryPath->majorMinorVersion();
 
         $this->package = new Package(
             ExtensionType::PhpModule,
@@ -49,8 +52,8 @@ final class WindowsExtensionAssetNameTest extends TestCase
     {
         self::assertSame(
             [
-                'php_foo-1.2.3-8.3-ts-vc14-x86_64.zip',
-                'php_foo-1.2.3-8.3-vc14-ts-x86_64.zip',
+                'php_foo-1.2.3-' . $this->phpVersion . '-ts-vc14-x86_64.zip',
+                'php_foo-1.2.3-' . $this->phpVersion . '-vc14-ts-x86_64.zip',
             ],
             WindowsExtensionAssetName::zipNames($this->platform, $this->package),
         );
@@ -60,8 +63,8 @@ final class WindowsExtensionAssetNameTest extends TestCase
     {
         self::assertSame(
             [
-                'php_foo-1.2.3-8.3-ts-vc14-x86_64.dll',
-                'php_foo-1.2.3-8.3-vc14-ts-x86_64.dll',
+                'php_foo-1.2.3-' . $this->phpVersion . '-ts-vc14-x86_64.dll',
+                'php_foo-1.2.3-' . $this->phpVersion . '-vc14-ts-x86_64.dll',
             ],
             WindowsExtensionAssetName::dllNames($this->platform, $this->package),
         );
