@@ -20,7 +20,6 @@ use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Process\Process;
 
-/** @covers \Php\Pie\Installing\UnixInstall */
 #[CoversClass(UnixInstall::class)]
 final class UnixInstallTest extends TestCase
 {
