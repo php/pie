@@ -20,16 +20,22 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(WindowsExtensionAssetName::class)]
 final class WindowsExtensionAssetNameTest extends TestCase
 {
-    public function testZipNames(): void
+    private TargetPlatform $platform;
+    private Package $package;
+
+    public function setUp(): void
     {
-        $platform = new TargetPlatform(
+        parent::setUp();
+
+        $this->platform = new TargetPlatform(
             OperatingSystem::Windows,
             PhpBinaryPath::fromCurrentProcess(),
             Architecture::x86_64,
             ThreadSafetyMode::ThreadSafe,
             WindowsCompiler::VC14,
         );
-        $package  = new Package(
+
+        $this->package = new Package(
             ExtensionType::PhpModule,
             ExtensionName::normaliseFromString('foo'),
             'phpf/foo',
@@ -37,13 +43,27 @@ final class WindowsExtensionAssetNameTest extends TestCase
             null,
             [],
         );
+    }
 
+    public function testZipNames(): void
+    {
         self::assertSame(
             [
                 'php_foo-1.2.3-8.3-ts-vc14-x86_64.zip',
                 'php_foo-1.2.3-8.3-vc14-ts-x86_64.zip',
             ],
-            WindowsExtensionAssetName::zipNames($platform, $package),
+            WindowsExtensionAssetName::zipNames($this->platform, $this->package),
+        );
+    }
+
+    public function testDllNames(): void
+    {
+        self::assertSame(
+            [
+                'php_foo-1.2.3-8.3-ts-vc14-x86_64.dll',
+                'php_foo-1.2.3-8.3-vc14-ts-x86_64.dll',
+            ],
+            WindowsExtensionAssetName::dllNames($this->platform, $this->package),
         );
     }
 }

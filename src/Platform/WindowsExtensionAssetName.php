@@ -58,4 +58,10 @@ final class WindowsExtensionAssetName
     {
         return self::assetNames($targetPlatform, $package, 'zip');
     }
+
+    /** @return non-empty-list<non-empty-string> */
+    public static function dllNames(TargetPlatform $targetPlatform, Package $package): array
+    {
+        return self::assetNames($targetPlatform, $package, 'dll');
+    }
 }
