@@ -16,11 +16,14 @@ use Webmozart\Assert\Assert;
 
 use function array_key_exists;
 use function assert;
+use function dirname;
 use function file_exists;
 use function is_dir;
 use function preg_match;
 use function sprintf;
 use function trim;
+
+use const DIRECTORY_SEPARATOR;
 
 /**
  * @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks
@@ -50,13 +53,21 @@ class PhpBinaryPath
             && array_key_exists(1, $matches)
             && trim($matches[1]) !== ''
             && trim($matches[1]) !== 'no value'
-            && file_exists(trim($matches[1]))
-            && is_dir(trim($matches[1]))
         ) {
             $extensionPath = trim($matches[1]);
             assert($extensionPath !== '');
 
-            return $extensionPath;
+            if (file_exists($extensionPath) && is_dir($extensionPath)) {
+                return $extensionPath;
+            }
+
+            // `extension_dir` may be a relative URL on Windows, so resolve it according to the location of PHP
+            $phpPath              = dirname($this->phpBinaryPath);
+            $attemptExtensionPath = $phpPath . DIRECTORY_SEPARATOR . $extensionPath;
+
+            if (file_exists($attemptExtensionPath) && is_dir($attemptExtensionPath)) {
+                return $attemptExtensionPath;
+            }
         }
 
         throw new RuntimeException('Could not determine extension path for ' . $this->phpBinaryPath);

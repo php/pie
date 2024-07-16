@@ -128,6 +128,7 @@ final class PhpBinaryPathTest extends TestCase
 
     public function testExtensionPath(): void
     {
+        // @todo test relative `ext` path on Windows
         self::assertSame(
             ini_get('extension_dir'),
             PhpBinaryPath::fromCurrentProcess()
