@@ -33,9 +33,9 @@ use Php\Pie\Downloading\UnixDownloadAndExtract;
 use Php\Pie\Downloading\WindowsDownloadAndExtract;
 use Php\Pie\Installing\Install;
 use Php\Pie\Installing\UnixInstall;
+use Php\Pie\Installing\WindowsInstall;
 use Php\Pie\Platform\TargetPhp\ResolveTargetPhpToPlatformRepository;
 use Psr\Container\ContainerInterface;
-use RuntimeException;
 use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
@@ -135,8 +135,7 @@ final class Container
             Install::class,
             static function (ContainerInterface $container): Install {
                 if (Platform::isWindows()) {
-                    // @todo implement Windows installer
-                    throw new RuntimeException('tbc');
+                    return $container->get(WindowsInstall::class);
                 }
 
                 return $container->get(UnixInstall::class);
