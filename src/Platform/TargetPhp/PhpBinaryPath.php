@@ -9,10 +9,16 @@ use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
 use Psl\Json;
 use Psl\Type;
+use RuntimeException;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
 use Webmozart\Assert\Assert;
 
+use function array_key_exists;
+use function assert;
+use function file_exists;
+use function is_dir;
+use function preg_match;
 use function sprintf;
 use function trim;
 
@@ -32,6 +38,28 @@ class PhpBinaryPath
         private readonly string|null $phpConfigPath,
     ) {
         // @todo https://github.com/php/pie/issues/12 - we could verify that the given $phpBinaryPath really is a PHP install
+    }
+
+    /** @return non-empty-string */
+    public function extensionPath(): string
+    {
+        $phpinfo = $this->phpinfo();
+
+        if (
+            preg_match('#^extension_dir\s+=>\s+([^=]+)\s+=>\s+([^=]+)$#m', $phpinfo, $matches)
+            && array_key_exists(1, $matches)
+            && trim($matches[1]) !== ''
+            && trim($matches[1]) !== 'no value'
+            && file_exists(trim($matches[1]))
+            && is_dir(trim($matches[1]))
+        ) {
+            $extensionPath = trim($matches[1]);
+            assert($extensionPath !== '');
+
+            return $extensionPath;
+        }
+
+        throw new RuntimeException('Could not determine extension path for ' . $this->phpBinaryPath);
     }
 
     /**

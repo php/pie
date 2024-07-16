@@ -32,8 +32,9 @@ final class UnixInstallTest extends TestCase
             self::markTestSkipped('Unix build test cannot be run on Windows');
         }
 
-        $output = new BufferedOutput();
+        $output         = new BufferedOutput();
         $targetPlatform = TargetPlatform::fromPhpBinaryPath(PhpBinaryPath::fromCurrentProcess());
+        $extensionPath  = $targetPlatform->phpBinaryPath->extensionPath();
 
         $downloadedPackage = DownloadedPackage::fromPackageAndExtractedPath(
             new Package(
@@ -54,7 +55,7 @@ final class UnixInstallTest extends TestCase
             new NullOutput(),
         );
 
-        (new UnixInstall())->__invoke(
+        $installedSharedObject = (new UnixInstall())->__invoke(
             $downloadedPackage,
             $targetPlatform,
             $output,
@@ -62,9 +63,13 @@ final class UnixInstallTest extends TestCase
 
         $outputString = $output->fetch();
 
-        self::assertStringContainsString('Install complete.', $outputString);
+        self::assertStringContainsString('Install complete: ' . $extensionPath . '/pie_test_ext.so', $outputString);
         self::assertStringContainsString('You must now add "extension=pie_test_ext.so" to your php.ini', $outputString);
 
+        self::assertSame($extensionPath . '/pie_test_ext.so', $installedSharedObject);
+        self::assertFileExists($installedSharedObject);
+
+        (new Process(['sudo', 'rm', $installedSharedObject]))->mustRun();
         (new Process(['make', 'clean'], $downloadedPackage->extractedSourcePath))->mustRun();
         (new Process(['phpize', '--clean'], $downloadedPackage->extractedSourcePath))->mustRun();
     }

@@ -135,6 +135,7 @@ final class Container
             Install::class,
             static function (ContainerInterface $container): Install {
                 if (Platform::isWindows()) {
+                    // @todo implement Windows installer
                     throw new RuntimeException('tbc');
                 }
 

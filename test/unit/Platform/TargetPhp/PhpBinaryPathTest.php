@@ -17,6 +17,7 @@ use function assert;
 use function defined;
 use function file_exists;
 use function get_loaded_extensions;
+use function ini_get;
 use function is_executable;
 use function php_uname;
 use function phpversion;
@@ -122,6 +123,15 @@ final class PhpBinaryPathTest extends TestCase
             PHP_INT_SIZE,
             PhpBinaryPath::fromCurrentProcess()
                 ->phpIntSize(),
+        );
+    }
+
+    public function testExtensionPath(): void
+    {
+        self::assertSame(
+            ini_get('extension_dir'),
+            PhpBinaryPath::fromCurrentProcess()
+                ->extensionPath(),
         );
     }
 }

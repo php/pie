@@ -6,16 +6,15 @@ namespace Php\PieIntegrationTest\Command;
 
 use Php\Pie\Command\InstallCommand;
 use Php\Pie\Container;
-use Php\Pie\DependencyResolver\UnableToResolveRequirement;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Component\Process\Process;
 
-use function array_combine;
-use function array_map;
+use function array_key_exists;
 use function file_exists;
-use function is_executable;
+use function is_file;
+use function preg_match;
 
 use const PHP_VERSION;
 use const PHP_VERSION_ID;
@@ -43,7 +42,19 @@ class InstallCommandTest extends TestCase
         $this->commandTester->assertCommandIsSuccessful();
 
         $outputString = $this->commandTester->getDisplay();
-        self::assertStringContainsString('Install complete.', $outputString);
+        self::assertStringContainsString('Install complete: ', $outputString);
         self::assertStringContainsString('You must now add "extension=example_pie_extension.so" to your php.ini', $outputString);
+
+        if (
+            ! preg_match('#^Install complete: (.*)$#m', $outputString, $matches)
+            || ! array_key_exists(1, $matches)
+            || $matches[1] === ''
+            || ! file_exists($matches[1])
+            || ! is_file($matches[1])
+        ) {
+            return;
+        }
+
+        (new Process(['sudo', 'rm', $matches[1]]))->mustRun();
     }
 }
