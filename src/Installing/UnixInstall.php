@@ -44,7 +44,7 @@ final class UnixInstall implements Install
         $output->writeln(sprintf(
             '<comment>You must now add "%s=%s" to your php.ini</comment>',
             $downloadedPackage->package->extensionType === ExtensionType::PhpModule ? 'extension' : 'zend_extension',
-            $sharedObjectName,
+            $downloadedPackage->package->extensionName->name(),
         ));
 
         return $expectedSharedObjectLocation;

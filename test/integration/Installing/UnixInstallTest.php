@@ -70,7 +70,7 @@ final class UnixInstallTest extends TestCase
         $outputString = $output->fetch();
 
         self::assertStringContainsString('Install complete: ' . $extensionPath . '/pie_test_ext.so', $outputString);
-        self::assertStringContainsString('You must now add "extension=pie_test_ext.so" to your php.ini', $outputString);
+        self::assertStringContainsString('You must now add "extension=pie_test_ext" to your php.ini', $outputString);
 
         self::assertSame($extensionPath . '/pie_test_ext.so', $installedSharedObject);
         self::assertFileExists($installedSharedObject);

@@ -50,7 +50,7 @@ class InstallCommandTest extends TestCase
 
         $outputString = $this->commandTester->getDisplay();
         self::assertStringContainsString('Install complete: ', $outputString);
-        self::assertStringContainsString('You must now add "extension=example_pie_extension.so" to your php.ini', $outputString);
+        self::assertStringContainsString('You must now add "extension=example_pie_extension" to your php.ini', $outputString);
 
         if (
             ! preg_match('#^Install complete: (.*)$#m', $outputString, $matches)

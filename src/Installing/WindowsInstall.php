@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\Pie\Installing;
 
 use Php\Pie\Downloading\DownloadedPackage;
+use Php\Pie\ExtensionType;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\WindowsExtensionAssetName;
 use RuntimeException;
@@ -14,6 +15,7 @@ use function copy;
 use function file_exists;
 use function implode;
 use function is_file;
+use function sprintf;
 use function str_replace;
 
 use const DIRECTORY_SEPARATOR;
@@ -46,6 +48,17 @@ final class WindowsInstall implements Install
 
         // @todo copy any OTHER .dll file next to `C:\path\to\php\php.exe`
         // @todo copy any other file (excluding those above, and `downloaded.zip`) to `C:\path\to\php\extras\{extension-name}\.`
+
+        /**
+         * @link https://github.com/php/pie/issues/20
+         *
+         * @todo this should be improved in future to try to automatically set up the ext
+         */
+        $output->writeln(sprintf(
+            '<comment>You must now add "%s=%s" to your php.ini</comment>',
+            $downloadedPackage->package->extensionType === ExtensionType::PhpModule ? 'extension' : 'zend_extension',
+            $downloadedPackage->package->extensionName->name(),
+        ));
 
         return $destinationDllName;
     }
