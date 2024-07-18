@@ -128,11 +128,21 @@ final class PhpBinaryPathTest extends TestCase
 
     public function testExtensionPath(): void
     {
-        // @todo test relative `ext` path on Windows
+        $phpBinary = PhpBinaryPath::fromCurrentProcess();
+
+        $expectedExtensionDir = ini_get('extension_dir');
+
+        // `extension_dir` may be a relative URL on Windows (e.g. "ext"), so resolve it according to the location of PHP
+        if (!file_exists($expectedExtensionDir) || !is_dir($expectedExtensionDir)) {
+            $absoluteExtensionDir = dirname($phpBinary->phpBinaryPath) . DIRECTORY_SEPARATOR . $expectedExtensionDir;
+            if (file_exists($absoluteExtensionDir) && is_dir($absoluteExtensionDir)) {
+                $expectedExtensionDir = $absoluteExtensionDir;
+            }
+        }
+
         self::assertSame(
-            ini_get('extension_dir'),
-            PhpBinaryPath::fromCurrentProcess()
-                ->extensionPath(),
+            $expectedExtensionDir,
+            $phpBinary->extensionPath(),
         );
     }
 }
