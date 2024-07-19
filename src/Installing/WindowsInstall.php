@@ -5,18 +5,27 @@ declare(strict_types=1);
 namespace Php\Pie\Installing;
 
 use Php\Pie\Downloading\DownloadedPackage;
+use Php\Pie\Downloading\DownloadZip;
 use Php\Pie\ExtensionType;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\WindowsExtensionAssetName;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 use RuntimeException;
+use SplFileInfo;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use function assert;
 use function copy;
+use function dirname;
 use function file_exists;
 use function implode;
 use function is_file;
+use function mkdir;
 use function sprintf;
 use function str_replace;
+use function strlen;
+use function substr;
 
 use const DIRECTORY_SEPARATOR;
 
@@ -25,9 +34,10 @@ final class WindowsInstall implements Install
 {
     public function __invoke(DownloadedPackage $downloadedPackage, TargetPlatform $targetPlatform, OutputInterface $output): string
     {
-        $sourceDllName      = $this->determineDllName($targetPlatform, $downloadedPackage);
-        $extensionPath      = $targetPlatform->phpBinaryPath->extensionPath();
-        $destinationDllName = $extensionPath . DIRECTORY_SEPARATOR . 'php_' . $downloadedPackage->package->extensionName->name() . '.dll';
+        $extractedSourcePath = $downloadedPackage->extractedSourcePath;
+        $sourceDllName       = $this->determineDllName($targetPlatform, $downloadedPackage);
+        $extensionPath       = $targetPlatform->phpBinaryPath->extensionPath();
+        $destinationDllName  = $extensionPath . DIRECTORY_SEPARATOR . 'php_' . $downloadedPackage->package->extensionName->name() . '.dll';
 
         if (! copy($sourceDllName, $destinationDllName) || ! file_exists($destinationDllName) && ! is_file($destinationDllName)) {
             throw new RuntimeException('Failed to install DLL to ' . $destinationDllName);
@@ -46,8 +56,52 @@ final class WindowsInstall implements Install
             $output->writeln('<info>Copied PDB to:</info> ' . $destinationPdbName);
         }
 
-        // @todo copy any OTHER .dll file next to `C:\path\to\php\php.exe`
-        // @todo copy any other file (excluding those above, and `downloaded.zip`) to `C:\path\to\php\extras\{extension-name}\.`
+        $phpPath    = dirname($targetPlatform->phpBinaryPath->phpBinaryPath);
+        $extrasPath = $phpPath
+            . DIRECTORY_SEPARATOR . 'extras'
+            . DIRECTORY_SEPARATOR . $downloadedPackage->package->extensionName->name();
+
+        foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($extractedSourcePath)) as $file) {
+            assert($file instanceof SplFileInfo);
+            /**
+             * Skip directories, the main DLL, PDB, and the downloaded.zip
+             */
+            if (
+                $file->isDir()
+                || str_replace('\\', '/', $file->getPathname()) === str_replace('\\', '/', $sourceDllName)
+                || str_replace('\\', '/', $file->getPathname()) === str_replace('\\', '/', $sourcePdbName)
+                || $file->getFilename() === DownloadZip::DOWNLOADED_ZIP_FILENAME
+            ) {
+                continue;
+            }
+
+            /**
+             * Any other DLL file should be copied into the same path where `php.exe` is
+             */
+            if ($file->getExtension() === 'dll') {
+                $destinationExtraDll = $phpPath . DIRECTORY_SEPARATOR . $file->getFilename();
+                if (! copy($file->getPathname(), $destinationExtraDll) || ! file_exists($destinationExtraDll) && ! is_file($destinationExtraDll)) {
+                    throw new RuntimeException('Failed to copy to ' . $destinationExtraDll);
+                }
+
+                $output->writeln('<info>Copied extra DLL:</info> ' . $destinationExtraDll);
+
+                continue;
+            }
+
+            /**
+             * Any other remaining file should be copied into the extras path, e.g. `C:\php\extras\my-php-ext\.`
+             */
+            $destinationPathname = $extrasPath . DIRECTORY_SEPARATOR . substr($file->getPathname(), strlen($extractedSourcePath) + 1);
+
+            mkdir(dirname($destinationPathname), 0777, true);
+
+            if (! copy($file->getPathname(), $destinationPathname) || ! file_exists($destinationPathname) && ! is_file($destinationPathname)) {
+                throw new RuntimeException('Failed to copy to ' . $destinationPathname);
+            }
+
+            $output->writeln('<info>Copied extras:</info> ' . $destinationPathname);
+        }
 
         /**
          * @link https://github.com/php/pie/issues/20

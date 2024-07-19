@@ -82,9 +82,12 @@ final class WindowsInstallTest extends TestCase
         self::assertFileExists($expectedSupportingOtherFile);
         self::assertFileExists($expectedSubdirectoryFile);
 
-        (new Process(['del', $installedDll]))->mustRun();
-        (new Process(['del', $expectedPdb]))->mustRun();
-        (new Process(['del', $expectedSupportingDll]))->mustRun();
-        (new Process(['del', $extrasDirectory]))->mustRun();
+        (new Process(['del', '/Q', $installedDll]))->mustRun();
+        (new Process(['del', '/Q', $expectedPdb]))->mustRun();
+        (new Process(['del', '/Q', $expectedSupportingDll]))->mustRun();
+        // @todo remove this
+//        if (file_exists($extrasDirectory)) {
+//            (new Process(['rmdir', $extrasDirectory]))->mustRun();
+//        }
     }
 }
