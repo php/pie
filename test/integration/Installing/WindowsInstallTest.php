@@ -69,18 +69,22 @@ final class WindowsInstallTest extends TestCase
         self::assertStringContainsString('Copied DLL to: ' . $extensionPath . '\php_pie_test_ext.dll', $outputString);
         self::assertStringContainsString('You must now add "extension=pie_test_ext" to your php.ini', $outputString);
 
+        $extrasDirectory = $phpPath . DIRECTORY_SEPARATOR . 'extras' . DIRECTORY_SEPARATOR . 'pie_test_ext';
+
         $expectedPdb                 = str_replace('.dll', '.pdb', $installedDll);
         $expectedSupportingDll       = $phpPath . DIRECTORY_SEPARATOR . 'supporting-library.dll';
-        $expectedSupportingOtherFile = $phpPath . DIRECTORY_SEPARATOR . 'extras' . DIRECTORY_SEPARATOR . 'pie_test_ext' . DIRECTORY_SEPARATOR . 'README.md';
+        $expectedSupportingOtherFile = $extrasDirectory . DIRECTORY_SEPARATOR . 'README.md';
+        $expectedSubdirectoryFile    = $extrasDirectory . DIRECTORY_SEPARATOR . 'more' . DIRECTORY_SEPARATOR . 'more-information.txt';
 
         self::assertFileExists($installedDll);
         self::assertFileExists($expectedPdb);
         self::assertFileExists($expectedSupportingDll);
         self::assertFileExists($expectedSupportingOtherFile);
+        self::assertFileExists($expectedSubdirectoryFile);
 
         (new Process(['del', $installedDll]))->mustRun();
         (new Process(['del', $expectedPdb]))->mustRun();
         (new Process(['del', $expectedSupportingDll]))->mustRun();
-        (new Process(['del', $expectedSupportingOtherFile]))->mustRun();
+        (new Process(['del', $extrasDirectory]))->mustRun();
     }
 }
