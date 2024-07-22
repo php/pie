@@ -9,6 +9,8 @@ use Psr\Http\Message\RequestInterface;
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 interface DownloadZip
 {
+    public const DOWNLOADED_ZIP_FILENAME = 'downloaded.zip';
+
     /**
      * @param non-empty-string $localPath
      *

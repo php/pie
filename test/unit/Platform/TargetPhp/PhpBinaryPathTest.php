@@ -15,14 +15,18 @@ use function array_combine;
 use function array_map;
 use function assert;
 use function defined;
+use function dirname;
 use function file_exists;
 use function get_loaded_extensions;
+use function ini_get;
+use function is_dir;
 use function is_executable;
 use function php_uname;
 use function phpversion;
 use function sprintf;
 use function trim;
 
+use const DIRECTORY_SEPARATOR;
 use const PHP_INT_SIZE;
 use const PHP_MAJOR_VERSION;
 use const PHP_MINOR_VERSION;
@@ -122,6 +126,26 @@ final class PhpBinaryPathTest extends TestCase
             PHP_INT_SIZE,
             PhpBinaryPath::fromCurrentProcess()
                 ->phpIntSize(),
+        );
+    }
+
+    public function testExtensionPath(): void
+    {
+        $phpBinary = PhpBinaryPath::fromCurrentProcess();
+
+        $expectedExtensionDir = ini_get('extension_dir');
+
+        // `extension_dir` may be a relative URL on Windows (e.g. "ext"), so resolve it according to the location of PHP
+        if (! file_exists($expectedExtensionDir) || ! is_dir($expectedExtensionDir)) {
+            $absoluteExtensionDir = dirname($phpBinary->phpBinaryPath) . DIRECTORY_SEPARATOR . $expectedExtensionDir;
+            if (file_exists($absoluteExtensionDir) && is_dir($absoluteExtensionDir)) {
+                $expectedExtensionDir = $absoluteExtensionDir;
+            }
+        }
+
+        self::assertSame(
+            $expectedExtensionDir,
+            $phpBinary->extensionPath(),
         );
     }
 }

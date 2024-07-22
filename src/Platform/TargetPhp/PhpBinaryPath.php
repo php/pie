@@ -9,12 +9,21 @@ use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
 use Psl\Json;
 use Psl\Type;
+use RuntimeException;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
 use Webmozart\Assert\Assert;
 
+use function array_key_exists;
+use function assert;
+use function dirname;
+use function file_exists;
+use function is_dir;
+use function preg_match;
 use function sprintf;
 use function trim;
+
+use const DIRECTORY_SEPARATOR;
 
 /**
  * @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks
@@ -32,6 +41,36 @@ class PhpBinaryPath
         private readonly string|null $phpConfigPath,
     ) {
         // @todo https://github.com/php/pie/issues/12 - we could verify that the given $phpBinaryPath really is a PHP install
+    }
+
+    /** @return non-empty-string */
+    public function extensionPath(): string
+    {
+        $phpinfo = $this->phpinfo();
+
+        if (
+            preg_match('#^extension_dir\s+=>\s+([^=]+)\s+=>\s+([^=]+)$#m', $phpinfo, $matches)
+            && array_key_exists(1, $matches)
+            && trim($matches[1]) !== ''
+            && trim($matches[1]) !== 'no value'
+        ) {
+            $extensionPath = trim($matches[1]);
+            assert($extensionPath !== '');
+
+            if (file_exists($extensionPath) && is_dir($extensionPath)) {
+                return $extensionPath;
+            }
+
+            // `extension_dir` may be a relative URL on Windows, so resolve it according to the location of PHP
+            $phpPath              = dirname($this->phpBinaryPath);
+            $attemptExtensionPath = $phpPath . DIRECTORY_SEPARATOR . $extensionPath;
+
+            if (file_exists($attemptExtensionPath) && is_dir($attemptExtensionPath)) {
+                return $attemptExtensionPath;
+            }
+        }
+
+        throw new RuntimeException('Could not determine extension path for ' . $this->phpBinaryPath);
     }
 
     /**

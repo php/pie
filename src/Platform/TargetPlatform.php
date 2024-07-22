@@ -8,6 +8,8 @@ use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 
 use function array_key_exists;
 use function explode;
+use function function_exists;
+use function posix_getuid;
 use function preg_match;
 use function trim;
 
@@ -25,6 +27,11 @@ class TargetPlatform
         public readonly ThreadSafetyMode $threadSafety,
         public readonly WindowsCompiler|null $windowsCompiler,
     ) {
+    }
+
+    public static function isRunningAsRoot(): bool
+    {
+        return function_exists('posix_getuid') && posix_getuid() === 0;
     }
 
     public static function fromPhpBinaryPath(PhpBinaryPath $phpBinaryPath): self

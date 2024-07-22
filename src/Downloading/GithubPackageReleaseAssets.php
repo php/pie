@@ -9,16 +9,14 @@ use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\RequestOptions;
 use Php\Pie\DependencyResolver\Package;
-use Php\Pie\Downloading\Exception\CouldNotFindReleaseAsset;
-use Php\Pie\Platform\OperatingSystem;
 use Php\Pie\Platform\TargetPlatform;
+use Php\Pie\Platform\WindowsExtensionAssetName;
 use Psl\Json;
 use Psl\Type;
 use Psr\Http\Message\ResponseInterface;
 
 use function assert;
 use function in_array;
-use function sprintf;
 use function strtolower;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
@@ -47,34 +45,7 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
     /** @return non-empty-list<non-empty-string> */
     private function expectedWindowsAssetNames(TargetPlatform $targetPlatform, Package $package): array
     {
-        if ($targetPlatform->operatingSystem !== OperatingSystem::Windows || $targetPlatform->windowsCompiler === null) {
-            throw CouldNotFindReleaseAsset::forMissingWindowsCompiler($targetPlatform);
-        }
-
-        /**
-         * During development, we swapped compiler/ts around. It is fairly trivial to support both, so we can check
-         * both formats pretty easily, just to avoid confusion for package maintainers...
-         */
-        return [
-            strtolower(sprintf(
-                'php_%s-%s-%s-%s-%s-%s.zip',
-                $package->extensionName->name(),
-                $package->version,
-                $targetPlatform->phpBinaryPath->majorMinorVersion(),
-                $targetPlatform->threadSafety->asShort(),
-                strtolower($targetPlatform->windowsCompiler->name),
-                $targetPlatform->architecture->name,
-            )),
-            strtolower(sprintf(
-                'php_%s-%s-%s-%s-%s-%s.zip',
-                $package->extensionName->name(),
-                $package->version,
-                $targetPlatform->phpBinaryPath->majorMinorVersion(),
-                strtolower($targetPlatform->windowsCompiler->name),
-                $targetPlatform->threadSafety->asShort(),
-                $targetPlatform->architecture->name,
-            )),
-        ];
+        return WindowsExtensionAssetName::zipNames($targetPlatform, $package);
     }
 
     /** @link https://github.com/squizlabs/PHP_CodeSniffer/issues/3734 */

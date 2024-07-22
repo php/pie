@@ -12,6 +12,8 @@ use Psr\Http\Message\ResponseInterface;
 use function assert;
 use function file_put_contents;
 
+use const DIRECTORY_SEPARATOR;
+
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class DownloadZipWithGuzzle implements DownloadZip
 {
@@ -36,7 +38,7 @@ final class DownloadZipWithGuzzle implements DownloadZip
 
         AssertHttp::responseStatusCode(200, $response);
 
-        $tmpZipFile = $localPath . '/downloaded.zip';
+        $tmpZipFile = $localPath . DIRECTORY_SEPARATOR . DownloadZip::DOWNLOADED_ZIP_FILENAME;
         file_put_contents($tmpZipFile, $response->getBody()->__toString());
 
         return $tmpZipFile;

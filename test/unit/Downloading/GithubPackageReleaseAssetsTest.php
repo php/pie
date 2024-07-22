@@ -13,6 +13,7 @@ use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\Exception\CouldNotFindReleaseAsset;
 use Php\Pie\Downloading\GithubPackageReleaseAssets;
 use Php\Pie\ExtensionName;
+use Php\Pie\ExtensionType;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
@@ -67,6 +68,7 @@ final class GithubPackageReleaseAssetsTest extends TestCase
         $guzzleMockClient = new Client(['handler' => HandlerStack::create($mockHandler)]);
 
         $package = new Package(
+            ExtensionType::PhpModule,
             ExtensionName::normaliseFromString('foo'),
             'asgrim/example-pie-extension',
             '1.2.3',
@@ -118,6 +120,7 @@ final class GithubPackageReleaseAssetsTest extends TestCase
         $guzzleMockClient = new Client(['handler' => HandlerStack::create($mockHandler)]);
 
         $package = new Package(
+            ExtensionType::PhpModule,
             ExtensionName::normaliseFromString('foo'),
             'asgrim/example-pie-extension',
             '1.2.3',
@@ -155,6 +158,7 @@ final class GithubPackageReleaseAssetsTest extends TestCase
         $guzzleMockClient = new Client(['handler' => HandlerStack::create($mockHandler)]);
 
         $package = new Package(
+            ExtensionType::PhpModule,
             ExtensionName::normaliseFromString('foo'),
             'asgrim/example-pie-extension',
             '1.2.3',

@@ -13,6 +13,7 @@ use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\DownloadAndExtract;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\ExtensionName;
+use Php\Pie\ExtensionType;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -102,6 +103,7 @@ final class CommandHelperTest extends TestCase
                 $targetPlatform,
             )
             ->willReturn($package = new Package(
+                ExtensionType::PhpModule,
                 ExtensionName::normaliseFromString('test_pie_ext'),
                 'php/test-pie-ext',
                 '1.2.3',
@@ -141,6 +143,7 @@ final class CommandHelperTest extends TestCase
     public function testProcessingConfigureOptionsFromInput(): void
     {
         $package         = new Package(
+            ExtensionType::PhpModule,
             ExtensionName::normaliseFromString('lolz'),
             'foo/bar',
             '1.0.0',

@@ -11,6 +11,7 @@ use Php\Pie\Downloading\ExtractZip;
 use Php\Pie\Downloading\PackageReleaseAssets;
 use Php\Pie\Downloading\WindowsDownloadAndExtract;
 use Php\Pie\ExtensionName;
+use Php\Pie\ExtensionType;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
@@ -75,6 +76,7 @@ final class WindowsDownloadAndExtractTest extends TestCase
             ->willReturn($extractedPath);
 
         $requestedPackage = new Package(
+            ExtensionType::PhpModule,
             ExtensionName::normaliseFromString('foo'),
             'foo/bar',
             '1.2.3',

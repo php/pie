@@ -7,10 +7,10 @@ namespace Php\Pie\DependencyResolver;
 use Composer\Package\CompletePackageInterface;
 use Composer\Package\Version\VersionSelector;
 use Composer\Repository\RepositorySet;
+use Php\Pie\ExtensionType;
 use Php\Pie\Platform\TargetPhp\ResolveTargetPhpToPlatformRepository;
 use Php\Pie\Platform\TargetPlatform;
 
-use function in_array;
 use function preg_match;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
@@ -43,8 +43,7 @@ final class ResolveDependencyWithComposer implements DependencyResolver
             throw UnableToResolveRequirement::fromRequirement($packageName, $requestedVersion);
         }
 
-        $type = $package->getType();
-        if (! in_array($type, [Package::TYPE_PHP_MODULE, Package::TYPE_ZEND_EXTENSION])) {
+        if (! ExtensionType::isValid($package->getType())) {
             throw UnableToResolveRequirement::toPhpOrZendExtension($package, $packageName, $requestedVersion);
         }
 
