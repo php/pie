@@ -18,11 +18,18 @@ use Php\Pie\Platform\ThreadSafetyMode;
 use Php\Pie\Platform\WindowsCompiler;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use SplFileInfo;
 use Symfony\Component\Console\Output\BufferedOutput;
-use Symfony\Component\Process\Process;
 
+use function assert;
 use function dirname;
+use function file_exists;
+use function is_dir;
+use function rmdir;
 use function str_replace;
+use function unlink;
 
 use const DIRECTORY_SEPARATOR;
 
@@ -75,6 +82,7 @@ final class WindowsInstallTest extends TestCase
         $expectedSupportingDll       = $phpPath . DIRECTORY_SEPARATOR . 'supporting-library.dll';
         $expectedSupportingOtherFile = $extrasDirectory . DIRECTORY_SEPARATOR . 'README.md';
         $expectedSubdirectoryFile    = $extrasDirectory . DIRECTORY_SEPARATOR . 'more' . DIRECTORY_SEPARATOR . 'more-information.txt';
+        assert($expectedPdb !== '');
 
         self::assertFileExists($installedDll);
         self::assertFileExists($expectedPdb);
@@ -82,12 +90,44 @@ final class WindowsInstallTest extends TestCase
         self::assertFileExists($expectedSupportingOtherFile);
         self::assertFileExists($expectedSubdirectoryFile);
 
-        (new Process(['del', '/Q', $installedDll]))->mustRun();
-        (new Process(['del', '/Q', $expectedPdb]))->mustRun();
-        (new Process(['del', '/Q', $expectedSupportingDll]))->mustRun();
-        // @todo remove this
-//        if (file_exists($extrasDirectory)) {
-//            (new Process(['rmdir', $extrasDirectory]))->mustRun();
-//        }
+        $this->delete($installedDll);
+        $this->delete($expectedPdb);
+        $this->delete($expectedSupportingDll);
+        $this->delete($extrasDirectory);
+    }
+
+    /**
+     * Recursively remove a file/path to clean up after testing
+     *
+     * @param non-empty-string $path
+     */
+    private function delete(string $path): void
+    {
+        if (! file_exists($path)) {
+            return;
+        }
+
+        if (! is_dir($path)) {
+            unlink($path);
+
+            return;
+        }
+
+        $files = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::CHILD_FIRST,
+        );
+
+        foreach ($files as $fileinfo) {
+            assert($fileinfo instanceof SplFileInfo);
+            if ($fileinfo->isDir()) {
+                rmdir($fileinfo->getRealPath());
+                continue;
+            }
+
+            unlink($fileinfo->getRealPath());
+        }
+
+        rmdir($path);
     }
 }

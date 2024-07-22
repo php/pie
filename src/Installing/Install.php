@@ -14,6 +14,8 @@ interface Install
     /**
      * Install the extension in the given target platform's PHP, and return the location of the installed shared object
      * or DLL, depending on the platform implementation.
+     *
+     * @return non-empty-string
      */
     public function __invoke(
         DownloadedPackage $downloadedPackage,
