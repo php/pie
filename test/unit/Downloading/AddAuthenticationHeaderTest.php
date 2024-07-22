@@ -32,7 +32,13 @@ final class AddAuthenticationHeaderTest extends TestCase
 
         $requestWithAuthHeader = (new AddAuthenticationHeader())->withAuthHeaderFromComposer(
             $request,
-            new Package(ExtensionName::normaliseFromString('foo'), 'foo/bar', '1.2.3', $downloadUrl),
+            new Package(
+                ExtensionName::normaliseFromString('foo'),
+                'foo/bar',
+                '1.2.3',
+                $downloadUrl,
+                [],
+            ),
             $authHelper,
         );
 
@@ -48,7 +54,13 @@ final class AddAuthenticationHeaderTest extends TestCase
         $authHelper = $this->createMock(AuthHelper::class);
 
         $addAuthenticationHeader = new AddAuthenticationHeader();
-        $package                 = new Package(ExtensionName::normaliseFromString('foo'), 'foo/bar', '1.2.3', null);
+        $package                 = new Package(
+            ExtensionName::normaliseFromString('foo'),
+            'foo/bar',
+            '1.2.3',
+            null,
+            [],
+        );
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('The package foo/bar does not have a download URL');

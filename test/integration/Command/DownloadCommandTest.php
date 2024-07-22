@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\PieIntegrationTest\Command;
 
+use Composer\Util\Platform;
 use Php\Pie\Command\DownloadCommand;
 use Php\Pie\Container;
 use Php\Pie\DependencyResolver\UnableToResolveRequirement;
@@ -45,7 +46,7 @@ class DownloadCommandTest extends TestCase
             [self::TEST_PACKAGE . ':1.0.1-alpha.3@alpha', self::TEST_PACKAGE . ':1.0.1-alpha.3'],
             [self::TEST_PACKAGE . ':*', self::TEST_PACKAGE . ':1.0.1'],
             [self::TEST_PACKAGE . ':~1.0.0@alpha', self::TEST_PACKAGE . ':1.0.1'],
-            [self::TEST_PACKAGE . ':^1.1.0@alpha', self::TEST_PACKAGE . ':1.1.0-alpha.1'],
+            [self::TEST_PACKAGE . ':^1.1.0@alpha', self::TEST_PACKAGE . ':1.1.0-alpha.4'],
             [self::TEST_PACKAGE . ':~1.0.0', self::TEST_PACKAGE . ':1.0.1'],
             // @todo https://github.com/php/pie/issues/13 - in theory, these could work, on NonWindows at least
             // [self::TEST_PACKAGE . ':dev-main', self::TEST_PACKAGE . ':???'],
@@ -77,6 +78,10 @@ class DownloadCommandTest extends TestCase
     #[DataProvider('validVersionsList')]
     public function testDownloadingWithPhpConfig(string $requestedVersion, string $expectedVersion): void
     {
+        if (! Platform::isWindows()) {
+            self::markTestSkipped('This test can only run on Windows');
+        }
+
         // @todo This test makes an assumption you're using `ppa:ondrej/php` to have multiple PHP versions. This allows
         //       us to test scenarios where you run with PHP 8.1 but want to install to a PHP 8.3 instance, for example.
         //       However, this test isn't very portable, and won't run in CI, so we could do with improving this later.
@@ -101,10 +106,11 @@ class DownloadCommandTest extends TestCase
     #[DataProvider('validVersionsList')]
     public function testDownloadingWithPhpPath(string $requestedVersion, string $expectedVersion): void
     {
-        // @todo This test makes an assumption you're using `ppa:ondrej/php` to have multiple PHP versions. This allows
-        //       us to test scenarios where you run with PHP 8.1 but want to install to a PHP 8.3 instance, for example.
-        //       However, this test isn't very portable, and won't run in CI, so we could do with improving this later.
-        $phpBinaryPath = '/usr/bin/php8.3';
+        if (! Platform::isWindows()) {
+            self::markTestSkipped('This test can only run on Windows');
+        }
+
+        $phpBinaryPath = 'C:\php-8.3.6\php.exe';
 
         if (! file_exists($phpBinaryPath) || ! is_executable($phpBinaryPath)) {
             self::markTestSkipped('This test can only run where "' . $phpBinaryPath . '" exists and is executable, to target PHP 8.3');

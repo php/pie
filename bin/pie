@@ -5,6 +5,7 @@ declare(strict_types=1);
 
 namespace Php\Pie;
 
+use Php\Pie\Command\BuildCommand;
 use Php\Pie\Command\DownloadCommand;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\CommandLoader\ContainerCommandLoader;
@@ -21,6 +22,7 @@ $application->setCommandLoader(new ContainerCommandLoader(
     $container,
     [
         'download' => DownloadCommand::class,
+        'build' => BuildCommand::class,
     ]
 ));
 $application->run($container->get(InputInterface::class), $container->get(OutputInterface::class));
