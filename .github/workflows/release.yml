@@ -1,0 +1,37 @@
+name: "Release"
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  release-phar:
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      matrix:
+        operating-system:
+          - ubuntu-latest
+        php-versions:
+          - '8.1'
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          coverage: none
+          tools: composer, box
+          php-version: "${{ matrix.php-version }}"
+      - uses: actions/checkout@v4
+      - uses: ramsey/composer-install@v3
+      - name: Build PHAR
+        run: box compile
+      - name: Check the PHAR executes
+        run: php pie.phar --version
+      # @todo sign the phar
+      - name: Upload binaries to release
+        uses: softprops/action-gh-release@v1
+        if: ${{startsWith(github.ref, 'refs/tags/') }}
+        with:
+          files: |
+            pie.phar
+      #      pie.phar.asc
