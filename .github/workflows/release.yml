@@ -27,11 +27,24 @@ jobs:
         run: box compile
       - name: Check the PHAR executes
         run: php pie.phar --version
-      # @todo sign the phar
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_SIGNING_KEY }}
+          passphrase: ${{ secrets.GPG_SIGNING_KEY_PASSPHRASE }}
+      - name: Sign the PHAR
+        run: |
+          gpg --local-user asgrim+pie-releases@php.net \
+              --batch \
+              --yes \
+              --passphrase="${{ secrets.GPG_SIGNING_KEY_PASSPHRASE }}" \
+              --detach-sign \
+              --output pie.phar.asc \
+              pie.phar
       - name: Upload binaries to release
         uses: softprops/action-gh-release@v1
         if: ${{startsWith(github.ref, 'refs/tags/') }}
         with:
           files: |
             pie.phar
-      #      pie.phar.asc
+            pie.phar.asc
