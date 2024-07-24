@@ -3,3 +3,9 @@
 /.phpunit.cache/
 /.phpunit.result.cache
 /.phpcs-cache
+phpcs.xml
+phpunit.xml
+psalm.xml
+box.json
+box.phar
+pie.phar

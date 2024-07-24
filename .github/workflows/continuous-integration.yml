@@ -30,3 +30,31 @@ jobs:
       - uses: ramsey/composer-install@v3
       - name: Run PHPUnit
         run: vendor/bin/phpunit
+
+  build-phar:
+    needs:
+      - ci
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      matrix:
+        operating-system:
+          - ubuntu-latest
+        php-versions:
+          - '8.1'
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          coverage: none
+          tools: composer, box
+          php-version: "${{ matrix.php-version }}"
+      - uses: actions/checkout@v4
+      - uses: ramsey/composer-install@v3
+      - name: Build PHAR
+        run: box compile
+      - name: Check the PHAR executes
+        run: php pie.phar --version
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pie-${{ github.sha }}.phar
+          path: pie.phar
