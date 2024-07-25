@@ -34,6 +34,11 @@ class DownloadCommandTest extends TestCase
     }
 
     /**
+     * Note: this data provider is not intended to provide a fully comprehensive list of supported version mappings
+     * since it is slightly slower to run (as it actually downloads). For a fuller list of version resolution tests,
+     * please see {@see \Php\PieIntegrationTest\DependencyResolver\ResolveDependencyWithComposerTest}, which is much
+     * faster to execute!
+     *
      * @return array<non-empty-string, array{0: non-empty-string, 1: non-empty-string}>
      *
      * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
@@ -46,11 +51,7 @@ class DownloadCommandTest extends TestCase
             [self::TEST_PACKAGE . ':1.0.1-alpha.3@alpha', self::TEST_PACKAGE . ':1.0.1-alpha.3'],
             [self::TEST_PACKAGE . ':*', self::TEST_PACKAGE . ':1.0.1'],
             [self::TEST_PACKAGE . ':~1.0.0@alpha', self::TEST_PACKAGE . ':1.0.1'],
-            [self::TEST_PACKAGE . ':^1.1.0@alpha', self::TEST_PACKAGE . ':1.1.0-alpha.4'],
             [self::TEST_PACKAGE . ':~1.0.0', self::TEST_PACKAGE . ':1.0.1'],
-            // @todo https://github.com/php/pie/issues/13 - in theory, these could work, on NonWindows at least
-            // [self::TEST_PACKAGE . ':dev-main', self::TEST_PACKAGE . ':???'],
-            // [self::TEST_PACKAGE . ':dev-main#769f906413d6d1e12152f6d34134cbcd347ca253', self::TEST_PACKAGE . ':???'],
         ];
 
         return array_combine(
