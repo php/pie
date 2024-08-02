@@ -13,6 +13,8 @@ use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
 use Webmozart\Assert\Assert;
 
+use function file_exists;
+use function is_executable;
 use function sprintf;
 use function trim;
 
@@ -31,7 +33,23 @@ class PhpBinaryPath
         public readonly string $phpBinaryPath,
         private readonly string|null $phpConfigPath,
     ) {
-        // @todo https://github.com/php/pie/issues/12 - we could verify that the given $phpBinaryPath really is a PHP install
+        if (! file_exists($this->phpBinaryPath)) {
+            throw Exception\InvalidPhpBinaryPath::fromNonExistentPhpBinary($this->phpBinaryPath);
+        }
+
+        if (! is_executable($this->phpBinaryPath)) {
+            throw Exception\InvalidPhpBinaryPath::fromNonExecutablePhpBinary($this->phpBinaryPath);
+        }
+
+        // This is somewhat of a rudimentary check that the target PHP really is a PHP instance; not sure why you
+        // WOULDN'T want to use a real PHP, but this should stop obvious hiccups at least (rather than for security)
+        $testOutput = trim((new Process([$this->phpBinaryPath, '-r', 'echo "PHP";']))
+            ->mustRun()
+            ->getOutput());
+
+        if ($testOutput !== 'PHP') {
+            throw Exception\InvalidPhpBinaryPath::fromInvalidPhpBinary($this->phpBinaryPath);
+        }
     }
 
     /**
