@@ -22,28 +22,32 @@ use const PHP_VERSION_ID;
 #[CoversClass(ResolveDependencyWithComposer::class)]
 final class ResolveDependencyWithComposerTest extends TestCase
 {
+    private const DOWNLOAD_URL_ANY           = 'https://api.github.com/repos/asgrim/example-pie-extension/zipball/%s';
+    private const DOWNLOAD_URL_1_0_1_ALPHA_3 = 'https://api.github.com/repos/asgrim/example-pie-extension/zipball/115f8f8e01ee098a18ec2f47af4852be51ebece7';
+    private const DOWNLOAD_URL_1_0_1         = 'https://api.github.com/repos/asgrim/example-pie-extension/zipball/769f906413d6d1e12152f6d34134cbcd347ca253';
+    private const DOWNLOAD_URL_1_1_0_BETA_1  = 'https://api.github.com/repos/asgrim/example-pie-extension/zipball/b8cec47269dc607b3111fbebd2c47f5b5112595e';
+
     /**
-     * @return array<non-empty-string|'null', array{0: non-empty-string|null, 1: non-empty-string}>
+     * @return array<non-empty-string|'null', array{0: non-empty-string|null, 1: non-empty-string, 2: non-empty-string}>
      *
      * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
      */
     public static function validVersionsList(): array
     {
         $versionsAndExpected = [
-            [null, '1.0.1'],
-            ['*', '1.0.1'],
-            ['1.0.1-alpha.3@alpha', '1.0.1-alpha.3'],
-            ['^1.0', '1.0.1'],
-            ['^1.1.0@alpha', '1.1.0-beta.1'],
-            ['^1.0@beta', '1.0.1'],
-            ['^1.1@beta', '1.1.0-beta.1'],
-            ['~1.0.0', '1.0.1'],
-            ['~1.0.0@alpha', '1.0.1'],
-            ['~1.0.0@beta', '1.0.1'],
-            ['~1.0@beta', '1.0.1'],
-            ['dev-main', 'dev-main'],
-            // @todo this is resolving simply to `dev-main`, but we should be able to download a specific commit
-//            ['dev-769f906413d6d1e12152f6d34134cbcd347ca253#769f906413d6d1e12152f6d34134cbcd347ca253@dev', ''],
+            [null, '1.0.1', self::DOWNLOAD_URL_ANY],
+            ['*', '1.0.1', self::DOWNLOAD_URL_ANY],
+            ['1.0.1-alpha.3@alpha', '1.0.1-alpha.3', self::DOWNLOAD_URL_1_0_1_ALPHA_3],
+            ['^1.0', '1.0.1', self::DOWNLOAD_URL_1_0_1],
+            ['^1.1.0@alpha', '1.1.0-beta.1', self::DOWNLOAD_URL_1_1_0_BETA_1],
+            ['^1.0@beta', '1.0.1', self::DOWNLOAD_URL_1_0_1],
+            ['^1.1@beta', '1.1.0-beta.1', self::DOWNLOAD_URL_1_1_0_BETA_1],
+            ['~1.0.0', '1.0.1', self::DOWNLOAD_URL_1_0_1],
+            ['~1.0.0@alpha', '1.0.1', self::DOWNLOAD_URL_1_0_1],
+            ['~1.0.0@beta', '1.0.1', self::DOWNLOAD_URL_1_0_1],
+            ['~1.0@beta', '1.0.1', self::DOWNLOAD_URL_1_0_1],
+            ['dev-main', 'dev-main', self::DOWNLOAD_URL_ANY],
+            ['dev-main#769f906413d6d1e12152f6d34134cbcd347ca253', 'dev-main', self::DOWNLOAD_URL_1_0_1],
         ];
 
         return array_combine(
@@ -53,8 +57,11 @@ final class ResolveDependencyWithComposerTest extends TestCase
     }
 
     #[DataProvider('validVersionsList')]
-    public function testDependenciesAreResolvedToExpectedVersions(string|null $requestedVersion, string $expectedVersion): void
-    {
+    public function testDependenciesAreResolvedToExpectedVersions(
+        string|null $requestedVersion,
+        string $expectedVersion,
+        string $expectedDownloadUrl,
+    ): void {
         if (PHP_VERSION_ID < 80300 || PHP_VERSION_ID >= 80400) {
             self::markTestSkipped('This test can only run on PHP 8.3 - you are running ' . PHP_VERSION);
         }
@@ -69,5 +76,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
         );
 
         self::assertSame($expectedVersion, $package->version);
+        self::assertNotNull($package->downloadUrl);
+        self::assertStringMatchesFormat($expectedDownloadUrl, $package->downloadUrl);
     }
 }
