@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Php\PieUnitTest\DependencyResolver;
 
+use Composer\Composer;
 use Composer\IO\NullIO;
 use Composer\Repository\CompositeRepository;
 use Composer\Repository\RepositoryFactory;
-use Composer\Repository\RepositorySet;
+use Composer\Repository\RepositoryManager;
 use Php\Pie\DependencyResolver\ResolveDependencyWithComposer;
 use Php\Pie\DependencyResolver\UnableToResolveRequirement;
 use Php\Pie\Platform\Architecture;
@@ -23,15 +24,20 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(ResolveDependencyWithComposer::class)]
 final class ResolveDependencyWithComposerTest extends TestCase
 {
-    private RepositorySet $repositorySet;
+    private Composer $composer;
     private ResolveTargetPhpToPlatformRepository $resolveTargetPhpToPlatformRepository;
 
     public function setUp(): void
     {
         parent::setUp();
 
-        $this->repositorySet = new RepositorySet();
-        $this->repositorySet->addRepository(new CompositeRepository(RepositoryFactory::defaultReposWithDefaultManager(new NullIO())));
+        $repoManager = $this->createMock(RepositoryManager::class);
+        $repoManager->method('getRepositories')
+            ->willReturn([new CompositeRepository(RepositoryFactory::defaultReposWithDefaultManager(new NullIO()))]);
+
+        $this->composer = $this->createMock(Composer::class);
+        $this->composer->method('getRepositoryManager')
+            ->willReturn($repoManager);
 
         $this->resolveTargetPhpToPlatformRepository = new ResolveTargetPhpToPlatformRepository();
     }
@@ -52,7 +58,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
         );
 
         $package = (new ResolveDependencyWithComposer(
-            $this->repositorySet,
+            $this->composer,
             $this->resolveTargetPhpToPlatformRepository,
         ))($targetPlatform, 'asgrim/example-pie-extension', '^1.0');
 
@@ -94,7 +100,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
         $this->expectException(UnableToResolveRequirement::class);
 
         (new ResolveDependencyWithComposer(
-            $this->repositorySet,
+            $this->composer,
             $this->resolveTargetPhpToPlatformRepository,
         ))(
             $targetPlatform,
