@@ -59,6 +59,19 @@ final class ResolveDependencyWithComposer implements DependencyResolver
             throw UnableToResolveRequirement::fromRequirement($packageName, $requestedVersion);
         }
 
+        /**
+         * If a specific commit hash is requested, override the references in the package. This is approximately what
+         * Composer does anyway:
+         *
+         * > ArrayLoader::parseLinks is in charge of this, it drops commit refs, for package resolution purposes we
+         * > only use dev-main, but we ensure in the PoolBuilder that root references (#...) are set so the dev-main
+         * > package has its source and dist refs overridden to be whatever you specify and that applies at install
+         * > time then but package metadata is only read from the branch's head
+         */
+        if ($requestedVersion !== null && preg_match('/#([a-f0-9]{40})$/', $requestedVersion, $matches)) {
+            $package->setSourceDistReferences($matches[1]);
+        }
+
         if (! ExtensionType::isValid($package->getType())) {
             throw UnableToResolveRequirement::toPhpOrZendExtension($package, $packageName, $requestedVersion);
         }
