@@ -41,22 +41,27 @@ class PhpBinaryPath
         public readonly string $phpBinaryPath,
         private readonly string|null $phpConfigPath,
     ) {
-        if (! file_exists($this->phpBinaryPath)) {
-            throw Exception\InvalidPhpBinaryPath::fromNonExistentPhpBinary($this->phpBinaryPath);
+    }
+
+    /** @param non-empty-string $phpBinaryPath */
+    private static function assertValidLookingPhpBinary(string $phpBinaryPath): void
+    {
+        if (! file_exists($phpBinaryPath)) {
+            throw Exception\InvalidPhpBinaryPath::fromNonExistentPhpBinary($phpBinaryPath);
         }
 
-        if (! is_executable($this->phpBinaryPath)) {
-            throw Exception\InvalidPhpBinaryPath::fromNonExecutablePhpBinary($this->phpBinaryPath);
+        if (! is_executable($phpBinaryPath)) {
+            throw Exception\InvalidPhpBinaryPath::fromNonExecutablePhpBinary($phpBinaryPath);
         }
 
         // This is somewhat of a rudimentary check that the target PHP really is a PHP instance; not sure why you
         // WOULDN'T want to use a real PHP, but this should stop obvious hiccups at least (rather than for security)
-        $testOutput = trim((new Process([$this->phpBinaryPath, '-r', 'echo "PHP";']))
+        $testOutput = trim((new Process([$phpBinaryPath, '-r', 'echo "PHP";']))
             ->mustRun()
             ->getOutput());
 
         if ($testOutput !== 'PHP') {
-            throw Exception\InvalidPhpBinaryPath::fromInvalidPhpBinary($this->phpBinaryPath);
+            throw Exception\InvalidPhpBinaryPath::fromInvalidPhpBinary($phpBinaryPath);
         }
     }
 
@@ -240,12 +245,16 @@ PHP,
             ->getOutput());
         Assert::stringNotEmpty($phpExecutable, 'Could not find path to PHP executable.');
 
+        self::assertValidLookingPhpBinary($phpExecutable);
+
         return new self($phpExecutable, $phpConfig);
     }
 
     /** @param non-empty-string $phpBinary */
     public static function fromPhpBinaryPath(string $phpBinary): self
     {
+        self::assertValidLookingPhpBinary($phpBinary);
+
         return new self($phpBinary, null);
     }
 
@@ -253,6 +262,8 @@ PHP,
     {
         $phpExecutable = trim((string) (new PhpExecutableFinder())->find());
         Assert::stringNotEmpty($phpExecutable, 'Could not find path to PHP executable.');
+
+        self::assertValidLookingPhpBinary($phpExecutable);
 
         return new self($phpExecutable, null);
     }
