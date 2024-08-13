@@ -9,6 +9,7 @@ use GuzzleHttp\Psr7\Request;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\AddAuthenticationHeader;
 use Php\Pie\ExtensionName;
+use Php\Pie\ExtensionType;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
@@ -33,6 +34,7 @@ final class AddAuthenticationHeaderTest extends TestCase
         $requestWithAuthHeader = (new AddAuthenticationHeader())->withAuthHeaderFromComposer(
             $request,
             new Package(
+                ExtensionType::PhpModule,
                 ExtensionName::normaliseFromString('foo'),
                 'foo/bar',
                 '1.2.3',
@@ -55,6 +57,7 @@ final class AddAuthenticationHeaderTest extends TestCase
 
         $addAuthenticationHeader = new AddAuthenticationHeader();
         $package                 = new Package(
+            ExtensionType::PhpModule,
             ExtensionName::normaliseFromString('foo'),
             'foo/bar',
             '1.2.3',

@@ -7,6 +7,7 @@ namespace Php\Pie;
 
 use Php\Pie\Command\BuildCommand;
 use Php\Pie\Command\DownloadCommand;
+use Php\Pie\Command\InstallCommand;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\CommandLoader\ContainerCommandLoader;
 use Symfony\Component\Console\Input\InputInterface;
@@ -23,6 +24,7 @@ $application->setCommandLoader(new ContainerCommandLoader(
     [
         'download' => DownloadCommand::class,
         'build' => BuildCommand::class,
+        'install' => InstallCommand::class,
     ]
 ));
 $application->run($container->get(InputInterface::class), $container->get(OutputInterface::class));
