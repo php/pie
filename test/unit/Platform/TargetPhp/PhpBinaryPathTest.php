@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Php\PieUnitTest\Platform\TargetPhp;
 
+use Composer\Util\Platform;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
+use Php\Pie\Platform\TargetPhp\Exception\InvalidPhpBinaryPath;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
@@ -35,6 +37,41 @@ use const PHP_RELEASE_VERSION;
 #[CoversClass(PhpBinaryPath::class)]
 final class PhpBinaryPathTest extends TestCase
 {
+    private const FAKE_PHP_EXECUTABLE = __DIR__ . '/../../../assets/fake-php.sh';
+
+    public function testNonExistentPhpBinaryIsRejected(): void
+    {
+        $this->expectException(InvalidPhpBinaryPath::class);
+        $this->expectExceptionMessage('does not exist');
+        PhpBinaryPath::fromPhpBinaryPath(__DIR__ . '/path/to/a/non/existent/php/binary');
+    }
+
+    public function testNonExecutablePhpBinaryIsRejected(): void
+    {
+        if (Platform::isWindows()) {
+            /**
+             * According to the {@link https://www.php.net/manual/en/function.is-executable.php}:
+             *
+             *     for BC reasons, files with a .bat or .cmd extension are also considered executable
+             *
+             * However, that does not seem to be the case; calling {@see is_executable} always seems to return false,
+             * even with a `.bat` file.
+             */
+            self::markTestSkipped('is_executable always returns false on Windows it seems...');
+        }
+
+        $this->expectException(InvalidPhpBinaryPath::class);
+        $this->expectExceptionMessage('is not executable');
+        PhpBinaryPath::fromPhpBinaryPath(__FILE__);
+    }
+
+    public function testInvalidPhpBinaryIsRejected(): void
+    {
+        $this->expectException(InvalidPhpBinaryPath::class);
+        $this->expectExceptionMessage('does not appear to be a PHP binary');
+        PhpBinaryPath::fromPhpBinaryPath(self::FAKE_PHP_EXECUTABLE);
+    }
+
     public function testVersionFromCurrentProcess(): void
     {
         $phpBinary = PhpBinaryPath::fromCurrentProcess();

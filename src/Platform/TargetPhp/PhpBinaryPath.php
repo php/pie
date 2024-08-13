@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\Pie\Platform\TargetPhp;
 
 use Composer\Semver\VersionParser;
+use Composer\Util\Platform;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
 use Psl\Json;
@@ -19,6 +20,7 @@ use function assert;
 use function dirname;
 use function file_exists;
 use function is_dir;
+use function is_executable;
 use function preg_match;
 use function sprintf;
 use function trim;
@@ -40,7 +42,28 @@ class PhpBinaryPath
         public readonly string $phpBinaryPath,
         private readonly string|null $phpConfigPath,
     ) {
-        // @todo https://github.com/php/pie/issues/12 - we could verify that the given $phpBinaryPath really is a PHP install
+    }
+
+    /** @param non-empty-string $phpBinaryPath */
+    private static function assertValidLookingPhpBinary(string $phpBinaryPath): void
+    {
+        if (! file_exists($phpBinaryPath)) {
+            throw Exception\InvalidPhpBinaryPath::fromNonExistentPhpBinary($phpBinaryPath);
+        }
+
+        if (! Platform::isWindows() && ! is_executable($phpBinaryPath)) {
+            throw Exception\InvalidPhpBinaryPath::fromNonExecutablePhpBinary($phpBinaryPath);
+        }
+
+        // This is somewhat of a rudimentary check that the target PHP really is a PHP instance; not sure why you
+        // WOULDN'T want to use a real PHP, but this should stop obvious hiccups at least (rather than for security)
+        $testOutput = trim((new Process([$phpBinaryPath, '-r', 'echo "PHP";']))
+            ->mustRun()
+            ->getOutput());
+
+        if ($testOutput !== 'PHP') {
+            throw Exception\InvalidPhpBinaryPath::fromInvalidPhpBinary($phpBinaryPath);
+        }
     }
 
     /** @return non-empty-string */
@@ -223,12 +246,16 @@ PHP,
             ->getOutput());
         Assert::stringNotEmpty($phpExecutable, 'Could not find path to PHP executable.');
 
+        self::assertValidLookingPhpBinary($phpExecutable);
+
         return new self($phpExecutable, $phpConfig);
     }
 
     /** @param non-empty-string $phpBinary */
     public static function fromPhpBinaryPath(string $phpBinary): self
     {
+        self::assertValidLookingPhpBinary($phpBinary);
+
         return new self($phpBinary, null);
     }
 
@@ -236,6 +263,8 @@ PHP,
     {
         $phpExecutable = trim((string) (new PhpExecutableFinder())->find());
         Assert::stringNotEmpty($phpExecutable, 'Could not find path to PHP executable.');
+
+        self::assertValidLookingPhpBinary($phpExecutable);
 
         return new self($phpExecutable, null);
     }
