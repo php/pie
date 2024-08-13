@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\Pie\Platform\TargetPhp;
 
 use Composer\Semver\VersionParser;
+use Composer\Util\Platform;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
 use Psl\Json;
@@ -50,7 +51,7 @@ class PhpBinaryPath
             throw Exception\InvalidPhpBinaryPath::fromNonExistentPhpBinary($phpBinaryPath);
         }
 
-        if (! is_executable($phpBinaryPath)) {
+        if (! Platform::isWindows() && ! is_executable($phpBinaryPath)) {
             throw Exception\InvalidPhpBinaryPath::fromNonExecutablePhpBinary($phpBinaryPath);
         }
 

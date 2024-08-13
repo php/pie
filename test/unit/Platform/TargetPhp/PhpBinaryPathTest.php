@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\PieUnitTest\Platform\TargetPhp;
 
+use Composer\Util\Platform;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
 use Php\Pie\Platform\TargetPhp\Exception\InvalidPhpBinaryPath;
@@ -47,6 +48,18 @@ final class PhpBinaryPathTest extends TestCase
 
     public function testNonExecutablePhpBinaryIsRejected(): void
     {
+        if (Platform::isWindows()) {
+            /**
+             * According to the {@link https://www.php.net/manual/en/function.is-executable.php}:
+             *
+             *     for BC reasons, files with a .bat or .cmd extension are also considered executable
+             *
+             * However, that does not seem to be the case; calling {@see is_executable} always seems to return false,
+             * even with a `.bat` file.
+             */
+            self::markTestSkipped('is_executable always returns false on Windows it seems...');
+        }
+
         $this->expectException(InvalidPhpBinaryPath::class);
         $this->expectExceptionMessage('is not executable');
         PhpBinaryPath::fromPhpBinaryPath(__FILE__);
