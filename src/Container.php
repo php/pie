@@ -8,8 +8,6 @@ use Composer\Composer;
 use Composer\Factory as ComposerFactory;
 use Composer\IO\ConsoleIO;
 use Composer\IO\IOInterface;
-use Composer\Repository\CompositeRepository;
-use Composer\Repository\RepositorySet;
 use Composer\Util\AuthHelper;
 use Composer\Util\Platform;
 use GuzzleHttp\Client;
@@ -79,12 +77,8 @@ final class Container
         $container->singleton(
             DependencyResolver::class,
             static function (ContainerInterface $container): DependencyResolver {
-                $composer      = $container->get(Composer::class);
-                $repositorySet = new RepositorySet();
-                $repositorySet->addRepository(new CompositeRepository($composer->getRepositoryManager()->getRepositories()));
-
                 return new ResolveDependencyWithComposer(
-                    $repositorySet,
+                    $container->get(Composer::class),
                     new ResolveTargetPhpToPlatformRepository(),
                 );
             },

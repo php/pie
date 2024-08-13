@@ -34,6 +34,11 @@ class DownloadCommandTest extends TestCase
     }
 
     /**
+     * Note: this data provider is not intended to provide a fully comprehensive list of supported version mappings
+     * since it is slightly slower to run (as it actually downloads). For a fuller list of version resolution tests,
+     * please see {@see \Php\PieIntegrationTest\DependencyResolver\ResolveDependencyWithComposerTest}, which is much
+     * faster to execute!
+     *
      * @return array<non-empty-string, array{0: non-empty-string, 1: non-empty-string}>
      *
      * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
@@ -46,11 +51,7 @@ class DownloadCommandTest extends TestCase
             [self::TEST_PACKAGE . ':1.0.1-alpha.3@alpha', self::TEST_PACKAGE . ':1.0.1-alpha.3'],
             [self::TEST_PACKAGE . ':*', self::TEST_PACKAGE . ':1.0.1'],
             [self::TEST_PACKAGE . ':~1.0.0@alpha', self::TEST_PACKAGE . ':1.0.1'],
-            [self::TEST_PACKAGE . ':^1.1.0@alpha', self::TEST_PACKAGE . ':1.1.0-alpha.4'],
             [self::TEST_PACKAGE . ':~1.0.0', self::TEST_PACKAGE . ':1.0.1'],
-            // @todo https://github.com/php/pie/issues/13 - in theory, these could work, on NonWindows at least
-            // [self::TEST_PACKAGE . ':dev-main', self::TEST_PACKAGE . ':???'],
-            // [self::TEST_PACKAGE . ':dev-main#769f906413d6d1e12152f6d34134cbcd347ca253', self::TEST_PACKAGE . ':???'],
         ];
 
         return array_combine(
@@ -60,8 +61,10 @@ class DownloadCommandTest extends TestCase
     }
 
     #[DataProvider('validVersionsList')]
-    public function testDownloadCommandWillDownloadCompatibleExtension(string $requestedVersion, string $expectedVersion): void
-    {
+    public function testDownloadCommandWillDownloadCompatibleExtension(
+        string $requestedVersion,
+        string $expectedVersion,
+    ): void {
         if (PHP_VERSION_ID < 80300 || PHP_VERSION_ID >= 80400) {
             self::markTestSkipped('This test can only run on PHP 8.3 - you are running ' . PHP_VERSION);
         }
@@ -73,6 +76,28 @@ class DownloadCommandTest extends TestCase
         $outputString = $this->commandTester->getDisplay();
         self::assertStringContainsString('Found package: ' . $expectedVersion . ' which provides', $outputString);
         self::assertStringContainsString('Extracted ' . $expectedVersion . ' source to', $outputString);
+    }
+
+    public function testDownloadCommandWillDownloadSpecificCommits(): void
+    {
+        if (Platform::isWindows()) {
+            self::markTestSkipped('This test can only run on non-Windows systems');
+        }
+
+        if (PHP_VERSION_ID < 80300 || PHP_VERSION_ID >= 80400) {
+            self::markTestSkipped('This test can only run on PHP 8.3 - you are running ' . PHP_VERSION);
+        }
+
+        $this->commandTester->execute(['requested-package-and-version' => 'asgrim/example-pie-extension:dev-main#9b5e6c80a1e05556e4e6824f0c112a4992cee001']);
+
+        $this->commandTester->assertCommandIsSuccessful();
+
+        $outputString = $this->commandTester->getDisplay();
+        self::assertStringContainsString('Found package: asgrim/example-pie-extension:dev-main which provides', $outputString);
+        self::assertStringMatchesFormat(
+            '%AExtracted asgrim/example-pie-extension:dev-main source to: /tmp/%s/asgrim-example-pie-extension-9b5e6c8%A',
+            $outputString,
+        );
     }
 
     #[DataProvider('validVersionsList')]
