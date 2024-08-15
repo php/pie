@@ -19,6 +19,7 @@ use Php\Pie\Building\UnixBuild;
 use Php\Pie\Building\WindowsBuild;
 use Php\Pie\Command\BuildCommand;
 use Php\Pie\Command\DownloadCommand;
+use Php\Pie\Command\InfoCommand;
 use Php\Pie\Command\InstallCommand;
 use Php\Pie\DependencyResolver\DependencyResolver;
 use Php\Pie\DependencyResolver\ResolveDependencyWithComposer;
@@ -52,6 +53,7 @@ final class Container
         $container->singleton(DownloadCommand::class);
         $container->singleton(BuildCommand::class);
         $container->singleton(InstallCommand::class);
+        $container->singleton(InfoCommand::class);
 
         $container->singleton(IOInterface::class, static function (ContainerInterface $container): IOInterface {
             return new ConsoleIO(

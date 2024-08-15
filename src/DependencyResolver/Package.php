@@ -19,9 +19,6 @@ use function array_map;
  */
 final class Package
 {
-    public const TYPE_PHP_MODULE     = 'php-ext';
-    public const TYPE_ZEND_EXTENSION = 'php-ext-zend';
-
     /** @param list<ConfigureOption> $configureOptions */
     public function __construct(
         public readonly ExtensionType $extensionType,
