@@ -18,8 +18,10 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\NullOutput;
-use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
+
+use function array_unshift;
+use function is_writable;
 
 #[CoversClass(UnixInstall::class)]
 final class UnixInstallTest extends TestCase
@@ -30,12 +32,6 @@ final class UnixInstallTest extends TestCase
     {
         if (Platform::isWindows()) {
             self::markTestSkipped('Unix build test cannot be run on Windows');
-        }
-
-        try {
-            (new Process(['sudo', 'ls']))->mustRun();
-        } catch (ProcessFailedException) {
-            self::markTestSkipped('Skipping as cannot run with sudo enabled');
         }
 
         $output         = new BufferedOutput();
@@ -75,7 +71,12 @@ final class UnixInstallTest extends TestCase
         self::assertSame($extensionPath . '/pie_test_ext.so', $installedSharedObject);
         self::assertFileExists($installedSharedObject);
 
-        (new Process(['sudo', 'rm', $installedSharedObject]))->mustRun();
+        $rmCommand = ['rm', $installedSharedObject];
+        if (! is_writable($installedSharedObject)) {
+            array_unshift($rmCommand, 'sudo');
+        }
+
+        (new Process($rmCommand))->mustRun();
         (new Process(['make', 'clean'], $downloadedPackage->extractedSourcePath))->mustRun();
         (new Process(['phpize', '--clean'], $downloadedPackage->extractedSourcePath))->mustRun();
     }
