@@ -5,14 +5,12 @@ on:
   push:
 
 jobs:
-  ci:
-    uses: laminas/workflow-continuous-integration/.github/workflows/continuous-integration.yml@1.x
-
-  windows-tests:
+  unit-tests:
     runs-on: ${{ matrix.operating-system }}
     strategy:
       matrix:
         operating-system:
+          - ubuntu-latest
           - windows-latest
         php-versions:
           - '8.1'
@@ -28,12 +26,48 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/checkout@v4
       - uses: ramsey/composer-install@v3
-      - name: Run PHPUnit
+      - name: Run PHPUnit on Windows
+        if: matrix.operating-system == 'windows-latest'
         run: vendor/bin/phpunit
+      - name: Run PHPUnit on non-Windows
+        if: matrix.operating-system != 'windows-latest'
+        run: sudo vendor/bin/phpunit
+
+  coding-standards:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.1
+          extensions: intl, sodium, zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v4
+      - uses: ramsey/composer-install@v3
+      - name: Run PHPCS
+        run: vendor/bin/phpcs
+
+  static-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.1
+          extensions: intl, sodium, zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v4
+      - uses: ramsey/composer-install@v3
+      - name: Run Psalm
+        run: vendor/bin/psalm
 
   build-phar:
     needs:
-      - ci
+      - unit-tests
+      - coding-standards
+      - static-analysis
     runs-on: ${{ matrix.operating-system }}
     strategy:
       matrix:
