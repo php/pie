@@ -12,14 +12,14 @@ You can install an extension using the `install` command. For example, to
 install the `example_pie_extension` extension, you would run:
 
 ```shell
-$ bin/pie install asgrim/example-pie-extension
+$ bin/pie install example/example-pie-extension
 This command may need elevated privileges, and may prompt you for your password.
 You are running PHP 8.3.10
 Target PHP installation: 8.3.10 nts, on Linux/OSX/etc x86_64 (from /usr/bin/php8.3)
-Found package: asgrim/example-pie-extension:1.0.1 which provides ext-example_pie_extension
+Found package: example/example-pie-extension:1.0.1 which provides ext-example_pie_extension
 phpize complete.
 Configure complete.
-Build complete: /tmp/pie_downloader_66e0b1de73cdb6.04069773/asgrim-example-pie-extension-769f906/modules/example_pie_extension.so
+Build complete: /tmp/pie_downloader_66e0b1de73cdb6.04069773/example-example-pie-extension-769f906/modules/example_pie_extension.so
 Install complete: /usr/lib/php/20230831/example_pie_extension.so
 You must now add "extension=example_pie_extension" to your php.ini
 $
@@ -39,7 +39,7 @@ On Windows, you may provide a path to the `php` executable itself using the
 to run PIE, but we want to download the extension for PHP 8.3:
 
 ```shell
-> C:\php-8.3.6\php.exe bin/pie install --with-php-path=C:\php-8.1.7\php.exe asgrim/example-pie-extension
+> C:\php-8.3.6\php.exe bin/pie install --with-php-path=C:\php-8.1.7\php.exe example/example-pie-extension
 ```
 
 ## Extensions that support PIE

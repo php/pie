@@ -12,9 +12,11 @@ notable exceptions:
  * The `type` MUST be either `php-ext` for a PHP Module (this will be most
    extensions), or `php-ext-zend` for a Zend Extension.
  * An additional `php-ext` section MAY exist.
- * The Composer package name (i.e. the top level `name` field) for a PIE
-   extension cannot share the same Composer package name as a regular PHP
-   package, even if they have different `type` fields.
+ * The Composer package name (i.e. the top level `name` field) should follow
+   the usual Composer package name format, i.e. `<vendor>/<package>`.
+ * However, please note that the Composer package name for a PIE extension
+   cannot share the same Composer package name as a regular PHP package, even
+   if they have different `type` fields.
 
 ### The `php-ext` definition
 
@@ -36,8 +38,8 @@ given a `composer.json` with:
 The extension name would be derived as `myextension`. The `myvendor/` vendor
 prefix is removed.
 
-The `extension-name` MAY be prefixed with `ext-` as is a convention in Composer,
-but this is optional.
+The `extension-name` SHOULD NOT be prefixed with `ext-` as is a convention in
+Composer when using `require`.
 
 An example of `extension-name` being used:
 
