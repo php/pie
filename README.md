@@ -6,13 +6,30 @@ any installed PHP version.
 If you are an extension maintainer wanting to add PIE support to your extension,
 please read [extension-maintainers](./docs/extension-maintainers.md).
 
+## Installing PIE
+
+### Manual installation
+
+- Download `pie.phar` from the [latest releases](https://github.com/php/pie/releases)
+- Validate the signature in `pie.phar.asc`
+- You may then invoke PIE with `php pie.phar <command>`
+
+Further installation details can be found in the [usage](./docs/usage.md) docs.
+This documentation assumes you have moved `pie.phar` into your `$PATH`, e.g.
+`/usr/local/bin/pie` on non-Windows systems.
+
+## Extensions that support PIE
+
+A list of extensions that support PIE can be found on
+[https://packagist.org/extensions](https://packagist.org/extensions).
+
 ## Installing an extension using PIE
 
 You can install an extension using the `install` command. For example, to
 install the `example_pie_extension` extension, you would run:
 
 ```shell
-$ bin/pie install example/example-pie-extension
+$ pie install example/example-pie-extension
 This command may need elevated privileges, and may prompt you for your password.
 You are running PHP 8.3.10
 Target PHP installation: 8.3.10 nts, on Linux/OSX/etc x86_64 (from /usr/bin/php8.3)
@@ -25,24 +42,6 @@ You must now add "extension=example_pie_extension" to your php.ini
 $
 ```
 
-### Using PIE to install an extension for a different PHP version
+## More documentation...
 
-If you are trying to install an extension for a different version of PHP, you
-may specify this on non-Windows systems with the `--with-php-config` option:
-
-```shell
-bin/pie install --with-php-config=/usr/bin/php-config7.2 my/extension
-```
-
-On Windows, you may provide a path to the `php` executable itself using the
-`--with-php-path` option. This is an example on Windows where PHP 8.1 is used
-to run PIE, but we want to download the extension for PHP 8.3:
-
-```shell
-> C:\php-8.3.6\php.exe bin/pie install --with-php-path=C:\php-8.1.7\php.exe example/example-pie-extension
-```
-
-## Extensions that support PIE
-
-A list of extensions that support PIE can be found on
-[https://packagist.org/extensions](https://packagist.org/extensions).
+The full documentation for PIE can be found in [usage](./docs/usage.md) docs.
