@@ -39,7 +39,7 @@ final class InstallCommand extends Command
     public function execute(InputInterface $input, OutputInterface $output): int
     {
         if (! TargetPlatform::isRunningAsRoot()) {
-            $output->writeln('This command needs elevated privileges, and may prompt you for your password.');
+            $output->writeln('This command may need elevated privileges, and may prompt you for your password.');
         }
 
         $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $output);

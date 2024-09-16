@@ -4,17 +4,21 @@ declare(strict_types=1);
 
 namespace Php\PieIntegrationTest\Command;
 
+use Composer\Util\Platform;
 use Php\Pie\Command\InstallCommand;
 use Php\Pie\Container;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
-use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 
 use function array_key_exists;
+use function array_unshift;
+use function assert;
 use function file_exists;
 use function is_file;
+use function is_string;
+use function is_writable;
 use function preg_match;
 
 use const PHP_VERSION;
@@ -32,16 +36,14 @@ class InstallCommandTest extends TestCase
         $this->commandTester = new CommandTester(Container::factory()->get(InstallCommand::class));
     }
 
-    public function testInstallCommandWillInstallCompatibleExtension(): void
+    public function testInstallCommandWillInstallCompatibleExtensionNonWindows(): void
     {
         if (PHP_VERSION_ID < 80300 || PHP_VERSION_ID >= 80400) {
             self::markTestSkipped('This test can only run on PHP 8.3 - you are running ' . PHP_VERSION);
         }
 
-        try {
-            (new Process(['sudo', 'ls']))->mustRun();
-        } catch (ProcessFailedException) {
-            self::markTestSkipped('Skipping as cannot run with sudo enabled');
+        if (Platform::isWindows()) {
+            self::markTestSkipped('This test can only run on non-Windows systems');
         }
 
         $this->commandTester->execute(['requested-package-and-version' => self::TEST_PACKAGE]);
@@ -62,6 +64,44 @@ class InstallCommandTest extends TestCase
             return;
         }
 
-        (new Process(['sudo', 'rm', $matches[1]]))->mustRun();
+        $fileToRemove = $matches[1];
+        assert(is_string($fileToRemove));
+        $rmCommand = ['rm', $fileToRemove];
+        if (! is_writable($fileToRemove)) {
+            array_unshift($rmCommand, 'sudo');
+        }
+
+        (new Process($rmCommand))->mustRun();
+    }
+
+    public function testInstallCommandWillInstallCompatibleExtensionWindows(): void
+    {
+        if (PHP_VERSION_ID < 80300 || PHP_VERSION_ID >= 80400) {
+            self::markTestSkipped('This test can only run on PHP 8.3 - you are running ' . PHP_VERSION);
+        }
+
+        if (! Platform::isWindows()) {
+            self::markTestSkipped('This test can only run on Windows systems');
+        }
+
+        $this->commandTester->execute(['requested-package-and-version' => self::TEST_PACKAGE]);
+
+        $this->commandTester->assertCommandIsSuccessful();
+
+        $outputString = $this->commandTester->getDisplay();
+        self::assertStringContainsString('Copied DLL to: ', $outputString);
+        self::assertStringContainsString('You must now add "extension=example_pie_extension" to your php.ini', $outputString);
+
+        if (
+            ! preg_match('#^Copied DLL to: (.*)$#m', $outputString, $matches)
+            || ! array_key_exists(1, $matches)
+            || $matches[1] === ''
+            || ! file_exists($matches[1])
+            || ! is_file($matches[1])
+        ) {
+            return;
+        }
+
+        (new Process(['rm', $matches[1]]))->mustRun();
     }
 }
