@@ -4,11 +4,8 @@ declare(strict_types=1);
 
 namespace Php\Pie\DependencyResolver;
 
+use Composer\Semver\VersionParser;
 use Webmozart\Assert\Assert;
-
-use function preg_match;
-use function str_ends_with;
-use function str_starts_with;
 
 /**
  * Utility to extract a valid Stability (see {@see \Composer\Package\BasePackage::$stabilities}) from a requested
@@ -44,21 +41,13 @@ final class DetermineMinimumStability
     /** @return self::STABILITY_* */
     public static function fromRequestedVersion(string|null $requestedVersion): string
     {
-        /** Stability options from {@see https://getcomposer.org/doc/04-schema.md#minimum-stability} */
-        if ($requestedVersion !== null) {
-            if (preg_match('#@(dev|alpha|beta|RC|stable)$#', $requestedVersion, $matches)) {
-                $matchedStability = $matches[1];
-                self::assertValidStabilityString($matchedStability);
-
-                return $matchedStability;
-            }
-
-            // If a specific stability was not requested, but the version requested was `dev-` something, change to dev min stability
-            if (str_starts_with($requestedVersion, 'dev-') || str_ends_with($requestedVersion, '-dev')) {
-                return self::STABILITY_DEV;
-            }
+        if ($requestedVersion === null) {
+            return self::DEFAULT_MINIMUM_STABILITY;
         }
 
-        return self::DEFAULT_MINIMUM_STABILITY;
+        $stability = VersionParser::parseStability($requestedVersion);
+        self::assertValidStabilityString($stability);
+
+        return $stability;
     }
 }
