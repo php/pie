@@ -14,7 +14,6 @@ use Php\Pie\Platform\TargetPhp\ResolveTargetPhpToPlatformRepository;
 use Php\Pie\Platform\TargetPlatform;
 
 use function preg_match;
-use function str_starts_with;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class ResolveDependencyWithComposer implements DependencyResolver
@@ -27,21 +26,7 @@ final class ResolveDependencyWithComposer implements DependencyResolver
 
     private function factoryRepositorySet(string|null $requestedVersion): RepositorySet
     {
-        $minimumStability = 'stable';
-
-        /** Stability options from {@see https://getcomposer.org/doc/04-schema.md#minimum-stability} */
-        if ($requestedVersion !== null) {
-            if (preg_match('#@(dev|alpha|beta|RC|stable)$#', $requestedVersion, $matches)) {
-                $minimumStability = $matches[1];
-            }
-
-            // If a specific stability was not requested, but the version requested was `dev-` something, change to dev min stability
-            if (! $matches && str_starts_with($requestedVersion, 'dev-')) {
-                $minimumStability = 'dev';
-            }
-        }
-
-        $repositorySet = new RepositorySet($minimumStability);
+        $repositorySet = new RepositorySet(DetermineMinimumStability::fromRequestedVersion($requestedVersion));
         $repositorySet->addRepository(new CompositeRepository($this->composer->getRepositoryManager()->getRepositories()));
 
         return $repositorySet;
