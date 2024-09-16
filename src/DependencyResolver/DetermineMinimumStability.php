@@ -7,6 +7,7 @@ namespace Php\Pie\DependencyResolver;
 use Webmozart\Assert\Assert;
 
 use function preg_match;
+use function str_ends_with;
 use function str_starts_with;
 
 /**
@@ -53,7 +54,7 @@ final class DetermineMinimumStability
             }
 
             // If a specific stability was not requested, but the version requested was `dev-` something, change to dev min stability
-            if (! $matches && str_starts_with($requestedVersion, 'dev-')) {
+            if (str_starts_with($requestedVersion, 'dev-') || str_ends_with($requestedVersion, '-dev')) {
                 return self::STABILITY_DEV;
             }
         }
