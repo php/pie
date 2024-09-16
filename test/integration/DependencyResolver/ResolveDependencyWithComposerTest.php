@@ -48,6 +48,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
             ['~1.0@beta', '1.0.1', self::DOWNLOAD_URL_1_0_1],
             ['dev-main', 'dev-main', self::DOWNLOAD_URL_ANY],
             ['dev-main#769f906413d6d1e12152f6d34134cbcd347ca253', 'dev-main', self::DOWNLOAD_URL_1_0_1],
+            ['v1.x-dev', 'v1.x-dev', self::DOWNLOAD_URL_1_1_0_BETA_1],
         ];
 
         return array_combine(

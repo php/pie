@@ -36,6 +36,7 @@ final class DetermineMinimumStabilityTest extends TestCase
             ['*@alpha', 'alpha'],
             ['*@dev', 'dev'],
             ['dev-main', 'dev'],
+            ['v1.x-dev', 'dev'],
         ];
 
         return array_combine(
