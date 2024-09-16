@@ -128,3 +128,99 @@ submit it to Packagist in the same way as any other package.
 
  * Head to [https://packagist.org/packages/submit](https://packagist.org/packages/submit)
  * Enter the URL of your repository, and follow the instructions.
+
+## Windows Support
+
+In order to support Windows users, you must publish pre-built DLLs, as PIE does
+not currently support building DLLs on the fly. The expected workflow for
+Windows-compatible releases is:
+
+ - The release is made on GitHub (only GitHub is supported at the moment)
+ - A CI pipeline runs to build the release assets, e.g. in a GitHub Action
+ - The resulting build assets are published to the GitHub release in a ZIP file
+
+The name of the ZIP file, and the DLL contained within must be:
+
+* `php_{extension-name}-{tag}-{php-maj/min}-{ts|nts}-{compiler}-{arch}.zip`
+* Example: `php_xdebug-3.3.2-8.3-ts-vs16-x86_64.zip`
+
+The descriptions of these items:
+
+* `extension-name` the name of the extension, e.g. `xdebug`
+* `tag` for example `3.3.0alpha3` - defined by the tag/release you have made
+* `php-maj/min` - for example `8.3` for PHP 8.3.*
+* `compiler` - usually something like `vc6`, `vs16` - fetch from
+  'PHP Extension Build' flags in `php -i`
+* `ts|nts` - Thread-safe or non-thread safe.
+* `arch` - for example `x86_64`.
+   * Windows: `Architecture` from `php -i`
+   * non-Windows: check `PHP_INT_SIZE` - 4 for 32-bit, 8 for 64-bit.
+
+### Contents of the Windows ZIP
+
+The pre-built ZIP should contain at minimum a DLL named in the same way as the
+ZIP itself, for example
+`php_{extension-name}-{tag}-{php-maj/min}-{ts|nts}-{compiler}-{arch}.dll`.
+The `.dll` will be moved into the PHP extensions path, and renamed, e.g.
+to `C:\path\to\php\ext\php_{extension-name}.dll`. The ZIP file may include
+additional resources, such as:
+
+* `php_{extension-name}.pdb` - this will be moved alongside
+  the `C:\path\to\php\ext\php_{extension-name}.dll`
+* `*.dll` - any other `.dll` would be moved alongside `C:\path\to\php\php.exe`
+* Any other file, which would be moved
+  into `C:\path\to\php\extras\{extension-name}\.`
+
+### Automation of the Windows publishing
+
+PHP provides a [set of GitHub Actions](https://github.com/php/php-windows-builder)
+that enable extension maintainers to build and release the Windows compatible
+assets. An example workflow that uses these actions:
+
+```yaml
+name: Publish Windows Releases
+on:
+   release:
+      types: [published]
+
+permissions:
+   contents: write
+
+jobs:
+   get-extension-matrix:
+      runs-on: ubuntu-latest
+      outputs:
+         matrix: ${{ steps.extension-matrix.outputs.matrix }}
+      steps:
+         - name: Checkout
+           uses: actions/checkout@v4
+         - name: Get the extension matrix
+           id: extension-matrix
+           uses: php/php-windows-builder/extension-matrix@v1
+   build:
+      needs: get-extension-matrix
+      runs-on: ${{ matrix.os }}
+      strategy:
+         matrix: ${{fromJson(needs.get-extension-matrix.outputs.matrix)}}
+      steps:
+         - name: Checkout
+           uses: actions/checkout@v4
+         - name: Build the extension
+           uses: php/php-windows-builder/extension@v1
+           with:
+              php-version: ${{ matrix.php-version }}
+              arch: ${{ matrix.arch }}
+              ts: ${{ matrix.ts }}
+   release:
+      runs-on: ubuntu-latest
+      needs: build
+      if: ${{ github.event_name == 'release' }}
+      steps:
+         - name: Upload artifact to the release
+           uses: php/php-windows-builder/release@v1
+           with:
+              release: ${{ github.event.release.tag_name }}
+              token: ${{ secrets.GITHUB_TOKEN }}
+```
+
+Source: [https://github.com/php/php-windows-builder?tab=readme-ov-file#example-workflow-to-build-and-release-an-extension](https://github.com/php/php-windows-builder?tab=readme-ov-file#example-workflow-to-build-and-release-an-extension)
