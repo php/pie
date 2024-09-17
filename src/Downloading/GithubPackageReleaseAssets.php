@@ -11,9 +11,8 @@ use GuzzleHttp\RequestOptions;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\WindowsExtensionAssetName;
-use Psl\Json;
-use Psl\Type;
 use Psr\Http\Message\ResponseInterface;
+use Webmozart\Assert\Assert;
 
 use function assert;
 use function in_array;
@@ -98,22 +97,28 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
 
         AssertHttp::responseStatusCode(200, $response);
 
-        $releaseAssets = Json\typed(
+        /** @var mixed $decodedRepsonse */
+        $decodedRepsonse = json_decode(
             (string) $response->getBody(),
-            Type\shape(
-                [
-                    'assets' => Type\vec(Type\shape(
-                        [
-                            'name' => Type\non_empty_string(),
-                            'browser_download_url' => Type\non_empty_string(),
-                        ],
-                        true,
-                    )),
-                ],
-                true,
-            ),
+            true,
+            512,
+            JSON_BIGINT_AS_STRING | JSON_THROW_ON_ERROR
         );
 
-        return $releaseAssets['assets'];
+        Assert::isArray($decodedRepsonse);
+        Assert::keyExists($decodedRepsonse, 'assets');
+        Assert::isList($decodedRepsonse['assets']);
+
+        return array_map(
+            static function (array $asset): array {
+                Assert::keyExists($asset, 'name');
+                Assert::stringNotEmpty($asset['name']);
+                Assert::keyExists($asset, 'browser_download_url');
+                Assert::stringNotEmpty($asset['browser_download_url']);
+
+                return $asset;
+            },
+            $decodedRepsonse['assets'],
+        );
     }
 }
