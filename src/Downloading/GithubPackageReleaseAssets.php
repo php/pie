@@ -14,9 +14,14 @@ use Php\Pie\Platform\WindowsExtensionAssetName;
 use Psr\Http\Message\ResponseInterface;
 use Webmozart\Assert\Assert;
 
+use function array_map;
 use function assert;
 use function in_array;
+use function json_decode;
 use function strtolower;
+
+use const JSON_BIGINT_AS_STRING;
+use const JSON_THROW_ON_ERROR;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class GithubPackageReleaseAssets implements PackageReleaseAssets
@@ -102,7 +107,7 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
             (string) $response->getBody(),
             true,
             512,
-            JSON_BIGINT_AS_STRING | JSON_THROW_ON_ERROR
+            JSON_BIGINT_AS_STRING | JSON_THROW_ON_ERROR,
         );
 
         Assert::isArray($decodedRepsonse);

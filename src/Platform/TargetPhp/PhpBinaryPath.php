@@ -13,9 +13,12 @@ use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
 use Webmozart\Assert\Assert;
 
+use function array_combine;
 use function array_key_exists;
+use function array_map;
 use function assert;
 use function dirname;
+use function explode;
 use function file_exists;
 use function is_dir;
 use function is_executable;
@@ -123,13 +126,13 @@ PHP,
             ->getOutput());
 
         $pairs = array_map(
-            fn (string $row) => explode(":", $row),
-            explode("\n", $extVersionsRawJson)
+            static fn (string $row) => explode(':', $row),
+            explode("\n", $extVersionsRawJson),
         );
 
         return array_combine(
-            array_map(fn (array $row) => $row[0], $pairs),
-            array_map(fn (array $row) => $row[1], $pairs)
+            array_map(static fn (array $row) => $row[0], $pairs),
+            array_map(static fn (array $row) => $row[1], $pairs),
         );
     }
 
