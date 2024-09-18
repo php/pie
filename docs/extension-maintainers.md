@@ -121,6 +121,19 @@ If an end user does not specify a flag defined in the `configure-options`
 definition, it will simply not be passed to `./configure`. There is no way to
 specify a default value in the `configure-options` definition.
 
+### Extension dependencies
+
+Extension authors may define some dependencies in `require`, but practically,
+most extensions would not need to define dependencies. Dependencies on other
+extensions may be defined, for example `ext-json`. However, dependencies on
+a regular PHP package (such as `monolog/monolog`) are ignored when requesting
+an installation of an extension with PIE.
+
+It is worth noting that if your extension does define a dependency on another
+dependency, this would prevent installation of the extension, and at the moment
+the messaging around this is
+[not particularly clear](https://github.com/php/pie/issues/15).
+
 ## Submit the extension to Packagist
 
 Once you have committed your `composer.json` to your repository, you may then
