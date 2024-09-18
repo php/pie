@@ -8,16 +8,17 @@ use Composer\Semver\VersionParser;
 use Composer\Util\Platform;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
-use Psl\Json;
-use Psl\Type;
 use RuntimeException;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
 use Webmozart\Assert\Assert;
 
+use function array_combine;
 use function array_key_exists;
+use function array_map;
 use function assert;
 use function dirname;
+use function explode;
 use function file_exists;
 use function is_dir;
 use function is_executable;
@@ -118,18 +119,20 @@ $extVersions = array_map(
     },
     $exts
 );
-echo json_encode(array_combine($exts, $extVersions));
+echo implode("\n", array_map(fn($k, $v) => sprintf('%s:%s', $k, $v), $exts, $extVersions));
 PHP,
         ]))
             ->mustRun()
             ->getOutput());
 
-        return Json\typed(
-            $extVersionsRawJson,
-            Type\dict(
-                Type\string(),
-                Type\string(),
-            ),
+        $pairs = array_map(
+            static fn (string $row) => explode(':', $row),
+            explode("\n", $extVersionsRawJson),
+        );
+
+        return array_combine(
+            array_map(static fn (array $row) => $row[0], $pairs),
+            array_map(static fn (array $row) => $row[1], $pairs),
         );
     }
 
