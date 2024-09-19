@@ -33,7 +33,7 @@ final class InstallCommand extends Command
     {
         parent::configure();
 
-        CommandHelper::configureOptions($this);
+        CommandHelper::configureDownloadBuildInstallOptions($this);
     }
 
     public function execute(InputInterface $input, OutputInterface $output): int

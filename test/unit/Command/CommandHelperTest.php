@@ -182,7 +182,7 @@ final class CommandHelperTest extends TestCase
         $command = new Command();
         $input   = new ArrayInput(['--with-php-config' => 'C:\path\to\php-config']);
         $output  = new NullOutput();
-        CommandHelper::configureOptions($command);
+        CommandHelper::configureDownloadBuildInstallOptions($command);
         CommandHelper::validateInput($input, $command);
 
         $this->expectException(InvalidArgumentException::class);
@@ -199,7 +199,7 @@ final class CommandHelperTest extends TestCase
         $command = new Command();
         $input   = new ArrayInput(['--with-php-path' => '/usr/bin/php']);
         $output  = new NullOutput();
-        CommandHelper::configureOptions($command);
+        CommandHelper::configureDownloadBuildInstallOptions($command);
         CommandHelper::validateInput($input, $command);
 
         $this->expectException(InvalidArgumentException::class);
