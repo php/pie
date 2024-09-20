@@ -74,6 +74,8 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             '1.2.3',
             'https://test-uri/' . uniqid('downloadUrl', true),
             [],
+            null,
+            '1.2.3.0',
         );
 
         $releaseAssets = new GithubPackageReleaseAssets($authHelper, $guzzleMockClient, 'https://test-github-api-base-url.thephp.foundation');
@@ -126,6 +128,8 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             '1.2.3',
             'https://test-uri/' . uniqid('downloadUrl', true),
             [],
+            null,
+            '1.2.3.0',
         );
 
         $releaseAssets = new GithubPackageReleaseAssets($authHelper, $guzzleMockClient, 'https://test-github-api-base-url.thephp.foundation');
@@ -164,6 +168,8 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             '1.2.3',
             'https://test-uri/' . uniqid('downloadUrl', true),
             [],
+            null,
+            '1.2.3.0',
         );
 
         $releaseAssets = new GithubPackageReleaseAssets($authHelper, $guzzleMockClient, 'https://test-github-api-base-url.thephp.foundation');

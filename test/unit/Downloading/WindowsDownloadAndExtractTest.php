@@ -82,6 +82,8 @@ final class WindowsDownloadAndExtractTest extends TestCase
             '1.2.3',
             'https://test-uri/' . uniqid('downloadUrl', true),
             [],
+            null,
+            '1.2.3.0',
         );
 
         $downloadedPackage = $windowsDownloadAndExtract->__invoke($targetPlatform, $requestedPackage);

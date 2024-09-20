@@ -39,6 +39,8 @@ final class UnixBuildTest extends TestCase
                 '0.1.0',
                 null,
                 [ConfigureOption::fromComposerJsonDefinition(['name' => 'enable-pie_test_ext'])],
+                null,
+                '0.1.0.0',
             ),
             self::TEST_EXTENSION_PATH,
         );
