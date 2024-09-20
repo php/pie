@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Php\Pie\Installing\InstallNotification;
 
 use Composer\Composer;
-use Composer\Util\Platform;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\RequestOptions;
