@@ -21,6 +21,7 @@ use Php\Pie\Command\BuildCommand;
 use Php\Pie\Command\DownloadCommand;
 use Php\Pie\Command\InfoCommand;
 use Php\Pie\Command\InstallCommand;
+use Php\Pie\Command\ShowCommand;
 use Php\Pie\DependencyResolver\DependencyResolver;
 use Php\Pie\DependencyResolver\ResolveDependencyWithComposer;
 use Php\Pie\Downloading\DownloadAndExtract;
@@ -54,6 +55,7 @@ final class Container
         $container->singleton(BuildCommand::class);
         $container->singleton(InstallCommand::class);
         $container->singleton(InfoCommand::class);
+        $container->singleton(ShowCommand::class);
 
         $container->singleton(IOInterface::class, static function (ContainerInterface $container): IOInterface {
             return new ConsoleIO(
