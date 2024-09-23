@@ -12,6 +12,7 @@ use Composer\Repository\RepositorySet;
 use Php\Pie\ExtensionType;
 use Php\Pie\Platform\TargetPhp\ResolveTargetPhpToPlatformRepository;
 use Php\Pie\Platform\TargetPlatform;
+use Php\Pie\Platform\ThreadSafetyMode;
 
 use function preg_match;
 
@@ -61,6 +62,21 @@ final class ResolveDependencyWithComposer implements DependencyResolver
             throw UnableToResolveRequirement::toPhpOrZendExtension($package, $packageName, $requestedVersion);
         }
 
-        return Package::fromComposerCompletePackage($package);
+        $package = Package::fromComposerCompletePackage($package);
+
+        $this->assertCompatibleThreadSafetyMode($targetPlatform->threadSafety, $package);
+
+        return $package;
+    }
+
+    private function assertCompatibleThreadSafetyMode(ThreadSafetyMode $threadSafetyMode, Package $resolvedPackage): void
+    {
+        if ($threadSafetyMode === ThreadSafetyMode::NonThreadSafe && ! $resolvedPackage->supportNts) {
+            throw IncompatibleThreadSafetyMode::ztsExtensionOnNtsPlatform();
+        }
+
+        if ($threadSafetyMode === ThreadSafetyMode::ThreadSafe && ! $resolvedPackage->supportZts) {
+            throw IncompatibleThreadSafetyMode::ntsExtensionOnZtsPlatform();
+        }
     }
 }

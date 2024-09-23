@@ -6,9 +6,12 @@ namespace Php\PieUnitTest\DependencyResolver;
 
 use Composer\Composer;
 use Composer\IO\NullIO;
+use Composer\Package\CompletePackage;
+use Composer\Repository\ArrayRepository;
 use Composer\Repository\CompositeRepository;
 use Composer\Repository\RepositoryFactory;
 use Composer\Repository\RepositoryManager;
+use Php\Pie\DependencyResolver\IncompatibleThreadSafetyMode;
 use Php\Pie\DependencyResolver\ResolveDependencyWithComposer;
 use Php\Pie\DependencyResolver\UnableToResolveRequirement;
 use Php\Pie\Platform\Architecture;
@@ -106,6 +109,90 @@ final class ResolveDependencyWithComposerTest extends TestCase
             $targetPlatform,
             $package,
             $version,
+        );
+    }
+
+    public function testZtsOnlyPackageCannotBeInstalledOnNtsSystem(): void
+    {
+        $pkg = new CompletePackage('test-vendor/test-package', '1.0.0.0', '1.0.0');
+        $pkg->setType('php-ext');
+        $pkg->setPhpExt([
+            'extension-name' => 'testext',
+            'support-nts' => false,
+        ]);
+
+        $repoManager = $this->createMock(RepositoryManager::class);
+        $repoManager->method('getRepositories')
+            ->willReturn([new ArrayRepository([$pkg])]);
+
+        $this->composer = $this->createMock(Composer::class);
+        $this->composer->method('getRepositoryManager')
+            ->willReturn($repoManager);
+
+        $phpBinaryPath = $this->createMock(PhpBinaryPath::class);
+        $phpBinaryPath->expects(self::any())
+            ->method('version')
+            ->willReturn('8.3.0');
+
+        $targetPlatform = new TargetPlatform(
+            OperatingSystem::NonWindows,
+            $phpBinaryPath,
+            Architecture::x86_64,
+            ThreadSafetyMode::NonThreadSafe,
+            null,
+        );
+
+        $this->expectException(IncompatibleThreadSafetyMode::class);
+        $this->expectExceptionMessage('This extension does not support being installed on a non-Thread Safe PHP installation');
+        (new ResolveDependencyWithComposer(
+            $this->composer,
+            $this->resolveTargetPhpToPlatformRepository,
+        ))(
+            $targetPlatform,
+            'test-vendor/test-package',
+            '1.0.0',
+        );
+    }
+
+    public function testNtsOnlyPackageCannotBeInstalledOnZtsSystem(): void
+    {
+        $pkg = new CompletePackage('test-vendor/test-package', '1.0.0.0', '1.0.0');
+        $pkg->setType('php-ext');
+        $pkg->setPhpExt([
+            'extension-name' => 'testext',
+            'support-zts' => false,
+        ]);
+
+        $repoManager = $this->createMock(RepositoryManager::class);
+        $repoManager->method('getRepositories')
+            ->willReturn([new ArrayRepository([$pkg])]);
+
+        $this->composer = $this->createMock(Composer::class);
+        $this->composer->method('getRepositoryManager')
+            ->willReturn($repoManager);
+
+        $phpBinaryPath = $this->createMock(PhpBinaryPath::class);
+        $phpBinaryPath->expects(self::any())
+            ->method('version')
+            ->willReturn('8.3.0');
+
+        $targetPlatform = new TargetPlatform(
+            OperatingSystem::NonWindows,
+            $phpBinaryPath,
+            Architecture::x86_64,
+            ThreadSafetyMode::ThreadSafe,
+            null,
+        );
+
+        $this->expectException(IncompatibleThreadSafetyMode::class);
+        $this->expectExceptionMessage('This extension does not support being installed on a Thread Safe PHP installation');
+        (new ResolveDependencyWithComposer(
+            $this->composer,
+            $this->resolveTargetPhpToPlatformRepository,
+        ))(
+            $targetPlatform,
+            'test-vendor/test-package',
+            '1.0.0',
         );
     }
 }
