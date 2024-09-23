@@ -57,9 +57,16 @@ An example of `extension-name` being used:
 `priority` is currently not used, but will form part of the `ini` filename to
 control ordering of extensions, if the target platform uses it.
 
-#### `support-zts`
+#### `support-zts` and `support-nts`
 
-Indicates whether the extension supports Zend Thread-Safe (ZTS) mode or not.
+Indicates whether the extension supports Zend Thread-Safe (ZTS) and non-Thread-
+Safe (NTS) modes. Both these flags default to `true` if not specified, but if
+your extension does not support either mode, it should be specified, and will
+mean the extension will not be installable on the target platform.
+
+Theoretically, it is possible to specify `false` for both `support-zts` and
+`support-nts`, but this will mean your package cannot be installed anywhere, so
+is not advisable.
 
 #### `configure-options`
 
