@@ -109,6 +109,8 @@ final class CommandHelperTest extends TestCase
                 '1.2.3',
                 'https://test-uri/',
                 [],
+                null,
+                '1.2.3.0',
             ));
 
         $downloadAndExtract->expects(self::once())
@@ -155,6 +157,8 @@ final class CommandHelperTest extends TestCase
                 ]),
                 ConfigureOption::fromComposerJsonDefinition(['name' => 'enable-thing']),
             ],
+            null,
+            '1.0.0.0',
         );
         $inputDefinition = new InputDefinition();
         $inputDefinition->addOption(new InputOption('with-stuff', null, InputOption::VALUE_REQUIRED));

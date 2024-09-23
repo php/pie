@@ -45,6 +45,8 @@ final class WindowsExtensionAssetNameTest extends TestCase
             '1.2.3',
             null,
             [],
+            null,
+            '1.2.3.0',
         );
     }
 

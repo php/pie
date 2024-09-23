@@ -8,6 +8,8 @@ use Php\Pie\Building\Build;
 use Php\Pie\DependencyResolver\DependencyResolver;
 use Php\Pie\Downloading\DownloadAndExtract;
 use Php\Pie\Installing\Install;
+use Php\Pie\Installing\InstallNotification\FailedToSendInstallNotification;
+use Php\Pie\Installing\InstallNotification\InstallNotification;
 use Php\Pie\Platform\TargetPlatform;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -25,6 +27,7 @@ final class InstallCommand extends Command
         private readonly DownloadAndExtract $downloadAndExtract,
         private readonly Build $build,
         private readonly Install $install,
+        private readonly InstallNotification $installNotification,
     ) {
         parent::__construct();
     }
@@ -61,6 +64,17 @@ final class InstallCommand extends Command
         ($this->build)($downloadedPackage, $targetPlatform, $configureOptionsValues, $output);
 
         ($this->install)($downloadedPackage, $targetPlatform, $output);
+
+        try {
+            $this->installNotification->send($targetPlatform, $downloadedPackage);
+        } catch (FailedToSendInstallNotification $failedToSendInstallNotification) {
+            if ($output->isVeryVerbose()) {
+                $output->writeln('Install notification did not send.');
+                if ($output->isDebug()) {
+                    $output->writeln($failedToSendInstallNotification->__toString());
+                }
+            }
+        }
 
         return Command::SUCCESS;
     }

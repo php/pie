@@ -7,8 +7,10 @@ namespace Php\Pie\Platform;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 
 use function array_key_exists;
+use function curl_version;
 use function explode;
 use function function_exists;
+use function is_string;
 use function posix_getuid;
 use function preg_match;
 use function trim;
@@ -27,6 +29,20 @@ class TargetPlatform
         public readonly ThreadSafetyMode $threadSafety,
         public readonly WindowsCompiler|null $windowsCompiler,
     ) {
+    }
+
+    public static function getCurlVersion(): string
+    {
+        static $curlVersion = null;
+
+        if ($curlVersion === null) {
+            $curlVersionList = curl_version();
+            $curlVersion     = array_key_exists('version', $curlVersionList) && is_string($curlVersionList['version'])
+                ? $curlVersionList['version']
+                : null;
+        }
+
+        return (string) $curlVersion;
     }
 
     public static function isRunningAsRoot(): bool

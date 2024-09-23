@@ -32,6 +32,8 @@ use Php\Pie\Downloading\PackageReleaseAssets;
 use Php\Pie\Downloading\UnixDownloadAndExtract;
 use Php\Pie\Downloading\WindowsDownloadAndExtract;
 use Php\Pie\Installing\Install;
+use Php\Pie\Installing\InstallNotification\InstallNotification;
+use Php\Pie\Installing\InstallNotification\SendInstallNotificationUsingGuzzle;
 use Php\Pie\Installing\UnixInstall;
 use Php\Pie\Installing\WindowsInstall;
 use Php\Pie\Platform\TargetPhp\ResolveTargetPhpToPlatformRepository;
@@ -139,6 +141,8 @@ final class Container
                 return $container->get(UnixInstall::class);
             },
         );
+
+        $container->alias(SendInstallNotificationUsingGuzzle::class, InstallNotification::class);
 
         return $container;
     }

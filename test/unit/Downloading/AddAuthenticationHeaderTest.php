@@ -40,6 +40,8 @@ final class AddAuthenticationHeaderTest extends TestCase
                 '1.2.3',
                 $downloadUrl,
                 [],
+                null,
+                '1.2.3.0',
             ),
             $authHelper,
         );
@@ -63,6 +65,8 @@ final class AddAuthenticationHeaderTest extends TestCase
             '1.2.3',
             null,
             [],
+            null,
+            '1.2.3.0',
         );
 
         $this->expectException(RuntimeException::class);
