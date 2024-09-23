@@ -69,6 +69,8 @@ final class UnixDownloadAndExtractTest extends TestCase
             [],
             null,
             '1.2.3.0',
+            true,
+            true,
         );
 
         $downloadedPackage = $unixDownloadAndExtract->__invoke($targetPlatform, $requestedPackage);

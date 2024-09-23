@@ -29,6 +29,8 @@ final class Package
         public readonly array $configureOptions,
         public readonly string|null $notificationUrl,
         public readonly string $notificationVersion,
+        public readonly bool $supportZts,
+        public readonly bool $supportNts,
     ) {
     }
 
@@ -43,6 +45,14 @@ final class Package
             )
             : [];
 
+        $supportZts = $phpExtOptions !== null && array_key_exists('support-zts', $phpExtOptions)
+            ? $phpExtOptions['support-zts']
+            : true;
+
+        $supportNts = $phpExtOptions !== null && array_key_exists('support-nts', $phpExtOptions)
+            ? $phpExtOptions['support-nts']
+            : true;
+
         return new self(
             ExtensionType::tryFrom($completePackage->getType()) ?? ExtensionType::PhpModule,
             ExtensionName::determineFromComposerPackage($completePackage),
@@ -52,6 +62,8 @@ final class Package
             $configureOptions,
             $completePackage->getNotificationUrl(),
             $completePackage->getVersion(),
+            $supportZts,
+            $supportNts,
         );
     }
 

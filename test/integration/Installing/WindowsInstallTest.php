@@ -54,6 +54,8 @@ final class WindowsInstallTest extends TestCase
                 [],
                 null,
                 '1.2.3.0',
+                true,
+                true,
             ),
             self::TEST_EXTENSION_PATH,
         );

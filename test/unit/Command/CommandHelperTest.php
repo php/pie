@@ -111,6 +111,8 @@ final class CommandHelperTest extends TestCase
                 [],
                 null,
                 '1.2.3.0',
+                true,
+                true,
             ));
 
         $downloadAndExtract->expects(self::once())
@@ -159,6 +161,8 @@ final class CommandHelperTest extends TestCase
             ],
             null,
             '1.0.0.0',
+            true,
+            true,
         );
         $inputDefinition = new InputDefinition();
         $inputDefinition->addOption(new InputOption('with-stuff', null, InputOption::VALUE_REQUIRED));

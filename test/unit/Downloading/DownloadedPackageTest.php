@@ -27,6 +27,8 @@ final class DownloadedPackageTest extends TestCase
             [],
             null,
             '1.2.3.0',
+            true,
+            true,
         );
 
         $extractedSourcePath = uniqid('/path/to/downloaded/package', true);
