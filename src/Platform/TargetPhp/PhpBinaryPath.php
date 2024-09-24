@@ -119,7 +119,13 @@ $extVersions = array_map(
     },
     $exts
 );
-echo implode("\n", array_map(fn($k, $v) => sprintf('%s:%s', $k, $v), $exts, $extVersions));
+echo implode("\n", array_map(
+    static function ($k, $v) {
+        return sprintf('%s:%s', $k, $v);
+    },
+    $exts,
+    $extVersions
+));
 PHP,
         ]))
             ->mustRun()

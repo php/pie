@@ -10,11 +10,15 @@ use Php\Pie\Platform\OperatingSystem;
 use Php\Pie\Platform\TargetPhp\Exception\InvalidPhpBinaryPath;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
 
 use function array_combine;
+use function array_filter;
 use function array_map;
+use function array_unique;
 use function assert;
 use function defined;
 use function dirname;
@@ -184,5 +188,52 @@ final class PhpBinaryPathTest extends TestCase
             $expectedExtensionDir,
             $phpBinary->extensionPath(),
         );
+    }
+
+    /**
+     * @return array<string, array{0: string}>
+     *
+     * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
+     */
+    public function phpPathProvider(): array
+    {
+        $possiblePhpBinaries = array_filter(
+            array_unique([
+                '/usr/bin/php',
+                (string) (new PhpExecutableFinder())->find(),
+                '/usr/bin/php8.4',
+                '/usr/bin/php8.3',
+                '/usr/bin/php8.2',
+                '/usr/bin/php8.1',
+                '/usr/bin/php8.0',
+                '/usr/bin/php7.4',
+                '/usr/bin/php7.3',
+                '/usr/bin/php7.2',
+                '/usr/bin/php7.1',
+                '/usr/bin/php7.0',
+                '/usr/bin/php5.6',
+            ]),
+            static fn (string $phpPath) => file_exists($phpPath) && is_executable($phpPath),
+        );
+
+        return array_combine(
+            $possiblePhpBinaries,
+            array_map(static fn (string $phpPath) => [$phpPath], $possiblePhpBinaries),
+        );
+    }
+
+    #[DataProvider('phpPathProvider')]
+    public function testDifferentVersionsOfPhp(string $phpPath): void
+    {
+        assert($phpPath !== '');
+        $php = PhpBinaryPath::fromPhpBinaryPath($phpPath);
+        self::assertArrayHasKey('Core', $php->extensions());
+        self::assertNotEmpty($php->extensionPath());
+        self::assertInstanceOf(OperatingSystem::class, $php->operatingSystem());
+        self::assertNotEmpty($php->version());
+        self::assertNotEmpty($php->majorMinorVersion());
+        self::assertInstanceOf(Architecture::class, $php->machineType());
+        self::assertGreaterThan(0, $php->phpIntSize());
+        self::assertNotEmpty($php->phpinfo());
     }
 }
