@@ -76,6 +76,8 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             [],
             null,
             '1.2.3.0',
+            true,
+            true,
         );
 
         $releaseAssets = new GithubPackageReleaseAssets($authHelper, $guzzleMockClient, 'https://test-github-api-base-url.thephp.foundation');
@@ -130,6 +132,8 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             [],
             null,
             '1.2.3.0',
+            true,
+            true,
         );
 
         $releaseAssets = new GithubPackageReleaseAssets($authHelper, $guzzleMockClient, 'https://test-github-api-base-url.thephp.foundation');
@@ -170,6 +174,8 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             [],
             null,
             '1.2.3.0',
+            true,
+            true,
         );
 
         $releaseAssets = new GithubPackageReleaseAssets($authHelper, $guzzleMockClient, 'https://test-github-api-base-url.thephp.foundation');

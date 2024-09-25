@@ -84,6 +84,8 @@ final class WindowsDownloadAndExtractTest extends TestCase
             [],
             null,
             '1.2.3.0',
+            true,
+            true,
         );
 
         $downloadedPackage = $windowsDownloadAndExtract->__invoke($targetPlatform, $requestedPackage);
