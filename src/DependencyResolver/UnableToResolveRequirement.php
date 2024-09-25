@@ -7,16 +7,26 @@ namespace Php\Pie\DependencyResolver;
 use Composer\Package\PackageInterface;
 use RuntimeException;
 
+use function array_map;
+use function count;
+use function implode;
 use function sprintf;
+use function strip_tags;
 
 class UnableToResolveRequirement extends RuntimeException
 {
-    public static function fromRequirement(string $requiredPackageName, string|null $requiredVersion): self
-    {
+    public static function fromRequirement(
+        string $requiredPackageName,
+        string|null $requiredVersion,
+        ArrayCollectionIO $io,
+    ): self {
+        $errors = $io->errors;
+
         return new self(sprintf(
-            'Unable to find an installable package %s%s',
+            'Unable to find an installable package %s%s%s',
             $requiredPackageName,
             $requiredVersion !== null ? sprintf(' for version %s.', $requiredVersion) : '.',
+            count($errors) ? "\n\n" . implode("\n\n", array_map(static fn ($e) => strip_tags($e), $errors)) : '',
         ));
     }
 

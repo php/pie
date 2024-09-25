@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\PieUnitTest\DependencyResolver;
 
 use Composer\Package\PackageInterface;
+use Php\Pie\DependencyResolver\ArrayCollectionIO;
 use Php\Pie\DependencyResolver\UnableToResolveRequirement;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
@@ -34,15 +35,23 @@ final class UnableToResolveRequirementTest extends TestCase
 
     public function testFromRequirementWithVersion(): void
     {
-        $exception = UnableToResolveRequirement::fromRequirement('foo/bar', '^1.2');
+        $io = new ArrayCollectionIO();
+        $io->writeError('message1');
+        $io->writeError(['message2', 'message3']);
 
-        self::assertSame('Unable to find an installable package foo/bar for version ^1.2.', $exception->getMessage());
+        $exception = UnableToResolveRequirement::fromRequirement('foo/bar', '^1.2', $io);
+
+        self::assertSame("Unable to find an installable package foo/bar for version ^1.2.\n\nmessage1\n\nmessage2\n\nmessage3", $exception->getMessage());
     }
 
     public function testFromRequirementWithoutVersion(): void
     {
-        $exception = UnableToResolveRequirement::fromRequirement('foo/bar', null);
+        $io = new ArrayCollectionIO();
+        $io->writeError('message1');
+        $io->writeError(['message2', 'message3']);
 
-        self::assertSame('Unable to find an installable package foo/bar.', $exception->getMessage());
+        $exception = UnableToResolveRequirement::fromRequirement('foo/bar', null, $io);
+
+        self::assertSame("Unable to find an installable package foo/bar.\n\nmessage1\n\nmessage2\n\nmessage3", $exception->getMessage());
     }
 }
