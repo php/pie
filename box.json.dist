@@ -1,4 +1,5 @@
 {
     "alias": "pie.phar",
-    "output": "pie.phar"
+    "output": "pie.phar",
+    "git": "pie_version"
 }
