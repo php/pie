@@ -38,6 +38,7 @@
         "webmozart/assert": "^1.11"
     },
     "require-dev": {
+        "behat/behat": "^3.14",
         "doctrine/coding-standard": "^12.0",
         "php-standard-library/psalm-plugin": "^2.3",
         "phpunit/phpunit": "^10.5",
