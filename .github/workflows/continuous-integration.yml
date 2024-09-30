@@ -69,6 +69,8 @@ jobs:
       - coding-standards
       - static-analysis
     runs-on: ${{ matrix.operating-system }}
+    # Do not build the PHAR on a 'pull_request' build, as we can't work out the version correctly in Box
+    if: github.event_name == 'push'
     strategy:
       matrix:
         operating-system:
@@ -83,6 +85,8 @@ jobs:
           tools: composer, box
           php-version: "${{ matrix.php-version }}"
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: ramsey/composer-install@v3
       - name: Build PHAR
         run: box compile
