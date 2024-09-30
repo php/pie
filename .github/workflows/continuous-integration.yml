@@ -69,8 +69,6 @@ jobs:
       - coding-standards
       - static-analysis
     runs-on: ${{ matrix.operating-system }}
-    # Do not build the PHAR on a 'pull_request' build, as we can't work out the version correctly in Box
-    if: github.event_name == 'push'
     strategy:
       matrix:
         operating-system:
@@ -87,6 +85,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      # Temporary until we have a first tag; Box needs at least one tag to exist!
+      - run: git describe --tags HEAD || git tag 0.0.0
       - uses: ramsey/composer-install@v3
       - name: Build PHAR
         run: box compile
