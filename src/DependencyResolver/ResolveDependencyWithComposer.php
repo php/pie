@@ -35,14 +35,16 @@ final class ResolveDependencyWithComposer implements DependencyResolver
 
     public function __invoke(TargetPlatform $targetPlatform, string $packageName, string|null $requestedVersion): Package
     {
+        $io = new ArrayCollectionIO();
+
         $package = (new VersionSelector(
             $this->factoryRepositorySet($requestedVersion),
             ($this->resolveTargetPhpToPlatformRepository)($targetPlatform->phpBinaryPath),
         ))
-            ->findBestCandidate($packageName, $requestedVersion);
+            ->findBestCandidate($packageName, $requestedVersion, io: $io);
 
         if (! $package instanceof CompletePackageInterface) {
-            throw UnableToResolveRequirement::fromRequirement($packageName, $requestedVersion);
+            throw UnableToResolveRequirement::fromRequirement($packageName, $requestedVersion, $io);
         }
 
         /**
