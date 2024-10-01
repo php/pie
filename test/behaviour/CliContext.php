@@ -37,17 +37,17 @@ class CliContext implements Context
     {
         Assert::same(0, $this->exitCode);
 
-        Assert::regex($this->output, '#Found package: apcu/apcu:v?\d+\.\d+\.\d+ which provides ext-apcu#');
-        Assert::regex($this->output, '#Extracted apcu/apcu:v?\d+\.\d+\.\d+ source to: .+/krakjoe-apcu-[a-z0-9]+#');
+        Assert::regex($this->output, '#Found package: asgrim/example-pie-extension:v?\d+\.\d+\.\d+ which provides ext-example_pie_extension#');
+        Assert::regex($this->output, '#Extracted asgrim/example-pie-extension:v?\d+\.\d+\.\d+ source to: .+/asgrim-example-pie-extension-[a-z0-9]+#');
     }
 
     /**
-     * @Then version :version of the extension should have been downloaded
+     * @Then version :version of package :package should have been downloaded
      */
-    public function versionOfTheExtensionShouldHaveBeen(string $version)
+    public function versionOfTheExtensionShouldHaveBeen(string $version, string $package)
     {
         Assert::same(0, $this->exitCode);
 
-        Assert::contains($this->output, 'Found package: xdebug/xdebug:' . $version . ' which provides ext-xdebug');
+        Assert::contains($this->output, 'Found package: ' . $package . ':' . $version);
     }
 }
