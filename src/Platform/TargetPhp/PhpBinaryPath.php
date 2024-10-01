@@ -68,6 +68,20 @@ class PhpBinaryPath
     }
 
     /** @return non-empty-string */
+    public function phpApiVersion(): string
+    {
+        if (
+            preg_match('/PHP API([ =>\t]*)(.*)/', $this->phpinfo(), $m)
+            && array_key_exists(2, $m)
+            && $m[2] !== ''
+        ) {
+            return $m[2];
+        }
+
+        throw new RuntimeException('Failed to find PHP API version...');
+    }
+
+    /** @return non-empty-string */
     public function extensionPath(): string
     {
         $phpinfo = $this->phpinfo();
