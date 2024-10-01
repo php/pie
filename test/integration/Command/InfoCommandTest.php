@@ -10,9 +10,6 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 
-use const PHP_VERSION;
-use const PHP_VERSION_ID;
-
 #[CoversClass(InfoCommand::class)]
 final class InfoCommandTest extends TestCase
 {
@@ -25,10 +22,6 @@ final class InfoCommandTest extends TestCase
 
     public function testInfoCommandDisplaysInformation(): void
     {
-        if (PHP_VERSION_ID < 80300 || PHP_VERSION_ID >= 80400) {
-            self::markTestSkipped('This test can only run on PHP 8.3 - you are running ' . PHP_VERSION);
-        }
-
         $this->commandTester->execute(['requested-package-and-version' => 'asgrim/example-pie-extension:dev-main#9b5e6c80a1e05556e4e6824f0c112a4992cee001']);
 
         $this->commandTester->assertCommandIsSuccessful();

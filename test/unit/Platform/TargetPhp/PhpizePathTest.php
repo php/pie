@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\PieUnitTest\Platform\TargetPhp;
 
+use Composer\Util\Platform;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPhp\PhpizePath;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -26,7 +27,7 @@ final class PhpizePathTest extends TestCase
      *
      * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
      */
-    public function phpPathProvider(): array
+    public static function phpPathProvider(): array
     {
         $possiblePhpBinaries = array_filter(
             array_unique([
@@ -56,6 +57,10 @@ final class PhpizePathTest extends TestCase
     #[DataProvider('phpPathProvider')]
     public function testGuessingFindsPhpizePath(): void
     {
+        if (Platform::isWindows()) {
+            self::markTestSkipped('Guessing phpize path is not done for Windows as we are not building for Windows (yet)');
+        }
+
         $phpize = PhpizePath::guessFrom(PhpBinaryPath::fromCurrentProcess());
 
         self::assertNotEmpty($phpize->phpizeBinaryPath);

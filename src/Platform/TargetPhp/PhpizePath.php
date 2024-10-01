@@ -8,6 +8,7 @@ use RuntimeException;
 use Symfony\Component\Process\Process;
 
 use function array_key_exists;
+use function assert;
 use function file_exists;
 use function is_executable;
 use function preg_match;
