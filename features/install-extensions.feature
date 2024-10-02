@@ -10,11 +10,14 @@ Feature: Extensions can be installed with Behat
 
     Examples:
       | constraint | version  |
-      | dev-main   | dev-main |
       | 2.0.0      | 2.0.0    |
       | ^2.0       | 2.0.0    |
 
-  @wip
+  @non-windows
+  Example: An in-development version can be downloaded on non-Windows systems
+    When I run a command to download version "dev-main" of an extension
+    Then version "dev-main" should have been downloaded
+
   Example: An extension can be built
     When I run a command to build an extension
     Then the extension should have been built

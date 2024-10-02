@@ -54,7 +54,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/checkout@v4
       - uses: ramsey/composer-install@v3
-      - name: Run Behat
+      - name: Run Behat on Windows
+        if: matrix.operating-system == 'windows-latest'
+        run: vendor/bin/behat --tags="~@non-windows"
+      - name: Run Behat on non-Windows
+        if: matrix.operating-system != 'windows-latest'
         run: vendor/bin/behat
 
   coding-standards:

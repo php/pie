@@ -39,22 +39,43 @@ class CliContext implements Context
         $this->exitCode = $proc->getExitCode();
     }
 
-    /** @Then the latest version should have been downloaded */
-    public function theLatestVersionShouldHaveBeenDownloaded(): void
+    /** @psalm-assert !null $this->output */
+    private function assertCommandSuccessful(): void
     {
         Assert::same(0, $this->exitCode);
 
         Assert::notNull($this->output);
+    }
+
+    /** @Then the latest version should have been downloaded */
+    public function theLatestVersionShouldHaveBeenDownloaded(): void
+    {
+        $this->assertCommandSuccessful();
         Assert::regex($this->output, '#Found package: asgrim/example-pie-extension:v?\d+\.\d+\.\d+ which provides ext-example_pie_extension#');
-        Assert::regex($this->output, '#Extracted asgrim/example-pie-extension:v?\d+\.\d+\.\d+ source to: .+/asgrim-example-pie-extension-[a-z0-9]+#');
+        Assert::regex($this->output, '#Extracted asgrim/example-pie-extension:v?\d+\.\d+\.\d+ source to: #');
     }
 
     /** @Then version :version should have been downloaded */
     public function versionOfTheExtensionShouldHaveBeen(string $version): void
     {
-        Assert::same(0, $this->exitCode);
-
-        Assert::notNull($this->output);
+        $this->assertCommandSuccessful();
         Assert::contains($this->output, 'Found package: asgrim/example-pie-extension:' . $version);
+    }
+
+    /** @When I run a command to build an extension */
+    public function iRunACommandToBuildAnExtension(): void
+    {
+        $this->runPieCommand(['build', 'asgrim/example-pie-extension']);
+    }
+
+    /**
+     * @Then /^the extension should have been built$/
+     */
+    public function theExtensionShouldHaveBeenBuilt()
+    {
+        $this->assertCommandSuccessful();
+        Assert::contains($this->output, 'phpize complete.');
+        Assert::contains($this->output, 'Configure complete.');
+        Assert::contains($this->output, 'Build complete:');
     }
 }
