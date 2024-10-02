@@ -12,5 +12,4 @@ Feature: Extensions can be installed with Behat
       | command                                    | package                      | version     |
       | download xdebug/xdebug:dev-master          | xdebug/xdebug                | dev-master  |
       | download xdebug/xdebug:3.4.0alpha1@alpha   | xdebug/xdebug                | 3.4.0alpha1 |
-      | download asgrim/example-pie-extension:^1.0 | asgrim/example-pie-extension | 1.0.1       |
       | download asgrim/example-pie-extension:^2.0 | asgrim/example-pie-extension | 2.0.0       |
