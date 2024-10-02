@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\PieBehaviourTest;
 
 use Behat\Behat\Context\Context;
+use Composer\Util\Platform;
 use Symfony\Component\Process\Process;
 use Webmozart\Assert\Assert;
 
@@ -72,6 +73,13 @@ class CliContext implements Context
     public function theExtensionShouldHaveBeenBuilt(): void
     {
         $this->assertCommandSuccessful();
+
+        if (Platform::isWindows()) {
+            Assert::contains($this->output, 'Nothing to do on Windows.');
+
+            return;
+        }
+
         Assert::contains($this->output, 'phpize complete.');
         Assert::contains($this->output, 'Configure complete.');
         Assert::contains($this->output, 'Build complete:');
@@ -87,8 +95,35 @@ class CliContext implements Context
     public function theExtensionShouldHaveBeenBuiltWithOptions(): void
     {
         $this->assertCommandSuccessful();
+
+        if (Platform::isWindows()) {
+            Assert::contains($this->output, 'Nothing to do on Windows.');
+
+            return;
+        }
+
         Assert::contains($this->output, 'phpize complete.');
         Assert::contains($this->output, 'Configure complete with options: --with-hello-name=\'sup\'');
         Assert::contains($this->output, 'Build complete:');
+    }
+
+    /** @When /^I run a command to install an extension$/ */
+    public function iRunACommandToInstallAnExtension(): void
+    {
+        $this->runPieCommand(['install', 'asgrim/example-pie-extension']);
+    }
+
+    /** @Then /^the extension should have been installed$/ */
+    public function theExtensionShouldHaveBeenInstalled(): void
+    {
+        $this->assertCommandSuccessful();
+
+        if (Platform::isWindows()) {
+            Assert::regex($this->output, '#Copied DLL to: [-\\\_:.a-zA-Z0-9]+\\\php_example_pie_extension.dll#');
+
+            return;
+        }
+
+        Assert::regex($this->output, '#Install complete: [-_a-zA-Z0-9/]+/example_pie_extension.so#');
     }
 }
