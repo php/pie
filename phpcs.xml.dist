@@ -10,6 +10,7 @@
     <file>src</file>
     <file>test/unit</file>
     <file>test/integration</file>
+    <file>test/behaviour</file>
 
     <rule ref="Doctrine">
         <exclude name="Generic.Files.LineLength.TooLong"/>

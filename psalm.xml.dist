@@ -13,6 +13,7 @@
         <directory name="src"/>
         <directory name="test/unit"/>
         <directory name="test/integration"/>
+        <directory name="test/behaviour"/>
         <ignoreFiles>
             <directory name="vendor"/>
         </ignoreFiles>

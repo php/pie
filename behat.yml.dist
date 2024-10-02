@@ -7,4 +7,4 @@ default:
         - Php\PieBehaviourTest\CliContext
   gherkin:
     filters:
-      tags: ~@wip
+      tags: "~@wip"

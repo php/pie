@@ -1,15 +1,30 @@
 Feature: Extensions can be installed with Behat
 
   Example: The latest version of an extension can be downloaded
-    When I run PIE command "download asgrim/example-pie-extension"
+    When I run a command to download the latest version of an extension
     Then the latest version should have been downloaded
 
   Scenario Outline: A version matching the requested constraint can be downloaded
-    When I run PIE command "<command>"
-    Then version "<version>" of package "<package>" should have been downloaded
+    When I run a command to download version "<constraint>" of an extension
+    Then version "<version>" should have been downloaded
 
     Examples:
-      | command                                    | package                      | version     |
-      | download xdebug/xdebug:dev-master          | xdebug/xdebug                | dev-master  |
-      | download xdebug/xdebug:3.4.0alpha1@alpha   | xdebug/xdebug                | 3.4.0alpha1 |
-      | download asgrim/example-pie-extension:^2.0 | asgrim/example-pie-extension | 2.0.0       |
+      | constraint | version  |
+      | dev-main   | dev-main |
+      | 2.0.0      | 2.0.0    |
+      | ^2.0       | 2.0.0    |
+
+  @wip
+  Example: An extension can be built
+    When I run a command to build an extension
+    Then the extension should have been built
+
+  @wip
+  Example: An extension can be built with configure options
+    When I run a command to build an extension with configure options
+    Then the extension should have been built
+
+  @wip
+  Example: An extension can be installed
+    When I run a command to install an extension
+    Then the extension should have been installed
