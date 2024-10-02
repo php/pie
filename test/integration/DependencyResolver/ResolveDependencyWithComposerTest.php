@@ -16,7 +16,6 @@ use PHPUnit\Framework\TestCase;
 use function array_combine;
 use function array_map;
 
-use const PHP_VERSION;
 use const PHP_VERSION_ID;
 
 #[CoversClass(ResolveDependencyWithComposer::class)]
@@ -35,21 +34,24 @@ final class ResolveDependencyWithComposerTest extends TestCase
     public static function validVersionsList(): array
     {
         $versionsAndExpected = [
-            [null, '1.0.1', self::DOWNLOAD_URL_ANY],
-            ['*', '1.0.1', self::DOWNLOAD_URL_ANY],
-            ['1.0.1-alpha.3@alpha', '1.0.1-alpha.3', self::DOWNLOAD_URL_1_0_1_ALPHA_3],
-            ['^1.0', '1.0.1', self::DOWNLOAD_URL_1_0_1],
-            ['^1.1.0@alpha', '1.1.0-beta.1', self::DOWNLOAD_URL_1_1_0_BETA_1],
-            ['^1.0@beta', '1.0.1', self::DOWNLOAD_URL_1_0_1],
-            ['^1.1@beta', '1.1.0-beta.1', self::DOWNLOAD_URL_1_1_0_BETA_1],
-            ['~1.0.0', '1.0.1', self::DOWNLOAD_URL_1_0_1],
-            ['~1.0.0@alpha', '1.0.1', self::DOWNLOAD_URL_1_0_1],
-            ['~1.0.0@beta', '1.0.1', self::DOWNLOAD_URL_1_0_1],
-            ['~1.0@beta', '1.0.1', self::DOWNLOAD_URL_1_0_1],
+            [null, '2.0.0', self::DOWNLOAD_URL_ANY],
+            ['*', '2.0.0', self::DOWNLOAD_URL_ANY],
             ['dev-main', 'dev-main', self::DOWNLOAD_URL_ANY],
             ['dev-main#769f906413d6d1e12152f6d34134cbcd347ca253', 'dev-main', self::DOWNLOAD_URL_1_0_1],
-            ['v1.x-dev', 'v1.x-dev', self::DOWNLOAD_URL_1_1_0_BETA_1],
         ];
+
+        if (PHP_VERSION_ID >= 80300 && PHP_VERSION_ID <= 80400) {
+            $versionsAndExpected[] = ['1.0.1-alpha.3@alpha', '1.0.1-alpha.3', self::DOWNLOAD_URL_1_0_1_ALPHA_3];
+            $versionsAndExpected[] = ['^1.0', '1.0.1', self::DOWNLOAD_URL_1_0_1];
+            $versionsAndExpected[] = ['^1.1.0@alpha', '1.1.0-beta.1', self::DOWNLOAD_URL_1_1_0_BETA_1];
+            $versionsAndExpected[] = ['^1.0@beta', '1.0.1', self::DOWNLOAD_URL_1_0_1];
+            $versionsAndExpected[] = ['^1.1@beta', '1.1.0-beta.1', self::DOWNLOAD_URL_1_1_0_BETA_1];
+            $versionsAndExpected[] = ['~1.0.0', '1.0.1', self::DOWNLOAD_URL_1_0_1];
+            $versionsAndExpected[] = ['~1.0.0@alpha', '1.0.1', self::DOWNLOAD_URL_1_0_1];
+            $versionsAndExpected[] = ['~1.0.0@beta', '1.0.1', self::DOWNLOAD_URL_1_0_1];
+            $versionsAndExpected[] = ['~1.0@beta', '1.0.1', self::DOWNLOAD_URL_1_0_1];
+            $versionsAndExpected[] = ['v1.x-dev', 'v1.x-dev', self::DOWNLOAD_URL_1_1_0_BETA_1];
+        }
 
         return array_combine(
             array_map(static fn ($item) => $item[0] ?? 'null', $versionsAndExpected),
@@ -63,10 +65,6 @@ final class ResolveDependencyWithComposerTest extends TestCase
         string $expectedVersion,
         string $expectedDownloadUrl,
     ): void {
-        if (PHP_VERSION_ID < 80300 || PHP_VERSION_ID >= 80400) {
-            self::markTestSkipped('This test can only run on PHP 8.3 - you are running ' . PHP_VERSION);
-        }
-
         $container = Container::factory();
         $resolve   = $container->get(DependencyResolver::class);
 

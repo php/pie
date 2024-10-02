@@ -15,12 +15,18 @@ use Php\Pie\Installing\UnixInstall;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Output\BufferedOutput;
-use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Process\Process;
 
+use function array_combine;
+use function array_filter;
+use function array_map;
 use function array_unshift;
+use function assert;
+use function file_exists;
+use function is_executable;
 use function is_writable;
 
 #[CoversClass(UnixInstall::class)]
@@ -28,14 +34,48 @@ final class UnixInstallTest extends TestCase
 {
     private const TEST_EXTENSION_PATH = __DIR__ . '/../../assets/pie_test_ext';
 
-    public function testUnixInstallCanInstallExtension(): void
+    /**
+     * @return array<string, array{0: non-empty-string}>
+     *
+     * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
+     */
+    public static function phpPathProvider(): array
     {
+        // data providers cannot return empty, even if the test is skipped
+        if (Platform::isWindows()) {
+            return ['skip' => ['skip']];
+        }
+
+        $possiblePhpConfigPaths = array_filter(
+            [
+                '/usr/bin/php-config',
+                '/usr/bin/php-config8.4',
+                '/usr/bin/php-config8.3',
+                '/usr/bin/php-config8.2',
+                '/usr/bin/php-config8.1',
+                '/usr/bin/php-config8.0',
+                '/usr/bin/php-config7.4',
+            ],
+            static fn (string $phpConfigPath) => file_exists($phpConfigPath)
+                && is_executable($phpConfigPath),
+        );
+
+        return array_combine(
+            $possiblePhpConfigPaths,
+            array_map(static fn (string $phpConfigPath) => [$phpConfigPath], $possiblePhpConfigPaths),
+        );
+    }
+
+    #[DataProvider('phpPathProvider')]
+    public function testUnixInstallCanInstallExtension(string $phpConfig): void
+    {
+        assert($phpConfig !== '');
         if (Platform::isWindows()) {
             self::markTestSkipped('Unix build test cannot be run on Windows');
         }
 
         $output         = new BufferedOutput();
-        $targetPlatform = TargetPlatform::fromPhpBinaryPath(PhpBinaryPath::fromCurrentProcess());
+        $targetPlatform = TargetPlatform::fromPhpBinaryPath(PhpBinaryPath::fromPhpConfigExecutable($phpConfig));
         $extensionPath  = $targetPlatform->phpBinaryPath->extensionPath();
 
         $downloadedPackage = DownloadedPackage::fromPackageAndExtractedPath(
@@ -58,7 +98,7 @@ final class UnixInstallTest extends TestCase
             $downloadedPackage,
             $targetPlatform,
             ['--enable-pie_test_ext'],
-            new NullOutput(),
+            $output,
         );
 
         $installedSharedObject = (new UnixInstall())->__invoke(
@@ -66,8 +106,7 @@ final class UnixInstallTest extends TestCase
             $targetPlatform,
             $output,
         );
-
-        $outputString = $output->fetch();
+        $outputString          = $output->fetch();
 
         self::assertStringContainsString('Install complete: ' . $extensionPath . '/pie_test_ext.so', $outputString);
         self::assertStringContainsString('You must now add "extension=pie_test_ext" to your php.ini', $outputString);

@@ -11,9 +11,6 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 
-use const PHP_VERSION;
-use const PHP_VERSION_ID;
-
 #[CoversClass(BuildCommand::class)]
 class BuildCommandTest extends TestCase
 {
@@ -28,10 +25,6 @@ class BuildCommandTest extends TestCase
 
     public function testBuildCommandWillBuildTheExtension(): void
     {
-        if (PHP_VERSION_ID < 80300 || PHP_VERSION_ID >= 80400) {
-            self::markTestSkipped('This test can only run on PHP 8.3 - you are running ' . PHP_VERSION);
-        }
-
         $this->commandTester->execute(['requested-package-and-version' => self::TEST_PACKAGE]);
 
         $this->commandTester->assertCommandIsSuccessful();

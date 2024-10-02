@@ -46,13 +46,17 @@ class DownloadCommandTest extends TestCase
     public static function validVersionsList(): array
     {
         $versionsAndExpected = [
-            [self::TEST_PACKAGE, self::TEST_PACKAGE . ':1.0.1'],
-            [self::TEST_PACKAGE . ':^1.0', self::TEST_PACKAGE . ':1.0.1'],
-            [self::TEST_PACKAGE . ':1.0.1-alpha.3@alpha', self::TEST_PACKAGE . ':1.0.1-alpha.3'],
-            [self::TEST_PACKAGE . ':*', self::TEST_PACKAGE . ':1.0.1'],
-            [self::TEST_PACKAGE . ':~1.0.0@alpha', self::TEST_PACKAGE . ':1.0.1'],
-            [self::TEST_PACKAGE . ':~1.0.0', self::TEST_PACKAGE . ':1.0.1'],
+            [self::TEST_PACKAGE, self::TEST_PACKAGE . ':2.0.0'],
+            [self::TEST_PACKAGE . ':*', self::TEST_PACKAGE . ':2.0.0'],
+            [self::TEST_PACKAGE . ':^2.0', self::TEST_PACKAGE . ':2.0.0'],
         ];
+
+        if (PHP_VERSION_ID >= 80300 && PHP_VERSION_ID <= 80400) {
+            $versionsAndExpected[] = [self::TEST_PACKAGE . ':^1.0', self::TEST_PACKAGE . ':1.0.1'];
+            $versionsAndExpected[] = [self::TEST_PACKAGE . ':1.0.1-alpha.3@alpha', self::TEST_PACKAGE . ':1.0.1-alpha.3'];
+            $versionsAndExpected[] = [self::TEST_PACKAGE . ':~1.0.0@alpha', self::TEST_PACKAGE . ':1.0.1'];
+            $versionsAndExpected[] = [self::TEST_PACKAGE . ':~1.0.0', self::TEST_PACKAGE . ':1.0.1'];
+        }
 
         return array_combine(
             array_map(static fn ($item) => $item[0], $versionsAndExpected),
@@ -65,10 +69,6 @@ class DownloadCommandTest extends TestCase
         string $requestedVersion,
         string $expectedVersion,
     ): void {
-        if (PHP_VERSION_ID < 80300 || PHP_VERSION_ID >= 80400) {
-            self::markTestSkipped('This test can only run on PHP 8.3 - you are running ' . PHP_VERSION);
-        }
-
         $this->commandTester->execute(['requested-package-and-version' => $requestedVersion]);
 
         $this->commandTester->assertCommandIsSuccessful();
@@ -82,10 +82,6 @@ class DownloadCommandTest extends TestCase
     {
         if (Platform::isWindows()) {
             self::markTestSkipped('This test can only run on non-Windows systems');
-        }
-
-        if (PHP_VERSION_ID < 80300 || PHP_VERSION_ID >= 80400) {
-            self::markTestSkipped('This test can only run on PHP 8.3 - you are running ' . PHP_VERSION);
         }
 
         $this->commandTester->execute(['requested-package-and-version' => 'asgrim/example-pie-extension:dev-main#9b5e6c80a1e05556e4e6824f0c112a4992cee001']);

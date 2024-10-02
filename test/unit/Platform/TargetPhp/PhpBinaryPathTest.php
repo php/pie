@@ -13,8 +13,8 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Process\PhpExecutableFinder;
-use Symfony\Component\Process\Process;
 
+use function array_column;
 use function array_combine;
 use function array_filter;
 use function array_map;
@@ -30,7 +30,6 @@ use function is_executable;
 use function php_uname;
 use function phpversion;
 use function sprintf;
-use function trim;
 
 use const DIRECTORY_SEPARATOR;
 use const PHP_INT_SIZE;
@@ -87,28 +86,52 @@ final class PhpBinaryPathTest extends TestCase
         self::assertNull($phpBinary->phpConfigPath());
     }
 
-    public function testFromPhpConfigExecutable(): void
+    /**
+     * @return array<string, array{0: non-empty-string, 1: non-empty-string}>
+     *
+     * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
+     */
+    public static function phpConfigPathProvider(): array
     {
-        $process             = (new Process(['which', 'php-config']));
-        $exitCode            = $process->run();
-        $phpConfigExecutable = trim($process->getOutput());
-
-        if ($exitCode !== 0 || ! file_exists($phpConfigExecutable) || ! is_executable($phpConfigExecutable) || $phpConfigExecutable === '') {
-            self::markTestSkipped('Needs php-config in path to run this test');
+        // data providers cannot return empty, even if the test is skipped
+        if (Platform::isWindows()) {
+            return ['skip' => ['skip', 'skip']];
         }
 
-        $phpBinary = PhpBinaryPath::fromPhpConfigExecutable($phpConfigExecutable);
-
-        // NOTE: this makes an assumption that the `php-config` in path is the same as the version being executed
-        // In most cases, this will be the cases (e.g. in CI, running locally), but if you're trying to test this and
-        // the versions are not matching, that's probably why.
-        // @todo improve this assertion in future, if it becomes problematic
-        self::assertSame(
-            sprintf('%s.%s.%s', PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION),
-            $phpBinary->version(),
+        $possiblePhpConfigPaths = array_filter(
+            [
+                ['/usr/bin/php-config8.3', '8.3'],
+                ['/usr/bin/php-config8.2', '8.2'],
+                ['/usr/bin/php-config8.1', '8.1'],
+                ['/usr/bin/php-config8.0', '8.0'],
+                ['/usr/bin/php-config7.4', '7.4'],
+            ],
+            static fn (array $phpConfigPath) => file_exists($phpConfigPath[0])
+                && is_executable($phpConfigPath[0]),
         );
 
-        self::assertSame($phpConfigExecutable, $phpBinary->phpConfigPath());
+        return array_combine(
+            array_column($possiblePhpConfigPaths, 0),
+            $possiblePhpConfigPaths,
+        );
+    }
+
+    #[DataProvider('phpConfigPathProvider')]
+    public function testFromPhpConfigExecutable(string $phpConfigPath, string $expectedMajorMinor): void
+    {
+        if (Platform::isWindows()) {
+            self::markTestSkipped('Do not need to test php-config on Windows as we are not building on Windows.');
+        }
+
+        assert($phpConfigPath !== '');
+        $phpBinary = PhpBinaryPath::fromPhpConfigExecutable($phpConfigPath);
+
+        self::assertSame(
+            $expectedMajorMinor,
+            $phpBinary->majorMinorVersion(),
+        );
+
+        self::assertSame($phpConfigPath, $phpBinary->phpConfigPath());
     }
 
     public function testExtensions(): void
@@ -195,7 +218,7 @@ final class PhpBinaryPathTest extends TestCase
      *
      * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
      */
-    public function phpPathProvider(): array
+    public static function phpPathProvider(): array
     {
         $possiblePhpBinaries = array_filter(
             array_unique([

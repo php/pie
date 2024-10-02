@@ -44,9 +44,13 @@ final class UnixInstall implements Install
             array_unshift($makeInstallCommand, 'sudo');
         }
 
-        (new Process($makeInstallCommand, $downloadedPackage->extractedSourcePath))
+        $makeInstallOutput = (new Process($makeInstallCommand, $downloadedPackage->extractedSourcePath))
             ->mustRun()
             ->getOutput();
+
+        if ($output->isVeryVerbose()) {
+            $output->writeln($makeInstallOutput);
+        }
 
         if (! file_exists($expectedSharedObjectLocation)) {
             throw new RuntimeException('Install failed, ' . $expectedSharedObjectLocation . ' was not installed.');

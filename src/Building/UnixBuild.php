@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\Pie\Building;
 
 use Php\Pie\Downloading\DownloadedPackage;
+use Php\Pie\Platform\TargetPhp\PhpizePath;
 use Php\Pie\Platform\TargetPlatform;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
@@ -24,7 +25,14 @@ final class UnixBuild implements Build
         array $configureOptions,
         OutputInterface $output,
     ): void {
-        $this->phpize($downloadedPackage);
+        $phpizeOutput = $this->phpize(
+            PhpizePath::guessFrom($targetPlatform->phpBinaryPath),
+            $downloadedPackage,
+        );
+        if ($output->isVeryVerbose()) {
+            $output->writeln($phpizeOutput);
+        }
+
         $output->writeln('<info>phpize complete</info>.');
 
         $phpConfigPath = $targetPlatform->phpBinaryPath->phpConfigPath();
@@ -32,11 +40,18 @@ final class UnixBuild implements Build
             $configureOptions[] = '--with-php-config=' . $phpConfigPath;
         }
 
-        $this->configure($downloadedPackage, $configureOptions);
+        $configureOutput = $this->configure($downloadedPackage, $configureOptions);
+        if ($output->isVeryVerbose()) {
+            $output->writeln($configureOutput);
+        }
+
         $optionsOutput = count($configureOptions) ? ' with options: ' . implode(' ', $configureOptions) : '.';
         $output->writeln('<info>Configure complete</info>' . $optionsOutput);
 
-        $this->make($downloadedPackage);
+        $makeOutput = $this->make($downloadedPackage);
+        if ($output->isVeryVerbose()) {
+            $output->writeln($makeOutput);
+        }
 
         $expectedSoFile = $downloadedPackage->extractedSourcePath . '/modules/' . $downloadedPackage->package->extensionName->name() . '.so';
 
@@ -55,22 +70,25 @@ final class UnixBuild implements Build
         ));
     }
 
-    private function phpize(DownloadedPackage $downloadedPackage): void
+    private function phpize(PhpizePath $phpize, DownloadedPackage $downloadedPackage): string
     {
-        (new Process(['phpize'], $downloadedPackage->extractedSourcePath))
-            ->mustRun();
+        return (new Process([$phpize->phpizeBinaryPath], $downloadedPackage->extractedSourcePath))
+            ->mustRun()
+            ->getOutput();
     }
 
     /** @param list<non-empty-string> $configureOptions */
-    private function configure(DownloadedPackage $downloadedPackage, array $configureOptions = []): void
+    private function configure(DownloadedPackage $downloadedPackage, array $configureOptions = []): string
     {
-        (new Process(['./configure', ...$configureOptions], $downloadedPackage->extractedSourcePath))
-            ->mustRun();
+        return (new Process(['./configure', ...$configureOptions], $downloadedPackage->extractedSourcePath))
+            ->mustRun()
+            ->getOutput();
     }
 
-    private function make(DownloadedPackage $downloadedPackage): void
+    private function make(DownloadedPackage $downloadedPackage): string
     {
-        (new Process(['make'], $downloadedPackage->extractedSourcePath))
-            ->mustRun();
+        return (new Process(['make'], $downloadedPackage->extractedSourcePath))
+            ->mustRun()
+            ->getOutput();
     }
 }
