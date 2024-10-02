@@ -93,6 +93,11 @@ final class PhpBinaryPathTest extends TestCase
      */
     public static function phpConfigPathProvider(): array
     {
+        // data providers cannot return empty, even if the test is skipped
+        if (Platform::isWindows()) {
+            return ['skip' => ['skip', 'skip']];
+        }
+
         $possiblePhpConfigPaths = array_filter(
             [
                 ['/usr/bin/php-config8.3', '8.3'],
@@ -114,6 +119,10 @@ final class PhpBinaryPathTest extends TestCase
     #[DataProvider('phpConfigPathProvider')]
     public function testFromPhpConfigExecutable(string $phpConfigPath, string $expectedMajorMinor): void
     {
+        if (Platform::isWindows()) {
+            self::markTestSkipped('Do not need to test php-config on Windows as we are not building on Windows.');
+        }
+
         assert($phpConfigPath !== '');
         $phpBinary = PhpBinaryPath::fromPhpConfigExecutable($phpConfigPath);
 

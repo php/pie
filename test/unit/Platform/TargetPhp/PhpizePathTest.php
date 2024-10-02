@@ -58,7 +58,7 @@ final class PhpizePathTest extends TestCase
     public function testGuessingFindsPhpizePath(): void
     {
         if (Platform::isWindows()) {
-            self::markTestSkipped('Guessing phpize path is not done for Windows as we are not building for Windows (yet)');
+            self::markTestSkipped('Guessing phpize path is not done for Windows as we are not building for Windows.');
         }
 
         $phpize = PhpizePath::guessFrom(PhpBinaryPath::fromCurrentProcess());

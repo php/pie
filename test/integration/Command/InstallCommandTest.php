@@ -46,6 +46,11 @@ class InstallCommandTest extends TestCase
      */
     public static function phpPathProvider(): array
     {
+        // data providers cannot return empty, even if the test is skipped
+        if (Platform::isWindows()) {
+            return ['skip' => ['skip']];
+        }
+
         $possiblePhpConfigPaths = array_filter(
             [
                 '/usr/bin/php-config',
