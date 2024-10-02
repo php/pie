@@ -68,14 +68,27 @@ class CliContext implements Context
         $this->runPieCommand(['build', 'asgrim/example-pie-extension']);
     }
 
-    /**
-     * @Then /^the extension should have been built$/
-     */
-    public function theExtensionShouldHaveBeenBuilt()
+    /** @Then /^the extension should have been built$/ */
+    public function theExtensionShouldHaveBeenBuilt(): void
     {
         $this->assertCommandSuccessful();
         Assert::contains($this->output, 'phpize complete.');
         Assert::contains($this->output, 'Configure complete.');
+        Assert::contains($this->output, 'Build complete:');
+    }
+
+    /** @When /^I run a command to build an extension with configure options$/ */
+    public function iRunACommandToBuildAnExtensionWithConfigureOptions(): void
+    {
+        $this->runPieCommand(['build', 'asgrim/example-pie-extension', '--with-hello-name=sup']);
+    }
+
+    /** @Then /^the extension should have been built with options$/ */
+    public function theExtensionShouldHaveBeenBuiltWithOptions(): void
+    {
+        $this->assertCommandSuccessful();
+        Assert::contains($this->output, 'phpize complete.');
+        Assert::contains($this->output, 'Configure complete with options: --with-hello-name=\'sup\'');
         Assert::contains($this->output, 'Build complete:');
     }
 }

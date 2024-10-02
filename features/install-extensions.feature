@@ -22,10 +22,9 @@ Feature: Extensions can be installed with Behat
     When I run a command to build an extension
     Then the extension should have been built
 
-  @wip
   Example: An extension can be built with configure options
     When I run a command to build an extension with configure options
-    Then the extension should have been built
+    Then the extension should have been built with options
 
   @wip
   Example: An extension can be installed
