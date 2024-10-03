@@ -10,7 +10,9 @@ please read [extension-maintainers](./docs/extension-maintainers.md).
 
 ### Manual installation
 
-- Download `pie.phar` from the [latest releases](https://github.com/php/pie/releases)
+- Download `pie.phar` either:
+  - [latest stable release](https://github.com/php/pie/releases)
+  - [latest unstable nightly](https://php.github.io/pie/pie-nightly.phar)
 - Validate the signature in `pie.phar.asc`
 - You may then invoke PIE with `php pie.phar <command>`
 
