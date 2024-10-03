@@ -10,6 +10,7 @@ COPY ./features /docs-src/features
 FROM builder AS built
 
 RUN bin/docbook-tool --html
+RUN rm -Rf /docs-package/pdf
 
 FROM scratch AS output
 
