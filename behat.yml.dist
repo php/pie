@@ -1,0 +1,10 @@
+default:
+  autoload:
+    '': "%paths.base%/test/behaviour"
+  suites:
+    default:
+      contexts:
+        - Php\PieBehaviourTest\CliContext
+  gherkin:
+    filters:
+      tags: "~@wip"

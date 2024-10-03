@@ -33,6 +33,34 @@ jobs:
         if: matrix.operating-system != 'windows-latest'
         run: sudo vendor/bin/phpunit
 
+  behaviour-tests:
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      matrix:
+        operating-system:
+          - ubuntu-latest
+          - windows-latest
+        php-versions:
+          - '8.1'
+          - '8.2'
+          - '8.3'
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          extensions: intl, sodium, zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v4
+      - uses: ramsey/composer-install@v3
+      - name: Run Behat on Windows
+        if: matrix.operating-system == 'windows-latest'
+        run: vendor/bin/behat --tags="~@non-windows"
+      - name: Run Behat on non-Windows
+        if: matrix.operating-system != 'windows-latest'
+        run: vendor/bin/behat
+
   coding-standards:
     runs-on: ubuntu-latest
     steps:

@@ -6,6 +6,7 @@
 phpcs.xml
 phpunit.xml
 psalm.xml
+behat.yml
 box.json
 box.phar
 pie.phar
