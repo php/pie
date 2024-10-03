@@ -1,23 +1,50 @@
 <!DOCTYPE html>
 <html lang="en" >
 <head>
-    <meta charset="utf-8"/>
-    <title>🥧 PHP Installer for Extensions</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PIE Documentation</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <style>
+        .selected {
+            background-color: #7A86B8;
+        }
+        .selected a, .selected a:focus {
+            color: white;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-<nav>
-    <ul>
-        {% for page in pages %}
-            <li><a href="#{{ page.slug }}">{{ page.title }}</a></li>
-        {% endfor %}
-    </ul>
-</nav>
-{% for page in pages %}
-    <hr />
-<section id="#{{ page.slug }}">
-    {{ page.content|raw }}
-</section>
-{% endfor %}
+<ul id="top-nav-tabs" class="invisible"><li><a href="#docs" class="fragmentRoute">Documentation</a></li></ul>
+<div class="container">
+    <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
+        <a href="#docs" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
+            <svg class="bi me-2" width="40" height="32"><use xlink:href="#bootstrap"/></svg>
+            <span class="fs-4">🥧 <strong>P</strong>HP <strong>I</strong>nstaller for <strong>E</strong>xtensions</span>
+        </a>
 
+        <ul class="nav nav-pills" id="docs-side-nav">
+            {% for page in pages %}
+            <li class="nav-item"><a href="#docs/{{ page.slug }}" class="nav-link fragmentRoute">{{ page.title }}</a></li>
+            {% endfor %}
+        </ul>
+    </header>
+</div>
+
+<section id="docs" class="tab-content"><div id="docs-content">
+    {% for page in pages %}
+    <section id="docs/{{ page.slug }}" class="container my-md-4 bd-layout hidden">
+        {{ page.content|preg_replace('~\./docs/~', '')|raw }}
+    </section>
+    {% endfor %}
+</div></section>
+
+<script src="https://roave.github.io/DocbookTool/js/docbook-tool.js"></script>
+<script>
+    loadDocBookNavigation("PIE Documentation");
+</script>
 </body>
 </html>
