@@ -1,3 +1,7 @@
+---
+title: Extension Maintainers
+order: 3
+---
 # PIE for Extension Maintainers
 
 Adding PIE support for your extension is relatively straightforward, and the

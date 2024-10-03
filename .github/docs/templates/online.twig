@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+    <meta charset="utf-8"/>
+    <title>🥧 PHP Installer for Extensions</title>
+</head>
+<body>
+<nav>
+    <ul>
+        {% for page in pages %}
+            <li><a href="#{{ page.slug }}">{{ page.title }}</a></li>
+        {% endfor %}
+    </ul>
+</nav>
+{% for page in pages %}
+    <hr />
+<section id="#{{ page.slug }}">
+    {{ page.content|raw }}
+</section>
+{% endfor %}
+
+</body>
+</html>
