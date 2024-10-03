@@ -1,4 +1,8 @@
-# PIE Usage for Extension Maintainers
+---
+title: Using PIE
+order: 2
+---
+# PIE Usage
 
 ## Installing PIE
 

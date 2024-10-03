@@ -10,3 +10,4 @@ behat.yml
 box.json
 box.phar
 pie.phar
+/docs-package/
