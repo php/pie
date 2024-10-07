@@ -26,6 +26,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/checkout@v4
+      # temporarily remove Psalm until ready for PHP 8.4
+      - name: remove psalm
+        if: matrix.php-versions == '8.4'
+        run: composer remove --dev --no-install vimeo/psalm psalm/plugin-phpunit php-standard-library/psalm-plugin
       - uses: ramsey/composer-install@v3
       - name: Run PHPUnit on Windows
         if: matrix.operating-system == 'windows-latest'
@@ -45,6 +49,7 @@ jobs:
           - '8.1'
           - '8.2'
           - '8.3'
+          - '8.4'
     steps:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -54,6 +59,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/checkout@v4
+      # temporarily remove Psalm until ready for PHP 8.4
+      - name: remove psalm
+        if: matrix.php-versions == '8.4'
+        run: composer remove --dev --no-install vimeo/psalm psalm/plugin-phpunit php-standard-library/psalm-plugin
       - uses: ramsey/composer-install@v3
       - name: Run Behat on Windows
         if: matrix.operating-system == 'windows-latest'
