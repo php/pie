@@ -10,8 +10,8 @@ Feature: Extensions can be installed with Behat
 
     Examples:
       | constraint | version  |
-      | 2.0.0      | 2.0.0    |
-      | ^2.0       | 2.0.0    |
+      | 2.0.1      | 2.0.1    |
+      | ^2.0       | 2.0.1    |
 
   @non-windows
   Example: An in-development version can be downloaded on non-Windows systems
