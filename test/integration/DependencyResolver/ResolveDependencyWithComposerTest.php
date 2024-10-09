@@ -34,8 +34,8 @@ final class ResolveDependencyWithComposerTest extends TestCase
     public static function validVersionsList(): array
     {
         $versionsAndExpected = [
-            [null, '2.0.1', self::DOWNLOAD_URL_ANY],
-            ['*', '2.0.1', self::DOWNLOAD_URL_ANY],
+            [null, '2.0.2', self::DOWNLOAD_URL_ANY],
+            ['*', '2.0.2', self::DOWNLOAD_URL_ANY],
             ['dev-main', 'dev-main', self::DOWNLOAD_URL_ANY],
             ['dev-main#769f906413d6d1e12152f6d34134cbcd347ca253', 'dev-main', self::DOWNLOAD_URL_1_0_1],
         ];
