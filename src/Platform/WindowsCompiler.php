@@ -14,4 +14,5 @@ enum WindowsCompiler
     case VC14;
     case VC15;
     case VS16;
+    case VS17;
 }
