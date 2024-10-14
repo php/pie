@@ -77,7 +77,7 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
     private function getReleaseAssetsForPackage(Package $package): array
     {
         $request = AddAuthenticationHeader::withAuthHeaderFromComposer(
-            new Request('GET', $this->githubApiBaseUrl . '/repos/' . $package->githubRepository() . '/releases/tags/' . $package->version),
+            new Request('GET', $this->githubApiBaseUrl . '/repos/' . $package->githubOrgAndRepository() . '/releases/tags/' . $package->version),
             $package,
             $this->authHelper,
         );

@@ -16,6 +16,7 @@ use function explode;
 use function implode;
 use function parse_url;
 use function str_contains;
+use function str_starts_with;
 
 /**
  * @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks
@@ -77,9 +78,13 @@ final class Package
         return $this->name . ':' . $this->version;
     }
 
-    public function githubRepository(): string
+    public function githubOrgAndRepository(): string
     {
         if ($this->downloadUrl === null || str_contains($this->downloadUrl, '/' . $this->name . '/')) {
+            return $this->name;
+        }
+
+        if (! str_starts_with($this->downloadUrl, 'https://api.github.com/repos/')) {
             return $this->name;
         }
 
