@@ -6,7 +6,10 @@ namespace Php\PieUnitTest\DependencyResolver;
 
 use Composer\Package\CompletePackage;
 use Php\Pie\DependencyResolver\Package;
+use Php\Pie\ExtensionName;
+use Php\Pie\ExtensionType;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(Package::class)]
@@ -37,5 +40,41 @@ final class PackageTest extends TestCase
         self::assertSame('1.2.3', $package->version);
         self::assertSame('vendor/foo:1.2.3', $package->prettyNameAndVersion());
         self::assertNull($package->downloadUrl);
+    }
+
+    /**
+     * @return array<string, array{0: string, 1: string|null, 2: string}>
+     *
+     * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
+     */
+    public function githubOrgAndRepoFromPackage(): array
+    {
+        return [
+            'noDownloadUrl' => ['foo/bar', null, 'foo/bar'],
+            'gitlabMatchingPackage' => ['foo/bar', 'https://gitlab.com/api/v4/projects/foo%2Fbar/repository/archive.zip?sha=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'foo/bar'],
+            'gitlabDifferentPackage' => ['foo/bar', 'https://gitlab.com/api/v4/projects/abc%2Fdef/repository/archive.zip?sha=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'foo/bar'],
+            'githubMatchingPackage' => ['foo/bar', 'https://api.github.com/repos/foo/bar/zipball/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'foo/bar'],
+            'githubDifferentPackage' => ['foo/bar', 'https://api.github.com/repos/abc/def/zipball/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'abc/def'],
+            'githubIncompleteUrl' => ['foo/bar', 'https://api.github.com/', 'foo/bar'],
+        ];
+    }
+
+    #[DataProvider('githubOrgAndRepoFromPackage')]
+    public function testGithubOrgAndRepo(string $composerPackageName, string|null $downloadUrl, string $expectedGithubOrgAndRepo): void
+    {
+        $package = new Package(
+            ExtensionType::PhpModule,
+            ExtensionName::normaliseFromString('foo'),
+            $composerPackageName,
+            '1.2.3',
+            $downloadUrl,
+            [],
+            null,
+            '1.2.3.0',
+            true,
+            true,
+        );
+
+        self::assertSame($expectedGithubOrgAndRepo, $package->githubOrgAndRepository());
     }
 }
