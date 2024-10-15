@@ -23,6 +23,7 @@ use Php\Pie\Command\InfoCommand;
 use Php\Pie\Command\InstallCommand;
 use Php\Pie\Command\ShowCommand;
 use Php\Pie\DependencyResolver\DependencyResolver;
+use Php\Pie\DependencyResolver\PieComposerFactory;
 use Php\Pie\DependencyResolver\ResolveDependencyWithComposer;
 use Php\Pie\Downloading\DownloadAndExtract;
 use Php\Pie\Downloading\DownloadZip;
@@ -67,12 +68,25 @@ final class Container
             );
         });
         $container->singleton(Composer::class, static function (ContainerInterface $container): Composer {
+            $pieComposer = \Php\Pie\Platform::getPieComposerJsonFilename();
+
+            if (! file_exists($pieComposer)) {
+                file_put_contents(
+                    $pieComposer,
+                    "{\n}\n",
+                );
+            }
+
             $io       = $container->get(IOInterface::class);
-            $composer = (new ComposerFactory())->createComposer(
+            $composer = (new PieComposerFactory())->createComposer(
                 $io,
-                [
-                    'config' => ['lock' => false],
-                ],
+                $pieComposer,
+//                [
+//                    'config' => [
+//                        'lock' => true,
+//                        'vendor-dir' => \Php\Pie\Platform::getPieWorkingDirectory(),
+//                    ],
+//                ],
                 true,
             );
             $io->loadConfiguration($composer->getConfig());
@@ -84,8 +98,10 @@ final class Container
             DependencyResolver::class,
             static function (ContainerInterface $container): DependencyResolver {
                 return new ResolveDependencyWithComposer(
+                    $container,
                     $container->get(Composer::class),
                     new ResolveTargetPhpToPlatformRepository(),
+                    $container->get(IOInterface::class),
                 );
             },
         );
