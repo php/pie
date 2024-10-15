@@ -71,7 +71,7 @@ On Windows, you may provide a path to the `php` executable itself using the
 to run PIE, but we want to download the extension for PHP 8.3:
 
 ```shell
-> C:\php-8.3.6\php.exe C:\pie.phar install --with-php-path=C:\php-8.1.7\php.exe example/example-pie-extension
+> C:\php-8.1.7\php.exe C:\pie.phar install --with-php-path=C:\php-8.3.6\php.exe example/example-pie-extension
 ```
 
 ### Version constraints and stability
