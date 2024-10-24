@@ -6,6 +6,9 @@ namespace Php\Pie\Util;
 
 use Symfony\Component\Process\Process;
 
+use function is_numeric;
+use function trim;
+
 final class NumberOfCores
 {
     /** @psalm-suppress UnusedConstructor */

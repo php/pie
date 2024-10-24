@@ -50,7 +50,7 @@ Zend Extension Build => API420230831,TS,VS16
 PHP Extension Build => API20230831,TS,VS16
 TEXT);
 
-        $platform = TargetPlatform::fromPhpBinaryPath($phpBinaryPath);
+        $platform = TargetPlatform::fromPhpBinaryPath($phpBinaryPath, null);
 
         self::assertSame(OperatingSystem::Windows, $platform->operatingSystem);
         self::assertSame(WindowsCompiler::VS16, $platform->windowsCompiler);
@@ -91,7 +91,7 @@ Debug Build => no
 Thread Safety => disabled
 TEXT);
 
-        $platform = TargetPlatform::fromPhpBinaryPath($phpBinaryPath);
+        $platform = TargetPlatform::fromPhpBinaryPath($phpBinaryPath, null);
 
         self::assertSame(OperatingSystem::NonWindows, $platform->operatingSystem);
         self::assertSame(null, $platform->windowsCompiler);

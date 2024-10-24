@@ -50,7 +50,7 @@ final class UnixBuildTest extends TestCase
         $unixBuilder = new UnixBuild();
         $unixBuilder->__invoke(
             $downloadedPackage,
-            TargetPlatform::fromPhpBinaryPath(PhpBinaryPath::fromCurrentProcess()),
+            TargetPlatform::fromPhpBinaryPath(PhpBinaryPath::fromCurrentProcess(), null),
             ['--enable-pie_test_ext'],
             $output,
         );

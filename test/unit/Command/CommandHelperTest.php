@@ -92,7 +92,7 @@ final class CommandHelperTest extends TestCase
     public function testDownloadPackage(): void
     {
         $dependencyResolver          = $this->createMock(DependencyResolver::class);
-        $targetPlatform              = TargetPlatform::fromPhpBinaryPath(PhpBinaryPath::fromCurrentProcess());
+        $targetPlatform              = TargetPlatform::fromPhpBinaryPath(PhpBinaryPath::fromCurrentProcess(), null);
         $requestedNameAndVersionPair = ['name' => 'php/test-pie-ext', 'version' => '^1.2'];
         $downloadAndExtract          = $this->createMock(DownloadAndExtract::class);
         $output                      = $this->createMock(OutputInterface::class);

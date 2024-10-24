@@ -69,7 +69,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
         $resolve   = $container->get(DependencyResolver::class);
 
         $package = $resolve->__invoke(
-            TargetPlatform::fromPhpBinaryPath(PhpBinaryPath::fromCurrentProcess()),
+            TargetPlatform::fromPhpBinaryPath(PhpBinaryPath::fromCurrentProcess(), null),
             'asgrim/example-pie-extension',
             $requestedVersion,
         );

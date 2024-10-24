@@ -20,7 +20,7 @@ final class UnixBuild implements Build
 {
     private const PHPIZE_TIMEOUT_SECS    = 60; // 1 minute
     private const CONFIGURE_TIMEOUT_SECS = 120; // 2 minutes
-    private const MAKE_TIMEOUT_SECS      = 600; // 10 minutes
+    private const MAKE_TIMEOUT_SECS      = null; // unlimited
 
     /** {@inheritDoc} */
     public function __invoke(
@@ -101,7 +101,7 @@ final class UnixBuild implements Build
             $output->writeln('Running make without parallelization - try providing -jN to PIE where N is the number of cores you have.');
         } else {
             $makeCommand[] = '--jobs';
-            $makeCommand[] = $targetPlatform->makeParallelJobs;
+            $makeCommand[] = (string) $targetPlatform->makeParallelJobs;
         }
 
         return Process::run(
