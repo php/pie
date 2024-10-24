@@ -7,9 +7,9 @@ namespace Php\Pie\Installing;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\ExtensionType;
 use Php\Pie\Platform\TargetPlatform;
+use Php\Pie\Util\Process;
 use RuntimeException;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Process\Process;
 
 use function array_unshift;
 use function file_exists;
@@ -19,6 +19,8 @@ use function sprintf;
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class UnixInstall implements Install
 {
+    private const MAKE_INSTALL_TIMEOUT_SECS = 60; // 1 minute
+
     public function __invoke(DownloadedPackage $downloadedPackage, TargetPlatform $targetPlatform, OutputInterface $output): string
     {
         $targetExtensionPath = $targetPlatform->phpBinaryPath->extensionPath();
@@ -44,9 +46,11 @@ final class UnixInstall implements Install
             array_unshift($makeInstallCommand, 'sudo');
         }
 
-        $makeInstallOutput = (new Process($makeInstallCommand, $downloadedPackage->extractedSourcePath))
-            ->mustRun()
-            ->getOutput();
+        $makeInstallOutput = Process::run(
+            $makeInstallCommand,
+            $downloadedPackage->extractedSourcePath,
+            self::MAKE_INSTALL_TIMEOUT_SECS,
+        );
 
         if ($output->isVeryVerbose()) {
             $output->writeln($makeInstallOutput);

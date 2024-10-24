@@ -7,8 +7,8 @@ namespace Php\Pie\Building;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\Platform\TargetPhp\PhpizePath;
 use Php\Pie\Platform\TargetPlatform;
+use Php\Pie\Util\Process;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Process\Process;
 
 use function count;
 use function file_exists;
@@ -18,6 +18,10 @@ use function sprintf;
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class UnixBuild implements Build
 {
+    private const PHPIZE_TIMEOUT_SECS    = 60; // 1 minute
+    private const CONFIGURE_TIMEOUT_SECS = 120; // 2 minutes
+    private const MAKE_TIMEOUT_SECS      = 600; // 10 minutes
+
     /** {@inheritDoc} */
     public function __invoke(
         DownloadedPackage $downloadedPackage,
@@ -72,23 +76,29 @@ final class UnixBuild implements Build
 
     private function phpize(PhpizePath $phpize, DownloadedPackage $downloadedPackage): string
     {
-        return (new Process([$phpize->phpizeBinaryPath], $downloadedPackage->extractedSourcePath))
-            ->mustRun()
-            ->getOutput();
+        return Process::run(
+            [$phpize->phpizeBinaryPath],
+            $downloadedPackage->extractedSourcePath,
+            self::PHPIZE_TIMEOUT_SECS,
+        );
     }
 
     /** @param list<non-empty-string> $configureOptions */
     private function configure(DownloadedPackage $downloadedPackage, array $configureOptions = []): string
     {
-        return (new Process(['./configure', ...$configureOptions], $downloadedPackage->extractedSourcePath))
-            ->mustRun()
-            ->getOutput();
+        return Process::run(
+            ['./configure', ...$configureOptions],
+            $downloadedPackage->extractedSourcePath,
+            self::CONFIGURE_TIMEOUT_SECS,
+        );
     }
 
     private function make(DownloadedPackage $downloadedPackage): string
     {
-        return (new Process(['make'], $downloadedPackage->extractedSourcePath))
-            ->mustRun()
-            ->getOutput();
+        return Process::run(
+            ['make'],
+            $downloadedPackage->extractedSourcePath,
+            self::MAKE_TIMEOUT_SECS,
+        );
     }
 }
