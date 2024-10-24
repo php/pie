@@ -41,6 +41,7 @@ final class CommandHelper
     private const ARG_REQUESTED_PACKAGE_AND_VERSION = 'requested-package-and-version';
     private const OPTION_WITH_PHP_CONFIG            = 'with-php-config';
     private const OPTION_WITH_PHP_PATH              = 'with-php-path';
+    private const OPTION_MAKE_PARALLEL_JOBS         = 'make-parallel-jobs';
 
     /** @psalm-suppress UnusedConstructor */
     private function __construct()
@@ -52,13 +53,13 @@ final class CommandHelper
         $command->addOption(
             self::OPTION_WITH_PHP_CONFIG,
             null,
-            InputOption::VALUE_OPTIONAL,
+            InputOption::VALUE_REQUIRED,
             'The path to the `php-config` binary to find the target PHP platform on ' . OperatingSystem::NonWindows->asFriendlyName() . ', e.g. --' . self::OPTION_WITH_PHP_CONFIG . '=/usr/bin/php-config7.4',
         );
         $command->addOption(
             self::OPTION_WITH_PHP_PATH,
             null,
-            InputOption::VALUE_OPTIONAL,
+            InputOption::VALUE_REQUIRED,
             'The path to the `php` binary to use as the target PHP platform on ' . OperatingSystem::Windows->asFriendlyName() . ', e.g. --' . self::OPTION_WITH_PHP_PATH . '=C:\usr\php7.4.33\php.exe',
         );
     }
@@ -69,6 +70,12 @@ final class CommandHelper
             self::ARG_REQUESTED_PACKAGE_AND_VERSION,
             InputArgument::REQUIRED,
             'The extension name and version constraint to use, in the format {ext-name}{?:{?version-constraint}{?@stability}}, for example `xdebug/xdebug:^3.4@alpha`, `xdebug/xdebug:@alpha`, `xdebug/xdebug:^3.4`, etc.',
+        );
+        $command->addOption(
+            self::OPTION_MAKE_PARALLEL_JOBS,
+            'j',
+            InputOption::VALUE_REQUIRED,
+            'Override many jobs to run in parallel when running compiling (this is passed to "make -jN" during build). PIE will try to detect this by default.',
         );
 
         self::configurePhpConfigOptions($command);
@@ -112,7 +119,16 @@ final class CommandHelper
             $phpBinaryPath = PhpBinaryPath::fromPhpBinaryPath($withPhpPath);
         }
 
-        $targetPlatform = TargetPlatform::fromPhpBinaryPath($phpBinaryPath);
+        $makeParallelJobs = null; /** `null` means {@see TargetPlatform} will try to auto-detect */
+        if ($input->hasOption(self::OPTION_MAKE_PARALLEL_JOBS)) {
+            $makeParallelJobs = (int) $input->getOption(self::OPTION_MAKE_PARALLEL_JOBS);
+            Assert::positiveInteger(
+                $makeParallelJobs,
+                'Expected a positive integer for the --' . self::OPTION_MAKE_PARALLEL_JOBS . ' option. Got: %s',
+            );
+        }
+
+        $targetPlatform = TargetPlatform::fromPhpBinaryPath($phpBinaryPath, $makeParallelJobs);
 
         $output->writeln(sprintf('<info>You are running PHP %s</info>', PHP_VERSION));
         $output->writeln(sprintf(
