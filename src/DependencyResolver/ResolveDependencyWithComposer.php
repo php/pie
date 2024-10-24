@@ -47,31 +47,38 @@ final class ResolveDependencyWithComposer implements DependencyResolver
     {
         $io = new ArrayCollectionIO();
 
-
         $versionSelector = (new VersionSelector(
             $this->factoryRepositorySet($requestedVersion),
             ($this->resolveTargetPhpToPlatformRepository)($targetPlatform->phpBinaryPath),
         ));
         $package = $versionSelector->findBestCandidate($packageName, $requestedVersion);
         $recommendedRequireVersion = $versionSelector->findRecommendedRequireVersion($package);
-        $constraint = (new VersionParser())->parseConstraints($recommendedRequireVersion);
 
-        $pieComposerJson = Platform::getPieComposerJsonFilename();
+        $pieComposerJson = Platform::getPieJsonFilename();
         $manipulator = new JsonManipulator(file_get_contents($pieComposerJson));
         $manipulator->addLink('require', $packageName, $recommendedRequireVersion, true);
         file_put_contents($pieComposerJson, $manipulator->getContents());
-//        $rootPackage = $this->composer->getPackage();
-//        $rootPackage->setRequires([
-//            $packageName => new Link($packageName, $packageName, $constraint),
-//        ]);
 
         $this->container->forgetInstance(Composer::class);
         $this->composer = $this->container->make(Composer::class);
+        foreach ($this->composer->getRepositoryManager()->getLocalRepository()->findPackages($packageName) as $pkg) {
+            $this->composer->getRepositoryManager()->getLocalRepository()->removePackage($pkg);
+        }
+
+        $this->composer->getConfig()->merge(['config' => [
+            '__PIE__' => [
+                'packageName' => $packageName,
+                'targetPlatform' => $targetPlatform,
+                'install' => false,
+                'build' => true,
+            ]
+        ]]);
 
         $i = Installer::create($this->io, $this->composer);
         $i
             ->setAllowedTypes(['php-ext', 'php-ext-zend'])
             ->setUpdate(true)
+            ->setInstall(true)
             ->setIgnoredTypes([])
             ->setDryRun(false)
             ->setDownloadOnly(false)

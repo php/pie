@@ -22,6 +22,7 @@ use Php\Pie\Command\DownloadCommand;
 use Php\Pie\Command\InfoCommand;
 use Php\Pie\Command\InstallCommand;
 use Php\Pie\Command\ShowCommand;
+use Php\Pie\DependencyResolver\ArrayCollectionIO;
 use Php\Pie\DependencyResolver\DependencyResolver;
 use Php\Pie\DependencyResolver\PieComposerFactory;
 use Php\Pie\DependencyResolver\ResolveDependencyWithComposer;
@@ -61,6 +62,7 @@ final class Container
         $container->singleton(ShowCommand::class);
 
         $container->singleton(IOInterface::class, static function (ContainerInterface $container): IOInterface {
+//            return new ArrayCollectionIO();
             return new ConsoleIO(
                 $container->get(InputInterface::class),
                 $container->get(OutputInterface::class),
@@ -68,7 +70,7 @@ final class Container
             );
         });
         $container->singleton(Composer::class, static function (ContainerInterface $container): Composer {
-            $pieComposer = \Php\Pie\Platform::getPieComposerJsonFilename();
+            $pieComposer = \Php\Pie\Platform::getPieJsonFilename();
 
             if (! file_exists($pieComposer)) {
                 file_put_contents(
@@ -78,7 +80,7 @@ final class Container
             }
 
             $io       = $container->get(IOInterface::class);
-            $composer = (new PieComposerFactory())->createComposer(
+            $composer = (new PieComposerFactory($container))->createComposer(
                 $io,
                 $pieComposer,
 //                [

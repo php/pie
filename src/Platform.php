@@ -83,8 +83,8 @@ class Platform
         return $dirs[0];
     }
 
-    public static function getPieComposerJsonFilename()
+    public static function getPieJsonFilename()
     {
-        return self::getPieWorkingDirectory() . '/composer.json';
+        return self::getPieWorkingDirectory() . '/pie.json';
     }
 }

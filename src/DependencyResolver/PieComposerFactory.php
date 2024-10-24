@@ -14,14 +14,23 @@ use Composer\Repository;
 use Composer\Util\Filesystem;
 use Composer\Util\ProcessExecutor;
 use Php\Pie\ExtensionType;
+use Psr\Container\ContainerInterface;
 
 class PieComposerFactory extends Factory
 {
+    private ContainerInterface $container;
+
+    public function __construct(ContainerInterface $container)
+    {
+        $this->container = $container;
+    }
+
     protected function createDefaultInstallers(Installer\InstallationManager $im, PartialComposer $composer, IOInterface $io, ?ProcessExecutor $process = null): void
     {
         $fs = new Filesystem($process);
 
         $im->addInstaller(new UnixPiePackageInstaller($io, $composer, ExtensionType::PhpModule->value, $fs));
+//        $im->addInstaller(new UnixPiePackageInstaller2($io, $composer, ExtensionType::PhpModule->value, $fs));
         $im->addInstaller(new UnixPiePackageInstaller($io, $composer, ExtensionType::ZendExtension->value, $fs));
         // @todo Windows installer
 //        $binaryInstaller = new Installer\BinaryInstaller($io, rtrim($composer->getConfig()->get('bin-dir'), '/'), $composer->getConfig()->get('bin-compat'), $fs, rtrim($composer->getConfig()->get('vendor-dir'), '/'));
