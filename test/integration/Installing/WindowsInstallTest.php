@@ -65,6 +65,7 @@ final class WindowsInstallTest extends TestCase
             PhpBinaryPath::fromCurrentProcess(),
             Architecture::x86_64,
             ThreadSafetyMode::ThreadSafe,
+            1,
             WindowsCompiler::VS16,
         );
         $phpPath           = dirname($targetPlatform->phpBinaryPath->phpBinaryPath);

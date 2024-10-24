@@ -33,6 +33,7 @@ final class WindowsExtensionAssetNameTest extends TestCase
             PhpBinaryPath::fromCurrentProcess(),
             Architecture::x86_64,
             ThreadSafetyMode::ThreadSafe,
+            1,
             WindowsCompiler::VC14,
         );
 

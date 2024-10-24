@@ -32,6 +32,7 @@ final class UnixDownloadAndExtractTest extends TestCase
             PhpBinaryPath::fromCurrentProcess(),
             Architecture::x86,
             ThreadSafetyMode::NonThreadSafe,
+            1,
             null,
         );
 

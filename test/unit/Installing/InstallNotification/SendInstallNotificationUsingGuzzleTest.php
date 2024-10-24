@@ -53,6 +53,7 @@ final class SendInstallNotificationUsingGuzzleTest extends TestCase
             $phpBinaryPath,
             Architecture::x86,
             ThreadSafetyMode::ThreadSafe,
+            1,
             WindowsCompiler::VC14,
         );
     }

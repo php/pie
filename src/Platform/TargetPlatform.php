@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\Pie\Platform;
 
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
+use Php\Pie\Util\NumberOfCores;
 
 use function array_key_exists;
 use function curl_version;
@@ -27,6 +28,7 @@ class TargetPlatform
         public readonly PhpBinaryPath $phpBinaryPath,
         public readonly Architecture $architecture,
         public readonly ThreadSafetyMode $threadSafety,
+        public readonly int $makeParallelJobs,
         public readonly WindowsCompiler|null $windowsCompiler,
     ) {
     }
@@ -50,7 +52,7 @@ class TargetPlatform
         return function_exists('posix_getuid') && posix_getuid() === 0;
     }
 
-    public static function fromPhpBinaryPath(PhpBinaryPath $phpBinaryPath): self
+    public static function fromPhpBinaryPath(PhpBinaryPath $phpBinaryPath, int|null $makeParallelJobs): self
     {
         $os = $phpBinaryPath->operatingSystem();
 
@@ -122,11 +124,16 @@ class TargetPlatform
             }
         }
 
+        if ($makeParallelJobs === null) {
+            $makeParallelJobs = NumberOfCores::determine();
+        }
+
         return new self(
             $os,
             $phpBinaryPath,
             $architecture,
             $threadSafety,
+            $makeParallelJobs,
             $windowsCompiler,
         );
     }

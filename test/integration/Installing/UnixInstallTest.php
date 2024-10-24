@@ -75,7 +75,7 @@ final class UnixInstallTest extends TestCase
         }
 
         $output         = new BufferedOutput();
-        $targetPlatform = TargetPlatform::fromPhpBinaryPath(PhpBinaryPath::fromPhpConfigExecutable($phpConfig));
+        $targetPlatform = TargetPlatform::fromPhpBinaryPath(PhpBinaryPath::fromPhpConfigExecutable($phpConfig), null);
         $extensionPath  = $targetPlatform->phpBinaryPath->extensionPath();
 
         $downloadedPackage = DownloadedPackage::fromPackageAndExtractedPath(

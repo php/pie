@@ -41,6 +41,7 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             $phpBinaryPath,
             Architecture::x86,
             ThreadSafetyMode::ThreadSafe,
+            1,
             WindowsCompiler::VC14,
         );
 
@@ -97,6 +98,7 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             $phpBinaryPath,
             Architecture::x86,
             ThreadSafetyMode::ThreadSafe,
+            1,
             WindowsCompiler::VC14,
         );
 
@@ -148,6 +150,7 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             PhpBinaryPath::fromCurrentProcess(),
             Architecture::x86,
             ThreadSafetyMode::ThreadSafe,
+            1,
             WindowsCompiler::VC14,
         );
 

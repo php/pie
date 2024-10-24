@@ -20,7 +20,7 @@ final class UnixBuild implements Build
 {
     private const PHPIZE_TIMEOUT_SECS    = 60; // 1 minute
     private const CONFIGURE_TIMEOUT_SECS = 120; // 2 minutes
-    private const MAKE_TIMEOUT_SECS      = 600; // 10 minutes
+    private const MAKE_TIMEOUT_SECS      = null; // unlimited
 
     /** {@inheritDoc} */
     public function __invoke(
@@ -52,7 +52,7 @@ final class UnixBuild implements Build
         $optionsOutput = count($configureOptions) ? ' with options: ' . implode(' ', $configureOptions) : '.';
         $output->writeln('<info>Configure complete</info>' . $optionsOutput);
 
-        $makeOutput = $this->make($downloadedPackage);
+        $makeOutput = $this->make($targetPlatform, $downloadedPackage, $output);
         if ($output->isVeryVerbose()) {
             $output->writeln($makeOutput);
         }
@@ -93,10 +93,19 @@ final class UnixBuild implements Build
         );
     }
 
-    private function make(DownloadedPackage $downloadedPackage): string
+    private function make(TargetPlatform $targetPlatform, DownloadedPackage $downloadedPackage, OutputInterface $output): string
     {
+        $makeCommand = ['make'];
+
+        if ($targetPlatform->makeParallelJobs === 1) {
+            $output->writeln('Running make without parallelization - try providing -jN to PIE where N is the number of cores you have.');
+        } else {
+            $makeCommand[] = '--jobs';
+            $makeCommand[] = (string) $targetPlatform->makeParallelJobs;
+        }
+
         return Process::run(
-            ['make'],
+            $makeCommand,
             $downloadedPackage->extractedSourcePath,
             self::MAKE_TIMEOUT_SECS,
         );

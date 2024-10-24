@@ -57,6 +57,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
             $phpBinaryPath,
             Architecture::x86_64,
             ThreadSafetyMode::ThreadSafe,
+            1,
             null,
         );
 
@@ -97,6 +98,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
             $phpBinaryPath,
             Architecture::x86_64,
             ThreadSafetyMode::ThreadSafe,
+            1,
             null,
         );
 
@@ -139,6 +141,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
             $phpBinaryPath,
             Architecture::x86_64,
             ThreadSafetyMode::NonThreadSafe,
+            1,
             null,
         );
 
@@ -181,6 +184,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
             $phpBinaryPath,
             Architecture::x86_64,
             ThreadSafetyMode::ThreadSafe,
+            1,
             null,
         );
 

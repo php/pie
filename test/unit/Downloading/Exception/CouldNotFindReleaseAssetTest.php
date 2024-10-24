@@ -67,6 +67,7 @@ final class CouldNotFindReleaseAssetTest extends TestCase
             $phpBinary,
             Architecture::x86,
             ThreadSafetyMode::NonThreadSafe,
+            1,
             null,
         ));
 
