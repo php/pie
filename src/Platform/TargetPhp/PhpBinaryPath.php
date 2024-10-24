@@ -8,9 +8,9 @@ use Composer\Semver\VersionParser;
 use Composer\Util\Platform;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
+use Php\Pie\Util\Process;
 use RuntimeException;
 use Symfony\Component\Process\PhpExecutableFinder;
-use Symfony\Component\Process\Process;
 use Webmozart\Assert\Assert;
 
 use function array_combine;
@@ -58,9 +58,7 @@ class PhpBinaryPath
 
         // This is somewhat of a rudimentary check that the target PHP really is a PHP instance; not sure why you
         // WOULDN'T want to use a real PHP, but this should stop obvious hiccups at least (rather than for security)
-        $testOutput = trim((new Process([$phpBinaryPath, '-r', 'echo "PHP";']))
-            ->mustRun()
-            ->getOutput());
+        $testOutput = Process::run([$phpBinaryPath, '-r', 'echo "PHP";']);
 
         if ($testOutput !== 'PHP') {
             throw Exception\InvalidPhpBinaryPath::fromInvalidPhpBinary($phpBinaryPath);
@@ -118,7 +116,7 @@ class PhpBinaryPath
      */
     public function extensions(): array
     {
-        $extVersionsRawJson = trim((new Process([
+        $extVersionsList = Process::run([
             $this->phpBinaryPath,
             '-r',
             <<<'PHP'
@@ -141,13 +139,11 @@ echo implode("\n", array_map(
     $extVersions
 ));
 PHP,
-        ]))
-            ->mustRun()
-            ->getOutput());
+        ]);
 
         $pairs = array_map(
             static fn (string $row) => explode(':', $row),
-            explode("\n", $extVersionsRawJson),
+            explode("\n", $extVersionsList),
         );
 
         return array_combine(
@@ -158,13 +154,11 @@ PHP,
 
     public function operatingSystem(): OperatingSystem
     {
-        $winOrNot = trim((new Process([
+        $winOrNot = Process::run([
             $this->phpBinaryPath,
             '-r',
             'echo \\defined(\'PHP_WINDOWS_VERSION_BUILD\') ? \'win\' : \'not\';',
-        ]))
-            ->mustRun()
-            ->getOutput());
+        ]);
         Assert::stringNotEmpty($winOrNot, 'Could not determine PHP version');
 
         return $winOrNot === 'win' ? OperatingSystem::Windows : OperatingSystem::NonWindows;
@@ -173,13 +167,11 @@ PHP,
     /** @return non-empty-string */
     public function version(): string
     {
-        $phpVersion = trim((new Process([
+        $phpVersion = Process::run([
             $this->phpBinaryPath,
             '-r',
             'echo PHP_MAJOR_VERSION . "." . PHP_MINOR_VERSION . "." . PHP_RELEASE_VERSION;',
-        ]))
-            ->mustRun()
-            ->getOutput());
+        ]);
         Assert::stringNotEmpty($phpVersion, 'Could not determine PHP version');
 
         // normalizing the version will throw an exception if it is not a valid version
@@ -191,13 +183,11 @@ PHP,
     /** @return non-empty-string */
     public function majorMinorVersion(): string
     {
-        $phpVersion = trim((new Process([
+        $phpVersion = Process::run([
             $this->phpBinaryPath,
             '-r',
             'echo PHP_MAJOR_VERSION . "." . PHP_MINOR_VERSION;',
-        ]))
-            ->mustRun()
-            ->getOutput());
+        ]);
         Assert::stringNotEmpty($phpVersion, 'Could not determine PHP version');
 
         // normalizing the version will throw an exception if it is not a valid version
@@ -208,13 +198,11 @@ PHP,
 
     public function machineType(): Architecture
     {
-        $phpMachineType = trim((new Process([
+        $phpMachineType = Process::run([
             $this->phpBinaryPath,
             '-r',
             'echo php_uname("m");',
-        ]))
-            ->mustRun()
-            ->getOutput());
+        ]);
         Assert::stringNotEmpty($phpMachineType, 'Could not determine PHP machine type');
 
         return Architecture::parseArchitecture($phpMachineType);
@@ -222,13 +210,11 @@ PHP,
 
     public function phpIntSize(): int
     {
-        $phpIntSize = trim((new Process([
+        $phpIntSize = Process::run([
             $this->phpBinaryPath,
             '-r',
             'echo PHP_INT_SIZE;',
-        ]))
-            ->mustRun()
-            ->getOutput());
+        ]);
         Assert::stringNotEmpty($phpIntSize, 'Could not fetch PHP_INT_SIZE');
         Assert::same($phpIntSize, (string) (int) $phpIntSize, 'PHP_INT_SIZE was not an integer processed %2$s from %s');
 
@@ -238,12 +224,10 @@ PHP,
     /** @return non-empty-string */
     public function phpinfo(): string
     {
-        $phpInfo = trim((new Process([
+        $phpInfo = Process::run([
             $this->phpBinaryPath,
             '-i',
-        ]))
-            ->mustRun()
-            ->getOutput());
+        ]);
 
         Assert::stringNotEmpty($phpInfo, sprintf('Could not run phpinfo using %s', $this->phpBinaryPath));
 
@@ -264,9 +248,7 @@ PHP,
     /** @param non-empty-string $phpConfig */
     public static function fromPhpConfigExecutable(string $phpConfig): self
     {
-        $phpExecutable = trim((new Process([$phpConfig, '--php-binary']))
-            ->mustRun()
-            ->getOutput());
+        $phpExecutable = Process::run([$phpConfig, '--php-binary']);
         Assert::stringNotEmpty($phpExecutable, 'Could not find path to PHP executable.');
 
         self::assertValidLookingPhpBinary($phpExecutable);
