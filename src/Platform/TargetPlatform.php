@@ -6,6 +6,7 @@ namespace Php\Pie\Platform;
 
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 
+use Php\Pie\Util\NumberOfCores;
 use function array_key_exists;
 use function curl_version;
 use function explode;
@@ -124,9 +125,8 @@ class TargetPlatform
         }
 
         if ($makeParallelJobs === null) {
-            $makeParallelJobs = 16; // @todo detect
+            $makeParallelJobs = NumberOfCores::determine();
         }
-
 
         return new self(
             $os,

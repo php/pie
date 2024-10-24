@@ -52,7 +52,7 @@ final class UnixBuild implements Build
         $optionsOutput = count($configureOptions) ? ' with options: ' . implode(' ', $configureOptions) : '.';
         $output->writeln('<info>Configure complete</info>' . $optionsOutput);
 
-        $makeOutput = $this->make($targetPlatform, $downloadedPackage);
+        $makeOutput = $this->make($targetPlatform, $downloadedPackage, $output);
         if ($output->isVeryVerbose()) {
             $output->writeln($makeOutput);
         }
@@ -93,10 +93,19 @@ final class UnixBuild implements Build
         );
     }
 
-    private function make(TargetPlatform $targetPlatform, DownloadedPackage $downloadedPackage): string
+    private function make(TargetPlatform $targetPlatform, DownloadedPackage $downloadedPackage, OutputInterface $output): string
     {
+        $makeCommand = ['make'];
+
+        if ($targetPlatform->makeParallelJobs === 1) {
+            $output->writeln('Running make without parallelization - try providing -jN to PIE where N is the number of cores you have.');
+        } else {
+            $makeCommand[] = '--jobs';
+            $makeCommand[] = $targetPlatform->makeParallelJobs;
+        }
+
         return Process::run(
-            ['make', '--jobs', $targetPlatform->makeParallelJobs],
+            $makeCommand,
             $downloadedPackage->extractedSourcePath,
             self::MAKE_TIMEOUT_SECS,
         );
