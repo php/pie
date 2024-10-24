@@ -52,7 +52,7 @@ final class UnixBuild implements Build
         $optionsOutput = count($configureOptions) ? ' with options: ' . implode(' ', $configureOptions) : '.';
         $output->writeln('<info>Configure complete</info>' . $optionsOutput);
 
-        $makeOutput = $this->make($downloadedPackage);
+        $makeOutput = $this->make($targetPlatform, $downloadedPackage);
         if ($output->isVeryVerbose()) {
             $output->writeln($makeOutput);
         }
@@ -93,10 +93,10 @@ final class UnixBuild implements Build
         );
     }
 
-    private function make(DownloadedPackage $downloadedPackage): string
+    private function make(TargetPlatform $targetPlatform, DownloadedPackage $downloadedPackage): string
     {
         return Process::run(
-            ['make'],
+            ['make', '--jobs', $targetPlatform->makeParallelJobs],
             $downloadedPackage->extractedSourcePath,
             self::MAKE_TIMEOUT_SECS,
         );

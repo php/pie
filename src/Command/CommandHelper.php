@@ -121,11 +121,10 @@ final class CommandHelper
 
         $makeParallelJobs = null; /** `null` means {@see TargetPlatform} will try to auto-detect */
         if ($input->hasOption(self::OPTION_MAKE_PARALLEL_JOBS)) {
-            $makeParallelJobs = (int) $input->getOption(self::OPTION_MAKE_PARALLEL_JOBS);
-            Assert::positiveInteger(
-                $makeParallelJobs,
-                'Expected a positive integer for the --' . self::OPTION_MAKE_PARALLEL_JOBS . ' option. Got: %s',
-            );
+            $makeParallelJobsOptions = (int) $input->getOption(self::OPTION_MAKE_PARALLEL_JOBS);
+            if ($makeParallelJobsOptions > 0) {
+                $makeParallelJobs = $makeParallelJobsOptions;
+            }
         }
 
         $targetPlatform = TargetPlatform::fromPhpBinaryPath($phpBinaryPath, $makeParallelJobs);
