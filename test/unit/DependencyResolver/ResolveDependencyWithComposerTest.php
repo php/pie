@@ -11,13 +11,14 @@ use Composer\Repository\ArrayRepository;
 use Composer\Repository\CompositeRepository;
 use Composer\Repository\RepositoryFactory;
 use Composer\Repository\RepositoryManager;
+use Php\Pie\ComposerIntegration\ArrayCollectionIO;
 use Php\Pie\DependencyResolver\IncompatibleThreadSafetyMode;
+use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\DependencyResolver\ResolveDependencyWithComposer;
 use Php\Pie\DependencyResolver\UnableToResolveRequirement;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
-use Php\Pie\Platform\TargetPhp\ResolveTargetPhpToPlatformRepository;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\ThreadSafetyMode;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -28,7 +29,6 @@ use PHPUnit\Framework\TestCase;
 final class ResolveDependencyWithComposerTest extends TestCase
 {
     private Composer $composer;
-    private ResolveTargetPhpToPlatformRepository $resolveTargetPhpToPlatformRepository;
 
     public function setUp(): void
     {
@@ -41,8 +41,6 @@ final class ResolveDependencyWithComposerTest extends TestCase
         $this->composer = $this->createMock(Composer::class);
         $this->composer->method('getRepositoryManager')
             ->willReturn($repoManager);
-
-        $this->resolveTargetPhpToPlatformRepository = new ResolveTargetPhpToPlatformRepository();
     }
 
     public function testPackageThatCanBeResolved(): void
@@ -62,16 +60,15 @@ final class ResolveDependencyWithComposerTest extends TestCase
         );
 
         $package = (new ResolveDependencyWithComposer(
-            $this->composer,
-            $this->resolveTargetPhpToPlatformRepository,
-        ))($targetPlatform, 'asgrim/example-pie-extension', '^1.0');
+            new ArrayCollectionIO(),
+        ))($this->composer, $targetPlatform, new RequestedPackageAndVersion('asgrim/example-pie-extension', '^1.0'));
 
         self::assertSame('asgrim/example-pie-extension', $package->name);
         self::assertStringStartsWith('1.', $package->version);
     }
 
     /**
-     * @return array<string, array{0: array<string, string>, 1: string, 2: string}>
+     * @return array<string, array{0: array<string, string>, 1: non-empty-string, 2: non-empty-string}>
      *
      * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
      */
@@ -84,7 +81,11 @@ final class ResolveDependencyWithComposerTest extends TestCase
         ];
     }
 
-    /** @param array<string, string> $platformOverrides */
+    /**
+     * @param array<string, string> $platformOverrides
+     * @param non-empty-string      $package
+     * @param non-empty-string      $version
+     */
     #[DataProvider('unresolvableDependencies')]
     public function testPackageThatCannotBeResolvedThrowsException(array $platformOverrides, string $package, string $version): void
     {
@@ -105,12 +106,14 @@ final class ResolveDependencyWithComposerTest extends TestCase
         $this->expectException(UnableToResolveRequirement::class);
 
         (new ResolveDependencyWithComposer(
-            $this->composer,
-            $this->resolveTargetPhpToPlatformRepository,
+            new ArrayCollectionIO(),
         ))(
+            $this->composer,
             $targetPlatform,
-            $package,
-            $version,
+            new RequestedPackageAndVersion(
+                $package,
+                $version,
+            ),
         );
     }
 
@@ -148,12 +151,14 @@ final class ResolveDependencyWithComposerTest extends TestCase
         $this->expectException(IncompatibleThreadSafetyMode::class);
         $this->expectExceptionMessage('This extension does not support being installed on a non-Thread Safe PHP installation');
         (new ResolveDependencyWithComposer(
-            $this->composer,
-            $this->resolveTargetPhpToPlatformRepository,
+            new ArrayCollectionIO(),
         ))(
+            $this->composer,
             $targetPlatform,
-            'test-vendor/test-package',
-            '1.0.0',
+            new RequestedPackageAndVersion(
+                'test-vendor/test-package',
+                '1.0.0',
+            ),
         );
     }
 
@@ -191,12 +196,14 @@ final class ResolveDependencyWithComposerTest extends TestCase
         $this->expectException(IncompatibleThreadSafetyMode::class);
         $this->expectExceptionMessage('This extension does not support being installed on a Thread Safe PHP installation');
         (new ResolveDependencyWithComposer(
-            $this->composer,
-            $this->resolveTargetPhpToPlatformRepository,
+            new ArrayCollectionIO(),
         ))(
+            $this->composer,
             $targetPlatform,
-            'test-vendor/test-package',
-            '1.0.0',
+            new RequestedPackageAndVersion(
+                'test-vendor/test-package',
+                '1.0.0',
+            ),
         );
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\PieUnitTest\Downloading\Exception;
 
+use Composer\Package\CompletePackage;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\Exception\CouldNotFindReleaseAsset;
 use Php\Pie\ExtensionName;
@@ -22,6 +23,7 @@ final class CouldNotFindReleaseAssetTest extends TestCase
     public function testForPackage(): void
     {
         $package = new Package(
+            $this->createMock(CompletePackage::class),
             ExtensionType::PhpModule,
             ExtensionName::normaliseFromString('foo'),
             'foo/bar',
@@ -42,6 +44,7 @@ final class CouldNotFindReleaseAssetTest extends TestCase
     public function testForPackageWithMissingTag(): void
     {
         $package = new Package(
+            $this->createMock(CompletePackage::class),
             ExtensionType::PhpModule,
             ExtensionName::normaliseFromString('foo'),
             'foo/bar',

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\PieUnitTest\Downloading;
 
+use Composer\Package\CompletePackage;
 use Composer\Util\AuthHelper;
 use Generator;
 use GuzzleHttp\Psr7\Request;
@@ -96,6 +97,7 @@ final class AddAuthenticationHeaderTest extends TestCase
     private function createDummyPackage(string|null $downloadUrl = null): Package
     {
         return new Package(
+            $this->createMock(CompletePackage::class),
             ExtensionType::PhpModule,
             ExtensionName::normaliseFromString('foo'),
             'foo/bar',

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\PieUnitTest\Downloading;
 
+use Composer\Package\CompletePackage;
 use Composer\Util\AuthHelper;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\DownloadZip;
@@ -62,6 +63,7 @@ final class UnixDownloadAndExtractTest extends TestCase
 
         $downloadUrl      = 'https://test-uri/' . uniqid('downloadUrl', true);
         $requestedPackage = new Package(
+            $this->createMock(CompletePackage::class),
             ExtensionType::PhpModule,
             ExtensionName::normaliseFromString('foo'),
             'foo/bar',

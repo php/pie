@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Php\Pie\Platform\TargetPhp;
+namespace Php\Pie\ComposerIntegration;
 
 use Composer\Package\CompletePackage;
 use Composer\Pcre\Preg;
 use Composer\Repository\PlatformRepository;
 use Composer\Semver\VersionParser;
+use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use UnexpectedValueException;
 
 use function str_replace;

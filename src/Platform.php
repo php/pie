@@ -6,6 +6,12 @@ namespace Php\Pie;
 
 use Composer\Util\Platform as ComposerPlatform;
 use Composer\Util\Silencer;
+use RuntimeException;
+
+use function array_keys;
+use function rtrim;
+use function strpos;
+use function strtr;
 
 class Platform
 {
@@ -17,21 +23,15 @@ class Platform
             }
         }
 
-        if (Silencer::call('is_dir', '/etc/xdg')) {
-            return true;
-        }
-
-        return false;
+        return (bool) Silencer::call('is_dir', '/etc/xdg');
     }
 
-    /**
-     * @throws \RuntimeException
-     */
+    /** @throws RuntimeException */
     private static function getUserDir(): string
     {
         $home = ComposerPlatform::getEnv('HOME');
-        if (!$home) {
-            throw new \RuntimeException('The HOME or PIE_WORKING_DIRECTORY environment variable must be set for PIE to run correctly');
+        if (! $home) {
+            throw new RuntimeException('The HOME or PIE_WORKING_DIRECTORY environment variable must be set for PIE to run correctly');
         }
 
         return rtrim(strtr($home, '\\', '/'), '/');
@@ -40,7 +40,7 @@ class Platform
     /**
      * This is essentially a Composer-controlled `vendor` directory that has downloaded sources
      *
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
     public static function getPieWorkingDirectory(): string
     {
@@ -50,20 +50,20 @@ class Platform
         }
 
         if (ComposerPlatform::isWindows()) {
-            if (!ComposerPlatform::getEnv('APPDATA')) {
-                throw new \RuntimeException('The APPDATA or PIE_WORKING_DIRECTORY environment variable must be set for PIE to run correctly');
+            if (! ComposerPlatform::getEnv('APPDATA')) {
+                throw new RuntimeException('The APPDATA or PIE_WORKING_DIRECTORY environment variable must be set for PIE to run correctly');
             }
 
             return rtrim(strtr(ComposerPlatform::getEnv('APPDATA'), '\\', '/'), '/') . '/PIE';
         }
 
         $userDir = self::getUserDir();
-        $dirs = [];
+        $dirs    = [];
 
         if (self::useXdg()) {
             // XDG Base Directory Specifications
             $xdgConfig = ComposerPlatform::getEnv('XDG_CONFIG_HOME');
-            if (!$xdgConfig) {
+            if (! $xdgConfig) {
                 $xdgConfig = $userDir . '/.config';
             }
 
@@ -83,7 +83,8 @@ class Platform
         return $dirs[0];
     }
 
-    public static function getPieJsonFilename()
+    /** @return non-empty-string */
+    public static function getPieJsonFilename(): string
     {
         return self::getPieWorkingDirectory() . '/pie.json';
     }

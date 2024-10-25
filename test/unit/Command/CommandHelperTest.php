@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace Php\PieUnitTest\Command;
 
+use Composer\Composer;
+use Composer\Package\CompletePackage;
 use Composer\Util\Platform;
 use InvalidArgumentException;
 use Php\Pie\Command\CommandHelper;
+use Php\Pie\ComposerIntegration\ComposerIntegrationHandler;
 use Php\Pie\ConfigureOption;
 use Php\Pie\DependencyResolver\DependencyResolver;
 use Php\Pie\DependencyResolver\Package;
-use Php\Pie\Downloading\DownloadAndExtract;
-use Php\Pie\Downloading\DownloadedPackage;
+use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
@@ -90,18 +92,18 @@ final class CommandHelperTest extends TestCase
 
     public function testDownloadPackage(): void
     {
-        $dependencyResolver          = $this->createMock(DependencyResolver::class);
-        $targetPlatform              = TargetPlatform::fromPhpBinaryPath(PhpBinaryPath::fromCurrentProcess(), null);
-        $requestedNameAndVersionPair = ['name' => 'php/test-pie-ext', 'version' => '^1.2'];
-        $downloadAndExtract          = $this->createMock(DownloadAndExtract::class);
-        $output                      = $this->createMock(OutputInterface::class);
+        $composer                   = $this->createMock(Composer::class);
+        $dependencyResolver         = $this->createMock(DependencyResolver::class);
+        $targetPlatform             = TargetPlatform::fromPhpBinaryPath(PhpBinaryPath::fromCurrentProcess(), null);
+        $requestedNameAndVersion    = new RequestedPackageAndVersion('php/test-pie-ext', '^1.2');
+        $composerIntegrationHandler = $this->createMock(ComposerIntegrationHandler::class);
+        $output                     = $this->createMock(OutputInterface::class);
 
         $dependencyResolver->expects(self::once())
             ->method('__invoke')
-            ->with(
-                $targetPlatform,
-            )
+            ->with($composer, $dependencyResolver, $targetPlatform, $requestedNameAndVersion)
             ->willReturn($package = new Package(
+                $this->createMock(CompletePackage::class),
                 ExtensionType::PhpModule,
                 ExtensionName::normaliseFromString('test_pie_ext'),
                 'php/test-pie-ext',
@@ -114,28 +116,22 @@ final class CommandHelperTest extends TestCase
                 true,
             ));
 
-        $downloadAndExtract->expects(self::once())
+        $composerIntegrationHandler->expects(self::once())
             ->method('__invoke')
-            ->with(
-                $targetPlatform,
-                $package,
-            )
-            ->willReturn($downloadedPackage = DownloadedPackage::fromPackageAndExtractedPath(
-                $package,
-                '/foo/bar',
-            ));
+            ->with($package, $composer, $targetPlatform, $requestedNameAndVersion);
 
         $output->expects(self::once())
             ->method('writeln')
             ->with(self::stringContains('<info>Found package:</info> php/test-pie-ext:1.2.3 which provides <info>ext-test_pie_ext</info>'));
 
-        self::assertSame($downloadedPackage, CommandHelper::downloadPackage(
+        CommandHelper::downloadPackage(
+            $composer,
             $dependencyResolver,
             $targetPlatform,
-            $requestedNameAndVersionPair,
-            $downloadAndExtract,
+            $requestedNameAndVersion,
+            $composerIntegrationHandler,
             $output,
-        ));
+        );
     }
 
     public function testBindingConfigurationOptionsFromPackage(): void
@@ -146,6 +142,7 @@ final class CommandHelperTest extends TestCase
     public function testProcessingConfigureOptionsFromInput(): void
     {
         $package         = new Package(
+            $this->createMock(CompletePackage::class),
             ExtensionType::PhpModule,
             ExtensionName::normaliseFromString('lolz'),
             'foo/bar',

@@ -4,14 +4,19 @@ declare(strict_types=1);
 
 namespace Php\PieIntegrationTest\DependencyResolver;
 
+use Php\Pie\Command\CommandHelper;
+use Php\Pie\ComposerIntegration\PieComposerRequest;
+use Php\Pie\ComposerIntegration\PieOperation;
 use Php\Pie\Container;
 use Php\Pie\DependencyResolver\DependencyResolver;
+use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\DependencyResolver\ResolveDependencyWithComposer;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Console\Output\OutputInterface;
 
 use function array_combine;
 use function array_map;
@@ -59,6 +64,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
         );
     }
 
+    /** @param non-empty-string|null $requestedVersion */
     #[DataProvider('validVersionsList')]
     public function testDependenciesAreResolvedToExpectedVersions(
         string|null $requestedVersion,
@@ -68,10 +74,25 @@ final class ResolveDependencyWithComposerTest extends TestCase
         $container = Container::factory();
         $resolve   = $container->get(DependencyResolver::class);
 
-        $package = $resolve->__invoke(
-            TargetPlatform::fromPhpBinaryPath(PhpBinaryPath::fromCurrentProcess(), null),
+        $targetPlatform             = TargetPlatform::fromPhpBinaryPath(PhpBinaryPath::fromCurrentProcess(), null);
+        $requestedPackageAndVersion = new RequestedPackageAndVersion(
             'asgrim/example-pie-extension',
             $requestedVersion,
+        );
+
+        $package = $resolve->__invoke(
+            CommandHelper::createComposer(
+                $container,
+                new PieComposerRequest(
+                    $this->createMock(OutputInterface::class),
+                    $targetPlatform,
+                    $requestedPackageAndVersion,
+                    PieOperation::Resolve,
+                    [],
+                ),
+            ),
+            $targetPlatform,
+            $requestedPackageAndVersion,
         );
 
         self::assertSame($expectedVersion, $package->version);

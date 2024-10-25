@@ -4,16 +4,21 @@ declare(strict_types=1);
 
 namespace Php\Pie\Command;
 
+use Composer\Composer;
 use Composer\Package\Version\VersionParser;
 use Composer\Util\Platform;
 use InvalidArgumentException;
+use Php\Pie\ComposerIntegration\ArrayCollectionIO;
+use Php\Pie\ComposerIntegration\ComposerIntegrationHandler;
+use Php\Pie\ComposerIntegration\PieComposerFactory;
+use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\DependencyResolver\DependencyResolver;
 use Php\Pie\DependencyResolver\Package;
-use Php\Pie\Downloading\DownloadAndExtract;
-use Php\Pie\Downloading\DownloadedPackage;
+use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\Platform\OperatingSystem;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -142,8 +147,7 @@ final class CommandHelper
         return $targetPlatform;
     }
 
-    /** @return RequestedNameAndVersionPair */
-    public static function requestedNameAndVersionPair(InputInterface $input): array
+    public static function requestedNameAndVersionPair(InputInterface $input): RequestedPackageAndVersion
     {
         $requestedPackageString = $input->getArgument(self::ARG_REQUESTED_PACKAGE_AND_VERSION);
 
@@ -166,35 +170,39 @@ final class CommandHelper
         Assert::stringNotEmpty($requestedNameAndVersionPair['name']);
         Assert::nullOrStringNotEmpty($requestedNameAndVersionPair['version']);
 
-        return $requestedNameAndVersionPair;
-    }
-
-    /** @param RequestedNameAndVersionPair $requestedNameAndVersionPair */
-    public static function resolvePackage(
-        DependencyResolver $dependencyResolver,
-        TargetPlatform $targetPlatform,
-        array $requestedNameAndVersionPair,
-    ): Package {
-        return ($dependencyResolver)(
-            $targetPlatform,
+        return new RequestedPackageAndVersion(
             $requestedNameAndVersionPair['name'],
             $requestedNameAndVersionPair['version'],
         );
     }
 
-    /** @param RequestedNameAndVersionPair $requestedNameAndVersionPair */
-    public static function downloadPackage(
+    public static function resolvePackage(
+        Composer $composer,
         DependencyResolver $dependencyResolver,
         TargetPlatform $targetPlatform,
-        array $requestedNameAndVersionPair,
-        DownloadAndExtract $downloadAndExtract,
+        RequestedPackageAndVersion $requestedNameAndVersion,
+    ): Package {
+        return ($dependencyResolver)(
+            $composer,
+            $targetPlatform,
+            $requestedNameAndVersion,
+        );
+    }
+
+    public static function downloadPackage(
+        Composer $composer,
+        DependencyResolver $dependencyResolver,
+        TargetPlatform $targetPlatform,
+        RequestedPackageAndVersion $requestedNameAndVersion,
+        ComposerIntegrationHandler $composerIntegrationHandler,
         OutputInterface $output,
-    ): DownloadedPackage {
-        $package = self::resolvePackage($dependencyResolver, $targetPlatform, $requestedNameAndVersionPair);
+    ): void {
+        $package = ($dependencyResolver)($composer, $targetPlatform, $requestedNameAndVersion);
 
         $output->writeln(sprintf('<info>Found package:</info> %s which provides <info>%s</info>', $package->prettyNameAndVersion(), $package->extensionName->nameWithExtPrefix()));
 
-        return ($downloadAndExtract)($targetPlatform, $package);
+        // @todo return DownloadedPackage, if needed/possible
+        ($composerIntegrationHandler)($package, $composer, $targetPlatform, $requestedNameAndVersion);
     }
 
     public static function bindConfigureOptionsFromPackage(Command $command, Package $package, InputInterface $input): void
@@ -239,5 +247,41 @@ final class CommandHelper
         }
 
         return $configureOptionsValues;
+    }
+
+    public static function createComposer(
+        ContainerInterface $container,
+        PieComposerRequest $composerRequest,
+    ): Composer {
+        $pieComposer = \Php\Pie\Platform::getPieJsonFilename();
+
+        if (! file_exists($pieComposer)) {
+            file_put_contents(
+                $pieComposer,
+                "{\n}\n",
+            );
+        }
+
+        $io       = $container->get(ArrayCollectionIO::class);
+        $composer = (new PieComposerFactory($container, $composerRequest))->createComposer(
+            $io,
+            $pieComposer,
+            true,
+        );
+        $composer->getConfig()->merge(['config' => ['__PIE_REQUEST__' => $composerRequest]]);
+        $io->loadConfiguration($composer->getConfig());
+
+        return $composer;
+    }
+
+    public static function recreateComposer(
+        ContainerInterface $container,
+        Composer $existingComposer,
+    ): Composer {
+        $composerRequest = $existingComposer->getConfig()->get('__PIE_REQUEST__');
+
+        Assert::isInstanceOf($composerRequest, PieComposerRequest::class);
+
+        return self::createComposer($container, $composerRequest);
     }
 }

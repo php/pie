@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\PieUnitTest\Downloading;
 
+use Composer\Package\CompletePackage;
 use Composer\Util\AuthHelper;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\DownloadZip;
@@ -77,6 +78,7 @@ final class WindowsDownloadAndExtractTest extends TestCase
             ->willReturn($extractedPath);
 
         $requestedPackage = new Package(
+            $this->createMock(CompletePackage::class),
             ExtensionType::PhpModule,
             ExtensionName::normaliseFromString('foo'),
             'foo/bar',

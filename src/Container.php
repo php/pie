@@ -4,11 +4,6 @@ declare(strict_types=1);
 
 namespace Php\Pie;
 
-use Composer\Composer;
-use Composer\Factory as ComposerFactory;
-use Composer\IO\ConsoleIO;
-use Composer\IO\IOInterface;
-use Composer\Util\AuthHelper;
 use Composer\Util\Platform;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
@@ -22,9 +17,8 @@ use Php\Pie\Command\DownloadCommand;
 use Php\Pie\Command\InfoCommand;
 use Php\Pie\Command\InstallCommand;
 use Php\Pie\Command\ShowCommand;
-use Php\Pie\DependencyResolver\ArrayCollectionIO;
+use Php\Pie\ComposerIntegration\ArrayCollectionIO;
 use Php\Pie\DependencyResolver\DependencyResolver;
-use Php\Pie\DependencyResolver\PieComposerFactory;
 use Php\Pie\DependencyResolver\ResolveDependencyWithComposer;
 use Php\Pie\Downloading\DownloadAndExtract;
 use Php\Pie\Downloading\DownloadZip;
@@ -38,9 +32,7 @@ use Php\Pie\Installing\InstallNotification\InstallNotification;
 use Php\Pie\Installing\InstallNotification\SendInstallNotificationUsingGuzzle;
 use Php\Pie\Installing\UnixInstall;
 use Php\Pie\Installing\WindowsInstall;
-use Php\Pie\Platform\TargetPhp\ResolveTargetPhpToPlatformRepository;
 use Psr\Container\ContainerInterface;
-use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
@@ -52,6 +44,7 @@ final class Container
     public static function factory(): ContainerInterface
     {
         $container = new IlluminateContainer();
+        $container->instance(ContainerInterface::class, $container);
         $container->instance(InputInterface::class, new ArgvInput());
         $container->instance(OutputInterface::class, new ConsoleOutput());
 
@@ -61,65 +54,16 @@ final class Container
         $container->singleton(InfoCommand::class);
         $container->singleton(ShowCommand::class);
 
-        $container->singleton(IOInterface::class, static function (ContainerInterface $container): IOInterface {
-//            return new ArrayCollectionIO();
-            return new ConsoleIO(
-                $container->get(InputInterface::class),
-                $container->get(OutputInterface::class),
-                new HelperSet([]),
-            );
-        });
-        $container->singleton(Composer::class, static function (ContainerInterface $container): Composer {
-            $pieComposer = \Php\Pie\Platform::getPieJsonFilename();
-
-            if (! file_exists($pieComposer)) {
-                file_put_contents(
-                    $pieComposer,
-                    "{\n}\n",
-                );
-            }
-
-            $io       = $container->get(IOInterface::class);
-            $composer = (new PieComposerFactory($container))->createComposer(
-                $io,
-                $pieComposer,
-//                [
-//                    'config' => [
-//                        'lock' => true,
-//                        'vendor-dir' => \Php\Pie\Platform::getPieWorkingDirectory(),
-//                    ],
-//                ],
-                true,
-            );
-            $io->loadConfiguration($composer->getConfig());
-
-            return $composer;
+        $container->singleton(ArrayCollectionIO::class, static function (): ArrayCollectionIO {
+            return new ArrayCollectionIO();
         });
 
-        $container->singleton(
-            DependencyResolver::class,
-            static function (ContainerInterface $container): DependencyResolver {
-                return new ResolveDependencyWithComposer(
-                    $container,
-                    $container->get(Composer::class),
-                    new ResolveTargetPhpToPlatformRepository(),
-                    $container->get(IOInterface::class),
-                );
-            },
-        );
+        $container->alias(ResolveDependencyWithComposer::class, DependencyResolver::class);
+
         $container->bind(
             ClientInterface::class,
             static function (): ClientInterface {
                 return new Client([RequestOptions::HTTP_ERRORS => false]);
-            },
-        );
-        $container->singleton(
-            AuthHelper::class,
-            static function (ContainerInterface $container): AuthHelper {
-                return new AuthHelper(
-                    $container->get(IOInterface::class),
-                    $container->get(Composer::class)->getConfig(),
-                );
             },
         );
         $container->alias(DownloadZipWithGuzzle::class, DownloadZip::class);

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\PieUnitTest\Installing\InstallNotification;
 
 use Composer\Composer;
+use Composer\Package\CompletePackage;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Psr7\Response;
 use Php\Pie\DependencyResolver\Package;
@@ -62,6 +63,7 @@ final class SendInstallNotificationUsingGuzzleTest extends TestCase
     {
         return DownloadedPackage::fromPackageAndExtractedPath(
             new Package(
+                $this->createMock(CompletePackage::class),
                 ExtensionType::PhpModule,
                 ExtensionName::normaliseFromString('foo'),
                 'bar/foo',

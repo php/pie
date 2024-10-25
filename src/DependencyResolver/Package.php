@@ -27,6 +27,7 @@ final class Package
 {
     /** @param list<ConfigureOption> $configureOptions */
     public function __construct(
+        public readonly CompletePackageInterface $composerPackage,
         public readonly ExtensionType $extensionType,
         public readonly ExtensionName $extensionName,
         public readonly string $name,
@@ -60,6 +61,7 @@ final class Package
             : true;
 
         return new self(
+            $completePackage,
             ExtensionType::tryFrom($completePackage->getType()) ?? ExtensionType::PhpModule,
             ExtensionName::determineFromComposerPackage($completePackage),
             $completePackage->getPrettyName(),

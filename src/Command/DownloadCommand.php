@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Php\Pie\Command;
 
+use Php\Pie\ComposerIntegration\ComposerIntegrationHandler;
+use Php\Pie\ComposerIntegration\PieComposerRequest;
+use Php\Pie\ComposerIntegration\PieOperation;
 use Php\Pie\DependencyResolver\DependencyResolver;
-use Php\Pie\Downloading\DownloadAndExtract;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-
-use function sprintf;
 
 #[AsCommand(
     name: 'download',
@@ -20,8 +21,9 @@ use function sprintf;
 final class DownloadCommand extends Command
 {
     public function __construct(
+        private readonly ContainerInterface $container,
         private readonly DependencyResolver $dependencyResolver,
-        private readonly DownloadAndExtract $downloadAndExtract,
+        private readonly ComposerIntegrationHandler $composerIntegrationHandler,
     ) {
         parent::__construct();
     }
@@ -39,21 +41,27 @@ final class DownloadCommand extends Command
 
         $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $output);
 
-        $requestedNameAndVersionPair = CommandHelper::requestedNameAndVersionPair($input);
+        $requestedNameAndVersion = CommandHelper::requestedNameAndVersionPair($input);
 
-        $downloadedPackage = CommandHelper::downloadPackage(
-            $this->dependencyResolver,
-            $targetPlatform,
-            $requestedNameAndVersionPair,
-            $this->downloadAndExtract,
-            $output,
+        $composer = CommandHelper::createComposer(
+            $this->container,
+            new PieComposerRequest(
+                $output,
+                $targetPlatform,
+                $requestedNameAndVersion,
+                PieOperation::Download,
+                [], // Configure options are not needed for download only
+            ),
         );
 
-        $output->writeln(sprintf(
-            '<info>Extracted %s source to:</info> %s',
-            $downloadedPackage->package->prettyNameAndVersion(),
-            $downloadedPackage->extractedSourcePath,
-        ));
+        CommandHelper::downloadPackage(
+            $composer,
+            $this->dependencyResolver,
+            $targetPlatform,
+            $requestedNameAndVersion,
+            $this->composerIntegrationHandler,
+            $output,
+        );
 
         return Command::SUCCESS;
     }

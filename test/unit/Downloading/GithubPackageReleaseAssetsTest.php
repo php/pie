@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\PieUnitTest\Downloading;
 
+use Composer\Package\CompletePackage;
 use Composer\Util\AuthHelper;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
@@ -69,6 +70,7 @@ final class GithubPackageReleaseAssetsTest extends TestCase
         $guzzleMockClient = new Client(['handler' => HandlerStack::create($mockHandler)]);
 
         $package = new Package(
+            $this->createMock(CompletePackage::class),
             ExtensionType::PhpModule,
             ExtensionName::normaliseFromString('foo'),
             'asgrim/example-pie-extension',
@@ -126,6 +128,7 @@ final class GithubPackageReleaseAssetsTest extends TestCase
         $guzzleMockClient = new Client(['handler' => HandlerStack::create($mockHandler)]);
 
         $package = new Package(
+            $this->createMock(CompletePackage::class),
             ExtensionType::PhpModule,
             ExtensionName::normaliseFromString('foo'),
             'asgrim/example-pie-extension',
@@ -169,6 +172,7 @@ final class GithubPackageReleaseAssetsTest extends TestCase
         $guzzleMockClient = new Client(['handler' => HandlerStack::create($mockHandler)]);
 
         $package = new Package(
+            $this->createMock(CompletePackage::class),
             ExtensionType::PhpModule,
             ExtensionName::normaliseFromString('foo'),
             'asgrim/example-pie-extension',
