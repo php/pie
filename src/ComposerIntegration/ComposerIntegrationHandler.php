@@ -45,7 +45,7 @@ class ComposerIntegrationHandler
         file_put_contents($pieComposerJson, $manipulator->getContents());
 
         // Refresh the Composer instance so it re-reads the updated pie.json
-        $composer = CommandHelper::recreateComposer($this->container, $composer);
+        $composer = PieComposerFactory::recreatePieComposer($this->container, $composer);
 
         // Removing the package from the local repository will trick Composer into "re-installing" it :)
         foreach ($composer->getRepositoryManager()->getLocalRepository()->findPackages($requestedPackageAndVersion->package) as $pkg) {

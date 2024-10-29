@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\PieIntegrationTest\DependencyResolver;
 
 use Php\Pie\Command\CommandHelper;
+use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieOperation;
 use Php\Pie\Container;
@@ -81,7 +82,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
         );
 
         $package = $resolve->__invoke(
-            CommandHelper::createComposer(
+            PieComposerFactory::createPieComposer(
                 $container,
                 new PieComposerRequest(
                     $this->createMock(OutputInterface::class),

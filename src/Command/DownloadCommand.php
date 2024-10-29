@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\Pie\Command;
 
 use Php\Pie\ComposerIntegration\ComposerIntegrationHandler;
+use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieOperation;
 use Php\Pie\DependencyResolver\DependencyResolver;
@@ -45,7 +46,7 @@ final class DownloadCommand extends Command
 
         $requestedNameAndVersion = CommandHelper::requestedNameAndVersionPair($input);
 
-        $composer = CommandHelper::createComposer(
+        $composer = PieComposerFactory::createPieComposer(
             $this->container,
             new PieComposerRequest(
                 $output,

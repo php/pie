@@ -4,20 +4,14 @@ declare(strict_types=1);
 
 namespace Php\Pie\Command;
 
-use Composer\Composer;
 use Composer\Package\Version\VersionParser;
 use Composer\Util\Platform;
 use InvalidArgumentException;
-use Php\Pie\ComposerIntegration\ArrayCollectionIO;
-use Php\Pie\ComposerIntegration\PieComposerFactory;
-use Php\Pie\ComposerIntegration\PieComposerRequest;
-use Php\Pie\DependencyResolver\DependencyResolver;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\Platform\OperatingSystem;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
-use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -175,19 +169,6 @@ final class CommandHelper
         );
     }
 
-    public static function resolvePackage(
-        Composer $composer,
-        DependencyResolver $dependencyResolver,
-        TargetPlatform $targetPlatform,
-        RequestedPackageAndVersion $requestedNameAndVersion,
-    ): Package {
-        return ($dependencyResolver)(
-            $composer,
-            $targetPlatform,
-            $requestedNameAndVersion,
-        );
-    }
-
     public static function bindConfigureOptionsFromPackage(Command $command, Package $package, InputInterface $input): void
     {
         foreach ($package->configureOptions as $configureOption) {
@@ -230,41 +211,5 @@ final class CommandHelper
         }
 
         return $configureOptionsValues;
-    }
-
-    public static function createComposer(
-        ContainerInterface $container,
-        PieComposerRequest $composerRequest,
-    ): Composer {
-        $pieComposer = \Php\Pie\Platform::getPieJsonFilename();
-
-        if (! file_exists($pieComposer)) {
-            file_put_contents(
-                $pieComposer,
-                "{\n}\n",
-            );
-        }
-
-        $io       = $container->get(ArrayCollectionIO::class);
-        $composer = (new PieComposerFactory($container, $composerRequest))->createComposer(
-            $io,
-            $pieComposer,
-            true,
-        );
-        $composer->getConfig()->merge(['config' => ['__PIE_REQUEST__' => $composerRequest]]);
-        $io->loadConfiguration($composer->getConfig());
-
-        return $composer;
-    }
-
-    public static function recreateComposer(
-        ContainerInterface $container,
-        Composer $existingComposer,
-    ): Composer {
-        $composerRequest = $existingComposer->getConfig()->get('__PIE_REQUEST__');
-
-        Assert::isInstanceOf($composerRequest, PieComposerRequest::class);
-
-        return self::createComposer($container, $composerRequest);
     }
 }

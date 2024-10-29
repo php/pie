@@ -4,20 +4,15 @@ declare(strict_types=1);
 
 namespace Php\PieUnitTest\Command;
 
-use Composer\Composer;
 use Composer\Package\CompletePackage;
 use Composer\Util\Platform;
 use InvalidArgumentException;
 use Php\Pie\Command\CommandHelper;
-use Php\Pie\ComposerIntegration\ComposerIntegrationHandler;
 use Php\Pie\ConfigureOption;
-use Php\Pie\DependencyResolver\DependencyResolver;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
-use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
-use Php\Pie\Platform\TargetPlatform;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
@@ -27,7 +22,6 @@ use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\NullOutput;
-use Symfony\Component\Console\Output\OutputInterface;
 
 use function array_combine;
 use function array_map;
@@ -36,7 +30,7 @@ use function array_map;
 final class CommandHelperTest extends TestCase
 {
     /**
-     * @return array<string, array{0: string, 1: string, 2: string|null}>
+     * @return array<string, array{0: string, 1: non-empty-string, 2: non-empty-string|null}>
      *
      * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
      */
@@ -57,6 +51,10 @@ final class CommandHelperTest extends TestCase
         );
     }
 
+    /**
+     * @param non-empty-string $expectedPackage
+     * @param non-empty-string|null $expectedVersion
+     */
     #[DataProvider('validPackageAndVersions')]
     public function testRequestedNameAndVersionPair(string $requestedPackageAndVersion, string $expectedPackage, string|null $expectedVersion): void
     {
@@ -67,11 +65,8 @@ final class CommandHelperTest extends TestCase
             ->with('requested-package-and-version')
             ->willReturn($requestedPackageAndVersion);
 
-        self::assertSame(
-            [
-                'name' => $expectedPackage,
-                'version' => $expectedVersion,
-            ],
+        self::assertEquals(
+            new RequestedPackageAndVersion($expectedPackage, $expectedVersion),
             CommandHelper::requestedNameAndVersionPair($input),
         );
     }
@@ -88,50 +83,6 @@ final class CommandHelperTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('No package was requested for installation');
         CommandHelper::requestedNameAndVersionPair($input);
-    }
-
-    public function testDownloadPackage(): void
-    {
-        $composer                   = $this->createMock(Composer::class);
-        $dependencyResolver         = $this->createMock(DependencyResolver::class);
-        $targetPlatform             = TargetPlatform::fromPhpBinaryPath(PhpBinaryPath::fromCurrentProcess(), null);
-        $requestedNameAndVersion    = new RequestedPackageAndVersion('php/test-pie-ext', '^1.2');
-        $composerIntegrationHandler = $this->createMock(ComposerIntegrationHandler::class);
-        $output                     = $this->createMock(OutputInterface::class);
-
-        $dependencyResolver->expects(self::once())
-            ->method('__invoke')
-            ->with($composer, $dependencyResolver, $targetPlatform, $requestedNameAndVersion)
-            ->willReturn($package = new Package(
-                $this->createMock(CompletePackage::class),
-                ExtensionType::PhpModule,
-                ExtensionName::normaliseFromString('test_pie_ext'),
-                'php/test-pie-ext',
-                '1.2.3',
-                'https://test-uri/',
-                [],
-                null,
-                '1.2.3.0',
-                true,
-                true,
-            ));
-
-        $composerIntegrationHandler->expects(self::once())
-            ->method('__invoke')
-            ->with($package, $composer, $targetPlatform, $requestedNameAndVersion);
-
-        $output->expects(self::once())
-            ->method('writeln')
-            ->with(self::stringContains('<info>Found package:</info> php/test-pie-ext:1.2.3 which provides <info>ext-test_pie_ext</info>'));
-
-        CommandHelper::downloadPackage(
-            $composer,
-            $dependencyResolver,
-            $targetPlatform,
-            $requestedNameAndVersion,
-            $composerIntegrationHandler,
-            $output,
-        );
     }
 
     public function testBindingConfigurationOptionsFromPackage(): void
