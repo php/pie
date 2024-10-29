@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 namespace Php\Pie\Command;
 
-use Php\Pie\Building\Build;
+use Php\Pie\ComposerIntegration\ComposerIntegrationHandler;
+use Php\Pie\ComposerIntegration\PieComposerRequest;
+use Php\Pie\ComposerIntegration\PieOperation;
 use Php\Pie\DependencyResolver\DependencyResolver;
-use Php\Pie\Downloading\DownloadAndExtract;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+
+use function sprintf;
 
 #[AsCommand(
     name: 'build',
@@ -19,9 +23,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 final class BuildCommand extends Command
 {
     public function __construct(
+        private readonly ContainerInterface $container,
         private readonly DependencyResolver $dependencyResolver,
-        private readonly DownloadAndExtract $downloadAndExtract,
-        private readonly Build $build,
+        private readonly ComposerIntegrationHandler $composerIntegrationHandler,
     ) {
         parent::__construct();
     }
@@ -37,21 +41,39 @@ final class BuildCommand extends Command
     {
         $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $output);
 
-        $requestedNameAndVersionPair = CommandHelper::requestedNameAndVersionPair($input);
+        $requestedNameAndVersion = CommandHelper::requestedNameAndVersionPair($input);
 
-        $downloadedPackage = CommandHelper::downloadPackage(
-            $this->dependencyResolver,
-            $targetPlatform,
-            $requestedNameAndVersionPair,
-            $this->downloadAndExtract,
-            $output,
+        $composer = CommandHelper::createComposer(
+            $this->container,
+            new PieComposerRequest(
+                $output,
+                $targetPlatform,
+                $requestedNameAndVersion,
+                PieOperation::Resolve,
+                [], // Configure options are not needed for resolve only
+            ),
         );
 
-        CommandHelper::bindConfigureOptionsFromPackage($this, $downloadedPackage->package, $input);
+        $package = ($this->dependencyResolver)($composer, $targetPlatform, $requestedNameAndVersion);
+        $output->writeln(sprintf('<info>Found package:</info> %s which provides <info>%s</info>', $package->prettyNameAndVersion(), $package->extensionName->nameWithExtPrefix()));
 
-        $configureOptionsValues = CommandHelper::processConfigureOptionsFromInput($downloadedPackage->package, $input);
+        // Now we know what package we have, we can validate the configure options for the command and re-create the
+        // Composer instance with the populated configure options
+        CommandHelper::bindConfigureOptionsFromPackage($this, $package, $input);
+        $configureOptionsValues = CommandHelper::processConfigureOptionsFromInput($package, $input);
 
-        ($this->build)($downloadedPackage, $targetPlatform, $configureOptionsValues, $output);
+        $composer = CommandHelper::createComposer(
+            $this->container,
+            new PieComposerRequest(
+                $output,
+                $targetPlatform,
+                $requestedNameAndVersion,
+                PieOperation::Build,
+                $configureOptionsValues,
+            ),
+        );
+
+        ($this->composerIntegrationHandler)($package, $composer, $targetPlatform, $requestedNameAndVersion);
 
         return Command::SUCCESS;
     }

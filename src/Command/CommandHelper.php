@@ -9,7 +9,6 @@ use Composer\Package\Version\VersionParser;
 use Composer\Util\Platform;
 use InvalidArgumentException;
 use Php\Pie\ComposerIntegration\ArrayCollectionIO;
-use Php\Pie\ComposerIntegration\ComposerIntegrationHandler;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\DependencyResolver\DependencyResolver;
@@ -187,22 +186,6 @@ final class CommandHelper
             $targetPlatform,
             $requestedNameAndVersion,
         );
-    }
-
-    public static function downloadPackage(
-        Composer $composer,
-        DependencyResolver $dependencyResolver,
-        TargetPlatform $targetPlatform,
-        RequestedPackageAndVersion $requestedNameAndVersion,
-        ComposerIntegrationHandler $composerIntegrationHandler,
-        OutputInterface $output,
-    ): void {
-        $package = ($dependencyResolver)($composer, $targetPlatform, $requestedNameAndVersion);
-
-        $output->writeln(sprintf('<info>Found package:</info> %s which provides <info>%s</info>', $package->prettyNameAndVersion(), $package->extensionName->nameWithExtPrefix()));
-
-        // @todo return DownloadedPackage, if needed/possible
-        ($composerIntegrationHandler)($package, $composer, $targetPlatform, $requestedNameAndVersion);
     }
 
     public static function bindConfigureOptionsFromPackage(Command $command, Package $package, InputInterface $input): void

@@ -50,13 +50,12 @@ final class InfoCommand extends Command
                 $output,
                 $targetPlatform,
                 $requestedNameAndVersion,
-                PieOperation::Download,
-                [], // Configure options are not needed for download only
+                PieOperation::Resolve,
+                [], // Configure options are not needed for resolve only
             ),
         );
 
         $package = ($this->dependencyResolver)($composer, $targetPlatform, $requestedNameAndVersion);
-
         $output->writeln(sprintf('<info>Found package:</info> %s which provides <info>%s</info>', $package->prettyNameAndVersion(), $package->extensionName->nameWithExtPrefix()));
 
         $output->writeln(sprintf('Extension name: %s', $package->extensionName->name()));

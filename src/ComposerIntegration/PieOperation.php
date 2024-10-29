@@ -12,11 +12,6 @@ enum PieOperation
     case Build;
     case Install;
 
-    public function shouldDownload(): bool
-    {
-        return $this === PieOperation::Download || $this === PieOperation::Build || $this === PieOperation::Install;
-    }
-
     public function shouldBuild(): bool
     {
         return $this === PieOperation::Build || $this === PieOperation::Install;

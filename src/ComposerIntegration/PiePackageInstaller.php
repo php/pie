@@ -15,6 +15,7 @@ use Php\Pie\Building\Build;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\ExtensionType;
+use Php\Pie\Installing\Install;
 
 use function sprintf;
 
@@ -26,7 +27,8 @@ class PiePackageInstaller extends LibraryInstaller
         PartialComposer $composer,
         ExtensionType $type,
         Filesystem $filesystem,
-        private readonly Build $builder,
+        private readonly Build $pieBuild,
+        private readonly Install $pieInstall,
         private readonly PieComposerRequest $composerRequest,
     ) {
         parent::__construct($io, $composer, $type->value, $filesystem);
@@ -35,32 +37,34 @@ class PiePackageInstaller extends LibraryInstaller
     /** @inheritDoc */
     public function install(InstalledRepositoryInterface $repo, PackageInterface $package)
     {
-        return parent::install($repo, $package)
-            ->then(function () use ($package): void {
+        $composerPackage = $package;
+
+        return parent::install($repo, $composerPackage)
+            ?->then(function () use ($composerPackage) {
                 $output = $this->composerRequest->pieOutput;
 
-                if ($this->composerRequest->requestedPackage->package !== $package->getName()) {
+                if ($this->composerRequest->requestedPackage->package !== $composerPackage->getName()) {
                     $output->writeln(sprintf(
                         '<error>Not using PIE to install %s as it was not the expected package %s</error>',
-                        $package->getName(),
+                        $composerPackage->getName(),
                         $this->composerRequest->requestedPackage->package,
                     ));
 
-                    return;
+                    return null;
                 }
 
-                if (! $package instanceof CompletePackage) {
+                if (! $composerPackage instanceof CompletePackage) {
                     $output->writeln(sprintf(
                         '<error>Not using PIE to install %s as it was not a Complete Package</error>',
-                        $package->getName(),
+                        $composerPackage->getName(),
                     ));
 
-                    return;
+                    return null;
                 }
 
                 $downloadedPackage = DownloadedPackage::fromPackageAndExtractedPath(
-                    Package::fromComposerCompletePackage($package),
-                    $this->getInstallPath($package),
+                    Package::fromComposerCompletePackage($composerPackage),
+                    $this->getInstallPath($composerPackage),
                 );
 
                 $output->writeln(sprintf(
@@ -69,8 +73,19 @@ class PiePackageInstaller extends LibraryInstaller
                     $downloadedPackage->extractedSourcePath,
                 ));
 
+                // @todo QUESTION: how do we install a package multiple times for different PHP versions?
+                //       SUGGESTION: maybe different pie.json per target platform...?
+
+                // @todo QUESTION: why does this not work?
+                $composerPackage->setExtra(['test1' => 'test1']);
+                $composerPackage->setTransportOptions(['test2' => 'test2']);
+
+                // @todo target platform metadata should go into `pie.lock`
+
                 if ($this->composerRequest->operation->shouldBuild()) {
-                    ($this->builder)(
+                    // @todo configureOptions used should go into `pie.lock`
+                    // @todo the location + checksum of the built .so should go into `pie.lock`
+                    ($this->pieBuild)(
                         $downloadedPackage,
                         $this->composerRequest->targetPlatform,
                         $this->composerRequest->configureOptions,
@@ -78,7 +93,30 @@ class PiePackageInstaller extends LibraryInstaller
                     );
                 }
 
-                // @todo shouldInstall
+                if (! $this->composerRequest->operation->shouldInstall()) {
+                    return null;
+                }
+
+                // @todo the location of the installed .so should go into `pie.lock`
+                ($this->pieInstall)(
+                    $downloadedPackage,
+                    $this->composerRequest->targetPlatform,
+                    $output,
+                );
+
+                // @todo should not need this, in theory, need to check
+                // try {
+                //     $this->installNotification->send($targetPlatform, $downloadedPackage);
+                // } catch (FailedToSendInstallNotification $failedToSendInstallNotification) {
+                //     if ($output->isVeryVerbose()) {
+                //         $output->writeln('Install notification did not send.');
+                //         if ($output->isDebug()) {
+                //             $output->writeln($failedToSendInstallNotification->__toString());
+                //         }
+                //     }
+                // }
+
+                return null;
             });
     }
 
@@ -86,9 +124,11 @@ class PiePackageInstaller extends LibraryInstaller
     public function update(InstalledRepositoryInterface $repo, PackageInterface $initial, PackageInterface $target)
     {
         return parent::update($repo, $initial, $target)
-            ->then(function (): void {
+            ?->then(function () {
                 // @todo do we need to do things?
                 $this->io->write('UPDATE');
+
+                return null;
             });
     }
 
@@ -96,9 +136,11 @@ class PiePackageInstaller extends LibraryInstaller
     public function cleanup($type, PackageInterface $package, PackageInterface|null $prevPackage = null)
     {
         return parent::cleanup($type, $package, $prevPackage)
-            ->then(function (): void {
+            ?->then(function () {
                 // @todo do we need to do things?
                 $this->io->write('CLEANUP');
+
+                return null;
             });
     }
 }
