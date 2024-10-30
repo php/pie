@@ -100,8 +100,7 @@ final class UnixBuild implements Build
         if ($targetPlatform->makeParallelJobs === 1) {
             $output->writeln('Running make without parallelization - try providing -jN to PIE where N is the number of cores you have.');
         } else {
-            $makeCommand[] = '--jobs';
-            $makeCommand[] = (string) $targetPlatform->makeParallelJobs;
+            $makeCommand[] = sprintf('-j%d', $targetPlatform->makeParallelJobs);
         }
 
         return Process::run(
