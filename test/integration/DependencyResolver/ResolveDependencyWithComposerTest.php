@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Php\PieIntegrationTest\DependencyResolver;
 
-use Php\Pie\Command\CommandHelper;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieOperation;

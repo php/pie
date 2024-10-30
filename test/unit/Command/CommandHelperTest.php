@@ -52,7 +52,7 @@ final class CommandHelperTest extends TestCase
     }
 
     /**
-     * @param non-empty-string $expectedPackage
+     * @param non-empty-string      $expectedPackage
      * @param non-empty-string|null $expectedVersion
      */
     #[DataProvider('validPackageAndVersions')]

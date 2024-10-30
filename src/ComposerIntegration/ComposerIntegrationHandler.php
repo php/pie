@@ -7,7 +7,6 @@ namespace Php\Pie\ComposerIntegration;
 use Composer\Composer;
 use Composer\Installer;
 use Composer\Json\JsonManipulator;
-use Php\Pie\Command\CommandHelper;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\Platform;
@@ -58,10 +57,12 @@ class ComposerIntegrationHandler
         $composerInstaller = Installer::create($this->arrayCollectionIo, $composer);
         $composerInstaller
             ->setAllowedTypes(['php-ext', 'php-ext-zend'])
+            ->setUpdate(true)
             ->setInstall(true)
             ->setIgnoredTypes([])
             ->setDryRun(false)
             ->setDownloadOnly(false);
-        $composerInstaller->run();
+        $resultCode = $composerInstaller->run();
+        // @todo handle `$resultCode`
     }
 }
