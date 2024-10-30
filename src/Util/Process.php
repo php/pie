@@ -25,14 +25,19 @@ final class Process
      *  - very short timeout by default (5 seconds)
      *  - output is trimmed
      *
-     * @param list<string> $command
+     * @param list<string>                                                         $command
+     * @param callable(SymfonyProcess::ERR|SymfonyProcess::OUT, string): void|null $outputCallback
      *
      * @throws ProcessFailedException
      */
-    public static function run(array $command, string|null $workingDirectory = null, int|null $timeout = 5): string
-    {
+    public static function run(
+        array $command,
+        string|null $workingDirectory = null,
+        int|null $timeout = 5,
+        callable|null $outputCallback = null,
+    ): string {
         return trim((new SymfonyProcess($command, $workingDirectory, timeout: $timeout))
-            ->mustRun()
+            ->mustRun($outputCallback)
             ->getOutput());
     }
 }

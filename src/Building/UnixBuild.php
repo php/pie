@@ -9,6 +9,7 @@ use Php\Pie\Platform\TargetPhp\PhpizePath;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Util\Process;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\Process as SymfonyProcess;
 
 use function count;
 use function file_exists;
@@ -29,13 +30,25 @@ final class UnixBuild implements Build
         array $configureOptions,
         OutputInterface $output,
     ): void {
-        $phpizeOutput = $this->phpize(
+        $outputCallback = null;
+        if ($output->isVerbose()) {
+            /** @var callable(SymfonyProcess::ERR|SymfonyProcess::OUT, string):void $outputCallback */
+            $outputCallback = static function (string $type, string $outputMessage) use ($output): void {
+                $output->write(sprintf(
+                    '%s%s%s',
+                    $type === SymfonyProcess::ERR ? '<comment>' : '',
+                    $outputMessage,
+                    $type === SymfonyProcess::ERR ? '</comment>' : '',
+                ));
+            };
+        }
+
+        $this->phpize(
             PhpizePath::guessFrom($targetPlatform->phpBinaryPath),
             $downloadedPackage,
+            $output,
+            $outputCallback,
         );
-        if ($output->isVeryVerbose()) {
-            $output->writeln($phpizeOutput);
-        }
 
         $output->writeln('<info>phpize complete</info>.');
 
@@ -44,18 +57,12 @@ final class UnixBuild implements Build
             $configureOptions[] = '--with-php-config=' . $phpConfigPath;
         }
 
-        $configureOutput = $this->configure($downloadedPackage, $configureOptions);
-        if ($output->isVeryVerbose()) {
-            $output->writeln($configureOutput);
-        }
+        $this->configure($downloadedPackage, $configureOptions, $output, $outputCallback);
 
         $optionsOutput = count($configureOptions) ? ' with options: ' . implode(' ', $configureOptions) : '.';
         $output->writeln('<info>Configure complete</info>' . $optionsOutput);
 
-        $makeOutput = $this->make($targetPlatform, $downloadedPackage, $output);
-        if ($output->isVeryVerbose()) {
-            $output->writeln($makeOutput);
-        }
+        $this->make($targetPlatform, $downloadedPackage, $output, $outputCallback);
 
         $expectedSoFile = $downloadedPackage->extractedSourcePath . '/modules/' . $downloadedPackage->package->extensionName->name() . '.so';
 
@@ -74,27 +81,58 @@ final class UnixBuild implements Build
         ));
     }
 
-    private function phpize(PhpizePath $phpize, DownloadedPackage $downloadedPackage): string
-    {
-        return Process::run(
-            [$phpize->phpizeBinaryPath],
+    /** @param callable(SymfonyProcess::ERR|SymfonyProcess::OUT, string): void|null $outputCallback */
+    private function phpize(
+        PhpizePath $phpize,
+        DownloadedPackage $downloadedPackage,
+        OutputInterface $output,
+        callable|null $outputCallback,
+    ): void {
+        $phpizeCommand = [$phpize->phpizeBinaryPath];
+
+        if ($output->isVerbose()) {
+            $output->writeln('<comment>Running phpize step using: ' . implode(' ', $phpizeCommand) . '</comment>');
+        }
+
+        Process::run(
+            $phpizeCommand,
             $downloadedPackage->extractedSourcePath,
             self::PHPIZE_TIMEOUT_SECS,
+            $outputCallback,
         );
     }
 
-    /** @param list<non-empty-string> $configureOptions */
-    private function configure(DownloadedPackage $downloadedPackage, array $configureOptions = []): string
-    {
-        return Process::run(
-            ['./configure', ...$configureOptions],
+    /**
+     * @param list<non-empty-string>                                               $configureOptions
+     * @param callable(SymfonyProcess::ERR|SymfonyProcess::OUT, string): void|null $outputCallback
+     */
+    private function configure(
+        DownloadedPackage $downloadedPackage,
+        array $configureOptions,
+        OutputInterface $output,
+        callable|null $outputCallback,
+    ): void {
+        $configureCommand = ['./configure', ...$configureOptions];
+
+        if ($output->isVerbose()) {
+            $output->writeln('<comment>Running configure step with: ' . implode(' ', $configureCommand) . '</comment>');
+        }
+
+        Process::run(
+            $configureCommand,
             $downloadedPackage->extractedSourcePath,
             self::CONFIGURE_TIMEOUT_SECS,
+            $outputCallback,
         );
     }
 
-    private function make(TargetPlatform $targetPlatform, DownloadedPackage $downloadedPackage, OutputInterface $output): string
-    {
+    /** @param callable(SymfonyProcess::ERR|SymfonyProcess::OUT, string): void|null $outputCallback */
+    private function make(
+        TargetPlatform $targetPlatform,
+        DownloadedPackage $downloadedPackage,
+        OutputInterface $output,
+        callable|null $outputCallback,
+    ): void {
         $makeCommand = ['make'];
 
         if ($targetPlatform->makeParallelJobs === 1) {
@@ -103,10 +141,15 @@ final class UnixBuild implements Build
             $makeCommand[] = sprintf('-j%d', $targetPlatform->makeParallelJobs);
         }
 
-        return Process::run(
+        if ($output->isVerbose()) {
+            $output->writeln('<comment>Running make step with: ' . implode(' ', $makeCommand) . '</comment>');
+        }
+
+        Process::run(
             $makeCommand,
             $downloadedPackage->extractedSourcePath,
             self::MAKE_TIMEOUT_SECS,
+            $outputCallback,
         );
     }
 }
