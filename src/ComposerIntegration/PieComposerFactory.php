@@ -20,6 +20,7 @@ use Webmozart\Assert\Assert;
 
 use function file_exists;
 use function file_put_contents;
+use function mkdir;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 class PieComposerFactory extends Factory
@@ -54,6 +55,12 @@ class PieComposerFactory extends Factory
         ContainerInterface $container,
         PieComposerRequest $composerRequest,
     ): Composer {
+        $workDir = Platform::getPieWorkingDirectory();
+
+        if (! file_exists($workDir)) {
+            mkdir($workDir, recursive: true);
+        }
+
         $pieComposer = Platform::getPieJsonFilename();
 
         if (! file_exists($pieComposer)) {
