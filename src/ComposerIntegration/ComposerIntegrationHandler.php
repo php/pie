@@ -51,8 +51,6 @@ class ComposerIntegrationHandler
             $composer->getRepositoryManager()->getLocalRepository()->removePackage($pkg);
         }
 
-        // @todo figure out how to download Windows zip file
-
         // @todo check if you have another ext in pie.json already, it doesn't get changed/installed/etc.
         $composerInstaller = Installer::create($this->arrayCollectionIo, $composer);
         $composerInstaller

@@ -20,13 +20,8 @@ use Php\Pie\Command\ShowCommand;
 use Php\Pie\ComposerIntegration\ArrayCollectionIO;
 use Php\Pie\DependencyResolver\DependencyResolver;
 use Php\Pie\DependencyResolver\ResolveDependencyWithComposer;
-use Php\Pie\Downloading\DownloadAndExtract;
-use Php\Pie\Downloading\DownloadZip;
-use Php\Pie\Downloading\DownloadZipWithGuzzle;
 use Php\Pie\Downloading\GithubPackageReleaseAssets;
 use Php\Pie\Downloading\PackageReleaseAssets;
-use Php\Pie\Downloading\UnixDownloadAndExtract;
-use Php\Pie\Downloading\WindowsDownloadAndExtract;
 use Php\Pie\Installing\Install;
 use Php\Pie\Installing\InstallNotification\InstallNotification;
 use Php\Pie\Installing\InstallNotification\SendInstallNotificationUsingGuzzle;
@@ -66,21 +61,10 @@ final class Container
                 return new Client([RequestOptions::HTTP_ERRORS => false]);
             },
         );
-        $container->alias(DownloadZipWithGuzzle::class, DownloadZip::class);
         $container->alias(GithubPackageReleaseAssets::class, PackageReleaseAssets::class);
         $container->when(GithubPackageReleaseAssets::class)
             ->needs('$githubApiBaseUrl')
             ->give('https://api.github.com');
-        $container->singleton(
-            DownloadAndExtract::class,
-            static function (ContainerInterface $container): DownloadAndExtract {
-                if (Platform::isWindows()) {
-                    return $container->get(WindowsDownloadAndExtract::class);
-                }
-
-                return $container->get(UnixDownloadAndExtract::class);
-            },
-        );
 
         $container->singleton(
             Build::class,

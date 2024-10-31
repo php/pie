@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Php\Pie\Installing;
 
 use Php\Pie\Downloading\DownloadedPackage;
-use Php\Pie\Downloading\DownloadZip;
 use Php\Pie\ExtensionType;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\WindowsExtensionAssetName;
@@ -51,13 +50,12 @@ final class WindowsInstall implements Install
             assert($file instanceof SplFileInfo);
 
             /**
-             * Skip directories, the main DLL, PDB, and the downloaded.zip
+             * Skip directories, the main DLL, PDB
              */
             if (
                 $file->isDir()
                 || $this->normalisedPathsMatch($file->getPathname(), $sourceDllName)
                 || $this->normalisedPathsMatch($file->getPathname(), $sourcePdbName)
-                || $file->getFilename() === DownloadZip::DOWNLOADED_ZIP_FILENAME
             ) {
                 continue;
             }

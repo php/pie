@@ -83,9 +83,9 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             true,
         );
 
-        $releaseAssets = new GithubPackageReleaseAssets($authHelper, $guzzleMockClient, 'https://test-github-api-base-url.thephp.foundation');
+        $releaseAssets = new GithubPackageReleaseAssets($guzzleMockClient, 'https://test-github-api-base-url.thephp.foundation');
 
-        self::assertSame('actual_download_url', $releaseAssets->findWindowsDownloadUrlForPackage($targetPlatform, $package));
+        self::assertSame('actual_download_url', $releaseAssets->findWindowsDownloadUrlForPackage($targetPlatform, $package, $authHelper));
     }
 
     public function testUrlIsReturnedWhenFindingWindowsDownloadUrlWithCompilerAndThreadSafetySwapped(): void
@@ -141,9 +141,9 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             true,
         );
 
-        $releaseAssets = new GithubPackageReleaseAssets($authHelper, $guzzleMockClient, 'https://test-github-api-base-url.thephp.foundation');
+        $releaseAssets = new GithubPackageReleaseAssets($guzzleMockClient, 'https://test-github-api-base-url.thephp.foundation');
 
-        self::assertSame('actual_download_url', $releaseAssets->findWindowsDownloadUrlForPackage($targetPlatform, $package));
+        self::assertSame('actual_download_url', $releaseAssets->findWindowsDownloadUrlForPackage($targetPlatform, $package, $authHelper));
     }
 
     public function testFindWindowsDownloadUrlForPackageThrowsExceptionWhenAssetNotFound(): void
@@ -185,9 +185,9 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             true,
         );
 
-        $releaseAssets = new GithubPackageReleaseAssets($authHelper, $guzzleMockClient, 'https://test-github-api-base-url.thephp.foundation');
+        $releaseAssets = new GithubPackageReleaseAssets($guzzleMockClient, 'https://test-github-api-base-url.thephp.foundation');
 
         $this->expectException(CouldNotFindReleaseAsset::class);
-        $releaseAssets->findWindowsDownloadUrlForPackage($targetPlatform, $package);
+        $releaseAssets->findWindowsDownloadUrlForPackage($targetPlatform, $package, $authHelper);
     }
 }
