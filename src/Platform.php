@@ -18,6 +18,7 @@ class Platform
     private static function useXdg(): bool
     {
         foreach (array_keys($_SERVER) as $key) {
+            /** @psalm-suppress RedundantCastGivenDocblockType */
             if (strpos((string) $key, 'XDG_') === 0) {
                 return true;
             }
@@ -30,7 +31,7 @@ class Platform
     private static function getUserDir(): string
     {
         $home = ComposerPlatform::getEnv('HOME');
-        if (! $home) {
+        if ($home === false || $home === '') {
             throw new RuntimeException('The HOME or PIE_WORKING_DIRECTORY environment variable must be set for PIE to run correctly');
         }
 
@@ -45,16 +46,17 @@ class Platform
     public static function getPieWorkingDirectory(): string
     {
         $home = ComposerPlatform::getEnv('PIE_WORKING_DIRECTORY');
-        if ($home) {
+        if ($home !== false && $home !== '') {
             return $home;
         }
 
         if (ComposerPlatform::isWindows()) {
-            if (! ComposerPlatform::getEnv('APPDATA')) {
+            $appData = ComposerPlatform::getEnv('APPDATA');
+            if ($appData === false || $appData === '') {
                 throw new RuntimeException('The APPDATA or PIE_WORKING_DIRECTORY environment variable must be set for PIE to run correctly');
             }
 
-            return rtrim(strtr(ComposerPlatform::getEnv('APPDATA'), '\\', '/'), '/') . '/PIE';
+            return rtrim(strtr($appData, '\\', '/'), '/') . '/PIE';
         }
 
         $userDir = self::getUserDir();
@@ -63,7 +65,7 @@ class Platform
         if (self::useXdg()) {
             // XDG Base Directory Specifications
             $xdgConfig = ComposerPlatform::getEnv('XDG_CONFIG_HOME');
-            if (! $xdgConfig) {
+            if ($xdgConfig === false || $xdgConfig === '') {
                 $xdgConfig = $userDir . '/.config';
             }
 
