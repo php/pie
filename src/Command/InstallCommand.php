@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\Pie\Command;
 
 use Php\Pie\ComposerIntegration\ComposerIntegrationHandler;
+use Php\Pie\ComposerIntegration\ComposerRunFailed;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieOperation;
@@ -79,7 +80,13 @@ final class InstallCommand extends Command
             ),
         );
 
-        ($this->composerIntegrationHandler)($package, $composer, $targetPlatform, $requestedNameAndVersion);
+        try {
+            ($this->composerIntegrationHandler)($package, $composer, $targetPlatform, $requestedNameAndVersion);
+        } catch (ComposerRunFailed $composerRunFailed) {
+            $output->writeln('<error>' . $composerRunFailed->getMessage() . '</error>');
+
+            return $composerRunFailed->getCode();
+        }
 
         return Command::SUCCESS;
     }

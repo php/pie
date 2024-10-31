@@ -61,6 +61,9 @@ class ComposerIntegrationHandler
             ->setDryRun(false)
             ->setDownloadOnly(false);
         $resultCode = $composerInstaller->run();
-        // @todo handle `$resultCode`
+
+        if ($resultCode !== Installer::ERROR_NONE) {
+            throw ComposerRunFailed::fromExitCode($resultCode);
+        }
     }
 }

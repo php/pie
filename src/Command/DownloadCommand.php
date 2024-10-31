@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\Pie\Command;
 
 use Php\Pie\ComposerIntegration\ComposerIntegrationHandler;
+use Php\Pie\ComposerIntegration\ComposerRunFailed;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieOperation;
@@ -60,7 +61,13 @@ final class DownloadCommand extends Command
         $package = ($this->dependencyResolver)($composer, $targetPlatform, $requestedNameAndVersion);
         $output->writeln(sprintf('<info>Found package:</info> %s which provides <info>%s</info>', $package->prettyNameAndVersion(), $package->extensionName->nameWithExtPrefix()));
 
-        ($this->composerIntegrationHandler)($package, $composer, $targetPlatform, $requestedNameAndVersion);
+        try {
+            ($this->composerIntegrationHandler)($package, $composer, $targetPlatform, $requestedNameAndVersion);
+        } catch (ComposerRunFailed $composerRunFailed) {
+            $output->writeln('<error>' . $composerRunFailed->getMessage() . '</error>');
+
+            return $composerRunFailed->getCode();
+        }
 
         return Command::SUCCESS;
     }
