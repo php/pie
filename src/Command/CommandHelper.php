@@ -28,11 +28,7 @@ use function strtolower;
 
 use const PHP_VERSION;
 
-/**
- * @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks
- *
- * @psalm-type RequestedNameAndVersionPair = array{name: non-empty-string, version: non-empty-string|null}
- */
+/** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class CommandHelper
 {
     private const ARG_REQUESTED_PACKAGE_AND_VERSION = 'requested-package-and-version';
