@@ -11,7 +11,7 @@ use Composer\Repository\ArrayRepository;
 use Composer\Repository\CompositeRepository;
 use Composer\Repository\RepositoryFactory;
 use Composer\Repository\RepositoryManager;
-use Php\Pie\ComposerIntegration\ArrayCollectionIO;
+use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use Php\Pie\DependencyResolver\IncompatibleThreadSafetyMode;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\DependencyResolver\ResolveDependencyWithComposer;
@@ -60,7 +60,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
         );
 
         $package = (new ResolveDependencyWithComposer(
-            new ArrayCollectionIO(),
+            $this->createMock(QuieterConsoleIO::class),
         ))($this->composer, $targetPlatform, new RequestedPackageAndVersion('asgrim/example-pie-extension', '^1.0'));
 
         self::assertSame('asgrim/example-pie-extension', $package->name);
@@ -106,7 +106,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
         $this->expectException(UnableToResolveRequirement::class);
 
         (new ResolveDependencyWithComposer(
-            new ArrayCollectionIO(),
+            $this->createMock(QuieterConsoleIO::class),
         ))(
             $this->composer,
             $targetPlatform,
@@ -151,7 +151,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
         $this->expectException(IncompatibleThreadSafetyMode::class);
         $this->expectExceptionMessage('This extension does not support being installed on a non-Thread Safe PHP installation');
         (new ResolveDependencyWithComposer(
-            new ArrayCollectionIO(),
+            $this->createMock(QuieterConsoleIO::class),
         ))(
             $this->composer,
             $targetPlatform,
@@ -196,7 +196,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
         $this->expectException(IncompatibleThreadSafetyMode::class);
         $this->expectExceptionMessage('This extension does not support being installed on a Thread Safe PHP installation');
         (new ResolveDependencyWithComposer(
-            new ArrayCollectionIO(),
+            $this->createMock(QuieterConsoleIO::class),
         ))(
             $this->composer,
             $targetPlatform,

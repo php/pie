@@ -70,7 +70,7 @@ class PieComposerFactory extends Factory
             );
         }
 
-        $io       = $container->get(ArrayCollectionIO::class);
+        $io       = $container->get(QuieterConsoleIO::class);
         $composer = (new PieComposerFactory($container, $composerRequest))->createComposer(
             $io,
             $pieComposer,

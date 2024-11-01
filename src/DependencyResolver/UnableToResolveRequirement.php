@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Php\Pie\DependencyResolver;
 
 use Composer\Package\PackageInterface;
-use Php\Pie\ComposerIntegration\ArrayCollectionIO;
+use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use RuntimeException;
 
 use function array_map;
@@ -18,7 +18,7 @@ class UnableToResolveRequirement extends RuntimeException
 {
     public static function fromRequirement(
         RequestedPackageAndVersion $requestedPackageAndVersion,
-        ArrayCollectionIO $io,
+        QuieterConsoleIO $io,
     ): self {
         $errors = $io->errors;
 

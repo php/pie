@@ -6,7 +6,7 @@ namespace Php\Pie\DependencyResolver;
 
 use Composer\Composer;
 use Composer\Package\CompletePackageInterface;
-use Php\Pie\ComposerIntegration\ArrayCollectionIO;
+use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use Php\Pie\ComposerIntegration\VersionSelectorFactory;
 use Php\Pie\ExtensionType;
 use Php\Pie\Platform\TargetPlatform;
@@ -18,7 +18,7 @@ use function preg_match;
 final class ResolveDependencyWithComposer implements DependencyResolver
 {
     public function __construct(
-        private readonly ArrayCollectionIO $arrayCollectionIo,
+        private readonly QuieterConsoleIO $arrayCollectionIo,
     ) {
     }
 

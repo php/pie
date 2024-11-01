@@ -22,7 +22,7 @@ class ComposerIntegrationHandler
     /** @psalm-api */
     public function __construct(
         private readonly ContainerInterface $container,
-        private readonly ArrayCollectionIO $arrayCollectionIo,
+        private readonly QuieterConsoleIO $arrayCollectionIo,
     ) {
     }
 

@@ -17,7 +17,7 @@ use Php\Pie\Command\DownloadCommand;
 use Php\Pie\Command\InfoCommand;
 use Php\Pie\Command\InstallCommand;
 use Php\Pie\Command\ShowCommand;
-use Php\Pie\ComposerIntegration\ArrayCollectionIO;
+use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use Php\Pie\DependencyResolver\DependencyResolver;
 use Php\Pie\DependencyResolver\ResolveDependencyWithComposer;
 use Php\Pie\Downloading\GithubPackageReleaseAssets;
@@ -28,6 +28,7 @@ use Php\Pie\Installing\InstallNotification\SendInstallNotificationUsingGuzzle;
 use Php\Pie\Installing\UnixInstall;
 use Php\Pie\Installing\WindowsInstall;
 use Psr\Container\ContainerInterface;
+use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
@@ -49,8 +50,12 @@ final class Container
         $container->singleton(InfoCommand::class);
         $container->singleton(ShowCommand::class);
 
-        $container->singleton(ArrayCollectionIO::class, static function (): ArrayCollectionIO {
-            return new ArrayCollectionIO();
+        $container->singleton(QuieterConsoleIO::class, static function (ContainerInterface $container): QuieterConsoleIO {
+            return new QuieterConsoleIO(
+                $container->get(InputInterface::class),
+                $container->get(OutputInterface::class),
+                new HelperSet(),
+            );
         });
 
         $container->alias(ResolveDependencyWithComposer::class, DependencyResolver::class);
