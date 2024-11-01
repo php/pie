@@ -13,6 +13,7 @@ use function rtrim;
 use function strpos;
 use function strtr;
 
+/** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 class Platform
 {
     private static function useXdg(): bool
