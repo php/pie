@@ -29,7 +29,7 @@ final class UnixBuild implements Build
         TargetPlatform $targetPlatform,
         array $configureOptions,
         OutputInterface $output,
-    ): void {
+    ): string {
         $outputCallback = null;
         if ($output->isVerbose()) {
             /** @var callable(SymfonyProcess::ERR|SymfonyProcess::OUT, string):void $outputCallback */
@@ -72,13 +72,15 @@ final class UnixBuild implements Build
                 $expectedSoFile,
             ));
 
-            return;
+            return $expectedSoFile;
         }
 
         $output->writeln(sprintf(
             '<info>Build complete:</info> %s',
             $expectedSoFile,
         ));
+
+        return $expectedSoFile;
     }
 
     /** @param callable(SymfonyProcess::ERR|SymfonyProcess::OUT, string): void|null $outputCallback */

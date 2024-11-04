@@ -17,7 +17,9 @@ final class WindowsBuild implements Build
         TargetPlatform $targetPlatform,
         array $configureOptions,
         OutputInterface $output,
-    ): void {
+    ): string {
         $output->writeln('<info>Nothing to do on Windows.</info>');
+
+        return 'blah'; // @todo return the DLL path
     }
 }

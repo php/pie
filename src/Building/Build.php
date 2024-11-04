@@ -11,11 +11,15 @@ use Symfony\Component\Console\Output\OutputInterface;
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 interface Build
 {
-    /** @param list<non-empty-string> $configureOptions */
+    /**
+     * @param list<non-empty-string> $configureOptions
+     *
+     * @return non-empty-string
+     */
     public function __invoke(
         DownloadedPackage $downloadedPackage,
         TargetPlatform $targetPlatform,
         array $configureOptions,
         OutputInterface $output,
-    ): void;
+    ): string;
 }

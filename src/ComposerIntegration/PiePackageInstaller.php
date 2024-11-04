@@ -12,11 +12,17 @@ use Composer\PartialComposer;
 use Composer\Repository\InstalledRepositoryInterface;
 use Composer\Util\Filesystem;
 use Php\Pie\Building\Build;
+use Php\Pie\ComposerIntegration\PieInstalledJsonMetadataKeys as MetadataKey;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\ExtensionType;
 use Php\Pie\Installing\Install;
+use Webmozart\Assert\Assert;
 
+use function array_merge;
+use function file_get_contents;
+use function hash;
+use function implode;
 use function sprintf;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
@@ -73,20 +79,61 @@ class PiePackageInstaller extends LibraryInstaller
                     $downloadedPackage->extractedSourcePath,
                 ));
 
-                // @todo QUESTION: why does this not work?
-                $composerPackage->setExtra(['test1' => 'test1']);
-                $composerPackage->setTransportOptions(['test2' => 'test2']);
-
-                // @todo target platform metadata should go into `pie.lock`
+                $this->addPieMetadata(
+                    $composerPackage,
+                    MetadataKey::TargetPlatformPhpPath,
+                    $this->composerRequest->targetPlatform->phpBinaryPath->phpBinaryPath,
+                );
+                $this->addPieMetadata(
+                    $composerPackage,
+                    MetadataKey::TargetPlatformPhpConfigPath,
+                    $this->composerRequest->targetPlatform->phpBinaryPath->phpConfigPath(),
+                );
+                $this->addPieMetadata(
+                    $composerPackage,
+                    MetadataKey::TargetPlatformPhpVersion,
+                    $this->composerRequest->targetPlatform->phpBinaryPath->version(),
+                );
+                $this->addPieMetadata(
+                    $composerPackage,
+                    MetadataKey::TargetPlatformPhpThreadSafety,
+                    $this->composerRequest->targetPlatform->threadSafety->name,
+                );
+                $this->addPieMetadata(
+                    $composerPackage,
+                    MetadataKey::TargetPlatformPhpWindowsCompiler,
+                    $this->composerRequest->targetPlatform->windowsCompiler?->name,
+                );
+                $this->addPieMetadata(
+                    $composerPackage,
+                    MetadataKey::TargetPlatformArchitecture,
+                    $this->composerRequest->targetPlatform->architecture->name,
+                );
 
                 if ($this->composerRequest->operation->shouldBuild()) {
-                    // @todo configureOptions used should go into `pie.lock`
-                    // @todo the location + checksum of the built .so should go into `pie.lock`
-                    ($this->pieBuild)(
+                    $this->addPieMetadata(
+                        $composerPackage,
+                        MetadataKey::ConfigureOptions,
+                        implode(' ', $this->composerRequest->configureOptions),
+                    );
+
+                    $builtBinaryFile = ($this->pieBuild)(
                         $downloadedPackage,
                         $this->composerRequest->targetPlatform,
                         $this->composerRequest->configureOptions,
                         $output,
+                    );
+
+                    $this->addPieMetadata(
+                        $composerPackage,
+                        MetadataKey::BuiltBinary,
+                        $builtBinaryFile,
+                    );
+
+                    $this->addPieMetadata(
+                        $composerPackage,
+                        MetadataKey::BinaryChecksum,
+                        hash('sha256', file_get_contents($builtBinaryFile)),
                     );
                 }
 
@@ -94,11 +141,14 @@ class PiePackageInstaller extends LibraryInstaller
                     return null;
                 }
 
-                // @todo the location of the installed .so should go into `pie.lock`
-                ($this->pieInstall)(
-                    $downloadedPackage,
-                    $this->composerRequest->targetPlatform,
-                    $output,
+                $this->addPieMetadata(
+                    $composerPackage,
+                    MetadataKey::InstalledBinary,
+                    ($this->pieInstall)(
+                        $downloadedPackage,
+                        $this->composerRequest->targetPlatform,
+                        $output,
+                    ),
                 );
 
                 // @todo should not need this, in theory, need to check
@@ -139,5 +189,20 @@ class PiePackageInstaller extends LibraryInstaller
 
                 return null;
             });
+    }
+
+    private function addPieMetadata(
+        CompletePackage $composerPackage,
+        MetadataKey $key,
+        string|null $value,
+    ): void {
+        $localRepositoryPackage = $this
+            ->composer
+            ->getRepositoryManager()
+            ->getLocalRepository()
+            ->findPackages($composerPackage->getName())[0];
+        Assert::isInstanceOf($localRepositoryPackage, CompletePackage::class);
+
+        $localRepositoryPackage->setExtra(array_merge($localRepositoryPackage->getExtra(), [$key->value => $value]));
     }
 }
