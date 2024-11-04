@@ -73,9 +73,6 @@ class PiePackageInstaller extends LibraryInstaller
                     $downloadedPackage->extractedSourcePath,
                 ));
 
-                // @todo QUESTION: how do we install a package multiple times for different PHP versions?
-                //       SUGGESTION: maybe different pie.json per target platform...?
-
                 // @todo QUESTION: why does this not work?
                 $composerPackage->setExtra(['test1' => 'test1']);
                 $composerPackage->setTransportOptions(['test2' => 'test2']);

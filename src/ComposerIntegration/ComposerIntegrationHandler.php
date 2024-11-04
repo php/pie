@@ -38,7 +38,7 @@ class ComposerIntegrationHandler
         }
 
         // Write the new requirement to pie.json; because we later essentially just do a `composer install` using that file
-        $pieComposerJson = Platform::getPieJsonFilename();
+        $pieComposerJson = Platform::getPieJsonFilename($targetPlatform);
         $manipulator     = new JsonManipulator(file_get_contents($pieComposerJson));
         $manipulator->addLink('require', $requestedPackageAndVersion->package, $recommendedRequireVersion, true);
         file_put_contents($pieComposerJson, $manipulator->getContents());

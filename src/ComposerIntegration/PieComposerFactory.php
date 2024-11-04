@@ -55,13 +55,13 @@ class PieComposerFactory extends Factory
         ContainerInterface $container,
         PieComposerRequest $composerRequest,
     ): Composer {
-        $workDir = Platform::getPieWorkingDirectory();
+        $workDir = Platform::getPieWorkingDirectory($composerRequest->targetPlatform);
 
         if (! file_exists($workDir)) {
             mkdir($workDir, recursive: true);
         }
 
-        $pieComposer = Platform::getPieJsonFilename();
+        $pieComposer = Platform::getPieJsonFilename($composerRequest->targetPlatform);
 
         if (! file_exists($pieComposer)) {
             file_put_contents(
