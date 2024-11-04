@@ -5,8 +5,12 @@ declare(strict_types=1);
 namespace Php\Pie\Platform;
 
 use Php\Pie\DependencyResolver\Package;
+use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\Downloading\Exception\CouldNotFindReleaseAsset;
+use RuntimeException;
 
+use function file_exists;
+use function implode;
 use function sprintf;
 use function strtolower;
 
@@ -63,5 +67,19 @@ final class WindowsExtensionAssetName
     public static function dllNames(TargetPlatform $targetPlatform, Package $package): array
     {
         return self::assetNames($targetPlatform, $package, 'dll');
+    }
+
+    /** @return non-empty-string */
+    public static function determineDllName(TargetPlatform $targetPlatform, DownloadedPackage $package): string
+    {
+        $possibleDllNames = self::dllNames($targetPlatform, $package->package);
+        foreach ($possibleDllNames as $dllName) {
+            $fullDllName = $package->extractedSourcePath . '/' . $dllName;
+            if (file_exists($fullDllName)) {
+                return $fullDllName;
+            }
+        }
+
+        throw new RuntimeException('Unable to find DLL for package, checked: ' . implode(', ', $possibleDllNames));
     }
 }

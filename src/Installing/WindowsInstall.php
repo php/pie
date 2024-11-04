@@ -18,7 +18,6 @@ use function assert;
 use function copy;
 use function dirname;
 use function file_exists;
-use function implode;
 use function is_file;
 use function mkdir;
 use function sprintf;
@@ -34,7 +33,7 @@ final class WindowsInstall implements Install
     public function __invoke(DownloadedPackage $downloadedPackage, TargetPlatform $targetPlatform, OutputInterface $output): string
     {
         $extractedSourcePath = $downloadedPackage->extractedSourcePath;
-        $sourceDllName       = $this->determineDllName($targetPlatform, $downloadedPackage);
+        $sourceDllName       = WindowsExtensionAssetName::determineDllName($targetPlatform, $downloadedPackage);
         $sourcePdbName       = str_replace('.dll', '.pdb', $sourceDllName);
         assert($sourcePdbName !== '');
 
@@ -83,20 +82,6 @@ final class WindowsInstall implements Install
         ));
 
         return $destinationDllName;
-    }
-
-    /** @return non-empty-string */
-    private function determineDllName(TargetPlatform $targetPlatform, DownloadedPackage $package): string
-    {
-        $possibleDllNames = WindowsExtensionAssetName::dllNames($targetPlatform, $package->package);
-        foreach ($possibleDllNames as $dllName) {
-            $fullDllName = $package->extractedSourcePath . '/' . $dllName;
-            if (file_exists($fullDllName)) {
-                return $fullDllName;
-            }
-        }
-
-        throw new RuntimeException('Unable to find DLL for package, checked: ' . implode(', ', $possibleDllNames));
     }
 
     /**

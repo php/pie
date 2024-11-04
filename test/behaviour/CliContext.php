@@ -77,7 +77,7 @@ class CliContext implements Context
         $this->assertCommandSuccessful();
 
         if (Platform::isWindows()) {
-            Assert::contains($this->output, 'Nothing to do on Windows.');
+            Assert::contains($this->output, 'Nothing to do on Windows');
 
             return;
         }
@@ -99,7 +99,7 @@ class CliContext implements Context
         $this->assertCommandSuccessful();
 
         if (Platform::isWindows()) {
-            Assert::contains($this->output, 'Nothing to do on Windows.');
+            Assert::contains($this->output, 'Nothing to do on Windows');
 
             return;
         }
