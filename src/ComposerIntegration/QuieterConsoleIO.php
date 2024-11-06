@@ -60,12 +60,14 @@ class QuieterConsoleIO extends ConsoleIO
             if (is_array($messages)) {
                 $this->errors = array_merge($this->errors, $messages);
 
+                parent::writeError($messages, $newline, $verbosity);
+
                 return;
             }
 
             $this->errors[] = $messages;
         }
 
-        parent::write($messages, $newline, $verbosity);
+        parent::writeError($messages, $newline, $verbosity);
     }
 }
