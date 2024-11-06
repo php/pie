@@ -76,7 +76,7 @@ final class WindowsInstallTest extends TestCase
         $installer = new WindowsInstall();
 
         $installedDll = $installer->__invoke($downloadedPackage, $targetPlatform, $output);
-        self::assertSame($extensionPath . '\php_pie_test_ext.dll', $installedDll);
+        self::assertSame($extensionPath . '\php_pie_test_ext.dll', $installedDll->filePath);
 
         $outputString = $output->fetch();
 
@@ -85,19 +85,19 @@ final class WindowsInstallTest extends TestCase
 
         $extrasDirectory = $phpPath . DIRECTORY_SEPARATOR . 'extras' . DIRECTORY_SEPARATOR . 'pie_test_ext';
 
-        $expectedPdb                 = str_replace('.dll', '.pdb', $installedDll);
+        $expectedPdb                 = str_replace('.dll', '.pdb', $installedDll->filePath);
         $expectedSupportingDll       = $phpPath . DIRECTORY_SEPARATOR . 'supporting-library.dll';
         $expectedSupportingOtherFile = $extrasDirectory . DIRECTORY_SEPARATOR . 'README.md';
         $expectedSubdirectoryFile    = $extrasDirectory . DIRECTORY_SEPARATOR . 'more' . DIRECTORY_SEPARATOR . 'more-information.txt';
         assert($expectedPdb !== '');
 
-        self::assertFileExists($installedDll);
+        self::assertFileExists($installedDll->filePath);
         self::assertFileExists($expectedPdb);
         self::assertFileExists($expectedSupportingDll);
         self::assertFileExists($expectedSupportingOtherFile);
         self::assertFileExists($expectedSubdirectoryFile);
 
-        $this->delete($installedDll);
+        $this->delete($installedDll->filePath);
         $this->delete($expectedPdb);
         $this->delete($expectedSupportingDll);
         $this->delete($extrasDirectory);

@@ -11,9 +11,7 @@ use Composer\IO\IOInterface;
 use Composer\PartialComposer;
 use Composer\Util\Filesystem;
 use Composer\Util\ProcessExecutor;
-use Php\Pie\Building\Build;
 use Php\Pie\ExtensionType;
-use Php\Pie\Installing\Install;
 use Php\Pie\Platform;
 use Psr\Container\ContainerInterface;
 use Webmozart\Assert\Assert;
@@ -41,8 +39,7 @@ class PieComposerFactory extends Factory
                 $composer,
                 $type,
                 $fs,
-                $this->container->get(Build::class),
-                $this->container->get(Install::class),
+                $this->container->get(InstallAndBuildProcess::class),
                 $this->composerRequest,
             );
         };

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\Pie\Building;
 
+use Php\Pie\BinaryFile;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\Platform\TargetPhp\PhpizePath;
 use Php\Pie\Platform\TargetPlatform;
@@ -29,7 +30,7 @@ final class UnixBuild implements Build
         TargetPlatform $targetPlatform,
         array $configureOptions,
         OutputInterface $output,
-    ): string {
+    ): BinaryFile {
         $outputCallback = null;
         if ($output->isVerbose()) {
             /** @var callable(SymfonyProcess::ERR|SymfonyProcess::OUT, string):void $outputCallback */
@@ -72,7 +73,7 @@ final class UnixBuild implements Build
                 $expectedSoFile,
             ));
 
-            return $expectedSoFile;
+            return BinaryFile::fromFileWithSha256Checksum($expectedSoFile);
         }
 
         $output->writeln(sprintf(
@@ -80,7 +81,7 @@ final class UnixBuild implements Build
             $expectedSoFile,
         ));
 
-        return $expectedSoFile;
+        return BinaryFile::fromFileWithSha256Checksum($expectedSoFile);
     }
 
     /** @param callable(SymfonyProcess::ERR|SymfonyProcess::OUT, string): void|null $outputCallback */

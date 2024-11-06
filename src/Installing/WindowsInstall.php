@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\Pie\Installing;
 
+use Php\Pie\BinaryFile;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\ExtensionType;
 use Php\Pie\Platform\TargetPlatform;
@@ -30,7 +31,7 @@ use const DIRECTORY_SEPARATOR;
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class WindowsInstall implements Install
 {
-    public function __invoke(DownloadedPackage $downloadedPackage, TargetPlatform $targetPlatform, OutputInterface $output): string
+    public function __invoke(DownloadedPackage $downloadedPackage, TargetPlatform $targetPlatform, OutputInterface $output): BinaryFile
     {
         $extractedSourcePath = $downloadedPackage->extractedSourcePath;
         $sourceDllName       = WindowsExtensionAssetName::determineDllName($targetPlatform, $downloadedPackage);
@@ -81,7 +82,7 @@ final class WindowsInstall implements Install
             $downloadedPackage->package->extensionName->name(),
         ));
 
-        return $destinationDllName;
+        return BinaryFile::fromFileWithSha256Checksum($destinationDllName);
     }
 
     /**

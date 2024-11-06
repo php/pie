@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\Pie\Building;
 
+use Php\Pie\BinaryFile;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\WindowsExtensionAssetName;
@@ -20,7 +21,7 @@ final class WindowsBuild implements Build
         TargetPlatform $targetPlatform,
         array $configureOptions,
         OutputInterface $output,
-    ): string {
+    ): BinaryFile {
         $prebuiltDll = WindowsExtensionAssetName::determineDllName($targetPlatform, $downloadedPackage);
 
         $output->writeln(sprintf(
@@ -28,6 +29,6 @@ final class WindowsBuild implements Build
             $prebuiltDll,
         ));
 
-        return $prebuiltDll;
+        return BinaryFile::fromFileWithSha256Checksum($prebuiltDll);
     }
 }

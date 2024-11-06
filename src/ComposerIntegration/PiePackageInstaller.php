@@ -11,18 +11,8 @@ use Composer\Package\PackageInterface;
 use Composer\PartialComposer;
 use Composer\Repository\InstalledRepositoryInterface;
 use Composer\Util\Filesystem;
-use Php\Pie\Building\Build;
-use Php\Pie\ComposerIntegration\PieInstalledJsonMetadataKeys as MetadataKey;
-use Php\Pie\DependencyResolver\Package;
-use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\ExtensionType;
-use Php\Pie\Installing\Install;
-use Webmozart\Assert\Assert;
 
-use function array_merge;
-use function file_get_contents;
-use function hash;
-use function implode;
 use function sprintf;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
@@ -33,8 +23,7 @@ class PiePackageInstaller extends LibraryInstaller
         PartialComposer $composer,
         ExtensionType $type,
         Filesystem $filesystem,
-        private readonly Build $pieBuild,
-        private readonly Install $pieInstall,
+        private readonly InstallAndBuildProcess $installAndBuildProcess,
         private readonly PieComposerRequest $composerRequest,
     ) {
         parent::__construct($io, $composer, $type->value, $filesystem);
@@ -68,100 +57,12 @@ class PiePackageInstaller extends LibraryInstaller
                     return null;
                 }
 
-                $downloadedPackage = DownloadedPackage::fromPackageAndExtractedPath(
-                    Package::fromComposerCompletePackage($composerPackage),
+                ($this->installAndBuildProcess)(
+                    $this->composer,
+                    $this->composerRequest,
+                    $composerPackage,
                     $this->getInstallPath($composerPackage),
                 );
-
-                $output->writeln(sprintf(
-                    '<info>Extracted %s source to:</info> %s',
-                    $downloadedPackage->package->prettyNameAndVersion(),
-                    $downloadedPackage->extractedSourcePath,
-                ));
-
-                $this->addPieMetadata(
-                    $composerPackage,
-                    MetadataKey::TargetPlatformPhpPath,
-                    $this->composerRequest->targetPlatform->phpBinaryPath->phpBinaryPath,
-                );
-                $this->addPieMetadata(
-                    $composerPackage,
-                    MetadataKey::TargetPlatformPhpConfigPath,
-                    $this->composerRequest->targetPlatform->phpBinaryPath->phpConfigPath(),
-                );
-                $this->addPieMetadata(
-                    $composerPackage,
-                    MetadataKey::TargetPlatformPhpVersion,
-                    $this->composerRequest->targetPlatform->phpBinaryPath->version(),
-                );
-                $this->addPieMetadata(
-                    $composerPackage,
-                    MetadataKey::TargetPlatformPhpThreadSafety,
-                    $this->composerRequest->targetPlatform->threadSafety->name,
-                );
-                $this->addPieMetadata(
-                    $composerPackage,
-                    MetadataKey::TargetPlatformPhpWindowsCompiler,
-                    $this->composerRequest->targetPlatform->windowsCompiler?->name,
-                );
-                $this->addPieMetadata(
-                    $composerPackage,
-                    MetadataKey::TargetPlatformArchitecture,
-                    $this->composerRequest->targetPlatform->architecture->name,
-                );
-
-                if ($this->composerRequest->operation->shouldBuild()) {
-                    $this->addPieMetadata(
-                        $composerPackage,
-                        MetadataKey::ConfigureOptions,
-                        implode(' ', $this->composerRequest->configureOptions),
-                    );
-
-                    $builtBinaryFile = ($this->pieBuild)(
-                        $downloadedPackage,
-                        $this->composerRequest->targetPlatform,
-                        $this->composerRequest->configureOptions,
-                        $output,
-                    );
-
-                    $this->addPieMetadata(
-                        $composerPackage,
-                        MetadataKey::BuiltBinary,
-                        $builtBinaryFile,
-                    );
-
-                    $this->addPieMetadata(
-                        $composerPackage,
-                        MetadataKey::BinaryChecksum,
-                        hash('sha256', file_get_contents($builtBinaryFile)),
-                    );
-                }
-
-                if (! $this->composerRequest->operation->shouldInstall()) {
-                    return null;
-                }
-
-                $this->addPieMetadata(
-                    $composerPackage,
-                    MetadataKey::InstalledBinary,
-                    ($this->pieInstall)(
-                        $downloadedPackage,
-                        $this->composerRequest->targetPlatform,
-                        $output,
-                    ),
-                );
-
-                // @todo should not need this, in theory, need to check
-                // try {
-                //     $this->installNotification->send($targetPlatform, $downloadedPackage);
-                // } catch (FailedToSendInstallNotification $failedToSendInstallNotification) {
-                //     if ($output->isVeryVerbose()) {
-                //         $output->writeln('Install notification did not send.');
-                //         if ($output->isDebug()) {
-                //             $output->writeln($failedToSendInstallNotification->__toString());
-                //         }
-                //     }
-                // }
 
                 return null;
             });
@@ -189,20 +90,5 @@ class PiePackageInstaller extends LibraryInstaller
 
                 return null;
             });
-    }
-
-    private function addPieMetadata(
-        CompletePackage $composerPackage,
-        MetadataKey $key,
-        string|null $value,
-    ): void {
-        $localRepositoryPackage = $this
-            ->composer
-            ->getRepositoryManager()
-            ->getLocalRepository()
-            ->findPackages($composerPackage->getName())[0];
-        Assert::isInstanceOf($localRepositoryPackage, CompletePackage::class);
-
-        $localRepositoryPackage->setExtra(array_merge($localRepositoryPackage->getExtra(), [$key->value => $value]));
     }
 }
