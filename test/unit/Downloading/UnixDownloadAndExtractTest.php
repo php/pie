@@ -72,11 +72,12 @@ final class UnixDownloadAndExtractTest extends TestCase
             '1.2.3.0',
             true,
             true,
+            '',
         );
 
         $downloadedPackage = $unixDownloadAndExtract->__invoke($targetPlatform, $requestedPackage);
 
         self::assertSame($requestedPackage, $downloadedPackage->package);
-        self::assertSame($extractedPath, $downloadedPackage->extractedSourcePath);
+        self::assertSame($extractedPath, $downloadedPackage->getSourcePath());
     }
 }

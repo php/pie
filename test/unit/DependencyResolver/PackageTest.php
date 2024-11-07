@@ -73,6 +73,7 @@ final class PackageTest extends TestCase
             '1.2.3.0',
             true,
             true,
+            '',
         );
 
         self::assertSame($expectedGithubOrgAndRepo, $package->githubOrgAndRepository());

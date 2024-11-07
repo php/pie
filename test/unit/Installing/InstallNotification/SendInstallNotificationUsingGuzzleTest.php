@@ -72,6 +72,7 @@ final class SendInstallNotificationUsingGuzzleTest extends TestCase
                 '1.2.3.0',
                 true,
                 true,
+                '',
             ),
             '/path/to/extracted',
         );

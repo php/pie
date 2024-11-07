@@ -12,8 +12,10 @@ use Php\Pie\ExtensionType;
 use function array_key_exists;
 use function array_map;
 use function array_slice;
+use function assert;
 use function explode;
 use function implode;
+use function is_string;
 use function parse_url;
 use function str_contains;
 use function str_starts_with;
@@ -37,6 +39,7 @@ final class Package
         public readonly string $notificationVersion,
         public readonly bool $supportZts,
         public readonly bool $supportNts,
+        public readonly string $extensionSource,
     ) {
     }
 
@@ -59,6 +62,12 @@ final class Package
             ? $phpExtOptions['support-nts']
             : true;
 
+        $extensionSource = $phpExtOptions !== null && array_key_exists('extension-src', $phpExtOptions)
+            ? $phpExtOptions['extension-src']
+            : '';
+        // @todo fix PHPDoc in upstream (composer)
+        assert(is_string($extensionSource));
+
         return new self(
             ExtensionType::tryFrom($completePackage->getType()) ?? ExtensionType::PhpModule,
             ExtensionName::determineFromComposerPackage($completePackage),
@@ -70,6 +79,7 @@ final class Package
             $completePackage->getVersion(),
             $supportZts,
             $supportNts,
+            $extensionSource,
         );
     }
 

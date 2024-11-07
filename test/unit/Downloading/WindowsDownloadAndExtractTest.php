@@ -87,11 +87,12 @@ final class WindowsDownloadAndExtractTest extends TestCase
             '1.2.3.0',
             true,
             true,
+            '',
         );
 
         $downloadedPackage = $windowsDownloadAndExtract->__invoke($targetPlatform, $requestedPackage);
 
         self::assertSame($requestedPackage, $downloadedPackage->package);
-        self::assertStringContainsString(sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'pie_downloader_', $downloadedPackage->extractedSourcePath);
+        self::assertStringContainsString(sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'pie_downloader_', $downloadedPackage->getSourcePath());
     }
 }

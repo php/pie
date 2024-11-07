@@ -57,7 +57,7 @@ final class UnixBuild implements Build
             $output->writeln($makeOutput);
         }
 
-        $expectedSoFile = $downloadedPackage->extractedSourcePath . '/modules/' . $downloadedPackage->package->extensionName->name() . '.so';
+        $expectedSoFile = $downloadedPackage->getSourcePath() . '/modules/' . $downloadedPackage->package->extensionName->name() . '.so';
 
         if (! file_exists($expectedSoFile)) {
             $output->writeln(sprintf(
@@ -78,7 +78,7 @@ final class UnixBuild implements Build
     {
         return Process::run(
             [$phpize->phpizeBinaryPath],
-            $downloadedPackage->extractedSourcePath,
+            $downloadedPackage->getSourcePath(),
             self::PHPIZE_TIMEOUT_SECS,
         );
     }
@@ -88,7 +88,7 @@ final class UnixBuild implements Build
     {
         return Process::run(
             ['./configure', ...$configureOptions],
-            $downloadedPackage->extractedSourcePath,
+            $downloadedPackage->getSourcePath(),
             self::CONFIGURE_TIMEOUT_SECS,
         );
     }
@@ -105,7 +105,7 @@ final class UnixBuild implements Build
 
         return Process::run(
             $makeCommand,
-            $downloadedPackage->extractedSourcePath,
+            $downloadedPackage->getSourcePath(),
             self::MAKE_TIMEOUT_SECS,
         );
     }

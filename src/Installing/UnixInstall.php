@@ -48,7 +48,7 @@ final class UnixInstall implements Install
 
         $makeInstallOutput = Process::run(
             $makeInstallCommand,
-            $downloadedPackage->extractedSourcePath,
+            $downloadedPackage->getSourcePath(),
             self::MAKE_INSTALL_TIMEOUT_SECS,
         );
 

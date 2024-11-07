@@ -29,13 +29,14 @@ final class DownloadedPackageTest extends TestCase
             '1.2.3.0',
             true,
             true,
+            '',
         );
 
         $extractedSourcePath = uniqid('/path/to/downloaded/package', true);
 
         $downloadedPackage = DownloadedPackage::fromPackageAndExtractedPath($package, $extractedSourcePath);
 
-        self::assertSame($extractedSourcePath, $downloadedPackage->extractedSourcePath);
+        self::assertSame($extractedSourcePath, $downloadedPackage->getSourcePath());
         self::assertSame($package, $downloadedPackage->package);
     }
 }

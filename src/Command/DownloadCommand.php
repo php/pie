@@ -52,7 +52,7 @@ final class DownloadCommand extends Command
         $output->writeln(sprintf(
             '<info>Extracted %s source to:</info> %s',
             $downloadedPackage->package->prettyNameAndVersion(),
-            $downloadedPackage->extractedSourcePath,
+            $downloadedPackage->getSourcePath(),
         ));
 
         return Command::SUCCESS;

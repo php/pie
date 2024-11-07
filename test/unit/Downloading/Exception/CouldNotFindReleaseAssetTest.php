@@ -32,6 +32,7 @@ final class CouldNotFindReleaseAssetTest extends TestCase
             '1.2.3.0',
             true,
             true,
+            '',
         );
 
         $exception = CouldNotFindReleaseAsset::forPackage($package, ['something.zip', 'something2.zip']);
@@ -52,6 +53,7 @@ final class CouldNotFindReleaseAssetTest extends TestCase
             '1.2.3.0',
             true,
             true,
+            '',
         );
 
         $exception = CouldNotFindReleaseAsset::forPackageWithMissingTag($package);

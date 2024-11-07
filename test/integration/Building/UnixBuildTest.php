@@ -21,7 +21,8 @@ use Symfony\Component\Process\Process;
 #[CoversClass(UnixBuild::class)]
 final class UnixBuildTest extends TestCase
 {
-    private const TEST_EXTENSION_PATH = __DIR__ . '/../../assets/pie_test_ext';
+    private const TEST_EXTENSION_PATH        = __DIR__ . '/../../assets/pie_test_ext';
+    private const TEST_EXTENSION_SUBDIR_PATH = __DIR__ . '/../../assets/pie_test_ext_subdir';
 
     public function testUnixBuildCanBuildExtension(): void
     {
@@ -43,6 +44,7 @@ final class UnixBuildTest extends TestCase
                 '0.1.0.0',
                 true,
                 true,
+                '',
             ),
             self::TEST_EXTENSION_PATH,
         );
@@ -64,12 +66,63 @@ final class UnixBuildTest extends TestCase
 
         self::assertSame(
             0,
-            (new Process(['make', 'test'], $downloadedPackage->extractedSourcePath))
+            (new Process(['make', 'test'], $downloadedPackage->getSourcePath()))
                 ->mustRun()
                 ->getExitCode(),
         );
 
-        (new Process(['make', 'clean'], $downloadedPackage->extractedSourcePath))->mustRun();
-        (new Process(['phpize', '--clean'], $downloadedPackage->extractedSourcePath))->mustRun();
+        (new Process(['make', 'clean'], $downloadedPackage->getSourcePath()))->mustRun();
+        (new Process(['phpize', '--clean'], $downloadedPackage->getSourcePath()))->mustRun();
+    }
+
+    public function testUnixBuildCanBuildSubDirExtension(): void
+    {
+        if (Platform::isWindows()) {
+            self::markTestSkipped('Unix build test cannot be run on Windows');
+        }
+
+        $output = new BufferedOutput();
+
+        $downloadedPackage = DownloadedPackage::fromPackageAndExtractedPath(
+            new Package(
+                ExtensionType::PhpModule,
+                ExtensionName::normaliseFromString('pie_test_ext_subdir'),
+                'pie_test_ext_subdir',
+                '0.1.0',
+                null,
+                [ConfigureOption::fromComposerJsonDefinition(['name' => 'enable-pie_test_ext_subdir'])],
+                null,
+                '0.1.0.0',
+                true,
+                true,
+                'ext',
+            ),
+            self::TEST_EXTENSION_SUBDIR_PATH,
+        );
+
+        $unixBuilder = new UnixBuild();
+        $unixBuilder->__invoke(
+            $downloadedPackage,
+            TargetPlatform::fromPhpBinaryPath(PhpBinaryPath::fromCurrentProcess(), null),
+            ['--enable-pie_test_ext_subdir'],
+            $output,
+        );
+
+        $outputString = $output->fetch();
+
+        self::assertStringContainsString('phpize complete.', $outputString);
+        self::assertStringContainsString('Configure complete with options: --enable-pie_test_ext_subdir', $outputString);
+        self::assertStringContainsString('Build complete:', $outputString);
+        self::assertStringContainsString('pie_test_ext_subdir.so', $outputString);
+
+        self::assertSame(
+            0,
+            (new Process(['make', 'test'], $downloadedPackage->getSourcePath()))
+                ->mustRun()
+                ->getExitCode(),
+        );
+
+        (new Process(['make', 'clean'], $downloadedPackage->getSourcePath()))->mustRun();
+        (new Process(['phpize', '--clean'], $downloadedPackage->getSourcePath()))->mustRun();
     }
 }

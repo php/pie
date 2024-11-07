@@ -34,7 +34,7 @@ final class WindowsInstall implements Install
 {
     public function __invoke(DownloadedPackage $downloadedPackage, TargetPlatform $targetPlatform, OutputInterface $output): string
     {
-        $extractedSourcePath = $downloadedPackage->extractedSourcePath;
+        $extractedSourcePath = $downloadedPackage->getSourcePath();
         $sourceDllName       = $this->determineDllName($targetPlatform, $downloadedPackage);
         $sourcePdbName       = str_replace('.dll', '.pdb', $sourceDllName);
         assert($sourcePdbName !== '');
@@ -92,7 +92,7 @@ final class WindowsInstall implements Install
     {
         $possibleDllNames = WindowsExtensionAssetName::dllNames($targetPlatform, $package->package);
         foreach ($possibleDllNames as $dllName) {
-            $fullDllName = $package->extractedSourcePath . '/' . $dllName;
+            $fullDllName = $package->getSourcePath() . '/' . $dllName;
             if (file_exists($fullDllName)) {
                 return $fullDllName;
             }
@@ -189,7 +189,7 @@ final class WindowsInstall implements Install
         $destinationFullFilename = dirname($targetPlatform->phpBinaryPath->phpBinaryPath) . DIRECTORY_SEPARATOR
             . 'extras' . DIRECTORY_SEPARATOR
             . $downloadedPackage->package->extensionName->name() . DIRECTORY_SEPARATOR
-            . substr($file->getPathname(), strlen($downloadedPackage->extractedSourcePath) + 1);
+            . substr($file->getPathname(), strlen($downloadedPackage->getSourcePath()) + 1);
 
         $destinationPath = dirname($destinationFullFilename);
 

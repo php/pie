@@ -90,6 +90,7 @@ final class UnixInstallTest extends TestCase
                 '0.1.0.0',
                 true,
                 true,
+                '',
             ),
             self::TEST_EXTENSION_PATH,
         );
@@ -120,7 +121,7 @@ final class UnixInstallTest extends TestCase
         }
 
         (new Process($rmCommand))->mustRun();
-        (new Process(['make', 'clean'], $downloadedPackage->extractedSourcePath))->mustRun();
-        (new Process(['phpize', '--clean'], $downloadedPackage->extractedSourcePath))->mustRun();
+        (new Process(['make', 'clean'], $downloadedPackage->getSourcePath()))->mustRun();
+        (new Process(['phpize', '--clean'], $downloadedPackage->getSourcePath()))->mustRun();
     }
 }
