@@ -33,7 +33,7 @@ class ComposerIntegrationHandler
 
         $recommendedRequireVersion = $requestedPackageAndVersion->version;
 
-        // @todo check this is reasonable?
+        // If user did not request a specific require version, use Composer to recommend one for the pie.json
         if ($recommendedRequireVersion === null) {
             $recommendedRequireVersion = $versionSelector->findRecommendedRequireVersion($package->composerPackage);
         }
