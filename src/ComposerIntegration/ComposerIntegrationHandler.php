@@ -39,7 +39,8 @@ class ComposerIntegrationHandler
 
         // Write the new requirement to pie.json; because we later essentially just do a `composer install` using that file
         $pieComposerJson = Platform::getPieJsonFilename($targetPlatform);
-        $manipulator     = new JsonManipulator(file_get_contents($pieComposerJson));
+        $originalPieJsonContent = file_get_contents($pieComposerJson);
+        $manipulator     = new JsonManipulator($originalPieJsonContent);
         $manipulator->addLink('require', $requestedPackageAndVersion->package, $recommendedRequireVersion, true);
         file_put_contents($pieComposerJson, $manipulator->getContents());
 
@@ -51,18 +52,25 @@ class ComposerIntegrationHandler
             $composer->getRepositoryManager()->getLocalRepository()->removePackage($pkg);
         }
 
-        // @todo check if you have another ext in pie.json already, it doesn't get changed/installed/etc.
         $composerInstaller = Installer::create($this->arrayCollectionIo, $composer);
         $composerInstaller
             ->setAllowedTypes(['php-ext', 'php-ext-zend'])
-            ->setUpdate(true)
             ->setInstall(true)
             ->setIgnoredTypes([])
             ->setDryRun(false)
             ->setDownloadOnly(false);
+
+        if (file_exists(PieComposerFactory::getLockFile($pieComposerJson))) {
+            $composerInstaller->setUpdate(true);
+            $composerInstaller->setUpdateAllowList([$requestedPackageAndVersion->package]);
+        }
+
         $resultCode = $composerInstaller->run();
 
         if ($resultCode !== Installer::ERROR_NONE) {
+            // Revert composer.json change
+            file_put_contents($pieComposerJson, $originalPieJsonContent);
+
             throw ComposerRunFailed::fromExitCode($resultCode);
         }
     }
