@@ -78,17 +78,5 @@ class InstallAndBuildProcess
                 $output,
             ),
         );
-
-        // @todo should not need this, in theory, need to check
-        // try {
-        //     $this->installNotification->send($targetPlatform, $downloadedPackage);
-        // } catch (FailedToSendInstallNotification $failedToSendInstallNotification) {
-        //     if ($output->isVeryVerbose()) {
-        //         $output->writeln('Install notification did not send.');
-        //         if ($output->isDebug()) {
-        //             $output->writeln($failedToSendInstallNotification->__toString());
-        //         }
-        //     }
-        // }
     }
 }

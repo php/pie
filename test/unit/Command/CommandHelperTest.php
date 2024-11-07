@@ -106,8 +106,6 @@ final class CommandHelperTest extends TestCase
                 ]),
                 ConfigureOption::fromComposerJsonDefinition(['name' => 'enable-thing']),
             ],
-            null,
-            '1.0.0.0',
             true,
             true,
         );

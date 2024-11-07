@@ -54,8 +54,6 @@ final class WindowsInstallTest extends TestCase
                 '1.2.3',
                 null,
                 [],
-                null,
-                '1.2.3.0',
                 true,
                 true,
             ),

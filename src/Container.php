@@ -23,8 +23,6 @@ use Php\Pie\DependencyResolver\ResolveDependencyWithComposer;
 use Php\Pie\Downloading\GithubPackageReleaseAssets;
 use Php\Pie\Downloading\PackageReleaseAssets;
 use Php\Pie\Installing\Install;
-use Php\Pie\Installing\InstallNotification\InstallNotification;
-use Php\Pie\Installing\InstallNotification\SendInstallNotificationUsingGuzzle;
 use Php\Pie\Installing\UnixInstall;
 use Php\Pie\Installing\WindowsInstall;
 use Psr\Container\ContainerInterface;
@@ -92,8 +90,6 @@ final class Container
                 return $container->get(UnixInstall::class);
             },
         );
-
-        $container->alias(SendInstallNotificationUsingGuzzle::class, InstallNotification::class);
 
         return $container;
     }

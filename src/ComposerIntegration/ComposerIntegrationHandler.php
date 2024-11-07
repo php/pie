@@ -13,6 +13,7 @@ use Php\Pie\Platform;
 use Php\Pie\Platform\TargetPlatform;
 use Psr\Container\ContainerInterface;
 
+use function file_exists;
 use function file_get_contents;
 use function file_put_contents;
 
@@ -38,9 +39,9 @@ class ComposerIntegrationHandler
         }
 
         // Write the new requirement to pie.json; because we later essentially just do a `composer install` using that file
-        $pieComposerJson = Platform::getPieJsonFilename($targetPlatform);
+        $pieComposerJson        = Platform::getPieJsonFilename($targetPlatform);
         $originalPieJsonContent = file_get_contents($pieComposerJson);
-        $manipulator     = new JsonManipulator($originalPieJsonContent);
+        $manipulator            = new JsonManipulator($originalPieJsonContent);
         $manipulator->addLink('require', $requestedPackageAndVersion->package, $recommendedRequireVersion, true);
         file_put_contents($pieComposerJson, $manipulator->getContents());
 

@@ -34,8 +34,6 @@ final class Package
         public readonly string $version,
         public readonly string|null $downloadUrl,
         public readonly array $configureOptions,
-        public readonly string|null $notificationUrl,
-        public readonly string $notificationVersion,
         public readonly bool $supportZts,
         public readonly bool $supportNts,
     ) {
@@ -68,8 +66,6 @@ final class Package
             $completePackage->getPrettyVersion(),
             $completePackage->getDistUrl(),
             $configureOptions,
-            $completePackage->getNotificationUrl(),
-            $completePackage->getVersion(),
             $supportZts,
             $supportNts,
         );
