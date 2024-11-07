@@ -67,28 +67,4 @@ class PiePackageInstaller extends LibraryInstaller
                 return null;
             });
     }
-
-    /** @inheritDoc */
-    public function update(InstalledRepositoryInterface $repo, PackageInterface $initial, PackageInterface $target)
-    {
-        return parent::update($repo, $initial, $target)
-            ?->then(function () {
-                // @todo do we need to do things?
-                $this->io->write('UPDATE');
-
-                return null;
-            });
-    }
-
-    /** @inheritDoc */
-    public function cleanup($type, PackageInterface $package, PackageInterface|null $prevPackage = null)
-    {
-        return parent::cleanup($type, $package, $prevPackage)
-            ?->then(function () {
-                // @todo do we need to do things?
-                $this->io->write('CLEANUP');
-
-                return null;
-            });
-    }
 }

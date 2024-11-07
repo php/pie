@@ -53,7 +53,6 @@ class OverrideWindowsUrlInstallListener
         /** @psalm-suppress InternalMethod */
         $operations = $installerEvent->getTransaction()?->getOperations() ?? [];
 
-        // @todo check these assertions are always valid for PIE usage
         Assert::count($operations, 1, 'I can only do exactly %d thing at once, %d attempted');
         $operation = reset($operations);
         Assert::isInstanceOf($operation, InstallOperation::class, 'I can only handle %2$s, got %s');
