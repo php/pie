@@ -189,8 +189,8 @@ The `.dll` will be moved into the PHP extensions path, and renamed, e.g.
 to `C:\path\to\php\ext\php_{extension-name}.dll`. The ZIP file may include
 additional resources, such as:
 
-* `php_{extension-name}.pdb` - this will be moved alongside
-  the `C:\path\to\php\ext\php_{extension-name}.dll`
+* `php_{extension-name}-{tag}-{php-maj/min}-{ts|nts}-{compiler}-{arch}.pdb` -
+  this will be moved alongside the `C:\path\to\php\ext\php_{extension-name}.dll`
 * `*.dll` - any other `.dll` would be moved alongside `C:\path\to\php\php.exe`
 * Any other file, which would be moved
   into `C:\path\to\php\extras\{extension-name}\.`
