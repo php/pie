@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace Php\PieUnitTest\Downloading;
 
+use Composer\Downloader\TransportException;
 use Composer\Package\CompletePackage;
 use Composer\Util\AuthHelper;
-use GuzzleHttp\Client;
-use GuzzleHttp\Handler\MockHandler;
-use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Psr7\Response;
+use Composer\Util\Http\Response;
+use Composer\Util\HttpDownloader;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\Exception\CouldNotFindReleaseAsset;
 use Php\Pie\Downloading\GithubPackageReleaseAssets;
@@ -24,7 +23,6 @@ use Php\Pie\Platform\WindowsCompiler;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-use function json_encode;
 use function uniqid;
 
 #[CoversClass(GithubPackageReleaseAssets::class)]
@@ -48,26 +46,28 @@ final class GithubPackageReleaseAssetsTest extends TestCase
 
         $authHelper = $this->createMock(AuthHelper::class);
 
-        $mockHandler = new MockHandler([
-            new Response(
-                200,
-                [],
-                json_encode([
-                    'assets' => [
-                        [
-                            'name' => 'php_foo-1.2.3-8.3-vc14-nts-x86.zip',
-                            'browser_download_url' => 'wrong_download_url',
-                        ],
-                        [
-                            'name' => 'php_foo-1.2.3-8.3-vc14-ts-x86.zip',
-                            'browser_download_url' => 'actual_download_url',
-                        ],
+        $httpDownloaderResponse = $this->createMock(Response::class);
+        $httpDownloaderResponse
+            ->expects(self::once())
+            ->method('decodeJson')
+            ->willReturn([
+                'assets' => [
+                    [
+                        'name' => 'php_foo-1.2.3-8.3-vc14-nts-x86.zip',
+                        'browser_download_url' => 'wrong_download_url',
                     ],
-                ]),
-            ),
-        ]);
+                    [
+                        'name' => 'php_foo-1.2.3-8.3-vc14-ts-x86.zip',
+                        'browser_download_url' => 'actual_download_url',
+                    ],
+                ],
+            ]);
 
-        $guzzleMockClient = new Client(['handler' => HandlerStack::create($mockHandler)]);
+        $httpDownloader = $this->createMock(HttpDownloader::class);
+        $httpDownloader
+            ->expects(self::once())
+            ->method('get')
+            ->willReturn($httpDownloaderResponse);
 
         $package = new Package(
             $this->createMock(CompletePackage::class),
@@ -81,9 +81,9 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             true,
         );
 
-        $releaseAssets = new GithubPackageReleaseAssets($guzzleMockClient, 'https://test-github-api-base-url.thephp.foundation');
+        $releaseAssets = new GithubPackageReleaseAssets('https://test-github-api-base-url.thephp.foundation');
 
-        self::assertSame('actual_download_url', $releaseAssets->findWindowsDownloadUrlForPackage($targetPlatform, $package, $authHelper));
+        self::assertSame('actual_download_url', $releaseAssets->findWindowsDownloadUrlForPackage($targetPlatform, $package, $authHelper, $httpDownloader));
     }
 
     public function testUrlIsReturnedWhenFindingWindowsDownloadUrlWithCompilerAndThreadSafetySwapped(): void
@@ -104,26 +104,28 @@ final class GithubPackageReleaseAssetsTest extends TestCase
 
         $authHelper = $this->createMock(AuthHelper::class);
 
-        $mockHandler = new MockHandler([
-            new Response(
-                200,
-                [],
-                json_encode([
-                    'assets' => [
-                        [
-                            'name' => 'php_foo-1.2.3-8.3-nts-vc14-x86.zip',
-                            'browser_download_url' => 'wrong_download_url',
-                        ],
-                        [
-                            'name' => 'php_foo-1.2.3-8.3-ts-vc14-x86.zip',
-                            'browser_download_url' => 'actual_download_url',
-                        ],
+        $httpDownloaderResponse = $this->createMock(Response::class);
+        $httpDownloaderResponse
+            ->expects(self::once())
+            ->method('decodeJson')
+            ->willReturn([
+                'assets' => [
+                    [
+                        'name' => 'php_foo-1.2.3-8.3-nts-vc14-x86.zip',
+                        'browser_download_url' => 'wrong_download_url',
                     ],
-                ]),
-            ),
-        ]);
+                    [
+                        'name' => 'php_foo-1.2.3-8.3-ts-vc14-x86.zip',
+                        'browser_download_url' => 'actual_download_url',
+                    ],
+                ],
+            ]);
 
-        $guzzleMockClient = new Client(['handler' => HandlerStack::create($mockHandler)]);
+        $httpDownloader = $this->createMock(HttpDownloader::class);
+        $httpDownloader
+            ->expects(self::once())
+            ->method('get')
+            ->willReturn($httpDownloaderResponse);
 
         $package = new Package(
             $this->createMock(CompletePackage::class),
@@ -137,9 +139,9 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             true,
         );
 
-        $releaseAssets = new GithubPackageReleaseAssets($guzzleMockClient, 'https://test-github-api-base-url.thephp.foundation');
+        $releaseAssets = new GithubPackageReleaseAssets('https://test-github-api-base-url.thephp.foundation');
 
-        self::assertSame('actual_download_url', $releaseAssets->findWindowsDownloadUrlForPackage($targetPlatform, $package, $authHelper));
+        self::assertSame('actual_download_url', $releaseAssets->findWindowsDownloadUrlForPackage($targetPlatform, $package, $authHelper, $httpDownloader));
     }
 
     public function testFindWindowsDownloadUrlForPackageThrowsExceptionWhenAssetNotFound(): void
@@ -155,17 +157,14 @@ final class GithubPackageReleaseAssetsTest extends TestCase
 
         $authHelper = $this->createMock(AuthHelper::class);
 
-        $mockHandler = new MockHandler([
-            new Response(
-                200,
-                [],
-                json_encode([
-                    'assets' => [],
-                ]),
-            ),
-        ]);
+        $e = new TransportException('not found', 404);
+        $e->setStatusCode(404);
 
-        $guzzleMockClient = new Client(['handler' => HandlerStack::create($mockHandler)]);
+        $httpDownloader = $this->createMock(HttpDownloader::class);
+        $httpDownloader
+            ->expects(self::once())
+            ->method('get')
+            ->willThrowException($e);
 
         $package = new Package(
             $this->createMock(CompletePackage::class),
@@ -179,9 +178,9 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             true,
         );
 
-        $releaseAssets = new GithubPackageReleaseAssets($guzzleMockClient, 'https://test-github-api-base-url.thephp.foundation');
+        $releaseAssets = new GithubPackageReleaseAssets('https://test-github-api-base-url.thephp.foundation');
 
         $this->expectException(CouldNotFindReleaseAsset::class);
-        $releaseAssets->findWindowsDownloadUrlForPackage($targetPlatform, $package, $authHelper);
+        $releaseAssets->findWindowsDownloadUrlForPackage($targetPlatform, $package, $authHelper, $httpDownloader);
     }
 }

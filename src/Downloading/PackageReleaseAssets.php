@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\Pie\Downloading;
 
 use Composer\Util\AuthHelper;
+use Composer\Util\HttpDownloader;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Platform\TargetPlatform;
 
@@ -16,5 +17,6 @@ interface PackageReleaseAssets
         TargetPlatform $targetPlatform,
         Package $package,
         AuthHelper $authHelper,
+        HttpDownloader $httpDownloader,
     ): string;
 }

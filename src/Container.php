@@ -5,9 +5,6 @@ declare(strict_types=1);
 namespace Php\Pie;
 
 use Composer\Util\Platform;
-use GuzzleHttp\Client;
-use GuzzleHttp\ClientInterface;
-use GuzzleHttp\RequestOptions;
 use Illuminate\Container\Container as IlluminateContainer;
 use Php\Pie\Building\Build;
 use Php\Pie\Building\UnixBuild;
@@ -58,12 +55,6 @@ final class Container
 
         $container->alias(ResolveDependencyWithComposer::class, DependencyResolver::class);
 
-        $container->bind(
-            ClientInterface::class,
-            static function (): ClientInterface {
-                return new Client([RequestOptions::HTTP_ERRORS => false]);
-            },
-        );
         $container->alias(GithubPackageReleaseAssets::class, PackageReleaseAssets::class);
         $container->when(GithubPackageReleaseAssets::class)
             ->needs('$githubApiBaseUrl')
