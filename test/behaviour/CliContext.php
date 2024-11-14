@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Php\PieBehaviourTest;
 
 use Behat\Behat\Context\Context;
+use Behat\Step\Then;
+use Behat\Step\When;
 use Composer\Util\Platform;
 use Symfony\Component\Process\Process;
 use Webmozart\Assert\Assert;
@@ -17,13 +19,13 @@ class CliContext implements Context
     private string|null $output = null;
     private int|null $exitCode  = null;
 
-    /** @When I run a command to download the latest version of an extension */
+    #[When('I run a command to download the latest version of an extension')]
     public function iRunACommandToDownloadTheLatestVersionOfAnExtension(): void
     {
         $this->runPieCommand(['download', 'asgrim/example-pie-extension']);
     }
 
-    /** @When I run a command to download version :version of an extension */
+    #[When('I run a command to download version :version of an extension')]
     public function iRunACommandToDownloadSpecificVersionOfAnExtension(string $version): void
     {
         $this->runPieCommand(['download', 'asgrim/example-pie-extension:' . $version]);
@@ -48,7 +50,7 @@ class CliContext implements Context
         Assert::notNull($this->output);
     }
 
-    /** @Then the latest version should have been downloaded */
+    #[Then('the latest version should have been downloaded')]
     public function theLatestVersionShouldHaveBeenDownloaded(): void
     {
         $this->assertCommandSuccessful();
@@ -56,20 +58,20 @@ class CliContext implements Context
         Assert::regex($this->output, '#Extracted asgrim/example-pie-extension:v?\d+\.\d+\.\d+ source to: #');
     }
 
-    /** @Then version :version should have been downloaded */
+    #[Then('version :version should have been downloaded')]
     public function versionOfTheExtensionShouldHaveBeen(string $version): void
     {
         $this->assertCommandSuccessful();
         Assert::contains($this->output, 'Found package: asgrim/example-pie-extension:' . $version);
     }
 
-    /** @When I run a command to build an extension */
+    #[When('I run a command to build an extension')]
     public function iRunACommandToBuildAnExtension(): void
     {
         $this->runPieCommand(['build', 'asgrim/example-pie-extension']);
     }
 
-    /** @Then /^the extension should have been built$/ */
+    #[Then('the extension should have been built')]
     public function theExtensionShouldHaveBeenBuilt(): void
     {
         $this->assertCommandSuccessful();
@@ -85,13 +87,13 @@ class CliContext implements Context
         Assert::contains($this->output, 'Build complete:');
     }
 
-    /** @When /^I run a command to build an extension with configure options$/ */
+    #[When('I run a command to build an extension with configure options')]
     public function iRunACommandToBuildAnExtensionWithConfigureOptions(): void
     {
         $this->runPieCommand(['build', 'asgrim/example-pie-extension', '--with-hello-name=sup']);
     }
 
-    /** @Then /^the extension should have been built with options$/ */
+    #[Then('the extension should have been built with options')]
     public function theExtensionShouldHaveBeenBuiltWithOptions(): void
     {
         $this->assertCommandSuccessful();
@@ -107,13 +109,13 @@ class CliContext implements Context
         Assert::contains($this->output, 'Build complete:');
     }
 
-    /** @When /^I run a command to install an extension$/ */
+    #[When('I run a command to install an extension')]
     public function iRunACommandToInstallAnExtension(): void
     {
         $this->runPieCommand(['install', 'asgrim/example-pie-extension']);
     }
 
-    /** @Then /^the extension should have been installed$/ */
+    #[Then('the extension should have been installed')]
     public function theExtensionShouldHaveBeenInstalled(): void
     {
         $this->assertCommandSuccessful();
