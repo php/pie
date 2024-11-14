@@ -9,10 +9,11 @@ use Php\Pie\DependencyResolver\Package;
 use Psr\Http\Message\RequestInterface;
 use RuntimeException;
 
+use function array_map;
 use function array_walk;
+use function count;
 use function explode;
 use function sprintf;
-use function trim;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class AddAuthenticationHeader
@@ -27,9 +28,13 @@ final class AddAuthenticationHeader
         array_walk(
             $authHeaders,
             static function (string $v) use (&$request): void {
-                // @todo probably process this better
-                $headerParts = explode(':', $v);
-                $request     = $request->withHeader(trim($headerParts[0]), trim($headerParts[1]));
+                $headerParts = array_map('trim', explode(':', $v, 2));
+
+                if (count($headerParts) !== 2 || ! $headerParts[0] || ! $headerParts[1]) {
+                    throw new RuntimeException('Authorization header is malformed, it should contain a non-empty key and a non-empty value.');
+                }
+
+                $request = $request->withHeader($headerParts[0], $headerParts[1]);
             },
         );
 
