@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Php\Pie;
 
-use function file_get_contents;
-use function hash;
+use function hash_file;
 
 /**
  * @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks
@@ -31,7 +30,7 @@ final class BinaryFile
     {
         return new self(
             $filePath,
-            hash(self::HASH_TYPE_SHA256, file_get_contents($filePath)),
+            hash_file(self::HASH_TYPE_SHA256, $filePath),
         );
     }
 }
