@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\PieUnitTest\Downloading;
 
+use Composer\Package\CompletePackage;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\ExtensionName;
@@ -19,14 +20,13 @@ final class DownloadedPackageTest extends TestCase
     public function testFromPackageAndExtractedPath(): void
     {
         $package = new Package(
+            $this->createMock(CompletePackage::class),
             ExtensionType::PhpModule,
             ExtensionName::normaliseFromString('foo'),
             'foo/bar',
             '1.2.3',
             null,
             [],
-            null,
-            '1.2.3.0',
             true,
             true,
         );

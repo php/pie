@@ -6,11 +6,9 @@ namespace Php\Pie\DependencyResolver;
 
 use Composer\Composer;
 use Composer\Package\CompletePackageInterface;
-use Composer\Package\Version\VersionSelector;
-use Composer\Repository\CompositeRepository;
-use Composer\Repository\RepositorySet;
+use Php\Pie\ComposerIntegration\QuieterConsoleIO;
+use Php\Pie\ComposerIntegration\VersionSelectorFactory;
 use Php\Pie\ExtensionType;
-use Php\Pie\Platform\TargetPhp\ResolveTargetPhpToPlatformRepository;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\ThreadSafetyMode;
 
@@ -20,31 +18,22 @@ use function preg_match;
 final class ResolveDependencyWithComposer implements DependencyResolver
 {
     public function __construct(
-        private readonly Composer $composer,
-        private readonly ResolveTargetPhpToPlatformRepository $resolveTargetPhpToPlatformRepository,
+        private readonly QuieterConsoleIO $arrayCollectionIo,
     ) {
     }
 
-    private function factoryRepositorySet(string|null $requestedVersion): RepositorySet
+    public function __invoke(Composer $composer, TargetPlatform $targetPlatform, RequestedPackageAndVersion $requestedPackageAndVersion): Package
     {
-        $repositorySet = new RepositorySet(DetermineMinimumStability::fromRequestedVersion($requestedVersion));
-        $repositorySet->addRepository(new CompositeRepository($this->composer->getRepositoryManager()->getRepositories()));
+        $versionSelector = VersionSelectorFactory::make($composer, $requestedPackageAndVersion, $targetPlatform);
 
-        return $repositorySet;
-    }
-
-    public function __invoke(TargetPlatform $targetPlatform, string $packageName, string|null $requestedVersion): Package
-    {
-        $io = new ArrayCollectionIO();
-
-        $package = (new VersionSelector(
-            $this->factoryRepositorySet($requestedVersion),
-            ($this->resolveTargetPhpToPlatformRepository)($targetPlatform->phpBinaryPath),
-        ))
-            ->findBestCandidate($packageName, $requestedVersion, io: $io);
+        $package = $versionSelector->findBestCandidate(
+            $requestedPackageAndVersion->package,
+            $requestedPackageAndVersion->version,
+            io: $this->arrayCollectionIo,
+        );
 
         if (! $package instanceof CompletePackageInterface) {
-            throw UnableToResolveRequirement::fromRequirement($packageName, $requestedVersion, $io);
+            throw UnableToResolveRequirement::fromRequirement($requestedPackageAndVersion, $this->arrayCollectionIo);
         }
 
         /**
@@ -56,19 +45,19 @@ final class ResolveDependencyWithComposer implements DependencyResolver
          * > package has its source and dist refs overridden to be whatever you specify and that applies at install
          * > time then but package metadata is only read from the branch's head
          */
-        if ($requestedVersion !== null && preg_match('/#([a-f0-9]{40})$/', $requestedVersion, $matches)) {
+        if ($requestedPackageAndVersion->version !== null && preg_match('/#([a-f0-9]{40})$/', $requestedPackageAndVersion->version, $matches)) {
             $package->setSourceDistReferences($matches[1]);
         }
 
         if (! ExtensionType::isValid($package->getType())) {
-            throw UnableToResolveRequirement::toPhpOrZendExtension($package, $packageName, $requestedVersion);
+            throw UnableToResolveRequirement::toPhpOrZendExtension($package, $requestedPackageAndVersion);
         }
 
-        $package = Package::fromComposerCompletePackage($package);
+        $piePackage = Package::fromComposerCompletePackage($package);
 
-        $this->assertCompatibleThreadSafetyMode($targetPlatform->threadSafety, $package);
+        $this->assertCompatibleThreadSafetyMode($targetPlatform->threadSafety, $piePackage);
 
-        return $package;
+        return $piePackage;
     }
 
     private function assertCompatibleThreadSafetyMode(ThreadSafetyMode $threadSafetyMode, Package $resolvedPackage): void

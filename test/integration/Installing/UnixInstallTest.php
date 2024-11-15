@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\PieIntegrationTest\Installing;
 
+use Composer\Package\CompletePackage;
 use Composer\Util\Platform;
 use Php\Pie\Building\UnixBuild;
 use Php\Pie\ConfigureOption;
@@ -80,14 +81,13 @@ final class UnixInstallTest extends TestCase
 
         $downloadedPackage = DownloadedPackage::fromPackageAndExtractedPath(
             new Package(
+                $this->createMock(CompletePackage::class),
                 ExtensionType::PhpModule,
                 ExtensionName::normaliseFromString('pie_test_ext'),
                 'pie_test_ext',
                 '0.1.0',
                 null,
                 [ConfigureOption::fromComposerJsonDefinition(['name' => 'enable-pie_test_ext'])],
-                null,
-                '0.1.0.0',
                 true,
                 true,
             ),
@@ -111,11 +111,11 @@ final class UnixInstallTest extends TestCase
         self::assertStringContainsString('Install complete: ' . $extensionPath . '/pie_test_ext.so', $outputString);
         self::assertStringContainsString('You must now add "extension=pie_test_ext" to your php.ini', $outputString);
 
-        self::assertSame($extensionPath . '/pie_test_ext.so', $installedSharedObject);
-        self::assertFileExists($installedSharedObject);
+        self::assertSame($extensionPath . '/pie_test_ext.so', $installedSharedObject->filePath);
+        self::assertFileExists($installedSharedObject->filePath);
 
-        $rmCommand = ['rm', $installedSharedObject];
-        if (! is_writable($installedSharedObject)) {
+        $rmCommand = ['rm', $installedSharedObject->filePath];
+        if (! is_writable($installedSharedObject->filePath)) {
             array_unshift($rmCommand, 'sudo');
         }
 

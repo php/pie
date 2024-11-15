@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\Pie\Downloading;
 
+use Composer\Util\AuthHelper;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Platform\TargetPlatform;
 
@@ -11,5 +12,9 @@ use Php\Pie\Platform\TargetPlatform;
 interface PackageReleaseAssets
 {
     /** @return non-empty-string */
-    public function findWindowsDownloadUrlForPackage(TargetPlatform $targetPlatform, Package $package): string;
+    public function findWindowsDownloadUrlForPackage(
+        TargetPlatform $targetPlatform,
+        Package $package,
+        AuthHelper $authHelper,
+    ): string;
 }

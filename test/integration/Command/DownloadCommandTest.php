@@ -90,8 +90,8 @@ class DownloadCommandTest extends TestCase
 
         $outputString = $this->commandTester->getDisplay();
         self::assertStringContainsString('Found package: asgrim/example-pie-extension:dev-main which provides', $outputString);
-        self::assertStringMatchesFormat(
-            '%AExtracted asgrim/example-pie-extension:dev-main source to: /tmp/%s/asgrim-example-pie-extension-9b5e6c8%A',
+        self::assertStringContainsString(
+            'Extracted asgrim/example-pie-extension:dev-main source to:',
             $outputString,
         );
     }

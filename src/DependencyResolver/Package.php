@@ -27,14 +27,13 @@ final class Package
 {
     /** @param list<ConfigureOption> $configureOptions */
     public function __construct(
+        public readonly CompletePackageInterface $composerPackage,
         public readonly ExtensionType $extensionType,
         public readonly ExtensionName $extensionName,
         public readonly string $name,
         public readonly string $version,
         public readonly string|null $downloadUrl,
         public readonly array $configureOptions,
-        public readonly string|null $notificationUrl,
-        public readonly string $notificationVersion,
         public readonly bool $supportZts,
         public readonly bool $supportNts,
     ) {
@@ -60,14 +59,13 @@ final class Package
             : true;
 
         return new self(
+            $completePackage,
             ExtensionType::tryFrom($completePackage->getType()) ?? ExtensionType::PhpModule,
             ExtensionName::determineFromComposerPackage($completePackage),
             $completePackage->getPrettyName(),
             $completePackage->getPrettyVersion(),
             $completePackage->getDistUrl(),
             $configureOptions,
-            $completePackage->getNotificationUrl(),
-            $completePackage->getVersion(),
             $supportZts,
             $supportNts,
         );

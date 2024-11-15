@@ -7,10 +7,8 @@ namespace Php\Pie\Command;
 use Composer\Package\Version\VersionParser;
 use Composer\Util\Platform;
 use InvalidArgumentException;
-use Php\Pie\DependencyResolver\DependencyResolver;
 use Php\Pie\DependencyResolver\Package;
-use Php\Pie\Downloading\DownloadAndExtract;
-use Php\Pie\Downloading\DownloadedPackage;
+use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\Platform\OperatingSystem;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
@@ -30,11 +28,7 @@ use function strtolower;
 
 use const PHP_VERSION;
 
-/**
- * @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks
- *
- * @psalm-type RequestedNameAndVersionPair = array{name: non-empty-string, version: non-empty-string|null}
- */
+/** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class CommandHelper
 {
     private const ARG_REQUESTED_PACKAGE_AND_VERSION = 'requested-package-and-version';
@@ -142,8 +136,7 @@ final class CommandHelper
         return $targetPlatform;
     }
 
-    /** @return RequestedNameAndVersionPair */
-    public static function requestedNameAndVersionPair(InputInterface $input): array
+    public static function requestedNameAndVersionPair(InputInterface $input): RequestedPackageAndVersion
     {
         $requestedPackageString = $input->getArgument(self::ARG_REQUESTED_PACKAGE_AND_VERSION);
 
@@ -166,35 +159,10 @@ final class CommandHelper
         Assert::stringNotEmpty($requestedNameAndVersionPair['name']);
         Assert::nullOrStringNotEmpty($requestedNameAndVersionPair['version']);
 
-        return $requestedNameAndVersionPair;
-    }
-
-    /** @param RequestedNameAndVersionPair $requestedNameAndVersionPair */
-    public static function resolvePackage(
-        DependencyResolver $dependencyResolver,
-        TargetPlatform $targetPlatform,
-        array $requestedNameAndVersionPair,
-    ): Package {
-        return ($dependencyResolver)(
-            $targetPlatform,
+        return new RequestedPackageAndVersion(
             $requestedNameAndVersionPair['name'],
             $requestedNameAndVersionPair['version'],
         );
-    }
-
-    /** @param RequestedNameAndVersionPair $requestedNameAndVersionPair */
-    public static function downloadPackage(
-        DependencyResolver $dependencyResolver,
-        TargetPlatform $targetPlatform,
-        array $requestedNameAndVersionPair,
-        DownloadAndExtract $downloadAndExtract,
-        OutputInterface $output,
-    ): DownloadedPackage {
-        $package = self::resolvePackage($dependencyResolver, $targetPlatform, $requestedNameAndVersionPair);
-
-        $output->writeln(sprintf('<info>Found package:</info> %s which provides <info>%s</info>', $package->prettyNameAndVersion(), $package->extensionName->nameWithExtPrefix()));
-
-        return ($downloadAndExtract)($targetPlatform, $package);
     }
 
     public static function bindConfigureOptionsFromPackage(Command $command, Package $package, InputInterface $input): void

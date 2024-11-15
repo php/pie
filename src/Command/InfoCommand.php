@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace Php\Pie\Command;
 
+use Php\Pie\ComposerIntegration\PieComposerFactory;
+use Php\Pie\ComposerIntegration\PieComposerRequest;
+use Php\Pie\ComposerIntegration\PieOperation;
 use Php\Pie\DependencyResolver\DependencyResolver;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -20,6 +24,7 @@ use function sprintf;
 final class InfoCommand extends Command
 {
     public function __construct(
+        private readonly ContainerInterface $container,
         private readonly DependencyResolver $dependencyResolver,
     ) {
         parent::__construct();
@@ -38,14 +43,20 @@ final class InfoCommand extends Command
 
         $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $output);
 
-        $requestedNameAndVersionPair = CommandHelper::requestedNameAndVersionPair($input);
+        $requestedNameAndVersion = CommandHelper::requestedNameAndVersionPair($input);
 
-        $package = CommandHelper::resolvePackage(
-            $this->dependencyResolver,
-            $targetPlatform,
-            $requestedNameAndVersionPair,
+        $composer = PieComposerFactory::createPieComposer(
+            $this->container,
+            new PieComposerRequest(
+                $output,
+                $targetPlatform,
+                $requestedNameAndVersion,
+                PieOperation::Resolve,
+                [], // Configure options are not needed for resolve only
+            ),
         );
 
+        $package = ($this->dependencyResolver)($composer, $targetPlatform, $requestedNameAndVersion);
         $output->writeln(sprintf('<info>Found package:</info> %s which provides <info>%s</info>', $package->prettyNameAndVersion(), $package->extensionName->nameWithExtPrefix()));
 
         $output->writeln(sprintf('Extension name: %s', $package->extensionName->name()));

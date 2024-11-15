@@ -9,6 +9,7 @@ use Symfony\Component\Process\Process;
 use function is_numeric;
 use function trim;
 
+/** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class NumberOfCores
 {
     /** @psalm-suppress UnusedConstructor */

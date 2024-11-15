@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\PieUnitTest\Downloading;
 
+use Composer\Package\CompletePackage;
 use Composer\Util\AuthHelper;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
@@ -69,21 +70,20 @@ final class GithubPackageReleaseAssetsTest extends TestCase
         $guzzleMockClient = new Client(['handler' => HandlerStack::create($mockHandler)]);
 
         $package = new Package(
+            $this->createMock(CompletePackage::class),
             ExtensionType::PhpModule,
             ExtensionName::normaliseFromString('foo'),
             'asgrim/example-pie-extension',
             '1.2.3',
             'https://test-uri/' . uniqid('downloadUrl', true),
             [],
-            null,
-            '1.2.3.0',
             true,
             true,
         );
 
-        $releaseAssets = new GithubPackageReleaseAssets($authHelper, $guzzleMockClient, 'https://test-github-api-base-url.thephp.foundation');
+        $releaseAssets = new GithubPackageReleaseAssets($guzzleMockClient, 'https://test-github-api-base-url.thephp.foundation');
 
-        self::assertSame('actual_download_url', $releaseAssets->findWindowsDownloadUrlForPackage($targetPlatform, $package));
+        self::assertSame('actual_download_url', $releaseAssets->findWindowsDownloadUrlForPackage($targetPlatform, $package, $authHelper));
     }
 
     public function testUrlIsReturnedWhenFindingWindowsDownloadUrlWithCompilerAndThreadSafetySwapped(): void
@@ -126,21 +126,20 @@ final class GithubPackageReleaseAssetsTest extends TestCase
         $guzzleMockClient = new Client(['handler' => HandlerStack::create($mockHandler)]);
 
         $package = new Package(
+            $this->createMock(CompletePackage::class),
             ExtensionType::PhpModule,
             ExtensionName::normaliseFromString('foo'),
             'asgrim/example-pie-extension',
             '1.2.3',
             'https://test-uri/' . uniqid('downloadUrl', true),
             [],
-            null,
-            '1.2.3.0',
             true,
             true,
         );
 
-        $releaseAssets = new GithubPackageReleaseAssets($authHelper, $guzzleMockClient, 'https://test-github-api-base-url.thephp.foundation');
+        $releaseAssets = new GithubPackageReleaseAssets($guzzleMockClient, 'https://test-github-api-base-url.thephp.foundation');
 
-        self::assertSame('actual_download_url', $releaseAssets->findWindowsDownloadUrlForPackage($targetPlatform, $package));
+        self::assertSame('actual_download_url', $releaseAssets->findWindowsDownloadUrlForPackage($targetPlatform, $package, $authHelper));
     }
 
     public function testFindWindowsDownloadUrlForPackageThrowsExceptionWhenAssetNotFound(): void
@@ -169,21 +168,20 @@ final class GithubPackageReleaseAssetsTest extends TestCase
         $guzzleMockClient = new Client(['handler' => HandlerStack::create($mockHandler)]);
 
         $package = new Package(
+            $this->createMock(CompletePackage::class),
             ExtensionType::PhpModule,
             ExtensionName::normaliseFromString('foo'),
             'asgrim/example-pie-extension',
             '1.2.3',
             'https://test-uri/' . uniqid('downloadUrl', true),
             [],
-            null,
-            '1.2.3.0',
             true,
             true,
         );
 
-        $releaseAssets = new GithubPackageReleaseAssets($authHelper, $guzzleMockClient, 'https://test-github-api-base-url.thephp.foundation');
+        $releaseAssets = new GithubPackageReleaseAssets($guzzleMockClient, 'https://test-github-api-base-url.thephp.foundation');
 
         $this->expectException(CouldNotFindReleaseAsset::class);
-        $releaseAssets->findWindowsDownloadUrlForPackage($targetPlatform, $package);
+        $releaseAssets->findWindowsDownloadUrlForPackage($targetPlatform, $package, $authHelper);
     }
 }

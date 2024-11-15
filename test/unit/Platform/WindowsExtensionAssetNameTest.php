@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\PieUnitTest\Platform;
 
+use Composer\Package\CompletePackage;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
@@ -40,14 +41,13 @@ final class WindowsExtensionAssetNameTest extends TestCase
         $this->phpVersion = $this->platform->phpBinaryPath->majorMinorVersion();
 
         $this->package = new Package(
+            $this->createMock(CompletePackage::class),
             ExtensionType::PhpModule,
             ExtensionName::normaliseFromString('foo'),
             'phpf/foo',
             '1.2.3',
             null,
             [],
-            null,
-            '1.2.3.0',
             true,
             true,
         );

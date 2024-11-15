@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\PieIntegrationTest\Building;
 
+use Composer\Package\CompletePackage;
 use Composer\Util\Platform;
 use Php\Pie\Building\UnixBuild;
 use Php\Pie\ConfigureOption;
@@ -33,14 +34,13 @@ final class UnixBuildTest extends TestCase
 
         $downloadedPackage = DownloadedPackage::fromPackageAndExtractedPath(
             new Package(
+                $this->createMock(CompletePackage::class),
                 ExtensionType::PhpModule,
                 ExtensionName::normaliseFromString('pie_test_ext'),
                 'pie_test_ext',
                 '0.1.0',
                 null,
                 [ConfigureOption::fromComposerJsonDefinition(['name' => 'enable-pie_test_ext'])],
-                null,
-                '0.1.0.0',
                 true,
                 true,
             ),
@@ -48,12 +48,14 @@ final class UnixBuildTest extends TestCase
         );
 
         $unixBuilder = new UnixBuild();
-        $unixBuilder->__invoke(
+        $builtBinary = $unixBuilder->__invoke(
             $downloadedPackage,
             TargetPlatform::fromPhpBinaryPath(PhpBinaryPath::fromCurrentProcess(), null),
             ['--enable-pie_test_ext'],
             $output,
         );
+
+        self::assertNotEmpty($builtBinary);
 
         $outputString = $output->fetch();
 

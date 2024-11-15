@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\Pie\Installing;
 
+use Php\Pie\BinaryFile;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\ExtensionType;
 use Php\Pie\Platform\TargetPlatform;
@@ -21,7 +22,7 @@ final class UnixInstall implements Install
 {
     private const MAKE_INSTALL_TIMEOUT_SECS = 60; // 1 minute
 
-    public function __invoke(DownloadedPackage $downloadedPackage, TargetPlatform $targetPlatform, OutputInterface $output): string
+    public function __invoke(DownloadedPackage $downloadedPackage, TargetPlatform $targetPlatform, OutputInterface $output): BinaryFile
     {
         $targetExtensionPath = $targetPlatform->phpBinaryPath->extensionPath();
 
@@ -73,6 +74,6 @@ final class UnixInstall implements Install
             $downloadedPackage->package->extensionName->name(),
         ));
 
-        return $expectedSharedObjectLocation;
+        return BinaryFile::fromFileWithSha256Checksum($expectedSharedObjectLocation);
     }
 }

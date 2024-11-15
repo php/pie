@@ -28,19 +28,21 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
 {
     /** @psalm-api */
     public function __construct(
-        private readonly AuthHelper $authHelper,
         private readonly ClientInterface $client,
         private readonly string $githubApiBaseUrl,
     ) {
     }
 
     /** @return non-empty-string */
-    public function findWindowsDownloadUrlForPackage(TargetPlatform $targetPlatform, Package $package): string
-    {
+    public function findWindowsDownloadUrlForPackage(
+        TargetPlatform $targetPlatform,
+        Package $package,
+        AuthHelper $authHelper,
+    ): string {
         $releaseAsset = $this->selectMatchingReleaseAsset(
             $targetPlatform,
             $package,
-            $this->getReleaseAssetsForPackage($package),
+            $this->getReleaseAssetsForPackage($package, $authHelper),
         );
 
         return $releaseAsset['browser_download_url'];
@@ -74,12 +76,12 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
     }
 
     /** @return list<array{name: non-empty-string, browser_download_url: non-empty-string, ...}> */
-    private function getReleaseAssetsForPackage(Package $package): array
+    private function getReleaseAssetsForPackage(Package $package, AuthHelper $authHelper): array
     {
         $request = AddAuthenticationHeader::withAuthHeaderFromComposer(
             new Request('GET', $this->githubApiBaseUrl . '/repos/' . $package->githubOrgAndRepository() . '/releases/tags/' . $package->version),
             $package,
-            $this->authHelper,
+            $authHelper,
         );
 
         $response = $this->client

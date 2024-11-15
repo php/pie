@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Php\Pie\Installing;
 
+use Php\Pie\BinaryFile;
 use Php\Pie\Downloading\DownloadedPackage;
-use Php\Pie\Downloading\DownloadZip;
 use Php\Pie\ExtensionType;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\WindowsExtensionAssetName;
@@ -19,7 +19,6 @@ use function assert;
 use function copy;
 use function dirname;
 use function file_exists;
-use function implode;
 use function is_file;
 use function mkdir;
 use function sprintf;
@@ -32,10 +31,10 @@ use const DIRECTORY_SEPARATOR;
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class WindowsInstall implements Install
 {
-    public function __invoke(DownloadedPackage $downloadedPackage, TargetPlatform $targetPlatform, OutputInterface $output): string
+    public function __invoke(DownloadedPackage $downloadedPackage, TargetPlatform $targetPlatform, OutputInterface $output): BinaryFile
     {
         $extractedSourcePath = $downloadedPackage->extractedSourcePath;
-        $sourceDllName       = $this->determineDllName($targetPlatform, $downloadedPackage);
+        $sourceDllName       = WindowsExtensionAssetName::determineDllName($targetPlatform, $downloadedPackage);
         $sourcePdbName       = str_replace('.dll', '.pdb', $sourceDllName);
         assert($sourcePdbName !== '');
 
@@ -51,13 +50,12 @@ final class WindowsInstall implements Install
             assert($file instanceof SplFileInfo);
 
             /**
-             * Skip directories, the main DLL, PDB, and the downloaded.zip
+             * Skip directories, the main DLL, PDB
              */
             if (
                 $file->isDir()
                 || $this->normalisedPathsMatch($file->getPathname(), $sourceDllName)
                 || $this->normalisedPathsMatch($file->getPathname(), $sourcePdbName)
-                || $file->getFilename() === DownloadZip::DOWNLOADED_ZIP_FILENAME
             ) {
                 continue;
             }
@@ -84,21 +82,7 @@ final class WindowsInstall implements Install
             $downloadedPackage->package->extensionName->name(),
         ));
 
-        return $destinationDllName;
-    }
-
-    /** @return non-empty-string */
-    private function determineDllName(TargetPlatform $targetPlatform, DownloadedPackage $package): string
-    {
-        $possibleDllNames = WindowsExtensionAssetName::dllNames($targetPlatform, $package->package);
-        foreach ($possibleDllNames as $dllName) {
-            $fullDllName = $package->extractedSourcePath . '/' . $dllName;
-            if (file_exists($fullDllName)) {
-                return $fullDllName;
-            }
-        }
-
-        throw new RuntimeException('Unable to find DLL for package, checked: ' . implode(', ', $possibleDllNames));
+        return BinaryFile::fromFileWithSha256Checksum($destinationDllName);
     }
 
     /**
