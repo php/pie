@@ -55,6 +55,7 @@ class InstallAndBuildProcess
                 $composerRequest->targetPlatform,
                 $composerRequest->configureOptions,
                 $output,
+                $composerRequest->phpizePath,
             );
 
             $this->installedJsonMetadata->addBuildMetadata(

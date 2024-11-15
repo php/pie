@@ -30,6 +30,7 @@ final class UnixBuild implements Build
         TargetPlatform $targetPlatform,
         array $configureOptions,
         OutputInterface $output,
+        PhpizePath|null $phpizePath,
     ): BinaryFile {
         $outputCallback = null;
         if ($output->isVerbose()) {
@@ -45,7 +46,7 @@ final class UnixBuild implements Build
         }
 
         $this->phpize(
-            PhpizePath::guessFrom($targetPlatform->phpBinaryPath),
+            $phpizePath ?? PhpizePath::guessFrom($targetPlatform->phpBinaryPath),
             $downloadedPackage,
             $output,
             $outputCallback,

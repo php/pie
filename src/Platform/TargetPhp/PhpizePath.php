@@ -66,7 +66,6 @@ final class PhpizePath
             }
         }
 
-        // @todo add a way to specify --phpize or similar
-        throw new RuntimeException('did not find a good phpize, oh');
+        throw new RuntimeException('Could not find a suitable `phpize` binary, you may provide one using the "--with-phpize-path" option.');
     }
 }

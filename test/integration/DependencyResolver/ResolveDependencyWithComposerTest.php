@@ -89,6 +89,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
                     $requestedPackageAndVersion,
                     PieOperation::Resolve,
                     [],
+                    null,
                 ),
             ),
             $targetPlatform,

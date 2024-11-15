@@ -99,6 +99,7 @@ final class UnixInstallTest extends TestCase
             $targetPlatform,
             ['--enable-pie_test_ext'],
             $output,
+            null,
         );
 
         $installedSharedObject = (new UnixInstall())->__invoke(

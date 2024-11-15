@@ -74,6 +74,13 @@ to run PIE, but we want to download the extension for PHP 8.3:
 > C:\php-8.1.7\php.exe C:\pie.phar install --with-php-path=C:\php-8.3.6\php.exe example/example-pie-extension
 ```
 
+You may also need to use the corresponding `phpize` command for the target PHP
+version, which can be specified with the `--with-phpize-path` option:
+
+```shell
+pie install --with-phpize-path=/usr/bin/phpize7.2 my/extension
+```
+
 ### Version constraints and stability
 
 You may optionally specify a version constraint when using PIE to install an

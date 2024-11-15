@@ -94,7 +94,7 @@ TEXT);
         $platform = TargetPlatform::fromPhpBinaryPath($phpBinaryPath, null);
 
         self::assertSame(OperatingSystem::NonWindows, $platform->operatingSystem);
-        self::assertSame(null, $platform->windowsCompiler);
+        self::assertNull($platform->windowsCompiler);
         self::assertSame(ThreadSafetyMode::NonThreadSafe, $platform->threadSafety);
         self::assertSame(Architecture::x86_64, $platform->architecture);
     }

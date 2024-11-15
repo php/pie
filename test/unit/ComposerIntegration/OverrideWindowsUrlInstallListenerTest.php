@@ -77,6 +77,7 @@ final class OverrideWindowsUrlInstallListenerTest extends TestCase
                 new RequestedPackageAndVersion('foo/bar', '^1.1'),
                 PieOperation::Install,
                 [],
+                null,
             ),
         );
     }
@@ -120,6 +121,7 @@ final class OverrideWindowsUrlInstallListenerTest extends TestCase
                 new RequestedPackageAndVersion('foo/bar', '^1.1'),
                 PieOperation::Install,
                 [],
+                null,
             ),
         ))($installerEvent);
 
@@ -175,6 +177,7 @@ final class OverrideWindowsUrlInstallListenerTest extends TestCase
                 new RequestedPackageAndVersion('foo/bar', '^1.1'),
                 PieOperation::Install,
                 [],
+                null,
             ),
         ))($installerEvent);
 

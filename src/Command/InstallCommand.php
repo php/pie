@@ -58,6 +58,7 @@ final class InstallCommand extends Command
                 $requestedNameAndVersion,
                 PieOperation::Resolve,
                 [], // Configure options are not needed for resolve only
+                null,
             ),
         );
 
@@ -77,6 +78,7 @@ final class InstallCommand extends Command
                 $requestedNameAndVersion,
                 PieOperation::Install,
                 $configureOptionsValues,
+                CommandHelper::determinePhpizePathFromInputs($input),
             ),
         );
 

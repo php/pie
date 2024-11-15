@@ -53,6 +53,7 @@ final class UnixBuildTest extends TestCase
             TargetPlatform::fromPhpBinaryPath(PhpBinaryPath::fromCurrentProcess(), null),
             ['--enable-pie_test_ext'],
             $output,
+            null,
         );
 
         self::assertNotEmpty($builtBinary);

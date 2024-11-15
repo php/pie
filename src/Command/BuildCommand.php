@@ -53,6 +53,7 @@ final class BuildCommand extends Command
                 $requestedNameAndVersion,
                 PieOperation::Resolve,
                 [], // Configure options are not needed for resolve only
+                null,
             ),
         );
 
@@ -72,6 +73,7 @@ final class BuildCommand extends Command
                 $requestedNameAndVersion,
                 PieOperation::Build,
                 $configureOptionsValues,
+                CommandHelper::determinePhpizePathFromInputs($input),
             ),
         );
 
