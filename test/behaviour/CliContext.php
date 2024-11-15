@@ -103,7 +103,7 @@ class CliContext implements Context
         }
 
         Assert::contains($this->output, 'phpize complete.');
-        Assert::contains($this->output, 'Configure complete with options: --with-hello-name=\'sup\'');
+        Assert::contains($this->output, 'Configure complete with options: --with-hello-name=sup');
         Assert::contains($this->output, 'Build complete:');
     }
 

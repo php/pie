@@ -29,7 +29,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 use function array_combine;
 use function array_map;
-use function escapeshellarg;
 
 #[CoversClass(CommandHelper::class)]
 final class CommandHelperTest extends TestCase
@@ -174,7 +173,7 @@ final class CommandHelperTest extends TestCase
 
         self::assertSame(
             [
-                '--with-stuff=' . escapeshellarg('lolz'),
+                '--with-stuff=lolz',
                 '--enable-thing',
             ],
             $options,
