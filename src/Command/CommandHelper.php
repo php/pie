@@ -22,7 +22,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Webmozart\Assert\Assert;
 
 use function array_key_exists;
-use function escapeshellarg;
 use function is_array;
 use function is_string;
 use function reset;
@@ -225,7 +224,7 @@ final class CommandHelper
 
             if ($configureOption->needsValue) {
                 if (is_string($value) && $value !== '') {
-                    $configureOptionsValues[] = '--' . $configureOption->name . '=' . escapeshellarg($value);
+                    $configureOptionsValues[] = '--' . $configureOption->name . '=' . $value;
                 }
 
                 continue;
