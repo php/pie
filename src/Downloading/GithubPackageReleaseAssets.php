@@ -4,31 +4,23 @@ declare(strict_types=1);
 
 namespace Php\Pie\Downloading;
 
+use Composer\Downloader\TransportException;
 use Composer\Util\AuthHelper;
-use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\RequestOptions;
+use Composer\Util\HttpDownloader;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\WindowsExtensionAssetName;
-use Psr\Http\Message\ResponseInterface;
 use Webmozart\Assert\Assert;
 
 use function array_map;
-use function assert;
 use function in_array;
-use function json_decode;
 use function strtolower;
-
-use const JSON_BIGINT_AS_STRING;
-use const JSON_THROW_ON_ERROR;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class GithubPackageReleaseAssets implements PackageReleaseAssets
 {
     /** @psalm-api */
     public function __construct(
-        private readonly ClientInterface $client,
         private readonly string $githubApiBaseUrl,
     ) {
     }
@@ -38,11 +30,12 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
         TargetPlatform $targetPlatform,
         Package $package,
         AuthHelper $authHelper,
+        HttpDownloader $httpDownloader,
     ): string {
         $releaseAsset = $this->selectMatchingReleaseAsset(
             $targetPlatform,
             $package,
-            $this->getReleaseAssetsForPackage($package, $authHelper),
+            $this->getReleaseAssetsForPackage($package, $authHelper, $httpDownloader),
         );
 
         return $releaseAsset['browser_download_url'];
@@ -76,40 +69,32 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
     }
 
     /** @return list<array{name: non-empty-string, browser_download_url: non-empty-string, ...}> */
-    private function getReleaseAssetsForPackage(Package $package, AuthHelper $authHelper): array
-    {
-        $request = AddAuthenticationHeader::withAuthHeaderFromComposer(
-            new Request('GET', $this->githubApiBaseUrl . '/repos/' . $package->githubOrgAndRepository() . '/releases/tags/' . $package->version),
-            $package,
-            $authHelper,
-        );
+    private function getReleaseAssetsForPackage(
+        Package $package,
+        AuthHelper $authHelper,
+        HttpDownloader $httpDownloader,
+    ): array {
+        Assert::notNull($package->downloadUrl);
 
-        $response = $this->client
-            ->sendAsync(
-                $request,
+        try {
+            $decodedRepsonse = $httpDownloader->get(
+                $this->githubApiBaseUrl . '/repos/' . $package->githubOrgAndRepository() . '/releases/tags/' . $package->version,
                 [
-                    RequestOptions::ALLOW_REDIRECTS => true,
-                    RequestOptions::HTTP_ERRORS => false,
-                    RequestOptions::SYNCHRONOUS => true,
+                    'retry-auth-failure' => false,
+                    'http' => [
+                        'method' => 'GET',
+                        'header' => $authHelper->addAuthenticationHeader([], $this->githubApiBaseUrl, $package->downloadUrl),
+                    ],
                 ],
-            )
-            ->wait();
-        assert($response instanceof ResponseInterface);
+            )->decodeJson();
+        } catch (TransportException $t) {
+            /** @link https://docs.github.com/en/rest/releases/releases?apiVersion=2022-11-28#get-a-release-by-tag-name */
+            if ($t->getStatusCode() === 404) {
+                throw Exception\CouldNotFindReleaseAsset::forPackageWithMissingTag($package);
+            }
 
-        /** @link https://docs.github.com/en/rest/releases/releases?apiVersion=2022-11-28#get-a-release-by-tag-name */
-        if ($response->getStatusCode() === 404) {
-            throw Exception\CouldNotFindReleaseAsset::forPackageWithMissingTag($package);
+            throw $t;
         }
-
-        AssertHttp::responseStatusCode(200, $response);
-
-        /** @var mixed $decodedRepsonse */
-        $decodedRepsonse = json_decode(
-            (string) $response->getBody(),
-            true,
-            512,
-            JSON_BIGINT_AS_STRING | JSON_THROW_ON_ERROR,
-        );
 
         Assert::isArray($decodedRepsonse);
         Assert::keyExists($decodedRepsonse, 'assets');

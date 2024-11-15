@@ -11,6 +11,7 @@ use Composer\Installer\InstallerEvents;
 use Composer\IO\IOInterface;
 use Composer\Package\CompletePackageInterface;
 use Composer\Util\AuthHelper;
+use Composer\Util\HttpDownloader;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\PackageReleaseAssets;
 use Php\Pie\Platform\OperatingSystem;
@@ -65,6 +66,7 @@ class OverrideWindowsUrlInstallListener
             $this->composerRequest->targetPlatform,
             Package::fromComposerCompletePackage($composerPackage),
             new AuthHelper($this->io, $this->composer->getConfig()),
+            new HttpDownloader($this->io, $this->composer->getConfig()),
         );
 
         $this->composerRequest->pieOutput->writeln('Found prebuilt archive: ' . $url);
