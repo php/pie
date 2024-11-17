@@ -24,7 +24,7 @@ running this, but this will put PIE into `/usr/local/bin/pie` on a non-Windows
 system:
 
 ```shell
-sudo curl -L --output /usr/local/bin/pie https://github.com/php/pie/releases/latest/download/pie.phar && sudo chmod +x /usr/local/bin/pie
+sudo curl -L --output /usr/local/bin/pie https://github.com/php/pie/releases/download/0.1.0/pie.phar && sudo chmod +x /usr/local/bin/pie
 ```
 
 ## Prerequisities for PIE
