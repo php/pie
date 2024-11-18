@@ -10,6 +10,8 @@ order: 2
 
 - Download `pie.phar` from the [latest releases](https://github.com/php/pie/releases)
 - Validate the signature in `pie.phar.asc`
+  - You can fetch the public key with `gpg --recv-key 343F8427AD6B48FF`
+  - Then you can verify the release with `gpg --verify pie.phar.asc pie.phar`
 - You may then invoke PIE with `php pie.phar <command>`
 - Optionally, copy `pie.phar` into your `$PATH`, e.g. `cp pie.phar /usr/local/bin/pie`
     - If you copy PIE into your `$PATH`, you may then invoke PIE with `pie <command>`
