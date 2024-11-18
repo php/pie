@@ -6,6 +6,7 @@ namespace Php\PieIntegrationTest\Building;
 
 use Composer\Package\CompletePackage;
 use Composer\Util\Platform;
+use Php\Pie\Building\ExtensionBinaryNotFound;
 use Php\Pie\Building\UnixBuild;
 use Php\Pie\ConfigureOption;
 use Php\Pie\DependencyResolver\Package;
@@ -73,5 +74,44 @@ final class UnixBuildTest extends TestCase
 
         (new Process(['make', 'clean'], $downloadedPackage->extractedSourcePath))->mustRun();
         (new Process(['phpize', '--clean'], $downloadedPackage->extractedSourcePath))->mustRun();
+    }
+
+    public function testUnixBuildWillThrowExceptionWhenExpectedBinaryNameMismatches(): void
+    {
+        if (Platform::isWindows()) {
+            self::markTestSkipped('Unix build test cannot be run on Windows');
+        }
+
+        $output = new BufferedOutput();
+
+        $downloadedPackage = DownloadedPackage::fromPackageAndExtractedPath(
+            new Package(
+                $this->createMock(CompletePackage::class),
+                ExtensionType::PhpModule,
+                ExtensionName::normaliseFromString('mismatched_name'),
+                'pie_test_ext',
+                '0.1.0',
+                null,
+                [ConfigureOption::fromComposerJsonDefinition(['name' => 'enable-pie_test_ext'])],
+                true,
+                true,
+            ),
+            self::TEST_EXTENSION_PATH,
+        );
+
+        $unixBuilder = new UnixBuild();
+
+        $this->expectException(ExtensionBinaryNotFound::class);
+        try {
+            $unixBuilder->__invoke(
+                $downloadedPackage,
+                TargetPlatform::fromPhpBinaryPath(PhpBinaryPath::fromCurrentProcess(), null),
+                ['--enable-pie_test_ext'],
+                $output,
+            );
+        } finally {
+            (new Process(['make', 'clean'], $downloadedPackage->extractedSourcePath))->mustRun();
+            (new Process(['phpize', '--clean'], $downloadedPackage->extractedSourcePath))->mustRun();
+        }
     }
 }
