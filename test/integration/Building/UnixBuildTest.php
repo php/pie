@@ -109,6 +109,7 @@ final class UnixBuildTest extends TestCase
                 TargetPlatform::fromPhpBinaryPath(PhpBinaryPath::fromCurrentProcess(), null),
                 ['--enable-pie_test_ext'],
                 $output,
+                null,
             );
         } finally {
             (new Process(['make', 'clean'], $downloadedPackage->extractedSourcePath))->mustRun();
