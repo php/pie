@@ -32,6 +32,45 @@ sudo curl -L --output /usr/local/bin/pie https://github.com/php/pie/releases/lat
 Running PIE requires PHP 8.1 or newer. However, you may still use PIE to install
 an extension for an older version of PHP.
 
+Additionally to PHP, PIE requires the following tools to be available on your
+system in order to download, build and install extensions:
+
+- `git` to download the extension source code ;
+- `autoconf`, `automake`, `libtool`, `m4`, `make`, and `gcc` to build the extension ;
+- `php-config` to determine the PHP configuration ;
+- The `zip` extension enabled for the PHP version running PIE ;
+- `phpize` to prepare the extension for building.
+
+Also, each extension may have its own requirements, such as additional libraries.
+
+### Using Linux
+
+On a Debian-based system, you may install the required tools with:
+
+```shell
+sudo apt-get install git autoconf automake libtool m4 make gcc
+```
+
+On a Red Hat-based system, you may install the required tools with:
+
+```shell
+sudo yum install git autoconf automake libtool m4 make gcc
+```
+
+### Using macOS
+
+On macOS, you may install the required tools with [Homebrew](https://brew.sh):
+
+```shell
+brew install git autoconf automake libtool m4 make gcc
+```
+
+### Using Windows
+
+On Windows, extensions are typically distributed as precompiled binaries.
+Instead of building the extension yourself, it will be downloaded as DLL
+files and placed in the PHP extensions directory.
+
 ## Downloading, Building, or Installing an extension
 
 PIE has the ability to:
