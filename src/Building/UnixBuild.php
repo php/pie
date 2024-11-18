@@ -68,12 +68,7 @@ final class UnixBuild implements Build
         $expectedSoFile = $downloadedPackage->extractedSourcePath . '/modules/' . $downloadedPackage->package->extensionName->name() . '.so';
 
         if (! file_exists($expectedSoFile)) {
-            $output->writeln(sprintf(
-                'Build complete, but expected <comment>%s</comment> does not exist - however, this may be normal if this extension outputs the .so file in a different location.',
-                $expectedSoFile,
-            ));
-
-            return BinaryFile::fromFileWithSha256Checksum($expectedSoFile);
+            throw ExtensionBinaryNotFound::fromExpectedBinary($expectedSoFile);
         }
 
         $output->writeln(sprintf(
