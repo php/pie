@@ -44,6 +44,11 @@
         "psalm/plugin-phpunit": "^0.18.4",
         "vimeo/psalm": "^5.22"
     },
+    "replace": {
+        "symfony/polyfill-php81": "*",
+        "symfony/polyfill-php80": "*",
+        "symfony/polyfill-php73": "*"
+    },
     "config": {
         "sort-packages": true,
         "preferred-install": "dist",
