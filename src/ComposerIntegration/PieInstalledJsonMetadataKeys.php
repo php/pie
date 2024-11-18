@@ -16,4 +16,5 @@ enum PieInstalledJsonMetadataKeys: string
     case BuiltBinary                      = 'pie-built-binary';
     case BinaryChecksum                   = 'pie-installed-binary-checksum';
     case InstalledBinary                  = 'pie-installed-binary';
+    case PhpizeBinary                     = 'pie-phpize-binary';
 }

@@ -55,6 +55,7 @@ final class DownloadCommand extends Command
                 $requestedNameAndVersion,
                 PieOperation::Download,
                 [], // Configure options are not needed for download only
+                null,
             ),
         );
 

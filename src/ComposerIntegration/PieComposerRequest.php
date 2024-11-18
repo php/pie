@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\Pie\ComposerIntegration;
 
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
+use Php\Pie\Platform\TargetPhp\PhpizePath;
 use Php\Pie\Platform\TargetPlatform;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -22,6 +23,7 @@ final class PieComposerRequest
         public readonly RequestedPackageAndVersion $requestedPackage,
         public readonly PieOperation $operation,
         public readonly array $configureOptions,
+        public readonly PhpizePath|null $phpizePath,
     ) {
     }
 }

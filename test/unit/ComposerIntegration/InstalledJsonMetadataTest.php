@@ -16,6 +16,7 @@ use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
+use Php\Pie\Platform\TargetPhp\PhpizePath;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\ThreadSafetyMode;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -60,6 +61,7 @@ final class InstalledJsonMetadataTest extends TestCase
                 new RequestedPackageAndVersion('foo/bar', '^1.0'),
                 PieOperation::Build,
                 ['--foo', '--bar="yes"'],
+                null,
             ),
             clone $package,
         );
@@ -96,6 +98,7 @@ final class InstalledJsonMetadataTest extends TestCase
                 new RequestedPackageAndVersion('foo/bar', '^1.0'),
                 PieOperation::Build,
                 ['--foo', '--bar="yes"'],
+                new PhpizePath('/path/to/phpize'),
             ),
             clone $package,
             new BinaryFile('/path/to/built', 'sha256-checksum-value'),
@@ -104,6 +107,7 @@ final class InstalledJsonMetadataTest extends TestCase
         self::assertSame(
             [
                 'pie-configure-options' => '--foo --bar="yes"',
+                'pie-phpize-binary' => '/path/to/phpize',
                 'pie-built-binary' => '/path/to/built',
                 'pie-installed-binary-checksum' => 'sha256-checksum-value',
             ],

@@ -76,6 +76,13 @@ class InstalledJsonMetadata
         $this->addPieMetadata(
             $composer,
             $composerPackage,
+            MetadataKey::PhpizeBinary,
+            $composerRequest->phpizePath->phpizeBinaryPath ?? null,
+        );
+
+        $this->addPieMetadata(
+            $composer,
+            $composerPackage,
             MetadataKey::BuiltBinary,
             $builtBinary->filePath,
         );

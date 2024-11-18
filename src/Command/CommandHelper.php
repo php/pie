@@ -11,6 +11,7 @@ use Php\Pie\DependencyResolver\Package;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\Platform\OperatingSystem;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
+use Php\Pie\Platform\TargetPhp\PhpizePath;
 use Php\Pie\Platform\TargetPlatform;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -25,6 +26,7 @@ use function is_string;
 use function reset;
 use function sprintf;
 use function strtolower;
+use function trim;
 
 use const PHP_VERSION;
 
@@ -34,6 +36,7 @@ final class CommandHelper
     private const ARG_REQUESTED_PACKAGE_AND_VERSION = 'requested-package-and-version';
     private const OPTION_WITH_PHP_CONFIG            = 'with-php-config';
     private const OPTION_WITH_PHP_PATH              = 'with-php-path';
+    private const OPTION_WITH_PHPIZE_PATH           = 'with-phpize-path';
     private const OPTION_MAKE_PARALLEL_JOBS         = 'make-parallel-jobs';
 
     /** @psalm-suppress UnusedConstructor */
@@ -69,6 +72,12 @@ final class CommandHelper
             'j',
             InputOption::VALUE_REQUIRED,
             'Override many jobs to run in parallel when running compiling (this is passed to "make -jN" during build). PIE will try to detect this by default.',
+        );
+        $command->addOption(
+            self::OPTION_WITH_PHPIZE_PATH,
+            null,
+            InputOption::VALUE_REQUIRED,
+            'The path to the `phpize` binary to use as the target PHP platform, e.g. --' . self::OPTION_WITH_PHPIZE_PATH . '=/usr/bin/phpize7.4',
         );
 
         self::configurePhpConfigOptions($command);
@@ -134,6 +143,19 @@ final class CommandHelper
         ));
 
         return $targetPlatform;
+    }
+
+    public static function determinePhpizePathFromInputs(InputInterface $input): PhpizePath|null
+    {
+        if ($input->hasOption(self::OPTION_WITH_PHPIZE_PATH)) {
+            $phpizePathOption = (string) $input->getOption(self::OPTION_WITH_PHPIZE_PATH);
+            if (trim($phpizePathOption) !== '') {
+                /** @psalm-suppress ArgumentTypeCoercion */
+                return new PhpizePath($phpizePathOption);
+            }
+        }
+
+        return null;
     }
 
     public static function requestedNameAndVersionPair(InputInterface $input): RequestedPackageAndVersion

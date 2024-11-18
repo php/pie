@@ -6,6 +6,7 @@ namespace Php\Pie\Building;
 
 use Php\Pie\BinaryFile;
 use Php\Pie\Downloading\DownloadedPackage;
+use Php\Pie\Platform\TargetPhp\PhpizePath;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\WindowsExtensionAssetName;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -21,6 +22,7 @@ final class WindowsBuild implements Build
         TargetPlatform $targetPlatform,
         array $configureOptions,
         OutputInterface $output,
+        PhpizePath|null $phpizePath,
     ): BinaryFile {
         $prebuiltDll = WindowsExtensionAssetName::determineDllName($targetPlatform, $downloadedPackage);
 
