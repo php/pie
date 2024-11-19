@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Php\Pie\Platform;
 
+use Fidry\CpuCoreCounter\CpuCoreCounter;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
-use Php\Pie\Util\NumberOfCores;
 
 use function array_key_exists;
 use function explode;
@@ -109,7 +109,7 @@ class TargetPlatform
         }
 
         if ($makeParallelJobs === null) {
-            $makeParallelJobs = NumberOfCores::determine();
+            $makeParallelJobs = (new CpuCoreCounter())->getAvailableForParallelisation()->availableCpus;
         }
 
         return new self(
