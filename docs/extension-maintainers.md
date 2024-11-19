@@ -166,7 +166,7 @@ Windows-compatible releases is:
 The name of the ZIP file, and the DLL contained within must be:
 
 * `php_{extension-name}-{tag}-{php-maj/min}-{ts|nts}-{compiler}-{arch}.zip`
-* Example: `php_xdebug-3.3.2-8.3-ts-vs16-x86_64.zip`
+* Example: `php_xdebug-3.3.2-8.3-ts-vs16-x64.zip`
 
 The descriptions of these items:
 
@@ -176,7 +176,7 @@ The descriptions of these items:
 * `compiler` - usually something like `vc6`, `vs16` - fetch from
   'PHP Extension Build' flags in `php -i`
 * `ts|nts` - Thread-safe or non-thread safe.
-* `arch` - for example `x86_64`.
+* `arch` - for example `x64`, `x86`, `arm64`.
    * Windows: `Architecture` from `php -i`
    * non-Windows: check `PHP_INT_SIZE` - 4 for 32-bit, 8 for 64-bit.
 
