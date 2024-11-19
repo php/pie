@@ -157,4 +157,18 @@ final class CommandHelperTest extends TestCase
         $this->expectExceptionMessage('The --with-php-path=/path/to/php cannot be used on non-Windows, use --with-php-config=/path/to/php-config instead.');
         CommandHelper::determineTargetPlatformFromInputs($input, $output);
     }
+
+    #[RequiresOperatingSystemFamily('Windows')]
+    public function testWindowsMachinesCannotUseWithPhpizePathOption(): void
+    {
+        $command = new Command();
+        $input   = new ArrayInput(['--with-phpize-path' => 'C:\path\to\phpize']);
+        $output  = new NullOutput();
+        CommandHelper::configureDownloadBuildInstallOptions($command);
+        CommandHelper::validateInput($input, $command);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('The --with-phpize-path=/path/to/phpize cannot be used on Windows.');
+        CommandHelper::determineTargetPlatformFromInputs($input, $output);
+    }
 }
