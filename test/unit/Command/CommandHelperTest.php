@@ -15,6 +15,7 @@ use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\RequiresOperatingSystemFamily;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -126,12 +127,9 @@ final class CommandHelperTest extends TestCase
         );
     }
 
+    #[RequiresOperatingSystemFamily('Windows')]
     public function testWindowsMachinesCannotUseWithPhpConfigOption(): void
     {
-        if (! Platform::isWindows()) {
-            self::markTestSkipped('This test can only run on Windows');
-        }
-
         $command = new Command();
         $input   = new ArrayInput(['--with-php-config' => 'C:\path\to\php-config']);
         $output  = new NullOutput();
