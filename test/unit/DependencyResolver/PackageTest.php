@@ -47,7 +47,7 @@ final class PackageTest extends TestCase
      *
      * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
      */
-    public function githubOrgAndRepoFromPackage(): array
+    public static function githubOrgAndRepoFromPackage(): array
     {
         return [
             'noDownloadUrl' => ['foo/bar', null, 'foo/bar'],

@@ -75,7 +75,7 @@ final class QuieterConsoleIOTest extends TestCase
      *
      * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
      */
-    public function verbosyExpectationsProvider(): array
+    public static function verbosyExpectationsProvider(): array
     {
         return [
             'q' => [OutputInterface::VERBOSITY_QUIET, []],
