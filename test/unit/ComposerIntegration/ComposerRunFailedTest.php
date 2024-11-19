@@ -17,7 +17,7 @@ final class ComposerRunFailedTest extends TestCase
      *
      * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
      */
-    public function errorCodesProvider(): array
+    public static function errorCodesProvider(): array
     {
         return [
             'exit-0' => [0, 'PIE Composer run failed with error code 0', 1], // probably not real scenario
