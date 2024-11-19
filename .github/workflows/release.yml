@@ -50,3 +50,21 @@ jobs:
           files: |
             pie.phar
             pie.phar.asc
+      - name: Get release tag
+        run: |
+          RELEASE_TAG=${GITHUB_REF/refs\/tags\//}
+          echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_ENV
+      - name: Update Homebrew formula
+        uses: mislav/bump-homebrew-formula-action@v3
+        with:
+          formula-name: php-pie
+          formula-path: homebrew/Formula/php-pie.rb
+          homebrew-tap: php/pie
+          download-url: https://github.com/php/pie/releases/download/${{ env.RELEASE_TAG }}/pie.phar
+          commit-message: |
+            Update Homebrew TAP formula: {{formulaName}} to version: {{version}}
+
+            Commit executed by automatic flow after every release
+        env:
+          # the personal access token should have "repo" & "workflow" scopes
+          COMMITTER_TOKEN: ${{ secrets.ACCESS_TOKEN }}
