@@ -10,6 +10,8 @@ use Php\Pie\Container;
 use Php\Pie\DependencyResolver\UnableToResolveRequirement;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\RequiresOperatingSystemFamily;
+use PHPUnit\Framework\Attributes\RequiresPhp;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 
@@ -18,7 +20,6 @@ use function array_map;
 use function file_exists;
 use function is_executable;
 
-use const PHP_VERSION;
 use const PHP_VERSION_ID;
 
 #[CoversClass(DownloadCommand::class)]
@@ -96,13 +97,10 @@ class DownloadCommandTest extends TestCase
         );
     }
 
+    #[RequiresOperatingSystemFamily('Windows')]
     #[DataProvider('validVersionsList')]
     public function testDownloadingWithPhpConfig(string $requestedVersion, string $expectedVersion): void
     {
-        if (! Platform::isWindows()) {
-            self::markTestSkipped('This test can only run on Windows');
-        }
-
         // @todo This test makes an assumption you're using `ppa:ondrej/php` to have multiple PHP versions. This allows
         //       us to test scenarios where you run with PHP 8.1 but want to install to a PHP 8.3 instance, for example.
         //       However, this test isn't very portable, and won't run in CI, so we could do with improving this later.
@@ -124,13 +122,10 @@ class DownloadCommandTest extends TestCase
         self::assertStringContainsString('Extracted ' . $expectedVersion . ' source to', $outputString);
     }
 
+    #[RequiresOperatingSystemFamily('Windows')]
     #[DataProvider('validVersionsList')]
     public function testDownloadingWithPhpPath(string $requestedVersion, string $expectedVersion): void
     {
-        if (! Platform::isWindows()) {
-            self::markTestSkipped('This test can only run on Windows');
-        }
-
         $phpBinaryPath = 'C:\php-8.3.6\php.exe';
 
         if (! file_exists($phpBinaryPath) || ! is_executable($phpBinaryPath)) {
@@ -149,12 +144,9 @@ class DownloadCommandTest extends TestCase
         self::assertStringContainsString('Extracted ' . $expectedVersion . ' source to', $outputString);
     }
 
+    #[RequiresPhp('<8.2')]
     public function testDownloadCommandFailsWhenUsingIncompatiblePhpVersion(): void
     {
-        if (PHP_VERSION_ID >= 80200) {
-            self::markTestSkipped('This test can only run on older than PHP 8.2 - you are running ' . PHP_VERSION);
-        }
-
         $this->expectException(UnableToResolveRequirement::class);
         // 1.0.0 is only compatible with PHP 8.3.0
         $this->commandTester->execute(['requested-package-and-version' => self::TEST_PACKAGE . ':1.0.0']);

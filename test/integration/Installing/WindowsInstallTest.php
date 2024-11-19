@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Php\PieIntegrationTest\Installing;
 
 use Composer\Package\CompletePackage;
-use Composer\Util\Platform;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\ExtensionName;
@@ -18,6 +17,7 @@ use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\ThreadSafetyMode;
 use Php\Pie\Platform\WindowsCompiler;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\RequiresOperatingSystemFamily;
 use PHPUnit\Framework\TestCase;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -39,12 +39,9 @@ final class WindowsInstallTest extends TestCase
 {
     private const TEST_EXTENSION_PATH = __DIR__ . '/../../assets/pie_test_ext_win';
 
+    #[RequiresOperatingSystemFamily('Windows')]
     public function testWindowsInstallCanInstallExtension(): void
     {
-        if (! Platform::isWindows()) {
-            self::markTestSkipped('Test can only be run on Windows');
-        }
-
         $downloadedPackage = DownloadedPackage::fromPackageAndExtractedPath(
             new Package(
                 $this->createMock(CompletePackage::class),

@@ -9,6 +9,7 @@ use Php\Pie\Command\InstallCommand;
 use Php\Pie\Container;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\RequiresOperatingSystemFamily;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -108,12 +109,9 @@ class InstallCommandTest extends TestCase
         (new Process($rmCommand))->mustRun();
     }
 
+    #[RequiresOperatingSystemFamily('Windows')]
     public function testInstallCommandWillInstallCompatibleExtensionWindows(): void
     {
-        if (! Platform::isWindows()) {
-            self::markTestSkipped('This test can only run on Windows systems');
-        }
-
         $this->commandTester->execute(['requested-package-and-version' => self::TEST_PACKAGE]);
 
         $this->commandTester->assertCommandIsSuccessful();
