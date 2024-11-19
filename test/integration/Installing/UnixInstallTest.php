@@ -90,6 +90,7 @@ final class UnixInstallTest extends TestCase
                 [ConfigureOption::fromComposerJsonDefinition(['name' => 'enable-pie_test_ext'])],
                 true,
                 true,
+                null,
             ),
             self::TEST_EXTENSION_PATH,
         );
