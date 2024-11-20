@@ -6,6 +6,7 @@ namespace Php\PieUnitTest\Platform;
 
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
+use Php\Pie\Platform\OperatingSystemFamily;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\ThreadSafetyMode;
@@ -22,6 +23,9 @@ final class TargetPlatformTest extends TestCase
         $phpBinaryPath->expects(self::any())
             ->method('operatingSystem')
             ->willReturn(OperatingSystem::Windows);
+        $phpBinaryPath->expects(self::any())
+            ->method('operatingSystemFamily')
+            ->willReturn(OperatingSystemFamily::Windows);
         $phpBinaryPath->expects(self::any())
             ->method('machineType')
             ->willReturn(Architecture::x86);
@@ -53,6 +57,7 @@ TEXT);
         $platform = TargetPlatform::fromPhpBinaryPath($phpBinaryPath, null);
 
         self::assertSame(OperatingSystem::Windows, $platform->operatingSystem);
+        self::assertSame(OperatingSystemFamily::Windows, $platform->operatingSystemFamily);
         self::assertSame(WindowsCompiler::VS16, $platform->windowsCompiler);
         self::assertSame(ThreadSafetyMode::ThreadSafe, $platform->threadSafety);
         self::assertSame(Architecture::x86_64, $platform->architecture);
@@ -64,6 +69,9 @@ TEXT);
         $phpBinaryPath->expects(self::any())
             ->method('operatingSystem')
             ->willReturn(OperatingSystem::NonWindows);
+        $phpBinaryPath->expects(self::any())
+            ->method('operatingSystemFamily')
+            ->willReturn(OperatingSystemFamily::Linux);
         $phpBinaryPath->expects(self::any())
             ->method('machineType')
             ->willReturn(Architecture::x86_64);
@@ -94,6 +102,7 @@ TEXT);
         $platform = TargetPlatform::fromPhpBinaryPath($phpBinaryPath, null);
 
         self::assertSame(OperatingSystem::NonWindows, $platform->operatingSystem);
+        self::assertSame(OperatingSystemFamily::Linux, $platform->operatingSystemFamily);
         self::assertNull($platform->windowsCompiler);
         self::assertSame(ThreadSafetyMode::NonThreadSafe, $platform->threadSafety);
         self::assertSame(Architecture::x86_64, $platform->architecture);

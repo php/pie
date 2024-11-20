@@ -10,6 +10,7 @@ use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
+use Php\Pie\Platform\OperatingSystemFamily;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\ThreadSafetyMode;
@@ -31,6 +32,7 @@ final class WindowsExtensionAssetNameTest extends TestCase
 
         $this->platform = new TargetPlatform(
             OperatingSystem::Windows,
+            OperatingSystemFamily::Windows,
             PhpBinaryPath::fromCurrentProcess(),
             Architecture::x86_64,
             ThreadSafetyMode::ThreadSafe,
@@ -51,6 +53,8 @@ final class WindowsExtensionAssetNameTest extends TestCase
             true,
             true,
             null,
+            [],
+            [],
         );
     }
 

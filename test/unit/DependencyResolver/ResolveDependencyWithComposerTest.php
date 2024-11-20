@@ -12,12 +12,14 @@ use Composer\Repository\CompositeRepository;
 use Composer\Repository\RepositoryFactory;
 use Composer\Repository\RepositoryManager;
 use Php\Pie\ComposerIntegration\QuieterConsoleIO;
+use Php\Pie\DependencyResolver\IncompatibleOperatingSystemFamily;
 use Php\Pie\DependencyResolver\IncompatibleThreadSafetyMode;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\DependencyResolver\ResolveDependencyWithComposer;
 use Php\Pie\DependencyResolver\UnableToResolveRequirement;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
+use Php\Pie\Platform\OperatingSystemFamily;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\ThreadSafetyMode;
@@ -52,6 +54,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
 
         $targetPlatform = new TargetPlatform(
             OperatingSystem::NonWindows,
+            OperatingSystemFamily::Linux,
             $phpBinaryPath,
             Architecture::x86_64,
             ThreadSafetyMode::ThreadSafe,
@@ -96,6 +99,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
 
         $targetPlatform = new TargetPlatform(
             OperatingSystem::NonWindows,
+            OperatingSystemFamily::Linux,
             $phpBinaryPath,
             Architecture::x86_64,
             ThreadSafetyMode::ThreadSafe,
@@ -141,6 +145,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
 
         $targetPlatform = new TargetPlatform(
             OperatingSystem::NonWindows,
+            OperatingSystemFamily::Linux,
             $phpBinaryPath,
             Architecture::x86_64,
             ThreadSafetyMode::NonThreadSafe,
@@ -186,6 +191,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
 
         $targetPlatform = new TargetPlatform(
             OperatingSystem::NonWindows,
+            OperatingSystemFamily::Linux,
             $phpBinaryPath,
             Architecture::x86_64,
             ThreadSafetyMode::ThreadSafe,
@@ -195,6 +201,98 @@ final class ResolveDependencyWithComposerTest extends TestCase
 
         $this->expectException(IncompatibleThreadSafetyMode::class);
         $this->expectExceptionMessage('This extension does not support being installed on a Thread Safe PHP installation');
+        (new ResolveDependencyWithComposer(
+            $this->createMock(QuieterConsoleIO::class),
+        ))(
+            $this->composer,
+            $targetPlatform,
+            new RequestedPackageAndVersion(
+                'test-vendor/test-package',
+                '1.0.0',
+            ),
+        );
+    }
+
+    public function testExtensionCanOnlyBeInstalledIfOsFamilyIsCompatible(): void
+    {
+        $pkg = new CompletePackage('test-vendor/test-package', '1.0.0.0', '1.0.0');
+        $pkg->setType('php-ext');
+        $pkg->setPhpExt([
+            'extension-name' => 'testext',
+            'os-families' => ['Solaris', 'Darwin'],
+        ]);
+
+        $repoManager = $this->createMock(RepositoryManager::class);
+        $repoManager->method('getRepositories')
+            ->willReturn([new ArrayRepository([$pkg])]);
+
+        $this->composer = $this->createMock(Composer::class);
+        $this->composer->method('getRepositoryManager')
+            ->willReturn($repoManager);
+
+        $phpBinaryPath = $this->createMock(PhpBinaryPath::class);
+        $phpBinaryPath->expects(self::any())
+            ->method('version')
+            ->willReturn('8.3.0');
+
+        $targetPlatform = new TargetPlatform(
+            OperatingSystem::NonWindows,
+            OperatingSystemFamily::Linux,
+            $phpBinaryPath,
+            Architecture::x86_64,
+            ThreadSafetyMode::ThreadSafe,
+            1,
+            null,
+        );
+
+        $this->expectException(IncompatibleOperatingSystemFamily::class);
+        $this->expectExceptionMessage('This extension does not support the "Linux" operating system family. It is compatible with the following families: "Solaris", "Darwin"');
+        (new ResolveDependencyWithComposer(
+            $this->createMock(QuieterConsoleIO::class),
+        ))(
+            $this->composer,
+            $targetPlatform,
+            new RequestedPackageAndVersion(
+                'test-vendor/test-package',
+                '1.0.0',
+            ),
+        );
+    }
+
+    public function testExtensionCanOnlyBeInstalledIfOsFamilyIsNotInCompatible(): void
+    {
+        $pkg = new CompletePackage('test-vendor/test-package', '1.0.0.0', '1.0.0');
+        $pkg->setType('php-ext');
+        $pkg->setPhpExt([
+            'extension-name' => 'testext',
+            'os-families-exclude' => ['Darwin', 'Solaris'],
+        ]);
+
+        $repoManager = $this->createMock(RepositoryManager::class);
+        $repoManager->method('getRepositories')
+            ->willReturn([new ArrayRepository([$pkg])]);
+
+        $this->composer = $this->createMock(Composer::class);
+        $this->composer->method('getRepositoryManager')
+            ->willReturn($repoManager);
+
+        $phpBinaryPath = $this->createMock(PhpBinaryPath::class);
+        $phpBinaryPath->expects(self::any())
+            ->method('version')
+            ->willReturn('8.3.0');
+
+        $targetPlatform = new TargetPlatform(
+            OperatingSystem::NonWindows,
+            OperatingSystemFamily::Darwin,
+            $phpBinaryPath,
+            Architecture::x86_64,
+            ThreadSafetyMode::ThreadSafe,
+            1,
+            null,
+        );
+
+        $this->expectException(IncompatibleOperatingSystemFamily::class);
+        $this->expectExceptionMessage('This extension does not support the "Darwin" operating system family. It is incompatible with the following families: "Darwin", "Solaris".');
         (new ResolveDependencyWithComposer(
             $this->createMock(QuieterConsoleIO::class),
         ))(

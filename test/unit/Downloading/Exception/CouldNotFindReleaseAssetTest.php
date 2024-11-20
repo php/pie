@@ -11,6 +11,7 @@ use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
+use Php\Pie\Platform\OperatingSystemFamily;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\ThreadSafetyMode;
@@ -33,6 +34,8 @@ final class CouldNotFindReleaseAssetTest extends TestCase
             true,
             true,
             null,
+            [],
+            [],
         );
 
         $exception = CouldNotFindReleaseAsset::forPackage($package, ['something.zip', 'something2.zip']);
@@ -53,6 +56,8 @@ final class CouldNotFindReleaseAssetTest extends TestCase
             true,
             true,
             null,
+            [],
+            [],
         );
 
         $exception = CouldNotFindReleaseAsset::forPackageWithMissingTag($package);
@@ -65,6 +70,7 @@ final class CouldNotFindReleaseAssetTest extends TestCase
         $phpBinary = PhpBinaryPath::fromCurrentProcess();
         $exception = CouldNotFindReleaseAsset::forMissingWindowsCompiler(new TargetPlatform(
             OperatingSystem::NonWindows,
+            OperatingSystemFamily::Linux,
             $phpBinary,
             Architecture::x86,
             ThreadSafetyMode::NonThreadSafe,
