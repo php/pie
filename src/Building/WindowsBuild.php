@@ -23,6 +23,7 @@ final class WindowsBuild implements Build
         array $configureOptions,
         OutputInterface $output,
         PhpizePath|null $phpizePath,
+        bool $dryRun,
     ): BinaryFile {
         $prebuiltDll = WindowsExtensionAssetName::determineDllName($targetPlatform, $downloadedPackage);
 

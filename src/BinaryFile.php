@@ -15,6 +15,8 @@ final class BinaryFile
 {
     private const HASH_TYPE_SHA256 = 'sha256';
 
+    private const DRY_RUN_FAKE_HASH = 'dry_run_fake_hash';
+
     /**
      * @param non-empty-string $filePath
      * @param non-empty-string $checksum
@@ -31,6 +33,15 @@ final class BinaryFile
         return new self(
             $filePath,
             hash_file(self::HASH_TYPE_SHA256, $filePath),
+        );
+    }
+
+    /** @param non-empty-string $filePath */
+    public static function nonExistentForDryRun(string $filePath): self
+    {
+        return new self(
+            'dry-run::' . $filePath,
+            self::DRY_RUN_FAKE_HASH,
         );
     }
 }

@@ -38,6 +38,7 @@ final class CommandHelper
     private const OPTION_WITH_PHP_PATH              = 'with-php-path';
     private const OPTION_WITH_PHPIZE_PATH           = 'with-phpize-path';
     private const OPTION_MAKE_PARALLEL_JOBS         = 'make-parallel-jobs';
+    private const OPTION_DRY_RUN                    = 'dry-run';
 
     /** @psalm-suppress UnusedConstructor */
     private function __construct()
@@ -87,6 +88,16 @@ final class CommandHelper
          * Note, this means you probably need to call {@see self::validateInput()} to validate the input manually...
          */
         $command->ignoreValidationErrors();
+    }
+
+    public static function configureDryRunOption(Command $command): void
+    {
+        $command->addOption(
+            self::OPTION_DRY_RUN,
+            null,
+            InputOption::VALUE_NONE,
+            'Do not actually build or install the extension, just show the steps that would be run.',
+        );
     }
 
     public static function validateInput(InputInterface $input, Command $command): void
@@ -152,6 +163,11 @@ final class CommandHelper
         ));
 
         return $targetPlatform;
+    }
+
+    public static function determineDryRunFromInputs(InputInterface $input): bool
+    {
+        return $input->hasOption(self::OPTION_DRY_RUN) && $input->getOption(self::OPTION_DRY_RUN);
     }
 
     public static function determinePhpizePathFromInputs(InputInterface $input): PhpizePath|null

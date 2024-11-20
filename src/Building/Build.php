@@ -20,5 +20,6 @@ interface Build
         array $configureOptions,
         OutputInterface $output,
         PhpizePath|null $phpizePath,
+        bool $dryRun,
     ): BinaryFile;
 }

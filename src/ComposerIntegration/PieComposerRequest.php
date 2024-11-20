@@ -24,6 +24,7 @@ final class PieComposerRequest
         public readonly PieOperation $operation,
         public readonly array $configureOptions,
         public readonly PhpizePath|null $phpizePath,
+        public readonly bool $dryRun,
     ) {
     }
 }

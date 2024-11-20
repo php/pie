@@ -38,6 +38,7 @@ final class InstallCommand extends Command
         parent::configure();
 
         CommandHelper::configureDownloadBuildInstallOptions($this);
+        CommandHelper::configureDryRunOption($this);
     }
 
     public function execute(InputInterface $input, OutputInterface $output): int
@@ -59,6 +60,7 @@ final class InstallCommand extends Command
                 PieOperation::Resolve,
                 [], // Configure options are not needed for resolve only
                 null,
+                CommandHelper::determineDryRunFromInputs($input),
             ),
         );
 
@@ -79,6 +81,7 @@ final class InstallCommand extends Command
                 PieOperation::Install,
                 $configureOptionsValues,
                 CommandHelper::determinePhpizePathFromInputs($input),
+                false,
             ),
         );
 

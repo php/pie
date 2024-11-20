@@ -66,6 +66,7 @@ final class InstallAndBuildProcessTest extends TestCase
             PieOperation::Download,
             ['--foo', '--bar="yes"'],
             null,
+            false,
         );
         $composerPackage = new CompletePackage('foo/bar', '1.2.3.0', '1.2.3');
         $installPath     = '/path/to/install';
@@ -106,6 +107,7 @@ final class InstallAndBuildProcessTest extends TestCase
             PieOperation::Build,
             ['--foo', '--bar="yes"'],
             null,
+            false,
         );
         $composerPackage = new CompletePackage('foo/bar', '1.2.3.0', '1.2.3');
         $installPath     = '/path/to/install';
@@ -149,6 +151,7 @@ final class InstallAndBuildProcessTest extends TestCase
             PieOperation::Install,
             ['--foo', '--bar="yes"'],
             null,
+            false,
         );
         $composerPackage = new CompletePackage('foo/bar', '1.2.3.0', '1.2.3');
         $installPath     = '/path/to/install';
