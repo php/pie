@@ -132,6 +132,34 @@ If an end user does not specify a flag defined in the `configure-options`
 definition, it will simply not be passed to `./configure`. There is no way to
 specify a default value in the `configure-options` definition.
 
+#### `build-path`
+
+The `build-path` setting may be used if your source code is not in the root
+of your repository. For example, if your repository structure is like:
+
+```
+/
+  docs/
+  src/
+    config.m4
+    config.w32
+    myext.c
+    ...etc
+```
+
+In this case, the actual extension source code would be built in `src/`, so you
+should specify this path in `build-path`, for example:
+
+```json
+{
+    "name": "myvendor/myext",
+    "php-ext": {
+        "extension-name": "myext",
+        "build-path": "src"
+    }
+}
+```
+
 ### Extension dependencies
 
 Extension authors may define some dependencies in `require`, but practically,
