@@ -50,7 +50,7 @@ final class UnableToResolveRequirementTest extends TestCase
 
         $exception = UnableToResolveRequirement::fromRequirement(new RequestedPackageAndVersion('foo/bar', '^1.2'), $io);
 
-        self::assertSame("Unable to find an installable package foo/bar for version ^1.2.\n\nmessage1\n\nmessage3\n\nmessage4", $exception->getMessage());
+        self::assertSame("Unable to find an installable package foo/bar for version ^1.2, with minimum stability stable.\n\nmessage1\n\nmessage3\n\nmessage4", $exception->getMessage());
     }
 
     public function testFromRequirementWithoutVersion(): void
@@ -66,6 +66,6 @@ final class UnableToResolveRequirementTest extends TestCase
 
         $exception = UnableToResolveRequirement::fromRequirement(new RequestedPackageAndVersion('foo/bar', null), $io);
 
-        self::assertSame("Unable to find an installable package foo/bar.\n\nmessage1\n\nmessage3\n\nmessage4", $exception->getMessage());
+        self::assertSame("Unable to find an installable package foo/bar for the latest compatible version, with minimum stability stable.\n\nmessage1\n\nmessage3\n\nmessage4", $exception->getMessage());
     }
 }
