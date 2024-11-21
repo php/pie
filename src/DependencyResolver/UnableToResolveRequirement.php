@@ -23,9 +23,10 @@ class UnableToResolveRequirement extends RuntimeException
         $errors = $io->errors;
 
         return new self(sprintf(
-            'Unable to find an installable package %s%s%s',
+            'Unable to find an installable package %s for %s, with minimum stability %s.%s',
             $requestedPackageAndVersion->package,
-            $requestedPackageAndVersion->version !== null ? sprintf(' for version %s.', $requestedPackageAndVersion->version) : '.',
+            $requestedPackageAndVersion->version !== null ? sprintf('version %s', $requestedPackageAndVersion->version) : 'the latest compatible version',
+            DetermineMinimumStability::fromRequestedVersion($requestedPackageAndVersion->version),
             count($errors) ? "\n\n" . implode("\n\n", array_map(static fn ($e) => strip_tags($e), $errors)) : '',
         ));
     }
