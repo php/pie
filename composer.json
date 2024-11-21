@@ -55,6 +55,9 @@
         "bump-after-update": true,
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true
+        },
+        "platform": {
+            "php": "8.1.0"
         }
     }
 }
