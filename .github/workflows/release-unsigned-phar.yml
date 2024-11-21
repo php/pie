@@ -23,6 +23,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      # Ensure some kind of previous tag exists, otherwise box fails
+      - run: git describe --tags HEAD || git tag 0.0.0
       - uses: ramsey/composer-install@v3
       - name: Build PHAR
         run: box compile
