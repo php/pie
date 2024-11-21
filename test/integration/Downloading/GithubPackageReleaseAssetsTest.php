@@ -51,6 +51,7 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             [],
             true,
             true,
+            null,
         );
 
         $io     = $this->createMock(IOInterface::class);

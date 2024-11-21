@@ -109,6 +109,7 @@ final class CommandHelperTest extends TestCase
             ],
             true,
             true,
+            null,
         );
         $inputDefinition = new InputDefinition();
         $inputDefinition->addOption(new InputOption('with-stuff', null, InputOption::VALUE_REQUIRED));

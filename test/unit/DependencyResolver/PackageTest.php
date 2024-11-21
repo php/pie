@@ -26,6 +26,7 @@ final class PackageTest extends TestCase
         self::assertSame('1.2.3', $package->version);
         self::assertSame('vendor/foo:1.2.3', $package->prettyNameAndVersion());
         self::assertNull($package->downloadUrl);
+        self::assertNull($package->buildPath);
     }
 
     public function testFromComposerCompletePackageWithExtensionName(): void
@@ -72,8 +73,20 @@ final class PackageTest extends TestCase
             [],
             true,
             true,
+            null,
         );
 
         self::assertSame($expectedGithubOrgAndRepo, $package->githubOrgAndRepository());
+    }
+
+    public function testFromComposerCompletePackageWithBuildPath(): void
+    {
+        $composerCompletePackage = new CompletePackage('vendor/foo', '1.2.3.0', '1.2.3');
+        $composerCompletePackage->setPhpExt(['build-path' => 'some/subdirectory/path/']);
+
+        $package = Package::fromComposerCompletePackage($composerCompletePackage);
+
+        self::assertSame('vendor/foo:1.2.3', $package->prettyNameAndVersion());
+        self::assertSame('some/subdirectory/path/', $package->buildPath);
     }
 }

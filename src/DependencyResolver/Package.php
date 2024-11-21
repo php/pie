@@ -36,6 +36,7 @@ final class Package
         public readonly array $configureOptions,
         public readonly bool $supportZts,
         public readonly bool $supportNts,
+        public readonly string|null $buildPath,
     ) {
     }
 
@@ -58,6 +59,10 @@ final class Package
             ? $phpExtOptions['support-nts']
             : true;
 
+        $buildPath = $phpExtOptions !== null && array_key_exists('build-path', $phpExtOptions)
+            ? $phpExtOptions['build-path']
+            : null;
+
         return new self(
             $completePackage,
             ExtensionType::tryFrom($completePackage->getType()) ?? ExtensionType::PhpModule,
@@ -68,6 +73,7 @@ final class Package
             $configureOptions,
             $supportZts,
             $supportNts,
+            $buildPath,
         );
     }
 
