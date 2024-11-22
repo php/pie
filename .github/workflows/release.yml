@@ -5,6 +5,9 @@ on:
     types:
       - published
 
+permissions:
+  contents: read
+
 jobs:
   release-phar:
     runs-on: ${{ matrix.operating-system }}
@@ -14,6 +17,9 @@ jobs:
           - ubuntu-latest
         php-versions:
           - '8.1'
+    permissions:
+      # contents:write is required to upload the binaries to the release.
+      contents: write
     steps:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
