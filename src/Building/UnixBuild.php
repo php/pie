@@ -12,6 +12,7 @@ use Php\Pie\Util\Process;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process as SymfonyProcess;
 
+use Throwable;
 use function count;
 use function file_exists;
 use function implode;
@@ -32,6 +33,8 @@ final class UnixBuild implements Build
         OutputInterface $output,
         PhpizePath|null $phpizePath,
     ): BinaryFile {
+        $this->cleanup($downloadedPackage, $output);
+
         $outputCallback = null;
         if ($output->isVerbose()) {
             /** @var callable(SymfonyProcess::ERR|SymfonyProcess::OUT, string):void $outputCallback */
@@ -77,7 +80,8 @@ final class UnixBuild implements Build
             $expectedSoFile,
         ));
 
-        return BinaryFile::fromFileWithSha256Checksum($expectedSoFile);
+        $binaryFile = BinaryFile::fromFileWithSha256Checksum($expectedSoFile);
+        return $binaryFile;
     }
 
     /** @param callable(SymfonyProcess::ERR|SymfonyProcess::OUT, string): void|null $outputCallback */
@@ -150,5 +154,42 @@ final class UnixBuild implements Build
             self::MAKE_TIMEOUT_SECS,
             $outputCallback,
         );
+    }
+    private function cleanup(
+        DownloadedPackage $downloadedPackage,
+        OutputInterface $output
+    ): void {
+        if (! file_exists($downloadedPackage->extractedSourcePath . '/Makefile')) {
+            return;
+        }
+
+        try {
+            // Run make clean first
+            Process::run(
+                ['make', 'clean'],
+                $downloadedPackage->extractedSourcePath,
+                self::CONFIGURE_TIMEOUT_SECS,
+                null
+            );
+
+            // Then run phpize --clean
+            Process::run(
+                ['phpize', '--clean'],
+                $downloadedPackage->extractedSourcePath,
+                self::PHPIZE_TIMEOUT_SECS,
+                null
+            );
+
+            if ($output->isVerbose()) {
+                $output->writeln('<comment>Build files cleaned up</comment>');
+            }
+        } catch (Throwable $e) {
+            if ($output->isVerbose()) {
+                $output->writeln(sprintf(
+                    '<comment>Warning: Failed to clean up build files: %s</comment>',
+                    $e->getMessage()
+                ));
+            }
+        }
     }
 }
