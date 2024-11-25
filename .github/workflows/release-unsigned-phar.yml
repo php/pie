@@ -3,8 +3,10 @@ name: "Release unsigned PHAR"
 on:
   workflow_call:
 
-jobs:
+permissions:
+  contents: read
 
+jobs:
   build-phar:
     runs-on: ${{ matrix.operating-system }}
     strategy:
