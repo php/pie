@@ -12,7 +12,6 @@ use Php\Pie\Util\Process;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process as SymfonyProcess;
 
-use Throwable;
 use function count;
 use function file_exists;
 use function implode;
@@ -33,8 +32,6 @@ final class UnixBuild implements Build
         OutputInterface $output,
         PhpizePath|null $phpizePath,
     ): BinaryFile {
-        $this->cleanup($downloadedPackage, $output);
-
         $outputCallback = null;
         if ($output->isVerbose()) {
             /** @var callable(SymfonyProcess::ERR|SymfonyProcess::OUT, string):void $outputCallback */
@@ -48,8 +45,18 @@ final class UnixBuild implements Build
             };
         }
 
+        $phpizePath ??= PhpizePath::guessFrom($targetPlatform->phpBinaryPath);
+
+        /**
+         * Call a cleanup first; most of the time, we expect to be changing a
+         * version (e.g. upgrade, downgrade), in which case the source is
+         * already clean anyway; however, sometimes we want to rebuild the
+         * current ext, so this will perform a clean first
+         */
+        $this->cleanup($phpizePath, $downloadedPackage, $output, $outputCallback);
+
         $this->phpize(
-            $phpizePath ?? PhpizePath::guessFrom($targetPlatform->phpBinaryPath),
+            $phpizePath,
             $downloadedPackage,
             $output,
             $outputCallback,
@@ -80,8 +87,7 @@ final class UnixBuild implements Build
             $expectedSoFile,
         ));
 
-        $binaryFile = BinaryFile::fromFileWithSha256Checksum($expectedSoFile);
-        return $binaryFile;
+        return BinaryFile::fromFileWithSha256Checksum($expectedSoFile);
     }
 
     /** @param callable(SymfonyProcess::ERR|SymfonyProcess::OUT, string): void|null $outputCallback */
@@ -155,41 +161,40 @@ final class UnixBuild implements Build
             $outputCallback,
         );
     }
+
+    /** @param callable(SymfonyProcess::ERR|SymfonyProcess::OUT, string): void|null $outputCallback */
     private function cleanup(
+        PhpizePath $phpize,
         DownloadedPackage $downloadedPackage,
-        OutputInterface $output
+        OutputInterface $output,
+        callable|null $outputCallback,
     ): void {
-        if (! file_exists($downloadedPackage->extractedSourcePath . '/Makefile')) {
+        /**
+         * A basic, but fallible check to see if we should clean first. This
+         * should work "most" of the time, unless someone has removed the
+         * configure script manually...
+         */
+        if (! file_exists($downloadedPackage->extractedSourcePath . '/configure')) {
+            if ($output->isVerbose()) {
+                $output->writeln('<comment>Skipping phpize --clean, configure does not exist</comment>');
+            }
+
             return;
         }
 
-        try {
-            // Run make clean first
-            Process::run(
-                ['make', 'clean'],
-                $downloadedPackage->extractedSourcePath,
-                self::CONFIGURE_TIMEOUT_SECS,
-                null
-            );
+        $phpizeCleanCommand = [$phpize->phpizeBinaryPath, '--clean'];
 
-            // Then run phpize --clean
-            Process::run(
-                ['phpize', '--clean'],
-                $downloadedPackage->extractedSourcePath,
-                self::PHPIZE_TIMEOUT_SECS,
-                null
-            );
-
-            if ($output->isVerbose()) {
-                $output->writeln('<comment>Build files cleaned up</comment>');
-            }
-        } catch (Throwable $e) {
-            if ($output->isVerbose()) {
-                $output->writeln(sprintf(
-                    '<comment>Warning: Failed to clean up build files: %s</comment>',
-                    $e->getMessage()
-                ));
-            }
+        if ($output->isVerbose()) {
+            $output->writeln('<comment>Running phpize --clean step using: ' . implode(' ', $phpizeCleanCommand) . '</comment>');
         }
+
+        Process::run(
+            $phpizeCleanCommand,
+            $downloadedPackage->extractedSourcePath,
+            self::PHPIZE_TIMEOUT_SECS,
+            $outputCallback,
+        );
+
+        $output->writeln('<info>Build files cleaned up.</info>');
     }
 }

@@ -20,13 +20,13 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
+
 use function dirname;
 
 #[CoversClass(UnixBuild::class)]
 final class UnixBuildTest extends TestCase
 {
     private const TEST_EXTENSION_PATH = __DIR__ . '/../../assets/pie_test_ext';
-
 
     public function testUnixBuildCanBuildExtension(): void
     {
@@ -77,8 +77,8 @@ final class UnixBuildTest extends TestCase
                 ->getExitCode(),
         );
 
-        self::assertFileDoesNotExist($downloadedPackage->extractedSourcePath . '/Makefile');
-        self::assertFileDoesNotExist($downloadedPackage->extractedSourcePath . '/configure');
+        (new Process(['make', 'clean'], $downloadedPackage->extractedSourcePath))->mustRun();
+        (new Process(['phpize', '--clean'], $downloadedPackage->extractedSourcePath))->mustRun();
     }
 
     public function testUnixBuildWillThrowExceptionWhenExpectedBinaryNameMismatches(): void
@@ -121,6 +121,7 @@ final class UnixBuildTest extends TestCase
             (new Process(['phpize', '--clean'], $downloadedPackage->extractedSourcePath))->mustRun();
         }
     }
+
     public function testUnixBuildCanBuildExtensionWithBuildPath(): void
     {
         if (Platform::isWindows()) {
@@ -174,14 +175,18 @@ final class UnixBuildTest extends TestCase
         (new Process(['phpize', '--clean'], $downloadedPackage->extractedSourcePath))->mustRun();
     }
 
-
-    public function testCleanupHandlesNonExistentMakefileGracefully(): void
+    public function testCleanupDoesNotCleanWhenConfigureIsMissing(): void
     {
         if (Platform::isWindows()) {
             self::markTestSkipped('Unix build test cannot be run on Windows');
         }
 
+        (new Process(['phpize', '--clean'], self::TEST_EXTENSION_PATH))->mustRun();
+        self::assertFileDoesNotExist(self::TEST_EXTENSION_PATH . '/configure');
+
         $output = new BufferedOutput();
+        $output->setVerbosity(OutputInterface::VERBOSITY_VERBOSE);
+
         $downloadedPackage = DownloadedPackage::fromPackageAndExtractedPath(
             new Package(
                 $this->createMock(CompletePackage::class),
@@ -199,15 +204,16 @@ final class UnixBuildTest extends TestCase
         );
 
         $unixBuilder = new UnixBuild();
-
-        // Create a ReflectionMethod to test the private cleanup method
-        $cleanupMethod = new \ReflectionMethod($unixBuilder, 'cleanup');
-        $cleanupMethod->setAccessible(true);
-
-        // Should not throw any exception
-        $cleanupMethod->invoke($unixBuilder, $downloadedPackage, $output);
+        $unixBuilder->__invoke(
+            $downloadedPackage,
+            TargetPlatform::fromPhpBinaryPath(PhpBinaryPath::fromCurrentProcess(), null),
+            ['--enable-pie_test_ext'],
+            $output,
+            null,
+        );
 
         $outputString = $output->fetch();
+        self::assertStringContainsString('Skipping phpize --clean, configure does not exist', $outputString);
         self::assertStringNotContainsString('Build files cleaned up', $outputString);
     }
 
@@ -216,6 +222,9 @@ final class UnixBuildTest extends TestCase
         if (Platform::isWindows()) {
             self::markTestSkipped('Unix build test cannot be run on Windows');
         }
+
+        (new Process(['phpize'], self::TEST_EXTENSION_PATH))->mustRun();
+        self::assertFileExists(self::TEST_EXTENSION_PATH . '/configure');
 
         $output = new BufferedOutput();
         $output->setVerbosity(OutputInterface::VERBOSITY_VERBOSE);
@@ -237,7 +246,7 @@ final class UnixBuildTest extends TestCase
         );
 
         $unixBuilder = new UnixBuild();
-        $builtBinary = $unixBuilder->__invoke(
+        $unixBuilder->__invoke(
             $downloadedPackage,
             TargetPlatform::fromPhpBinaryPath(PhpBinaryPath::fromCurrentProcess(), null),
             ['--enable-pie_test_ext'],
@@ -246,6 +255,7 @@ final class UnixBuildTest extends TestCase
         );
 
         $outputString = $output->fetch();
+        self::assertStringContainsString('Running phpize --clean step', $outputString);
         self::assertStringContainsString('Build files cleaned up', $outputString);
     }
 }
