@@ -5,7 +5,6 @@ declare(strict_types=1);
 
 namespace Php\Pie;
 
-use Composer\InstalledVersions;
 use Php\Pie\Command\BuildCommand;
 use Php\Pie\Command\DownloadCommand;
 use Php\Pie\Command\InfoCommand;
@@ -24,15 +23,15 @@ $container = Container::factory();
 
 $application = new Application('🥧 PHP Installer for Extensions (PIE)', PieVersion::get());
 
-$application->setCommandLoader(new ContainerCommandLoader($container, [
-    'download' => DownloadCommand::class,
-    'build' => BuildCommand::class,
-    'install' => InstallCommand::class,
-    'info' => InfoCommand::class,
-    'show' => ShowCommand::class,
-]));
+$application->setCommandLoader(new ContainerCommandLoader(
+    $container,
+    [
+        'download' => DownloadCommand::class,
+        'build' => BuildCommand::class,
+        'install' => InstallCommand::class,
+        'info' => InfoCommand::class,
+        'show' => ShowCommand::class,
+    ]
+));
 
-$application->run(
-    $container->get(InputInterface::class),
-    $container->get(OutputInterface::class),
-);
+$application->run($container->get(InputInterface::class), $container->get(OutputInterface::class));
