@@ -5,12 +5,12 @@ declare(strict_types=1);
 
 namespace Php\Pie;
 
-use Composer\InstalledVersions;
 use Php\Pie\Command\BuildCommand;
 use Php\Pie\Command\DownloadCommand;
 use Php\Pie\Command\InfoCommand;
 use Php\Pie\Command\InstallCommand;
 use Php\Pie\Command\ShowCommand;
+use Php\Pie\Util\PieVersion;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\CommandLoader\ContainerCommandLoader;
 use Symfony\Component\Console\Input\InputInterface;
@@ -21,36 +21,8 @@ include $_composer_autoload_path ?? __DIR__ . '/../vendor/autoload.php';
 
 $container = Container::factory();
 
-$application = new Application(
-    '🥧 PHP Installer for Extensions (PIE)',
-    (static function (): string {
-        $pieVersion = '@pie_version@';
+$application = new Application('🥧 PHP Installer for Extensions (PIE)', PieVersion::get());
 
-        /**
-         * @psalm-suppress RedundantCondition
-         * @noinspection PhpConditionAlreadyCheckedInspection
-         */
-        if ($pieVersion === '@pie_version'.'@') {
-            if (!class_exists(InstalledVersions::class)) {
-                /**
-                 * Note: magic constant that causes Symfony Console to not display a version
-                 * {@see Application::getLongVersion()}
-                 */
-                return 'UNKNOWN';
-            }
-
-            $installedVersion = InstalledVersions::getVersion(InstalledVersions::getRootPackage()['name']);
-            if ($installedVersion === null) {
-                return 'UNKNOWN';
-            }
-
-            return $installedVersion;
-        }
-
-        /** @psalm-suppress NoValue */
-        return $pieVersion;
-    })()
-);
 $application->setCommandLoader(new ContainerCommandLoader(
     $container,
     [
@@ -61,4 +33,5 @@ $application->setCommandLoader(new ContainerCommandLoader(
         'show' => ShowCommand::class,
     ]
 ));
+
 $application->run($container->get(InputInterface::class), $container->get(OutputInterface::class));
