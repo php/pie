@@ -13,7 +13,7 @@ please read [extension-maintainers](./docs/extension-maintainers.md).
 - Download `pie.phar` either:
   - [latest stable release](https://github.com/php/pie/releases)
   - [latest unstable nightly](https://php.github.io/pie/pie-nightly.phar)
-- Validate the signature in `pie.phar.asc`
+- Verify the PHAR's source with `gh attestation verify pie.phar --repo php/pie`
 - You may then invoke PIE with `php pie.phar <command>`
 
 Further installation details can be found in the [usage](./docs/usage.md) docs.

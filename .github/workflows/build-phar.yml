@@ -1,4 +1,14 @@
-name: "Release unsigned PHAR"
+# Invoking this pipeline requires additional permissions, so must be invoked
+# in a way to pass those permissions on, e.g.:
+#
+#  build-phar:
+#    permissions:
+#      contents: read
+#      id-token: write
+#      attestations: write
+#    uses: ./.github/workflows/build-phar.yml
+
+name: "Build the PIE PHAR"
 
 on:
   workflow_call:
@@ -15,6 +25,11 @@ jobs:
           - ubuntu-latest
         php-versions:
           - '8.1'
+    permissions:
+      # id-token:write is required for build provenance attestation.
+      id-token: write
+      # attestations:write is required for build provenance attestation.
+      attestations: write
     steps:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -32,6 +47,10 @@ jobs:
         run: box compile
       - name: Check the PHAR executes
         run: php pie.phar --version
+      - name: Generate build provenance attestation
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: '${{ github.workspace }}/pie.phar'
       - uses: actions/upload-artifact@v4
         with:
           name: pie-${{ github.sha }}.phar

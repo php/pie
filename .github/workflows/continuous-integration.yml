@@ -109,4 +109,9 @@ jobs:
       - unit-tests
       - coding-standards
       - static-analysis
-    uses: ./.github/workflows/release-unsigned-phar.yml
+    # See build-phar.yml for a list of the permissions and why they are needed
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    uses: ./.github/workflows/build-phar.yml
