@@ -19,10 +19,14 @@ concurrency:
 
 jobs:
   build-phar:
-    uses: ./.github/workflows/release-unsigned-phar.yml
+    # See build-phar.yml for a list of the permissions and why they are needed
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    uses: ./.github/workflows/build-phar.yml
 
-  # Build job
-  build:
+  build-docs-package:
     runs-on: ubuntu-latest
     needs:
       - build-phar
@@ -35,6 +39,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: pie-${{ github.sha }}.phar
+      - name: Verify the PHAR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh attestation verify pie.phar --repo ${{ github.repository }}
       - name: Copy PHAR into docs
         run: cp pie.phar docs-package/pie-nightly.phar
       - name: Upload artifact
@@ -42,13 +50,12 @@ jobs:
         with:
           path: docs-package
 
-  # Deployment job
   deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    needs: build
+    needs: build-docs-package
     permissions:
       contents: read
       # pages:write is required to deploy to GitHub pages.
