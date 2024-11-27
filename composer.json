@@ -31,7 +31,7 @@
         "ext-zip": "*",
         "composer/composer": "dev-main",
         "fidry/cpu-core-counter": "^1.2",
-        "illuminate/container": "^10.48.24",
+        "illuminate/container": "^10.48.25",
         "symfony/console": "^6.4.15",
         "symfony/process": "^6.4.15",
         "webmozart/assert": "^1.11"
