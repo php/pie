@@ -38,8 +38,8 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | igbinary             | ?                                                                                                                                                  |
 | ssh2                 | ?                                                                                                                                                  |
 | swoole               | ?                                                                                                                                                  |
-| mongo                | ?                                                                                                                                                  |
-| APC                  | ?                                                                                                                                                  |
+| mongo                | ❌ Abandoned                                                                                                                                        |
+| APC                  | ❌ Abandoned                                                                                                                                        |
 | sqlsrv               | ?                                                                                                                                                  |
 | rdkafka              | ?                                                                                                                                                  |
 | pdo_sqlsrv           | ?                                                                                                                                                  |
@@ -58,41 +58,41 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | Mosquitto            | ?                                                                                                                                                  |
 | couchbase            | ?                                                                                                                                                  |
 | apcu_bc              | ?                                                                                                                                                  |
-| intl                 | ?                                                                                                                                                  |
+| intl                 | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                                                                  |
 | protobuf             | ?                                                                                                                                                  |
 | smbclient            | ?                                                                                                                                                  |
-| PDO                  | ?                                                                                                                                                  |
+| PDO                  | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                                                                  |
 | event                | ?                                                                                                                                                  |
 | raphf                | ?                                                                                                                                                  |
 | gearman              | ?                                                                                                                                                  |
-| pdflib               | ?                                                                                                                                                  |
+| pdflib               | ❌ Abandoned                                                                                                                                        |
 | lzf                  | ?                                                                                                                                                  |
 | mogilefs             | ?                                                                                                                                                  |
 | uuid                 | ?                                                                                                                                                  |
 | uopz                 | ?                                                                                                                                                  |
-| PDO_MYSQL            | ?                                                                                                                                                  |
+| PDO_MYSQL            | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                                                                  |
 | ev                   | ?                                                                                                                                                  |
 | propro               | ?                                                                                                                                                  |
 | ds                   | ?                                                                                                                                                  |
 | hprose               | ?                                                                                                                                                  |
-| Fileinfo             | ?                                                                                                                                                  |
+| Fileinfo             | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                                                                  |
 | stomp                | ?                                                                                                                                                  |
 | solr                 | ?                                                                                                                                                  |
 | excimer              | ?                                                                                                                                                  |
-| json                 | ?                                                                                                                                                  |
+| json                 | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                                                                  |
 | gmagick              | ?                                                                                                                                                  |
 | decimal              | ?                                                                                                                                                  |
-| stats                | ?                                                                                                                                                  |
+| stats                | ❌ Abandoned                                                                                                                                        |
 | opentelemetry        | ?                                                                                                                                                  |
-| ZendOptimizerPlus    | ?                                                                                                                                                  |
+| ZendOptimizerPlus    | ❌ Possibly abandoned - [gives a 404 on PECL](https://pecl.php.net/package/ZendOptimizerPlus)                                                       |
 | rar                  | ?                                                                                                                                                  |
 | psr                  | ?                                                                                                                                                  |
-| xmlrpc               | ?                                                                                                                                                  |
+| xmlrpc               | ❌ Abandoned                                                                                                                                        |
 | opencensus           | ?                                                                                                                                                  |
-| pthreads             | ?                                                                                                                                                  |
+| pthreads             | ❌ Abandoned                                                                                                                                        |
 | xlswriter            | ?                                                                                                                                                  |
 | inotify              | ?                                                                                                                                                  |
-| zmq                  | ?                                                                                                                                                  |
+| zmq                  | ❌ Abandoned                                                                                                                                        |
 | Yaf                  | ?                                                                                                                                                  |
 | cassandra            | ?                                                                                                                                                  |
 | dbase                | ?                                                                                                                                                  |
@@ -106,103 +106,103 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | radius               | ?                                                                                                                                                  |
 | zstd                 | ?                                                                                                                                                  |
 | xdiff                | ?                                                                                                                                                  |
-| tidy                 | ?                                                                                                                                                  |
+| tidy                 | ❌ Abandoned                                                                                                                                        |
 | trader               | ?                                                                                                                                                  |
-| sphinx               | ?                                                                                                                                                  |
+| sphinx               | ❌ Abandoned                                                                                                                                        |
 | Phalcon              | ?                                                                                                                                                  |
 | runkit7              | ?                                                                                                                                                  |
-| runkit               | ?                                                                                                                                                  |
+| runkit               | ❌ Abandoned                                                                                                                                        |
 | yaz                  | ?                                                                                                                                                  |
-| libevent             | ?                                                                                                                                                  |
-| SQLite               | ?                                                                                                                                                  |
+| libevent             | ❌ Abandoned                                                                                                                                        |
+| SQLite               | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                                                                  |
 | zookeeper            | ?                                                                                                                                                  |
-| phar                 | ?                                                                                                                                                  |
+| phar                 | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                                                                  |
 | SeasLog              | ?                                                                                                                                                  |
 | dio                  | ?                                                                                                                                                  |
 | apfd                 | ?                                                                                                                                                  |
-| apd                  | ?                                                                                                                                                  |
+| apd                  | ❌ Abandoned                                                                                                                                        |
 | pcs                  | ?                                                                                                                                                  |
-| hash                 | ?                                                                                                                                                  |
-| PDO_PGSQL            | ?                                                                                                                                                  |
-| eio                  | ?                                                                                                                                                  |
+| hash                 | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                                                                  |
+| PDO_PGSQL            | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                                                                  |
 | jsmin                | ?                                                                                                                                                  |
+| eio                  | ?                                                                                                                                                  |
 | gender               | ?                                                                                                                                                  |
 | maxminddb            | ?                                                                                                                                                  |
-| bcompiler            | ?                                                                                                                                                  |
+| bcompiler            | ❌ Abandoned                                                                                                                                        |
 | PAM                  | ?                                                                                                                                                  |
 | parallel             | ?                                                                                                                                                  |
 | krb5                 | ?                                                                                                                                                  |
 | yar                  | ?                                                                                                                                                  |
 | rrd                  | ?                                                                                                                                                  |
-| filter               | ?                                                                                                                                                  |
+| filter               | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                                                                  |
 | vld                  | ?                                                                                                                                                  |
 | PDO_OCI              | ?                                                                                                                                                  |
 | lua                  | ?                                                                                                                                                  |
 | taint                | ?                                                                                                                                                  |
-| PDO_SQLITE           | ?                                                                                                                                                  |
+| PDO_SQLITE           | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                                                                  |
 | scrypt               | ?                                                                                                                                                  |
 | Bitset               | ?                                                                                                                                                  |
 | ssdeep               | ?                                                                                                                                                  |
 | jsonc                | ?                                                                                                                                                  |
-| bz2                  | ?                                                                                                                                                  |
-| cairo                | ?                                                                                                                                                  |
-| uri_template         | ?                                                                                                                                                  |
-| mysqlnd_ms           | ?                                                                                                                                                  |
+| bz2                  | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                                                                  |
+| cairo                | ❌ Abandoned                                                                                                                                        |
+| uri_template         | ❌ Abandoned                                                                                                                                        |
+| mysqlnd_ms           | ❌ Abandoned                                                                                                                                        |
 | crypto               | ?                                                                                                                                                  |
 | WinCache             | ?                                                                                                                                                  |
 | memprof              | ?                                                                                                                                                  |
 | sync                 | ?                                                                                                                                                  |
-| bbcode               | ?                                                                                                                                                  |
-| SPL_Types            | ?                                                                                                                                                  |
-| proctitle            | ?                                                                                                                                                  |
-| Weakref              | ?                                                                                                                                                  |
+| bbcode               | ❌ Abandoned                                                                                                                                        |
+| SPL_Types            | ❌ Abandoned                                                                                                                                        |
+| proctitle            | ❌ Abandoned                                                                                                                                        |
+| Weakref              | ❌ Abandoned                                                                                                                                        |
 | scoutapm             | ?                                                                                                                                                  |
 | mysqlnd_azure        | ?                                                                                                                                                  |
 | svm                  | ?                                                                                                                                                  |
 | xmldiff              | ?                                                                                                                                                  |
-| perl                 | ?                                                                                                                                                  |
+| perl                 | ❌ Abandoned                                                                                                                                        |
 | expect               | ?                                                                                                                                                  |
-| PDO_IDS              | ?                                                                                                                                                  |
+| PDO_IDS              | ❌ Possibly abandoned - [gives a 404 on PECL](https://pecl.php.net/package/PDO_IDS)                                                                 |
 | json_post            | ?                                                                                                                                                  |
 | yac                  | ?                                                                                                                                                  |
 | xattr                | ?                                                                                                                                                  |
-| PDO_DBLIB            | ?                                                                                                                                                  |
-| fribidi              | ?                                                                                                                                                  |
+| PDO_DBLIB            | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                                                                  |
+| fribidi              | ❌ Abandoned                                                                                                                                        |
 | ps                   | ?                                                                                                                                                  |
-| xmlwriter            | ?                                                                                                                                                  |
+| xmlwriter            | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                                                                  |
 | uv                   | ?                                                                                                                                                  |
-| mono                 | ?                                                                                                                                                  |
+| mono                 | ❌ Abandoned                                                                                                                                        |
 | zephir_parser        | ?                                                                                                                                                  |
 | pq                   | ?                                                                                                                                                  |
-| ncurses              | ?                                                                                                                                                  |
+| ncurses              | ❌ Abandoned                                                                                                                                        |
 | fann                 | ?                                                                                                                                                  |
-| sdo                  | ?                                                                                                                                                  |
+| sdo                  | ❌ Possibly abandoned - [gives a 404 on PECL](https://pecl.php.net/package/sdo)                                                                     |
 | varnish              | ?                                                                                                                                                  |
 | parle                | ?                                                                                                                                                  |
 | CSV                  | ?                                                                                                                                                  |
-| id3                  | ?                                                                                                                                                  |
-| xmlReader            | ?                                                                                                                                                  |
+| id3                  | ❌ Abandoned                                                                                                                                        |
+| xmlReader            | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                                                                  |
 | geospatial           | ?                                                                                                                                                  |
-| PDO_ODBC             | ?                                                                                                                                                  |
-| crack                | ?                                                                                                                                                  |
+| PDO_ODBC             | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                                                                  |
+| crack                | ❌ Abandoned                                                                                                                                        |
 | mustache             | ?                                                                                                                                                  |
-| sqlite3              | ?                                                                                                                                                  |
-| big_int              | ?                                                                                                                                                  |
-| Paradox              | ?                                                                                                                                                  |
-| haru                 | ?                                                                                                                                                  |
+| sqlite3              | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                                                                  |
+| big_int              | ❌ Abandoned                                                                                                                                        |
+| Paradox              | ❌ Abandoned                                                                                                                                        |
+| haru                 | ❌ Abandoned                                                                                                                                        |
 | LuaSandbox           | ?                                                                                                                                                  |
-| sundown              | ?                                                                                                                                                  |
-| mysql                | ?                                                                                                                                                  |
+| sundown              | ❌ Abandoned                                                                                                                                        |
+| mysql                | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                                                                  |
 | APM                  | ?                                                                                                                                                  |
 | stem                 | ?                                                                                                                                                  |
 | idn                  | ?                                                                                                                                                  |
-| enchant              | ?                                                                                                                                                  |
+| enchant              | ❌ Abandoned                                                                                                                                        |
 | ui                   | ?                                                                                                                                                  |
-| POP3                 | ?                                                                                                                                                  |
+| POP3                 | ❌ Abandoned                                                                                                                                        |
 | PDO_IBM              | ?                                                                                                                                                  |
 | doublemetaphone      | ?                                                                                                                                                  |
 | hrtime               | ?                                                                                                                                                  |
-| newt                 | ?                                                                                                                                                  |
+| newt                 | ❌ Abandoned                                                                                                                                        |
 | simdjson             | ?                                                                                                                                                  |
 | yaconf               | ?                                                                                                                                                  |
 | translit             | ?                                                                                                                                                  |
@@ -212,77 +212,77 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | stackdriver_debugger | ?                                                                                                                                                  |
 | syck                 | ?                                                                                                                                                  |
 | PDO_CUBRID           | ?                                                                                                                                                  |
-| dtrace               | ?                                                                                                                                                  |
-| cyrus                | ?                                                                                                                                                  |
+| dtrace               | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                                                                  |
+| cyrus                | ❌ Abandoned                                                                                                                                        |
 | PDO_SQLANYWHERE      | ?                                                                                                                                                  |
 | TCLink               | ?                                                                                                                                                  |
 | spplus               | ?                                                                                                                                                  |
 | jsonpath             | ?                                                                                                                                                  |
-| vpopmail             | ?                                                                                                                                                  |
-| dbx                  | ?                                                                                                                                                  |
-| kadm5                | ?                                                                                                                                                  |
-| parsekit             | ?                                                                                                                                                  |
+| vpopmail             | ❌ Abandoned                                                                                                                                        |
+| dbx                  | ❌ Abandoned                                                                                                                                        |
+| kadm5                | ❌ Abandoned                                                                                                                                        |
+| parsekit             | ❌ Abandoned                                                                                                                                        |
 | cmark                | ?                                                                                                                                                  |
-| odbtp                | ?                                                                                                                                                  |
-| wbxml                | ?                                                                                                                                                  |
+| odbtp                | ❌ Abandoned                                                                                                                                        |
+| wbxml                | ❌ Abandoned                                                                                                                                        |
 | ahocorasick          | ?                                                                                                                                                  |
 | WinBinder            | ?                                                                                                                                                  |
-| tokyo_tyrant         | ?                                                                                                                                                  |
-| mcve                 | ?                                                                                                                                                  |
+| tokyo_tyrant         | ❌ Abandoned                                                                                                                                        |
+| mcve                 | ❌ Abandoned                                                                                                                                        |
 | SeasClick            | ?                                                                                                                                                  |
 | brotli               | ?                                                                                                                                                  |
 | CUBRID               | ?                                                                                                                                                  |
-| operator             | ?                                                                                                                                                  |
-| Judy                 | ?                                                                                                                                                  |
+| operator             | ❌ Abandoned                                                                                                                                        |
+| Judy                 | ❌ Abandoned                                                                                                                                        |
 | AOP                  | ?                                                                                                                                                  |
-| mdbtools             | ?                                                                                                                                                  |
+| mdbtools             | ❌ Abandoned                                                                                                                                        |
 | mysql_xdevapi        | ?                                                                                                                                                  |
-| html_parse           | ?                                                                                                                                                  |
-| maxdb                | ?                                                                                                                                                  |
+| html_parse           | ❌ Abandoned                                                                                                                                        |
+| maxdb                | ❌ Abandoned                                                                                                                                        |
 | sasl                 | ?                                                                                                                                                  |
-| riak                 | ?                                                                                                                                                  |
+| riak                 | ❌ Abandoned                                                                                                                                        |
 | XMLRPCi              | ?                                                                                                                                                  |
 | jsonnet              | ?                                                                                                                                                  |
-| huffman              | ?                                                                                                                                                  |
+| huffman              | ❌ Abandoned                                                                                                                                        |
 | mqseries             | ?                                                                                                                                                  |
 | componere            | ?                                                                                                                                                  |
-| GDChart              | ?                                                                                                                                                  |
-| mnogosearch          | ?                                                                                                                                                  |
+| GDChart              | ❌ Abandoned                                                                                                                                        |
+| mnogosearch          | ❌ Abandoned                                                                                                                                        |
 | PKCS11               | ?                                                                                                                                                  |
-| protocolbuffers      | ?                                                                                                                                                  |
-| hidef                | ?                                                                                                                                                  |
-| ingres               | ?                                                                                                                                                  |
-| BLENC                | ?                                                                                                                                                  |
-| PECL_Gen             | ?                                                                                                                                                  |
+| protocolbuffers      | ❌ Abandoned                                                                                                                                        |
+| hidef                | ❌ Abandoned                                                                                                                                        |
+| ingres               | ❌ Abandoned                                                                                                                                        |
+| BLENC                | ❌ Abandoned                                                                                                                                        |
+| PECL_Gen             | ❌ Abandoned                                                                                                                                        |
 | zlib_filter          | ?                                                                                                                                                  |
-| amfext               | ?                                                                                                                                                  |
+| amfext               | ❌ Abandoned                                                                                                                                        |
 | dazuko               | ?                                                                                                                                                  |
-| python               | ?                                                                                                                                                  |
+| python               | ❌ Abandoned                                                                                                                                        |
 | awscrt               | ?                                                                                                                                                  |
-| spidermonkey         | ?                                                                                                                                                  |
+| spidermonkey         | ❌ Abandoned                                                                                                                                        |
 | Tensor               | ?                                                                                                                                                  |
-| jsond                | ?                                                                                                                                                  |
-| classkit             | ?                                                                                                                                                  |
+| jsond                | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                                                                  |
+| classkit             | ❌ Abandoned                                                                                                                                        |
 | statgrab             | ?                                                                                                                                                  |
 | nsq                  | ?                                                                                                                                                  |
-| inclued              | ?                                                                                                                                                  |
-| swish                | ?                                                                                                                                                  |
-| chdb                 | ?                                                                                                                                                  |
+| inclued              | ❌ Abandoned                                                                                                                                        |
+| swish                | ❌ Abandoned                                                                                                                                        |
+| chdb                 | ❌ Abandoned                                                                                                                                        |
 | env                  | ?                                                                                                                                                  |
-| sam                  | ?                                                                                                                                                  |
+| sam                  | ❌ Abandoned                                                                                                                                        |
 | Druid                | ?                                                                                                                                                  |
 | bz2_filter           | ?                                                                                                                                                  |
-| Net_Gopher           | ?                                                                                                                                                  |
-| ffi                  | ?                                                                                                                                                  |
-| DBus                 | ?                                                                                                                                                  |
-| xslcache             | ?                                                                                                                                                  |
+| Net_Gopher           | ❌ Abandoned                                                                                                                                        |
+| ffi                  | ❌ Abandoned                                                                                                                                        |
+| DBus                 | ❌ Abandoned                                                                                                                                        |
+| xslcache             | ❌ Abandoned                                                                                                                                        |
 | leveldb              | ?                                                                                                                                                  |
 | mcrypt_filter        | ?                                                                                                                                                  |
 | ecasound             | ?                                                                                                                                                  |
-| win32std             | ?                                                                                                                                                  |
+| win32std             | ❌ Abandoned                                                                                                                                        |
 | simple_kafka_client  | ?                                                                                                                                                  |
 | win32service         | ?                                                                                                                                                  |
-| mysqlnd_qc           | ?                                                                                                                                                  |
+| mysqlnd_qc           | ❌ Abandoned                                                                                                                                        |
 | php_trie             | ?                                                                                                                                                  |
 | spread               | ?                                                                                                                                                  |
 | ion                  | ?                                                                                                                                                  |
@@ -290,95 +290,95 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | ip2location          | ?                                                                                                                                                  |
 | zeroconf             | ?                                                                                                                                                  |
 | graphdat             | ?                                                                                                                                                  |
-| date_time            | ?                                                                                                                                                  |
-| colorer              | ?                                                                                                                                                  |
+| date_time            | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                                                                  |
+| colorer              | ❌ Abandoned                                                                                                                                        |
 | pcsc                 | ?                                                                                                                                                  |
 | shape                | ?                                                                                                                                                  |
 | perforce             | ?                                                                                                                                                  |
-| mysqlnd_memcache     | ?                                                                                                                                                  |
-| PHK                  | ?                                                                                                                                                  |
-| lchash               | ?                                                                                                                                                  |
-| PDO_FIREBIRD         | ?                                                                                                                                                  |
-| win32ps              | ?                                                                                                                                                  |
-| FreeImage            | ?                                                                                                                                                  |
-| dom_varimport        | ?                                                                                                                                                  |
+| mysqlnd_memcache     | ❌ Abandoned                                                                                                                                        |
+| PHK                  | ❌ Abandoned                                                                                                                                        |
+| lchash               | ❌ Abandoned                                                                                                                                        |
+| PDO_FIREBIRD         | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                                                                  |
+| win32ps              | ❌ Abandoned                                                                                                                                        |
+| FreeImage            | ❌ Abandoned                                                                                                                                        |
+| dom_varimport        | ❌ Abandoned                                                                                                                                        |
 | qqwry                | ?                                                                                                                                                  |
 | sdl                  | ?                                                                                                                                                  |
-| txforward            | ?                                                                                                                                                  |
-| hdr_histogram        | ?                                                                                                                                                  |
-| cybercash            | ?                                                                                                                                                  |
-| Valkyrie             | ?                                                                                                                                                  |
+| txforward            | ❌ Abandoned                                                                                                                                        |
+| hdr_histogram        | ⏰ Coming soon: [beberlei/hdrhistogram](https://packagist.org/packages/beberlei/hdrhistogram)                                                       |
+| cybercash            | ❌ Abandoned                                                                                                                                        |
+| Valkyrie             | ❌ Abandoned                                                                                                                                        |
 | skywalking           | ?                                                                                                                                                  |
-| xrange               | ?                                                                                                                                                  |
+| xrange               | ❌ Abandoned                                                                                                                                        |
 | augeas               | ?                                                                                                                                                  |
-| gupnp                | ?                                                                                                                                                  |
-| win32ps_dll          | ?                                                                                                                                                  |
+| gupnp                | ❌ Abandoned                                                                                                                                        |
+| win32ps_dll          | ❌ Abandoned                                                                                                                                        |
 | docblock             | ?                                                                                                                                                  |
 | termbox              | ?                                                                                                                                                  |
 | selinux              | ?                                                                                                                                                  |
 | imap                 | ?                                                                                                                                                  |
-| KTaglib              | ?                                                                                                                                                  |
-| funcall              | ?                                                                                                                                                  |
+| KTaglib              | ❌ Abandoned                                                                                                                                        |
+| funcall              | ❌ Abandoned                                                                                                                                        |
 | params               | ?                                                                                                                                                  |
-| Parse_Tree           | ?                                                                                                                                                  |
+| Parse_Tree           | ❌ Abandoned                                                                                                                                        |
 | Molten               | ?                                                                                                                                                  |
 | clips                | ?                                                                                                                                                  |
 | trace                | ?                                                                                                                                                  |
-| apn                  | ?                                                                                                                                                  |
+| apn                  | ❌ Abandoned                                                                                                                                        |
 | cld                  | ?                                                                                                                                                  |
 | cvsclient            | ?                                                                                                                                                  |
 | clucene              | ?                                                                                                                                                  |
-| panda                | ?                                                                                                                                                  |
-| wxwidgets            | ?                                                                                                                                                  |
-| tk                   | ?                                                                                                                                                  |
+| panda                | ❌ Abandoned                                                                                                                                        |
+| wxwidgets            | ❌ Abandoned                                                                                                                                        |
+| tk                   | ❌ Abandoned                                                                                                                                        |
 | v8                   | ?                                                                                                                                                  |
 | rpminfo              | ?                                                                                                                                                  |
 | skywalking_agent     | ?                                                                                                                                                  |
 | markdown             | ?                                                                                                                                                  |
-| ares                 | ?                                                                                                                                                  |
-| scream               | ?                                                                                                                                                  |
-| netools              | ?                                                                                                                                                  |
-| drizzle              | ?                                                                                                                                                  |
-| coin_acceptor        | ?                                                                                                                                                  |
-| xcommerce            | ?                                                                                                                                                  |
+| ares                 | ❌ Abandoned                                                                                                                                        |
+| scream               | ❌ Abandoned                                                                                                                                        |
+| netools              | ❌ Abandoned                                                                                                                                        |
+| drizzle              | ❌ Abandoned                                                                                                                                        |
+| coin_acceptor        | ❌ Abandoned                                                                                                                                        |
+| xcommerce            | ❌ Abandoned                                                                                                                                        |
 | courierauth          | ?                                                                                                                                                  |
 | ApacheAccessor       | ?                                                                                                                                                  |
-| rsync                | ?                                                                                                                                                  |
-| fuse                 | ?                                                                                                                                                  |
-| rsvg                 | ?                                                                                                                                                  |
+| rsync                | ❌ Abandoned                                                                                                                                        |
+| fuse                 | ❌ Abandoned                                                                                                                                        |
+| rsvg                 | ❌ Abandoned                                                                                                                                        |
 | esmtp                | ?                                                                                                                                                  |
-| archive              | ?                                                                                                                                                  |
-| qb                   | ?                                                                                                                                                  |
+| archive              | ❌ Abandoned                                                                                                                                        |
+| qb                   | ❌ Abandoned                                                                                                                                        |
 | quickhash            | ?                                                                                                                                                  |
 | cairo_wrapper        | ?                                                                                                                                                  |
 | intercept            | ?                                                                                                                                                  |
-| imlib2               | ?                                                                                                                                                  |
+| imlib2               | ❌ Abandoned                                                                                                                                        |
 | bloomy               | ?                                                                                                                                                  |
-| pdo_user             | ?                                                                                                                                                  |
+| pdo_user             | ❌ Abandoned                                                                                                                                        |
 | tdb                  | ?                                                                                                                                                  |
-| PDO_4D               | ?                                                                                                                                                  |
-| rpmreader            | ?                                                                                                                                                  |
-| memtrack             | ?                                                                                                                                                  |
+| PDO_4D               | ❌ Abandoned                                                                                                                                        |
+| rpmreader            | ❌ Abandoned                                                                                                                                        |
+| memtrack             | ❌ Abandoned                                                                                                                                        |
 | tvision              | ?                                                                                                                                                  |
-| strict               | ?                                                                                                                                                  |
+| strict               | ❌ Abandoned                                                                                                                                        |
 | yp                   | ?                                                                                                                                                  |
 | openal               | ?                                                                                                                                                  |
-| yami                 | ?                                                                                                                                                  |
-| oggvorbis            | ?                                                                                                                                                  |
-| memsession           | ?                                                                                                                                                  |
-| binpack              | ?                                                                                                                                                  |
-| DBDO                 | ?                                                                                                                                                  |
+| yami                 | ❌ Abandoned                                                                                                                                        |
+| oggvorbis            | ❌ Abandoned                                                                                                                                        |
+| memsession           | ❌ Abandoned                                                                                                                                        |
+| binpack              | ❌ Abandoned                                                                                                                                        |
+| DBDO                 | ❌ Abandoned                                                                                                                                        |
 | handlebars           | ?                                                                                                                                                  |
-| phdfs                | ?                                                                                                                                                  |
+| phdfs                | ❌ Abandoned                                                                                                                                        |
 | request              | ?                                                                                                                                                  |
 | isis                 | ?                                                                                                                                                  |
-| fam                  | ?                                                                                                                                                  |
+| fam                  | ❌ Abandoned                                                                                                                                        |
 | xpass                | ?                                                                                                                                                  |
 | ocal                 | ?                                                                                                                                                  |
-| lapack               | ?                                                                                                                                                  |
-| opendirectory        | ?                                                                                                                                                  |
-| xmms                 | ?                                                                                                                                                  |
-| dbplus               | ?                                                                                                                                                  |
+| lapack               | ❌ Abandoned                                                                                                                                        |
+| opendirectory        | ❌ Abandoned                                                                                                                                        |
+| xmms                 | ❌ Abandoned                                                                                                                                        |
+| dbplus               | ❌ Abandoned                                                                                                                                        |
 | framegrab            | ?                                                                                                                                                  |
 | base58               | ?                                                                                                                                                  |
 | IMS                  | ?                                                                                                                                                  |
@@ -390,19 +390,19 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | ecma_intl            | ?                                                                                                                                                  |
 | var_representation   | ?                                                                                                                                                  |
 | tcc                  | ?                                                                                                                                                  |
-| automap              | ?                                                                                                                                                  |
-| xmp                  | ?                                                                                                                                                  |
-| optimizer            | ?                                                                                                                                                  |
+| automap              | ❌ Abandoned                                                                                                                                        |
+| xmp                  | ❌ Abandoned                                                                                                                                        |
+| optimizer            | ❌ Abandoned                                                                                                                                        |
 | phpy                 | ?                                                                                                                                                  |
-| udis86               | ?                                                                                                                                                  |
+| udis86               | ❌ Abandoned                                                                                                                                        |
 | http_message         | ?                                                                                                                                                  |
 | memoize              | ?                                                                                                                                                  |
-| re2                  | ?                                                                                                                                                  |
+| re2                  | ❌ Abandoned                                                                                                                                        |
 | ice                  | ?                                                                                                                                                  |
 | teds                 | ?                                                                                                                                                  |
-| mysqlnd_uh           | ?                                                                                                                                                  |
+| mysqlnd_uh           | ❌ Abandoned                                                                                                                                        |
 | sandbox              | ?                                                                                                                                                  |
-| ircclient            | ?                                                                                                                                                  |
+| ircclient            | ❌ Abandoned                                                                                                                                        |
 | swoole_serialize     | ?                                                                                                                                                  |
 | pspell               | ?                                                                                                                                                  |
 | wasm                 | ?                                                                                                                                                  |
@@ -410,7 +410,7 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | ip2proxy             | ?                                                                                                                                                  |
 | bsdiff               | ?                                                                                                                                                  |
 | sdl_mixer            | ?                                                                                                                                                  |
-| axis2                | ?                                                                                                                                                  |
+| axis2                | ❌ Abandoned                                                                                                                                        |
 | SeasSnowflake        | ?                                                                                                                                                  |
 | rnp                  | ?                                                                                                                                                  |
 | PDO_TAOS             | ?                                                                                                                                                  |
@@ -419,7 +419,7 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | sdl_ttf              | ?                                                                                                                                                  |
 | sdl_image            | ?                                                                                                                                                  |
 | pinpoint_php         | ?                                                                                                                                                  |
-| orng                 | ?                                                                                                                                                  |
+| orng                 | ❌ Abandoned                                                                                                                                        |
 | immutable_cache      | ?                                                                                                                                                  |
 | mysqlnd_krb          | ?                                                                                                                                                  |
-| mysqlnd_ngen         | ?                                                                                                                                                  |
+| mysqlnd_ngen         | ❌ Abandoned                                                                                                                                        |
