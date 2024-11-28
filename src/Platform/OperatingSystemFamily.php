@@ -16,7 +16,7 @@ enum OperatingSystemFamily: string
     case Linux   = 'Linux';
     case Unknown = 'Unknown';
 
-    /** @return array<string> */
+    /** @return non-empty-list<non-empty-string> */
     public static function asValuesList(): array
     {
         return array_map(

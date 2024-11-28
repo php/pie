@@ -53,8 +53,8 @@ final class WindowsExtensionAssetNameTest extends TestCase
             true,
             true,
             null,
-            [],
-            [],
+            null,
+            null,
         );
     }
 

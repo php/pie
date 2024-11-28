@@ -11,6 +11,7 @@ use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
 use Php\Pie\Platform\OperatingSystemFamily;
 
+use Webmozart\Assert\Assert;
 use function array_key_exists;
 use function array_map;
 use function array_slice;
@@ -31,9 +32,9 @@ use function ucfirst;
 final class Package
 {
     /**
-     * @param list<ConfigureOption>       $configureOptions
-     * @param list<OperatingSystemFamily> $compatibleOsFamilies
-     * @param list<OperatingSystemFamily> $incompatibleOsFamilies
+     * @param list<ConfigureOption>                      $configureOptions
+     * @param non-empty-list<OperatingSystemFamily>|null $compatibleOsFamilies
+     * @param non-empty-list<OperatingSystemFamily>|null $incompatibleOsFamilies
      */
     public function __construct(
         public readonly CompletePackageInterface $composerPackage,
@@ -46,8 +47,8 @@ final class Package
         public readonly bool $supportZts,
         public readonly bool $supportNts,
         public readonly string|null $buildPath,
-        public readonly array $compatibleOsFamilies,
-        public readonly array $incompatibleOsFamilies,
+        public readonly array|null $compatibleOsFamilies,
+        public readonly array|null $incompatibleOsFamilies,
     ) {
     }
 
@@ -74,17 +75,15 @@ final class Package
             ? $phpExtOptions['build-path']
             : null;
 
-        /** @var list<string> $compatibleOsFamilies */
         $compatibleOsFamilies = $phpExtOptions !== null && array_key_exists('os-families', $phpExtOptions)
             ? $phpExtOptions['os-families']
-            : [];
+            : null;
 
-        /** @var list<string> $incompatibleOsFamilies */
         $incompatibleOsFamilies = $phpExtOptions !== null && array_key_exists('os-families-exclude', $phpExtOptions)
             ? $phpExtOptions['os-families-exclude']
-            : [];
+            : null;
 
-        if ($compatibleOsFamilies && $incompatibleOsFamilies) {
+        if ($compatibleOsFamilies !== null && $incompatibleOsFamilies !== null) {
             throw new InvalidArgumentException('Cannot specify both "os-families" and "os-families-exclude" in composer.json');
         }
 
@@ -129,24 +128,27 @@ final class Package
     }
 
     /**
-     * @param list<string> $input
+     * @param list<string>|null $input
      *
-     * @return list<OperatingSystemFamily>
+     * @return non-empty-list<OperatingSystemFamily>|null
      */
-    private static function convertInputStringsToOperatingSystemFamilies(array $input): array
+    private static function convertInputStringsToOperatingSystemFamilies(array|null $input): array|null
     {
+        if ($input === null) {
+            return null;
+        }
+
         $osFamilies = [];
         foreach ($input as $value) {
             // try to normalize a bit the input
             $valueToTry = ucfirst(strtolower($value));
 
-            $family = OperatingSystemFamily::tryFrom($valueToTry);
-            if ($family === null) {
-                throw new InvalidArgumentException(sprintf('Expected operating system family to be one of "%s", got "%s".', implode('", "', OperatingSystemFamily::asValuesList()), $value));
-            }
+            Assert::inArray($valueToTry, OperatingSystemFamily::asValuesList(), 'Expected operating system family to be one of: %2$s. Got: %s');
 
-            $osFamilies[] = $family;
+            $osFamilies[] = OperatingSystemFamily::from($valueToTry);
         }
+
+        Assert::isNonEmptyList($osFamilies, 'Expected operating systems families to be a non-empty list.');
 
         return $osFamilies;
     }

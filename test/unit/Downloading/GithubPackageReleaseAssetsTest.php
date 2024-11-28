@@ -82,8 +82,8 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             true,
             true,
             null,
-            [],
-            [],
+            null,
+            null,
         );
 
         $releaseAssets = new GithubPackageReleaseAssets('https://test-github-api-base-url.thephp.foundation');
@@ -144,8 +144,8 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             true,
             true,
             null,
-            [],
-            [],
+            null,
+            null,
         );
 
         $releaseAssets = new GithubPackageReleaseAssets('https://test-github-api-base-url.thephp.foundation');
@@ -187,8 +187,8 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             true,
             true,
             null,
-            [],
-            [],
+            null,
+            null,
         );
 
         $releaseAssets = new GithubPackageReleaseAssets('https://test-github-api-base-url.thephp.foundation');

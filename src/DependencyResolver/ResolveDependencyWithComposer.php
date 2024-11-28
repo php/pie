@@ -75,14 +75,14 @@ final class ResolveDependencyWithComposer implements DependencyResolver
 
     private function assertCompatibleOsFamily(TargetPlatform $targetPlatform, Package $resolvedPackage): void
     {
-        if ($resolvedPackage->compatibleOsFamilies && ! in_array($targetPlatform->operatingSystemFamily, $resolvedPackage->compatibleOsFamilies, true)) {
+        if ($resolvedPackage->compatibleOsFamilies !== null && ! in_array($targetPlatform->operatingSystemFamily, $resolvedPackage->compatibleOsFamilies, true)) {
             throw IncompatibleOperatingSystemFamily::notInCompatibleOperatingSystemFamilies(
                 $resolvedPackage->compatibleOsFamilies,
                 $targetPlatform->operatingSystemFamily,
             );
         }
 
-        if ($resolvedPackage->incompatibleOsFamilies && in_array($targetPlatform->operatingSystemFamily, $resolvedPackage->incompatibleOsFamilies, true)) {
+        if ($resolvedPackage->incompatibleOsFamilies !== null && in_array($targetPlatform->operatingSystemFamily, $resolvedPackage->incompatibleOsFamilies, true)) {
             throw IncompatibleOperatingSystemFamily::inIncompatibleOperatingSystemFamily(
                 $resolvedPackage->incompatibleOsFamilies,
                 $targetPlatform->operatingSystemFamily,

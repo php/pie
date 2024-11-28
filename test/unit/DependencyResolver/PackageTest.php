@@ -168,8 +168,8 @@ final class PackageTest extends TestCase
             true,
             true,
             null,
-            [],
-            [],
+            null,
+            null,
         );
 
         self::assertSame($expectedGithubOrgAndRepo, $package->githubOrgAndRepository());
