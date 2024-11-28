@@ -273,4 +273,23 @@ PHP,
 
         return new self($phpExecutable, null);
     }
+
+    /**
+     * @param non-empty-string $minimumVersion
+     * @throws RuntimeException if version requirement not met
+     */
+    public function assertMinimumVersion(string $minimumVersion): void
+    {
+        $versionParser = new VersionParser();
+        $normalized = $versionParser->normalize($this->version());
+        $normalizedMin = $versionParser->normalize($minimumVersion);
+        
+        if (version_compare($normalized, $normalizedMin, '<')) {
+            throw new RuntimeException(sprintf(
+                'PHP version %s is less than required version %s',
+                $this->version(),
+                $minimumVersion
+            ));
+        }
+    }
 }

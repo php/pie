@@ -4,38 +4,39 @@ declare(strict_types=1);
 
 namespace Php\PieUnitTest\Platform\TargetPhp;
 
+use function assert;
+use function is_dir;
+use function defined;
+use function dirname;
+use function ini_get;
+use function sprintf;
+use RuntimeException;
+use const PHP_INT_SIZE;
+use function array_map;
+
+use function php_uname;
+use function phpversion;
+use function file_exists;
+use function array_column;
+use function array_filter;
+use function array_unique;
 use Composer\Util\Platform;
+use function array_combine;
+use function is_executable;
+use const PHP_MAJOR_VERSION;
+use const PHP_MINOR_VERSION;
+use const DIRECTORY_SEPARATOR;
+use const PHP_RELEASE_VERSION;
+use PHPUnit\Framework\TestCase;
 use Php\Pie\Platform\Architecture;
+use function get_loaded_extensions;
+
 use Php\Pie\Platform\OperatingSystem;
-use Php\Pie\Platform\TargetPhp\Exception\InvalidPhpBinaryPath;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\TestCase;
 use Symfony\Component\Process\PhpExecutableFinder;
-
-use function array_column;
-use function array_combine;
-use function array_filter;
-use function array_map;
-use function array_unique;
-use function assert;
-use function defined;
-use function dirname;
-use function file_exists;
-use function get_loaded_extensions;
-use function ini_get;
-use function is_dir;
-use function is_executable;
-use function php_uname;
-use function phpversion;
-use function sprintf;
-
-use const DIRECTORY_SEPARATOR;
-use const PHP_INT_SIZE;
-use const PHP_MAJOR_VERSION;
-use const PHP_MINOR_VERSION;
-use const PHP_RELEASE_VERSION;
+use Php\Pie\Platform\TargetPhp\Exception\InvalidPhpBinaryPath;
 
 #[CoversClass(PhpBinaryPath::class)]
 final class PhpBinaryPathTest extends TestCase
@@ -258,5 +259,70 @@ final class PhpBinaryPathTest extends TestCase
         self::assertInstanceOf(Architecture::class, $php->machineType());
         self::assertGreaterThan(0, $php->phpIntSize());
         self::assertNotEmpty($php->phpinfo());
+    }
+    /**
+     * @return array<string, array{0: string}>
+     */
+    public static function validMinimumVersionProvider(): array
+    {
+        return [
+            'exact current version' => [
+                sprintf('%d.%d.%d', PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION),
+            ],
+            'lower version' => [
+                sprintf('%d.%d.%d', PHP_MAJOR_VERSION - 1, PHP_MINOR_VERSION, PHP_RELEASE_VERSION),
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, array{0: string}>
+     */
+    public static function invalidMinimumVersionProvider(): array
+    {
+        return [
+            'higher major version' => [
+                sprintf('%d.%d.%d', PHP_MAJOR_VERSION + 1, PHP_MINOR_VERSION, PHP_RELEASE_VERSION),
+            ],
+            'higher minor version' => [
+                sprintf('%d.%d.%d', PHP_MAJOR_VERSION, PHP_MINOR_VERSION + 1, PHP_RELEASE_VERSION),
+            ],
+            'higher patch version' => [
+                sprintf('%d.%d.%d', PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION + 1),
+            ],
+        ];
+    }
+
+    #[DataProvider('validMinimumVersionProvider')]
+    public function testValidMinimumVersions(string $version): void
+    {
+        $php = PhpBinaryPath::fromCurrentProcess();
+        $php->assertMinimumVersion($version);
+        self::assertTrue(true, 'Version check passed as expected');
+    }
+
+    #[DataProvider('invalidMinimumVersionProvider')]
+    public function testInvalidMinimumVersions(string $version): void
+    {
+        $php = PhpBinaryPath::fromCurrentProcess();
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage(sprintf(
+            'PHP version %s is less than required version %s',
+            $php->version(),
+            $version
+        ));
+
+        $php->assertMinimumVersion($version);
+    }
+
+    public function testMinimumVersionWithInvalidVersion(): void
+    {
+        $php = PhpBinaryPath::fromCurrentProcess();
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Invalid version string');
+
+        $php->assertMinimumVersion('not.a.version');
     }
 }
