@@ -75,13 +75,8 @@ final class Package
             ? $phpExtOptions['build-path']
             : null;
 
-        $compatibleOsFamilies = $phpExtOptions !== null && array_key_exists('os-families', $phpExtOptions)
-            ? $phpExtOptions['os-families']
-            : null;
-
-        $incompatibleOsFamilies = $phpExtOptions !== null && array_key_exists('os-families-exclude', $phpExtOptions)
-            ? $phpExtOptions['os-families-exclude']
-            : null;
+        $compatibleOsFamilies = $phpExtOptions['os-families'] ?? null;
+        $incompatibleOsFamilies = $phpExtOptions['os-families-exclude'] ?? null;
 
         if ($compatibleOsFamilies !== null && $incompatibleOsFamilies !== null) {
             throw new InvalidArgumentException('Cannot specify both "os-families" and "os-families-exclude" in composer.json');
