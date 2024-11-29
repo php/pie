@@ -6,7 +6,9 @@ on:
       - published
 
 permissions:
+  attestations: write
   contents: read
+  id-token: write
   packages: write
 
 jobs:
@@ -88,6 +90,7 @@ jobs:
             type=semver,pattern={{major}}
 
       - name: Build and push Docker image
+        id: build-and-push
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -97,3 +100,10 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-name: ghcr.io/${{ github.repository }}
+          subject-digest: ${{ steps.build-and-push.outputs.digest }}
+          push-to-registry: true
