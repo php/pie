@@ -6,10 +6,7 @@ on:
       - published
 
 permissions:
-  attestations: write
   contents: read
-  id-token: write
-  packages: write
 
 jobs:
   build-phar:
@@ -47,6 +44,14 @@ jobs:
     name: Docker binary-only image
     runs-on: ubuntu-latest
     if: ${{ startsWith(github.ref, 'refs/tags/') }}
+
+    permissions:
+      # attestations:write is required to publish provenance attestations for the built Docker image
+      attestations: write
+      # id-token:write is required for logging in to the Docker registry
+      id-token: write
+      # packages:write is required to publish Docker images to GitHub's registry
+      packages: write
 
     steps:
       - name: Checkout repository
