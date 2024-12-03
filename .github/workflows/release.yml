@@ -57,7 +57,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Restore built PHAR
+      - name: Fetch built PHAR from artifacts
         uses: actions/download-artifact@v4
         with:
           name: pie-${{ github.sha }}.phar
