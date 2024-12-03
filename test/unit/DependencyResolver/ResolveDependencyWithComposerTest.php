@@ -246,7 +246,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
         );
 
         $this->expectException(IncompatibleOperatingSystemFamily::class);
-        $this->expectExceptionMessage('This extension does not support the "Linux" operating system family. It is compatible with the following families: "Solaris", "Darwin"');
+        $this->expectExceptionMessage('This extension does not support the "linux" operating system family. It is compatible with the following families: "solaris", "darwin"');
         (new ResolveDependencyWithComposer(
             $this->createMock(QuieterConsoleIO::class),
         ))(
@@ -292,7 +292,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
         );
 
         $this->expectException(IncompatibleOperatingSystemFamily::class);
-        $this->expectExceptionMessage('This extension does not support the "Darwin" operating system family. It is incompatible with the following families: "Darwin", "Solaris".');
+        $this->expectExceptionMessage('This extension does not support the "darwin" operating system family. It is incompatible with the following families: "darwin", "solaris".');
         (new ResolveDependencyWithComposer(
             $this->createMock(QuieterConsoleIO::class),
         ))(

@@ -21,7 +21,6 @@ use function parse_url;
 use function str_contains;
 use function str_starts_with;
 use function strtolower;
-use function ucfirst;
 
 /**
  * @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks
@@ -134,8 +133,7 @@ final class Package
 
         $osFamilies = [];
         foreach ($input as $value) {
-            // try to normalize a bit the input
-            $valueToTry = ucfirst(strtolower($value));
+            $valueToTry = strtolower($value);
 
             Assert::inArray($valueToTry, OperatingSystemFamily::asValuesList(), 'Expected operating system family to be one of: %2$s. Got: %s');
 

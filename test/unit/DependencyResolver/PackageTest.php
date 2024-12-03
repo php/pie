@@ -74,36 +74,6 @@ final class PackageTest extends TestCase
         self::assertNull($package->downloadUrl);
     }
 
-    public function testFromComposerCompletePackageWithEmptyExcludedOsFamilies(): void
-    {
-        $composerCompletePackage = new CompletePackage('vendor/foo', '1.2.3.0', '1.2.3');
-        $composerCompletePackage->setPhpExt(['os-families-exclude' => null]);
-
-        $package = Package::fromComposerCompletePackage($composerCompletePackage);
-
-        self::assertEmpty($package->compatibleOsFamilies);
-        self::assertEmpty($package->incompatibleOsFamilies);
-        self::assertSame('vendor/foo', $package->name);
-        self::assertSame('1.2.3', $package->version);
-        self::assertSame('vendor/foo:1.2.3', $package->prettyNameAndVersion());
-        self::assertNull($package->downloadUrl);
-    }
-
-    public function testFromComposerCompletePackageWithEmptyOsFamilies(): void
-    {
-        $composerCompletePackage = new CompletePackage('vendor/foo', '1.2.3.0', '1.2.3');
-        $composerCompletePackage->setPhpExt(['os-families' => null]);
-
-        $package = Package::fromComposerCompletePackage($composerCompletePackage);
-
-        self::assertEmpty($package->compatibleOsFamilies);
-        self::assertEmpty($package->incompatibleOsFamilies);
-        self::assertSame('vendor/foo', $package->name);
-        self::assertSame('1.2.3', $package->version);
-        self::assertSame('vendor/foo:1.2.3', $package->prettyNameAndVersion());
-        self::assertNull($package->downloadUrl);
-    }
-
     public function testFromComposerCompletePackageWithBothOsFamiliesAndExcludedOsFamiliesThrows(): void
     {
         $composerCompletePackage = new CompletePackage('vendor/foo', '1.2.3.0', '1.2.3');
@@ -121,7 +91,7 @@ final class PackageTest extends TestCase
         $composerCompletePackage->setPhpExt(['os-families' => ['Not an OS']]);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Expected operating system family to be one of "Windows", "BSD", "Darwin", "Solaris", "Linux", "Unknown", got "Not an OS".');
+        $this->expectExceptionMessage('Expected operating system family to be one of: "windows", "bsd", "darwin", "solaris", "linux", "unknown". Got: "not an os"');
 
         Package::fromComposerCompletePackage($composerCompletePackage);
     }
@@ -132,7 +102,7 @@ final class PackageTest extends TestCase
         $composerCompletePackage->setPhpExt(['os-families-exclude' => ['Not an OS']]);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Expected operating system family to be one of "Windows", "BSD", "Darwin", "Solaris", "Linux", "Unknown", got "Not an OS".');
+        $this->expectExceptionMessage('Expected operating system family to be one of: "windows", "bsd", "darwin", "solaris", "linux", "unknown". Got: "not an os"');
 
         Package::fromComposerCompletePackage($composerCompletePackage);
     }

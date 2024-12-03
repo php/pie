@@ -25,6 +25,7 @@ use function is_dir;
 use function is_executable;
 use function preg_match;
 use function sprintf;
+use function strtolower;
 use function trim;
 
 use const DIRECTORY_SEPARATOR;
@@ -173,7 +174,7 @@ PHP,
             'echo PHP_OS_FAMILY;',
         ]);
 
-        $osFamily = OperatingSystemFamily::tryFrom(trim($output));
+        $osFamily = OperatingSystemFamily::tryFrom(strtolower(trim($output)));
         Assert::notNull($osFamily, 'Could not determine operating system family');
 
         return $osFamily;
