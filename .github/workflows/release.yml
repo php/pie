@@ -86,13 +86,12 @@ jobs:
         with:
           flavor: |
             latest=false
-            suffix=-bin
           images: ghcr.io/${{ github.repository }}
           tags: |
-            type=raw,value=latest
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
+            type=raw,value=bin
+            type=semver,pattern={{version}}-bin
+            type=semver,pattern={{major}}.{{minor}}-bin
+            type=semver,pattern={{major}}-bin
 
       - name: Build and push Docker image
         id: build-and-push
