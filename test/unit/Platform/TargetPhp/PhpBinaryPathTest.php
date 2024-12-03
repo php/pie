@@ -31,6 +31,7 @@ use function is_executable;
 use function php_uname;
 use function phpversion;
 use function sprintf;
+use function strtolower;
 
 use const DIRECTORY_SEPARATOR;
 use const PHP_INT_SIZE;
@@ -169,7 +170,7 @@ final class PhpBinaryPathTest extends TestCase
     public function testOperatingSystemFamily(): void
     {
         self::assertSame(
-            OperatingSystemFamily::from(PHP_OS_FAMILY),
+            OperatingSystemFamily::from(strtolower(PHP_OS_FAMILY)),
             PhpBinaryPath::fromCurrentProcess()
                 ->operatingSystemFamily(),
         );

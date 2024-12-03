@@ -15,12 +15,12 @@ class OperatingSystemFamilyTest extends TestCase
     {
         self::assertSame(
             [
-                'Windows',
-                'BSD',
-                'Darwin',
-                'Solaris',
-                'Linux',
-                'Unknown',
+                'windows',
+                'bsd',
+                'darwin',
+                'solaris',
+                'linux',
+                'unknown',
             ],
             OperatingSystemFamily::asValuesList(),
         );

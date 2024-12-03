@@ -20,7 +20,7 @@ class IncompatibleOperatingSystemFamilyTest extends TestCase
         );
 
         self::assertSame(
-            'This extension does not support the "Darwin" operating system family. It is compatible with the following families: "Windows", "Linux".',
+            'This extension does not support the "darwin" operating system family. It is compatible with the following families: "windows", "linux".',
             $exception->getMessage(),
         );
     }
@@ -33,7 +33,7 @@ class IncompatibleOperatingSystemFamilyTest extends TestCase
         );
 
         self::assertSame(
-            'This extension does not support the "Darwin" operating system family. It is incompatible with the following families: "Windows", "Linux".',
+            'This extension does not support the "darwin" operating system family. It is incompatible with the following families: "windows", "linux".',
             $exception->getMessage(),
         );
     }
