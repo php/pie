@@ -10,15 +10,14 @@ use Php\Pie\ConfigureOption;
 use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
 use Php\Pie\Platform\OperatingSystemFamily;
-
 use Webmozart\Assert\Assert;
+
 use function array_key_exists;
 use function array_map;
 use function array_slice;
 use function explode;
 use function implode;
 use function parse_url;
-use function sprintf;
 use function str_contains;
 use function str_starts_with;
 use function strtolower;
@@ -75,7 +74,7 @@ final class Package
             ? $phpExtOptions['build-path']
             : null;
 
-        $compatibleOsFamilies = $phpExtOptions['os-families'] ?? null;
+        $compatibleOsFamilies   = $phpExtOptions['os-families'] ?? null;
         $incompatibleOsFamilies = $phpExtOptions['os-families-exclude'] ?? null;
 
         if ($compatibleOsFamilies !== null && $incompatibleOsFamilies !== null) {

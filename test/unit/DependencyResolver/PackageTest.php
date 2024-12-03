@@ -77,7 +77,7 @@ final class PackageTest extends TestCase
     public function testFromComposerCompletePackageWithEmptyExcludedOsFamilies(): void
     {
         $composerCompletePackage = new CompletePackage('vendor/foo', '1.2.3.0', '1.2.3');
-        $composerCompletePackage->setPhpExt(['os-families-exclude' => []]);
+        $composerCompletePackage->setPhpExt(['os-families-exclude' => null]);
 
         $package = Package::fromComposerCompletePackage($composerCompletePackage);
 
@@ -92,7 +92,7 @@ final class PackageTest extends TestCase
     public function testFromComposerCompletePackageWithEmptyOsFamilies(): void
     {
         $composerCompletePackage = new CompletePackage('vendor/foo', '1.2.3.0', '1.2.3');
-        $composerCompletePackage->setPhpExt(['os-families' => []]);
+        $composerCompletePackage->setPhpExt(['os-families' => null]);
 
         $package = Package::fromComposerCompletePackage($composerCompletePackage);
 
