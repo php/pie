@@ -87,11 +87,12 @@ jobs:
           flavor: |
             latest=false
           images: ghcr.io/${{ github.repository }}
+          # @TODO v1.0 Consider introducing more granular tags (major and major.minor)
+          # @see https://github.com/php/pie/pull/122#pullrequestreview-2477496308
+          # @see https://github.com/php/pie/pull/122#discussion_r1867331273
           tags: |
             type=raw,value=bin
             type=semver,pattern={{version}}-bin
-            type=semver,pattern={{major}}.{{minor}}-bin
-            type=semver,pattern={{major}}-bin
 
       - name: Build and push Docker image
         id: build-and-push

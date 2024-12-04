@@ -35,7 +35,7 @@ PIE is published as binary-only Docker image, so you can install it easily durin
 COPY --from=ghcr.io/php/pie:bin /pie /usr/bin/pie
 ```
 
-Instead of `bin` tag (which represents latest binary-only image) you can also use explicit versions like `x.y.z-bin`, `x.y-bin` or `x-bin`, depending on stability level you want to achieve.
+Instead of `bin` tag (which represents latest binary-only image) you can also use explicit version (in `x.y.z-bin` format). Use [GitHub registry](https://ghcr.io/php/pie) to find available tags.
 
 > [!IMPORTANT]  
 > Binary-only images don't include PHP runtime so you can't use them for _running_ PIE. This is just an alternative way of distributing PHAR file, you still need to satisfy PIE's runtime requirements on your own.
