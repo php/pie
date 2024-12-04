@@ -68,7 +68,7 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | pdflib               | ❌ Abandoned                                                                                                                                        |
 | lzf                  | ?                                                                                                                                                  |
 | mogilefs             | ?                                                                                                                                                  |
-| uuid                 | ?                                                                                                                                                  |
+| uuid                 | ✅ Supported: [pecl/uuid](https://packagist.org/packages/pecl/uuid)                                                                                |
 | uopz                 | ?                                                                                                                                                  |
 | PDO_MYSQL            | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                                                                  |
 | ev                   | ?                                                                                                                                                  |
@@ -118,7 +118,7 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | zookeeper            | ?                                                                                                                                                  |
 | phar                 | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                                                                  |
 | SeasLog              | ?                                                                                                                                                  |
-| dio                  | ?                                                                                                                                                  |
+| dio                  | ✅ Supported: [pecl/dio](https://packagist.org/packages/pecl/dio)                                                                                  |
 | apfd                 | ?                                                                                                                                                  |
 | apd                  | ❌ Abandoned                                                                                                                                        |
 | pcs                  | ?                                                                                                                                                  |
@@ -315,7 +315,7 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | win32ps_dll          | ❌ Abandoned                                                                                                                                        |
 | docblock             | ?                                                                                                                                                  |
 | termbox              | ?                                                                                                                                                  |
-| selinux              | ?                                                                                                                                                  |
+| selinux              | ✅ Supported: [pecl/selinux](https://packagist.org/packages/pecl/selinux)                                                                          |
 | imap                 | ?                                                                                                                                                  |
 | KTaglib              | ❌ Abandoned                                                                                                                                        |
 | funcall              | ❌ Abandoned                                                                                                                                        |
@@ -332,7 +332,7 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | wxwidgets            | ❌ Abandoned                                                                                                                                        |
 | tk                   | ❌ Abandoned                                                                                                                                        |
 | v8                   | ?                                                                                                                                                  |
-| rpminfo              | ?                                                                                                                                                  |
+| rpminfo              | ✅ Supported: [remi/rpminfo](https://packagist.org/packages/remi/rpminfo)                                                                          |
 | skywalking_agent     | ?                                                                                                                                                  |
 | markdown             | ?                                                                                                                                                  |
 | ares                 | ❌ Abandoned                                                                                                                                        |
@@ -373,7 +373,7 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | request              | ?                                                                                                                                                  |
 | isis                 | ?                                                                                                                                                  |
 | fam                  | ❌ Abandoned                                                                                                                                        |
-| xpass                | ?                                                                                                                                                  |
+| xpass                | ✅ Supported: [remi/xpass](https://packagist.org/packages/remi/xpass)                                                                              |
 | ocal                 | ?                                                                                                                                                  |
 | lapack               | ❌ Abandoned                                                                                                                                        |
 | opendirectory        | ❌ Abandoned                                                                                                                                        |
