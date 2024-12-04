@@ -30,7 +30,7 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | memcached            | ⏰ PR [php-memcached-dev/php-memcached#560](https://github.com/php-memcached-dev/php-memcached/pull/560) was merged, but not yet added to Packagist |
 | mongodb              | ✅ Supported: [mongodb/mongodb-extension](https://packagist.org/packages/mongodb/mongodb-extension)                                                 |
 | timezonedb           | ⏰ PR: [php/pecl-datetime-timezonedb#12](https://github.com/php/pecl-datetime-timezonedb/pull/12)                                                   |
-| pcov                 | ⏰ PR: [krakjoe/pcov#113](https://github.com/krakjoe/pcov/pull/113)                                                                                 |
+| pcov                 | ✅ Supported: [pecl/pcov](https://packagist.org/packages/pecl/pcov)                                                                                 |
 | mcrypt               | ⏰ PR: [php/pecl-encryption-mcrypt#20](https://github.com/php/pecl-encryption-mcrypt/pull/20)                                                       |
 | amqp                 | ⏰ PR: [php-amqp/php-amqp#584](https://github.com/php-amqp/php-amqp/pull/584)                                                                       |
 | memcache             | ⏰ PR: [websupport-sk/pecl-memcache#116](https://github.com/websupport-sk/pecl-memcache/pull/116)                                                   |
