@@ -62,6 +62,7 @@ final class InstalledJsonMetadataTest extends TestCase
                 PieOperation::Build,
                 ['--foo', '--bar="yes"'],
                 null,
+                false,
             ),
             clone $package,
         );
@@ -99,6 +100,7 @@ final class InstalledJsonMetadataTest extends TestCase
                 PieOperation::Build,
                 ['--foo', '--bar="yes"'],
                 new PhpizePath('/path/to/phpize'),
+                false,
             ),
             clone $package,
             new BinaryFile('/path/to/built', 'sha256-checksum-value'),

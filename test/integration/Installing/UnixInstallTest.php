@@ -101,12 +101,14 @@ final class UnixInstallTest extends TestCase
             ['--enable-pie_test_ext'],
             $output,
             null,
+            false,
         );
 
         $installedSharedObject = (new UnixInstall())->__invoke(
             $downloadedPackage,
             $targetPlatform,
             $output,
+            false,
         );
         $outputString          = $output->fetch();
 
@@ -124,5 +126,57 @@ final class UnixInstallTest extends TestCase
         (new Process($rmCommand))->mustRun();
         (new Process(['make', 'clean'], $downloadedPackage->extractedSourcePath))->mustRun();
         (new Process(['phpize', '--clean'], $downloadedPackage->extractedSourcePath))->mustRun();
+    }
+
+    #[DataProvider('phpPathProvider')]
+    public function testUnixInstallCanInstallExtensionWithDryRun(string $phpConfig): void
+    {
+        assert($phpConfig !== '');
+        if (Platform::isWindows()) {
+            self::markTestSkipped('Unix build test cannot be run on Windows');
+        }
+
+        $output         = new BufferedOutput();
+        $targetPlatform = TargetPlatform::fromPhpBinaryPath(PhpBinaryPath::fromPhpConfigExecutable($phpConfig), null);
+        $extensionPath  = $targetPlatform->phpBinaryPath->extensionPath();
+
+        $downloadedPackage = DownloadedPackage::fromPackageAndExtractedPath(
+            new Package(
+                $this->createMock(CompletePackage::class),
+                ExtensionType::PhpModule,
+                ExtensionName::normaliseFromString('pie_test_ext'),
+                'pie_test_ext',
+                '0.1.0',
+                null,
+                [ConfigureOption::fromComposerJsonDefinition(['name' => 'enable-pie_test_ext'])],
+                true,
+                true,
+                null,
+            ),
+            self::TEST_EXTENSION_PATH,
+        );
+
+        (new UnixBuild())->__invoke(
+            $downloadedPackage,
+            $targetPlatform,
+            ['--enable-pie_test_ext'],
+            $output,
+            null,
+            true,
+        );
+
+        $installedSharedObject = (new UnixInstall())->__invoke(
+            $downloadedPackage,
+            $targetPlatform,
+            $output,
+            true,
+        );
+        $outputString          = $output->fetch();
+
+        self::assertStringContainsString('Install complete: ' . $extensionPath . '/pie_test_ext.so', $outputString);
+        self::assertStringContainsString('You must now add "extension=pie_test_ext" to your php.ini', $outputString);
+
+        self::assertSame('dry-run::' . $extensionPath . '/pie_test_ext.so', $installedSharedObject->filePath);
+        self::assertFileDoesNotExist($installedSharedObject->filePath);
     }
 }

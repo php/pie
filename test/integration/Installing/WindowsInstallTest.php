@@ -71,7 +71,7 @@ final class WindowsInstallTest extends TestCase
 
         $installer = new WindowsInstall();
 
-        $installedDll = $installer->__invoke($downloadedPackage, $targetPlatform, $output);
+        $installedDll = $installer->__invoke($downloadedPackage, $targetPlatform, $output, false);
         self::assertSame($extensionPath . '\php_pie_test_ext.dll', $installedDll->filePath);
 
         $outputString = $output->fetch();
@@ -97,6 +97,61 @@ final class WindowsInstallTest extends TestCase
         $this->delete($expectedPdb);
         $this->delete($expectedSupportingDll);
         $this->delete($extrasDirectory);
+    }
+
+    #[RequiresOperatingSystemFamily('Windows')]
+    public function testWindowsInstallCanInstallExtensionWithDryRun(): void
+    {
+        $downloadedPackage = DownloadedPackage::fromPackageAndExtractedPath(
+            new Package(
+                $this->createMock(CompletePackage::class),
+                ExtensionType::PhpModule,
+                ExtensionName::normaliseFromString('pie_test_ext'),
+                'php/pie-test-ext',
+                '1.2.3',
+                null,
+                [],
+                true,
+                true,
+                null,
+            ),
+            self::TEST_EXTENSION_PATH,
+        );
+        $output            = new BufferedOutput();
+        $targetPlatform    = new TargetPlatform(
+            OperatingSystem::Windows,
+            PhpBinaryPath::fromCurrentProcess(),
+            Architecture::x86_64,
+            ThreadSafetyMode::ThreadSafe,
+            1,
+            WindowsCompiler::VS16,
+        );
+        $phpPath           = dirname($targetPlatform->phpBinaryPath->phpBinaryPath);
+        $extensionPath     = $targetPlatform->phpBinaryPath->extensionPath();
+
+        $installer = new WindowsInstall();
+
+        $installedDll = $installer->__invoke($downloadedPackage, $targetPlatform, $output, true);
+        self::assertSame('dry-run::' . $extensionPath . '\php_pie_test_ext.dll', $installedDll->filePath);
+
+        $outputString = $output->fetch();
+
+        self::assertStringContainsString('Copied DLL to: ' . $extensionPath . '\php_pie_test_ext.dll', $outputString);
+        self::assertStringContainsString('You must now add "extension=pie_test_ext" to your php.ini', $outputString);
+
+        $extrasDirectory = $phpPath . DIRECTORY_SEPARATOR . 'extras' . DIRECTORY_SEPARATOR . 'pie_test_ext';
+
+        $expectedPdb                 = str_replace('.dll', '.pdb', $installedDll->filePath);
+        $expectedSupportingDll       = $phpPath . DIRECTORY_SEPARATOR . 'supporting-library.dll';
+        $expectedSupportingOtherFile = $extrasDirectory . DIRECTORY_SEPARATOR . 'README.md';
+        $expectedSubdirectoryFile    = $extrasDirectory . DIRECTORY_SEPARATOR . 'more' . DIRECTORY_SEPARATOR . 'more-information.txt';
+        assert($expectedPdb !== '');
+
+        self::assertFileDoesNotExist($installedDll->filePath);
+        self::assertFileDoesNotExist($expectedPdb);
+        self::assertFileDoesNotExist($expectedSupportingDll);
+        self::assertFileDoesNotExist($expectedSupportingOtherFile);
+        self::assertFileDoesNotExist($expectedSubdirectoryFile);
     }
 
     /**
