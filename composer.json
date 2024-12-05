@@ -30,8 +30,11 @@
         "php": "8.1.*||8.2.*||8.3.*||8.4.*",
         "ext-zip": "*",
         "composer/composer": "dev-main",
+        "composer/pcre": "^3.3.2",
+        "composer/semver": "^3.4.3",
         "fidry/cpu-core-counter": "^1.2",
         "illuminate/container": "^10.48.25",
+        "psr/container": "^2.0.2",
         "symfony/console": "^6.4.15",
         "symfony/process": "^6.4.15",
         "webmozart/assert": "^1.11"
