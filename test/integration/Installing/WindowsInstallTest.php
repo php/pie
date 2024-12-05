@@ -9,6 +9,8 @@ use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
+use Php\Pie\Installing\Ini\PickBestSetupIniApproach;
+use Php\Pie\Installing\SetupIniFile;
 use Php\Pie\Installing\WindowsInstall;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
@@ -73,7 +75,7 @@ final class WindowsInstallTest extends TestCase
         $phpPath           = dirname($targetPlatform->phpBinaryPath->phpBinaryPath);
         $extensionPath     = $targetPlatform->phpBinaryPath->extensionPath();
 
-        $installer = new WindowsInstall();
+        $installer = new WindowsInstall(new SetupIniFile(new PickBestSetupIniApproach([])));
 
         $installedDll = $installer->__invoke($downloadedPackage, $targetPlatform, $output);
         self::assertSame($extensionPath . '\php_pie_test_ext.dll', $installedDll->filePath);
