@@ -15,6 +15,7 @@ use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
+use Php\Pie\Platform\OperatingSystemFamily;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\ThreadSafetyMode;
@@ -34,6 +35,7 @@ final class GithubPackageReleaseAssetsTest extends TestCase
 
         $targetPlatform = new TargetPlatform(
             OperatingSystem::Windows,
+            OperatingSystemFamily::Windows,
             $phpBinaryPath,
             Architecture::x86_64,
             ThreadSafetyMode::ThreadSafe,
@@ -51,6 +53,8 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             [],
             true,
             true,
+            null,
+            null,
             null,
         );
 

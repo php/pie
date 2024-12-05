@@ -91,6 +91,8 @@ final class UnixInstallTest extends TestCase
                 true,
                 true,
                 null,
+                null,
+                null,
             ),
             self::TEST_EXTENSION_PATH,
         );

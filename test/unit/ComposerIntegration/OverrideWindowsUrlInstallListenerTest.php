@@ -18,6 +18,7 @@ use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\Downloading\PackageReleaseAssets;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
+use Php\Pie\Platform\OperatingSystemFamily;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\ThreadSafetyMode;
@@ -68,6 +69,7 @@ final class OverrideWindowsUrlInstallListenerTest extends TestCase
                 $this->createMock(OutputInterface::class),
                 new TargetPlatform(
                     OperatingSystem::NonWindows,
+                    OperatingSystemFamily::Linux,
                     PhpBinaryPath::fromCurrentProcess(),
                     Architecture::x86_64,
                     ThreadSafetyMode::NonThreadSafe,
@@ -112,6 +114,7 @@ final class OverrideWindowsUrlInstallListenerTest extends TestCase
                 $this->createMock(OutputInterface::class),
                 new TargetPlatform(
                     OperatingSystem::NonWindows,
+                    OperatingSystemFamily::Linux,
                     PhpBinaryPath::fromCurrentProcess(),
                     Architecture::x86_64,
                     ThreadSafetyMode::NonThreadSafe,
@@ -168,6 +171,7 @@ final class OverrideWindowsUrlInstallListenerTest extends TestCase
                 $this->createMock(OutputInterface::class),
                 new TargetPlatform(
                     OperatingSystem::Windows,
+                    OperatingSystemFamily::Linux,
                     PhpBinaryPath::fromCurrentProcess(),
                     Architecture::x86_64,
                     ThreadSafetyMode::NonThreadSafe,

@@ -12,6 +12,7 @@ use Php\Pie\ExtensionType;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\ThreadSafetyMode;
 
+use function in_array;
 use function preg_match;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
@@ -55,6 +56,7 @@ final class ResolveDependencyWithComposer implements DependencyResolver
 
         $piePackage = Package::fromComposerCompletePackage($package);
 
+        $this->assertCompatibleOsFamily($targetPlatform, $piePackage);
         $this->assertCompatibleThreadSafetyMode($targetPlatform->threadSafety, $piePackage);
 
         return $piePackage;
@@ -68,6 +70,23 @@ final class ResolveDependencyWithComposer implements DependencyResolver
 
         if ($threadSafetyMode === ThreadSafetyMode::ThreadSafe && ! $resolvedPackage->supportZts) {
             throw IncompatibleThreadSafetyMode::ntsExtensionOnZtsPlatform();
+        }
+    }
+
+    private function assertCompatibleOsFamily(TargetPlatform $targetPlatform, Package $resolvedPackage): void
+    {
+        if ($resolvedPackage->compatibleOsFamilies !== null && ! in_array($targetPlatform->operatingSystemFamily, $resolvedPackage->compatibleOsFamilies, true)) {
+            throw IncompatibleOperatingSystemFamily::notInCompatibleOperatingSystemFamilies(
+                $resolvedPackage->compatibleOsFamilies,
+                $targetPlatform->operatingSystemFamily,
+            );
+        }
+
+        if ($resolvedPackage->incompatibleOsFamilies !== null && in_array($targetPlatform->operatingSystemFamily, $resolvedPackage->incompatibleOsFamilies, true)) {
+            throw IncompatibleOperatingSystemFamily::inIncompatibleOperatingSystemFamily(
+                $resolvedPackage->incompatibleOsFamilies,
+                $targetPlatform->operatingSystemFamily,
+            );
         }
     }
 }

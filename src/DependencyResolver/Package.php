@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace Php\Pie\DependencyResolver;
 
 use Composer\Package\CompletePackageInterface;
+use InvalidArgumentException;
 use Php\Pie\ConfigureOption;
 use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
+use Php\Pie\Platform\OperatingSystemFamily;
+use Webmozart\Assert\Assert;
 
 use function array_key_exists;
 use function array_map;
@@ -17,6 +20,7 @@ use function implode;
 use function parse_url;
 use function str_contains;
 use function str_starts_with;
+use function strtolower;
 
 /**
  * @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks
@@ -25,7 +29,11 @@ use function str_starts_with;
  */
 final class Package
 {
-    /** @param list<ConfigureOption> $configureOptions */
+    /**
+     * @param list<ConfigureOption>                      $configureOptions
+     * @param non-empty-list<OperatingSystemFamily>|null $compatibleOsFamilies
+     * @param non-empty-list<OperatingSystemFamily>|null $incompatibleOsFamilies
+     */
     public function __construct(
         public readonly CompletePackageInterface $composerPackage,
         public readonly ExtensionType $extensionType,
@@ -37,6 +45,8 @@ final class Package
         public readonly bool $supportZts,
         public readonly bool $supportNts,
         public readonly string|null $buildPath,
+        public readonly array|null $compatibleOsFamilies,
+        public readonly array|null $incompatibleOsFamilies,
     ) {
     }
 
@@ -63,6 +73,13 @@ final class Package
             ? $phpExtOptions['build-path']
             : null;
 
+        $compatibleOsFamilies   = $phpExtOptions['os-families'] ?? null;
+        $incompatibleOsFamilies = $phpExtOptions['os-families-exclude'] ?? null;
+
+        if ($compatibleOsFamilies !== null && $incompatibleOsFamilies !== null) {
+            throw new InvalidArgumentException('Cannot specify both "os-families" and "os-families-exclude" in composer.json');
+        }
+
         return new self(
             $completePackage,
             ExtensionType::tryFrom($completePackage->getType()) ?? ExtensionType::PhpModule,
@@ -74,6 +91,8 @@ final class Package
             $supportZts,
             $supportNts,
             $buildPath,
+            self::convertInputStringsToOperatingSystemFamilies($compatibleOsFamilies),
+            self::convertInputStringsToOperatingSystemFamilies($incompatibleOsFamilies),
         );
     }
 
@@ -99,5 +118,30 @@ final class Package
 
         // Converts https://api.github.com/repos/<user>/<repository>/zipball/<sha>" to "<user>/<repository>"
         return implode('/', array_slice(explode('/', $parsed['path']), 2, 2));
+    }
+
+    /**
+     * @param list<string>|null $input
+     *
+     * @return non-empty-list<OperatingSystemFamily>|null
+     */
+    private static function convertInputStringsToOperatingSystemFamilies(array|null $input): array|null
+    {
+        if ($input === null) {
+            return null;
+        }
+
+        $osFamilies = [];
+        foreach ($input as $value) {
+            $valueToTry = strtolower($value);
+
+            Assert::inArray($valueToTry, OperatingSystemFamily::asValuesList(), 'Expected operating system family to be one of: %2$s. Got: %s');
+
+            $osFamilies[] = OperatingSystemFamily::from($valueToTry);
+        }
+
+        Assert::isNonEmptyList($osFamilies, 'Expected operating systems families to be a non-empty list.');
+
+        return $osFamilies;
     }
 }

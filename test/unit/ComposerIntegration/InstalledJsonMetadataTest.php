@@ -15,6 +15,7 @@ use Php\Pie\ComposerIntegration\PieOperation;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
+use Php\Pie\Platform\OperatingSystemFamily;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPhp\PhpizePath;
 use Php\Pie\Platform\TargetPlatform;
@@ -52,6 +53,7 @@ final class InstalledJsonMetadataTest extends TestCase
                 $this->createMock(OutputInterface::class),
                 new TargetPlatform(
                     OperatingSystem::NonWindows,
+                    OperatingSystemFamily::Linux,
                     $phpBinary,
                     Architecture::x86_64,
                     ThreadSafetyMode::NonThreadSafe,
@@ -89,6 +91,7 @@ final class InstalledJsonMetadataTest extends TestCase
                 $this->createMock(OutputInterface::class),
                 new TargetPlatform(
                     OperatingSystem::NonWindows,
+                    OperatingSystemFamily::Linux,
                     PhpBinaryPath::fromCurrentProcess(),
                     Architecture::x86_64,
                     ThreadSafetyMode::NonThreadSafe,

@@ -7,6 +7,7 @@ namespace Php\PieUnitTest\Platform\TargetPhp;
 use Composer\Util\Platform;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
+use Php\Pie\Platform\OperatingSystemFamily;
 use Php\Pie\Platform\TargetPhp\Exception\InvalidPhpBinaryPath;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -30,11 +31,13 @@ use function is_executable;
 use function php_uname;
 use function phpversion;
 use function sprintf;
+use function strtolower;
 
 use const DIRECTORY_SEPARATOR;
 use const PHP_INT_SIZE;
 use const PHP_MAJOR_VERSION;
 use const PHP_MINOR_VERSION;
+use const PHP_OS_FAMILY;
 use const PHP_RELEASE_VERSION;
 
 #[CoversClass(PhpBinaryPath::class)]
@@ -161,6 +164,15 @@ final class PhpBinaryPathTest extends TestCase
             defined('PHP_WINDOWS_VERSION_BUILD') ? OperatingSystem::Windows : OperatingSystem::NonWindows,
             PhpBinaryPath::fromCurrentProcess()
                 ->operatingSystem(),
+        );
+    }
+
+    public function testOperatingSystemFamily(): void
+    {
+        self::assertSame(
+            OperatingSystemFamily::from(strtolower(PHP_OS_FAMILY)),
+            PhpBinaryPath::fromCurrentProcess()
+                ->operatingSystemFamily(),
         );
     }
 

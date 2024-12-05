@@ -12,6 +12,7 @@ use Php\Pie\ExtensionType;
 use Php\Pie\Installing\WindowsInstall;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
+use Php\Pie\Platform\OperatingSystemFamily;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\ThreadSafetyMode;
@@ -54,12 +55,15 @@ final class WindowsInstallTest extends TestCase
                 true,
                 true,
                 null,
+                null,
+                null,
             ),
             self::TEST_EXTENSION_PATH,
         );
         $output            = new BufferedOutput();
         $targetPlatform    = new TargetPlatform(
             OperatingSystem::Windows,
+            OperatingSystemFamily::Windows,
             PhpBinaryPath::fromCurrentProcess(),
             Architecture::x86_64,
             ThreadSafetyMode::ThreadSafe,

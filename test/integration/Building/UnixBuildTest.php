@@ -48,6 +48,8 @@ final class UnixBuildTest extends TestCase
                 true,
                 true,
                 null,
+                null,
+                null,
             ),
             self::TEST_EXTENSION_PATH,
         );
@@ -101,6 +103,8 @@ final class UnixBuildTest extends TestCase
                 true,
                 true,
                 null,
+                null,
+                null,
             ),
             self::TEST_EXTENSION_PATH,
         );
@@ -142,6 +146,8 @@ final class UnixBuildTest extends TestCase
                 true,
                 true,
                 'pie_test_ext',
+                null,
+                null,
             ),
             dirname(self::TEST_EXTENSION_PATH),
         );
@@ -199,6 +205,8 @@ final class UnixBuildTest extends TestCase
                 true,
                 true,
                 null,
+                null,
+                null,
             ),
             self::TEST_EXTENSION_PATH,
         );
@@ -240,6 +248,8 @@ final class UnixBuildTest extends TestCase
                 [ConfigureOption::fromComposerJsonDefinition(['name' => 'enable-pie_test_ext'])],
                 true,
                 true,
+                null,
+                null,
                 null,
             ),
             self::TEST_EXTENSION_PATH,

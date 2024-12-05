@@ -12,6 +12,7 @@ use Php\Pie\ComposerIntegration\VersionSelectorFactory;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
+use Php\Pie\Platform\OperatingSystemFamily;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\ThreadSafetyMode;
@@ -46,6 +47,7 @@ final class VersionSelectorFactoryTest extends TestCase
             new RequestedPackageAndVersion('foo/bar', '^1.0'),
             new TargetPlatform(
                 OperatingSystem::NonWindows,
+                OperatingSystemFamily::Linux,
                 PhpBinaryPath::fromCurrentProcess(),
                 Architecture::x86_64,
                 ThreadSafetyMode::NonThreadSafe,
