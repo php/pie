@@ -5,22 +5,27 @@ declare(strict_types=1);
 namespace Php\PieUnitTest\Platform\TargetPhp;
 
 use Composer\Util\Platform;
+use Php\Pie\ExtensionName;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
 use Php\Pie\Platform\OperatingSystemFamily;
+use Php\Pie\Platform\TargetPhp\Exception\ExtensionIsNotLoaded;
 use Php\Pie\Platform\TargetPhp\Exception\InvalidPhpBinaryPath;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Process\PhpExecutableFinder;
 
 use function array_column;
 use function array_combine;
 use function array_filter;
+use function array_key_exists;
 use function array_map;
 use function array_unique;
 use function assert;
+use function count;
 use function defined;
 use function dirname;
 use function file_exists;
@@ -270,5 +275,33 @@ final class PhpBinaryPathTest extends TestCase
         self::assertInstanceOf(Architecture::class, $php->machineType());
         self::assertGreaterThan(0, $php->phpIntSize());
         self::assertNotEmpty($php->phpinfo());
+    }
+
+    public function testAssertExtensionIsLoaded(): void
+    {
+        $php              = PhpBinaryPath::fromCurrentProcess();
+        $loadedExtensions = $php->extensions();
+
+        if (! count($loadedExtensions) || ! array_key_exists('Core', $loadedExtensions)) {
+            self::fail('Core extension is not loaded, this is quite unexpected...');
+        }
+
+        $output = new BufferedOutput(BufferedOutput::VERBOSITY_VERBOSE);
+        $php->assertExtensionIsLoadedInRuntime(ExtensionName::normaliseFromString('Core'), $output);
+
+        self::assertStringContainsString(
+            'Successfully asserted that extension Core is loaded in runtime.',
+            $output->fetch(),
+        );
+    }
+
+    public function testAssertExtensionFailsWhenNotLoaded(): void
+    {
+        $php = PhpBinaryPath::fromCurrentProcess();
+
+        $this->expectException(ExtensionIsNotLoaded::class);
+        $php->assertExtensionIsLoadedInRuntime(ExtensionName::normaliseFromString(
+            'hopefully_this_extension_name_is_not_real_otherwise_this_test_will_fail',
+        ));
     }
 }
