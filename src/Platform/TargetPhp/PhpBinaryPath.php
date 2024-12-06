@@ -6,22 +6,26 @@ namespace Php\Pie\Platform\TargetPhp;
 
 use Composer\Semver\VersionParser;
 use Composer\Util\Platform;
+use Php\Pie\ExtensionName;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
 use Php\Pie\Platform\OperatingSystemFamily;
 use Php\Pie\Util\Process;
 use RuntimeException;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Webmozart\Assert\Assert;
 
 use function array_combine;
 use function array_key_exists;
+use function array_keys;
 use function array_map;
 use function assert;
 use function dirname;
 use function explode;
 use function file_exists;
 use function implode;
+use function in_array;
 use function is_dir;
 use function is_executable;
 use function preg_match;
@@ -110,6 +114,28 @@ class PhpBinaryPath
         }
 
         throw new RuntimeException('Could not determine extension path for ' . $this->phpBinaryPath);
+    }
+
+    public function assertExtensionIsLoadedInRuntime(ExtensionName $extension, OutputInterface|null $output = null): void
+    {
+        if (! in_array($extension->name(), array_keys($this->extensions()))) {
+            throw Exception\ExtensionIsNotLoaded::fromExpectedExtension(
+                $this,
+                $extension,
+            );
+        }
+
+        if ($output === null) {
+            return;
+        }
+
+        $output->writeln(
+            sprintf(
+                'Successfully asserted that extension %s is loaded in runtime.',
+                $extension->name(),
+            ),
+            OutputInterface::VERBOSITY_VERBOSE,
+        );
     }
 
     /**
