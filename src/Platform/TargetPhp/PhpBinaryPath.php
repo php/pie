@@ -8,6 +8,7 @@ use Composer\Semver\VersionParser;
 use Composer\Util\Platform;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
+use Php\Pie\Platform\OperatingSystemFamily;
 use Php\Pie\Util\Process;
 use RuntimeException;
 use Symfony\Component\Process\PhpExecutableFinder;
@@ -24,6 +25,7 @@ use function is_dir;
 use function is_executable;
 use function preg_match;
 use function sprintf;
+use function strtolower;
 use function trim;
 
 use const DIRECTORY_SEPARATOR;
@@ -162,6 +164,20 @@ PHP,
         Assert::stringNotEmpty($winOrNot, 'Could not determine PHP version');
 
         return $winOrNot === 'win' ? OperatingSystem::Windows : OperatingSystem::NonWindows;
+    }
+
+    public function operatingSystemFamily(): OperatingSystemFamily
+    {
+        $output = Process::run([
+            $this->phpBinaryPath,
+            '-r',
+            'echo PHP_OS_FAMILY;',
+        ]);
+
+        $osFamily = OperatingSystemFamily::tryFrom(strtolower(trim($output)));
+        Assert::notNull($osFamily, 'Could not determine operating system family');
+
+        return $osFamily;
     }
 
     /** @return non-empty-string */

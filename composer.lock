@@ -161,12 +161,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/composer/composer.git",
-                "reference": "38cb4bfe71dc3a9093cb8b4ecebfd39cb1a5699c"
+                "reference": "eefa0122043a54508630cd13b0addb477b8c6ac8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/composer/composer/zipball/38cb4bfe71dc3a9093cb8b4ecebfd39cb1a5699c",
-                "reference": "38cb4bfe71dc3a9093cb8b4ecebfd39cb1a5699c",
+                "url": "https://api.github.com/repos/composer/composer/zipball/eefa0122043a54508630cd13b0addb477b8c6ac8",
+                "reference": "eefa0122043a54508630cd13b0addb477b8c6ac8",
                 "shasum": ""
             },
             "require": {
@@ -211,13 +211,13 @@
             ],
             "type": "library",
             "extra": {
-                "branch-alias": {
-                    "dev-main": "2.8-dev"
-                },
                 "phpstan": {
                     "includes": [
                         "phpstan/rules.neon"
                     ]
+                },
+                "branch-alias": {
+                    "dev-main": "2.8-dev"
                 }
             },
             "autoload": {
@@ -268,7 +268,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-11-21T08:16:24+00:00"
+            "time": "2024-12-09T13:37:10+00:00"
         },
         {
             "name": "composer/metadata-minifier",

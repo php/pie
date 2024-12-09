@@ -23,6 +23,7 @@ class TargetPlatform
 {
     public function __construct(
         public readonly OperatingSystem $operatingSystem,
+        public readonly OperatingSystemFamily $operatingSystemFamily,
         public readonly PhpBinaryPath $phpBinaryPath,
         public readonly Architecture $architecture,
         public readonly ThreadSafetyMode $threadSafety,
@@ -38,7 +39,8 @@ class TargetPlatform
 
     public static function fromPhpBinaryPath(PhpBinaryPath $phpBinaryPath, int|null $makeParallelJobs): self
     {
-        $os = $phpBinaryPath->operatingSystem();
+        $os       = $phpBinaryPath->operatingSystem();
+        $osFamily = $phpBinaryPath->operatingSystemFamily();
 
         $phpinfo = $phpBinaryPath->phpinfo();
 
@@ -114,6 +116,7 @@ class TargetPlatform
 
         return new self(
             $os,
+            $osFamily,
             $phpBinaryPath,
             $architecture,
             $threadSafety,
