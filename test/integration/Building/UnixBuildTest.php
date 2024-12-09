@@ -61,6 +61,7 @@ final class UnixBuildTest extends TestCase
             ['--enable-pie_test_ext'],
             $output,
             null,
+            false,
         );
 
         self::assertNotEmpty($builtBinary);
@@ -119,6 +120,7 @@ final class UnixBuildTest extends TestCase
                 ['--enable-pie_test_ext'],
                 $output,
                 null,
+                false,
             );
         } finally {
             (new Process(['make', 'clean'], $downloadedPackage->extractedSourcePath))->mustRun();
@@ -159,6 +161,7 @@ final class UnixBuildTest extends TestCase
             ['--enable-pie_test_ext'],
             $output,
             null,
+            false,
         );
 
         self::assertNotEmpty($builtBinary);
@@ -218,6 +221,7 @@ final class UnixBuildTest extends TestCase
             ['--enable-pie_test_ext'],
             $output,
             null,
+            false,
         );
 
         $outputString = $output->fetch();
@@ -262,6 +266,7 @@ final class UnixBuildTest extends TestCase
             ['--enable-pie_test_ext'],
             $output,
             null,
+            false,
         );
 
         $outputString = $output->fetch();

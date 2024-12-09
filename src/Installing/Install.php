@@ -20,5 +20,6 @@ interface Install
         DownloadedPackage $downloadedPackage,
         TargetPlatform $targetPlatform,
         OutputInterface $output,
+        bool $dryRun,
     ): BinaryFile;
 }
