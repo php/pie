@@ -74,8 +74,10 @@ final class Container
 
         $container->singleton(
             Ini\SetupIniApproach::class,
-            static function (): Ini\SetupIniApproach {
-                return new Ini\PickBestSetupIniApproach([]);
+            static function (ContainerInterface $container): Ini\SetupIniApproach {
+                return new Ini\PickBestSetupIniApproach([
+                    $container->get(Ini\StandardSinglePhpIni::class),
+                ]);
             },
         );
 
