@@ -22,7 +22,7 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | PECL Extension       | Status                                                                                                                                             |
 |----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
 | imagick              | ⏰ PR: [Imagick/imagick#688](https://github.com/Imagick/imagick/pull/688)                                                                           |
-| Xdebug               | ⏰ Coming soon in 3.4.0: [xdebug/xdebug](https://packagist.org/packages/xdebug/xdebug)                                                              |
+| Xdebug               | ✅ Supported: [xdebug/xdebug](https://packagist.org/packages/xdebug/xdebug)                                                              |
 | redis                | ✅ Supported: [phpredis/phpredis](https://packagist.org/packages/phpredis/phpredis)                                                                 |
 | APCu                 | ✅ Supported: [apcu/apcu](https://packagist.org/packages/apcu/apcu)                                                                                 |
 | yaml                 | ⏰ PR: [php/pecl-file_formats-yaml#88](https://github.com/php/pecl-file_formats-yaml/pull/88)                                                       |
