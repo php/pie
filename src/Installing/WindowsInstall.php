@@ -31,17 +31,17 @@ use const DIRECTORY_SEPARATOR;
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class WindowsInstall implements Install
 {
-    public function __invoke(DownloadedPackage $downloadedPackage, TargetPlatform $targetPlatform, OutputInterface $output): BinaryFile
+    public function __invoke(DownloadedPackage $downloadedPackage, TargetPlatform $targetPlatform, OutputInterface $output, bool $dryRun): BinaryFile
     {
         $extractedSourcePath = $downloadedPackage->extractedSourcePath;
         $sourceDllName       = WindowsExtensionAssetName::determineDllName($targetPlatform, $downloadedPackage);
         $sourcePdbName       = str_replace('.dll', '.pdb', $sourceDllName);
         assert($sourcePdbName !== '');
 
-        $destinationDllName = $this->copyExtensionDll($targetPlatform, $downloadedPackage, $sourceDllName);
+        $destinationDllName = $this->copyExtensionDll($targetPlatform, $downloadedPackage, $sourceDllName, $dryRun);
         $output->writeln('<info>Copied DLL to:</info> ' . $destinationDllName);
 
-        $destinationPdbName = $this->copyExtensionPdb($targetPlatform, $downloadedPackage, $sourcePdbName, $destinationDllName);
+        $destinationPdbName = $this->copyExtensionPdb($targetPlatform, $downloadedPackage, $sourcePdbName, $destinationDllName, $dryRun);
         if ($destinationPdbName !== null) {
             $output->writeln('<info>Copied PDB to:</info> ' . $destinationPdbName);
         }
@@ -60,14 +60,14 @@ final class WindowsInstall implements Install
                 continue;
             }
 
-            $destinationExtraDll = $this->copyDependencyDll($targetPlatform, $file);
+            $destinationExtraDll = $this->copyDependencyDll($targetPlatform, $file, $dryRun);
             if ($destinationExtraDll !== null) {
                 $output->writeln('<info>Copied extra DLL:</info> ' . $destinationExtraDll);
 
                 continue;
             }
 
-            $destinationPathname = $this->copyExtraFile($targetPlatform, $downloadedPackage, $file);
+            $destinationPathname = $this->copyExtraFile($targetPlatform, $downloadedPackage, $file, $dryRun);
             $output->writeln('<info>Copied extras:</info> ' . $destinationPathname);
         }
 
@@ -81,6 +81,10 @@ final class WindowsInstall implements Install
             $downloadedPackage->package->extensionType === ExtensionType::PhpModule ? 'extension' : 'zend_extension',
             $downloadedPackage->package->extensionName->name(),
         ));
+
+        if ($dryRun) {
+            return BinaryFile::nonExistentForDryRun($destinationDllName);
+        }
 
         return BinaryFile::fromFileWithSha256Checksum($destinationDllName);
     }
@@ -101,10 +105,14 @@ final class WindowsInstall implements Install
      *
      * @return non-empty-string
      */
-    private function copyExtensionDll(TargetPlatform $targetPlatform, DownloadedPackage $downloadedPackage, string $sourceDllName): string
+    private function copyExtensionDll(TargetPlatform $targetPlatform, DownloadedPackage $downloadedPackage, string $sourceDllName, bool $dryRun): string
     {
         $destinationDllName = $targetPlatform->phpBinaryPath->extensionPath() . DIRECTORY_SEPARATOR
             . 'php_' . $downloadedPackage->package->extensionName->name() . '.dll';
+
+        if ($dryRun) {
+            return $destinationDllName;
+        }
 
         if (! copy($sourceDllName, $destinationDllName) || ! file_exists($destinationDllName) && ! is_file($destinationDllName)) {
             throw new RuntimeException('Failed to install DLL to ' . $destinationDllName);
@@ -124,7 +132,7 @@ final class WindowsInstall implements Install
      *
      * @return non-empty-string|null
      */
-    private function copyExtensionPdb(TargetPlatform $targetPlatform, DownloadedPackage $downloadedPackage, string $sourcePdbName, string $destinationDllName): string|null
+    private function copyExtensionPdb(TargetPlatform $targetPlatform, DownloadedPackage $downloadedPackage, string $sourcePdbName, string $destinationDllName, bool $dryRun): string|null
     {
         if (! file_exists($sourcePdbName)) {
             return null;
@@ -132,6 +140,10 @@ final class WindowsInstall implements Install
 
         $destinationPdbName = str_replace('.dll', '.pdb', $destinationDllName);
         assert($destinationPdbName !== '');
+
+        if ($dryRun) {
+            return $destinationPdbName;
+        }
 
         if (! copy($sourcePdbName, $destinationPdbName) || ! file_exists($destinationPdbName) && ! is_file($destinationPdbName)) {
             throw new RuntimeException('Failed to install PDB to ' . $destinationPdbName);
@@ -148,13 +160,17 @@ final class WindowsInstall implements Install
      *
      * @return non-empty-string|null
      */
-    private function copyDependencyDll(TargetPlatform $targetPlatform, SplFileInfo $file): string|null
+    private function copyDependencyDll(TargetPlatform $targetPlatform, SplFileInfo $file, bool $dryRun): string|null
     {
         if ($file->getExtension() !== 'dll') {
             return null;
         }
 
         $destinationExtraDll = dirname($targetPlatform->phpBinaryPath->phpBinaryPath) . DIRECTORY_SEPARATOR . $file->getFilename();
+
+        if ($dryRun) {
+            return $destinationExtraDll;
+        }
 
         if (! copy($file->getPathname(), $destinationExtraDll) || ! file_exists($destinationExtraDll) && ! is_file($destinationExtraDll)) {
             throw new RuntimeException('Failed to copy to ' . $destinationExtraDll);
@@ -168,7 +184,7 @@ final class WindowsInstall implements Install
      *
      * @return non-empty-string
      */
-    private function copyExtraFile(TargetPlatform $targetPlatform, DownloadedPackage $downloadedPackage, SplFileInfo $file): string
+    private function copyExtraFile(TargetPlatform $targetPlatform, DownloadedPackage $downloadedPackage, SplFileInfo $file, bool $dryRun): string
     {
         $destinationFullFilename = dirname($targetPlatform->phpBinaryPath->phpBinaryPath) . DIRECTORY_SEPARATOR
             . 'extras' . DIRECTORY_SEPARATOR
@@ -176,6 +192,10 @@ final class WindowsInstall implements Install
             . substr($file->getPathname(), strlen($downloadedPackage->extractedSourcePath) + 1);
 
         $destinationPath = dirname($destinationFullFilename);
+
+        if ($dryRun) {
+            return $destinationFullFilename;
+        }
 
         if (! file_exists($destinationPath)) {
             mkdir($destinationPath, 0777, true);

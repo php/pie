@@ -54,6 +54,7 @@ final class InfoCommand extends Command
                 PieOperation::Resolve,
                 [], // Configure options are not needed for resolve only
                 null,
+                CommandHelper::determineDryRunFromInputs($input),
             ),
         );
 

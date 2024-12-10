@@ -22,7 +22,7 @@ final class UnixInstall implements Install
 {
     private const MAKE_INSTALL_TIMEOUT_SECS = 60; // 1 minute
 
-    public function __invoke(DownloadedPackage $downloadedPackage, TargetPlatform $targetPlatform, OutputInterface $output): BinaryFile
+    public function __invoke(DownloadedPackage $downloadedPackage, TargetPlatform $targetPlatform, OutputInterface $output, bool $dryRun): BinaryFile
     {
         $targetExtensionPath = $targetPlatform->phpBinaryPath->extensionPath();
 
@@ -47,18 +47,20 @@ final class UnixInstall implements Install
             array_unshift($makeInstallCommand, 'sudo');
         }
 
-        $makeInstallOutput = Process::run(
-            $makeInstallCommand,
-            $downloadedPackage->extractedSourcePath,
-            self::MAKE_INSTALL_TIMEOUT_SECS,
-        );
+        if (! $dryRun) {
+            $makeInstallOutput = Process::run(
+                $makeInstallCommand,
+                $downloadedPackage->extractedSourcePath,
+                self::MAKE_INSTALL_TIMEOUT_SECS,
+            );
 
-        if ($output->isVeryVerbose()) {
-            $output->writeln($makeInstallOutput);
-        }
+            if ($output->isVeryVerbose()) {
+                $output->writeln($makeInstallOutput);
+            }
 
-        if (! file_exists($expectedSharedObjectLocation)) {
-            throw new RuntimeException('Install failed, ' . $expectedSharedObjectLocation . ' was not installed.');
+            if (! file_exists($expectedSharedObjectLocation)) {
+                throw new RuntimeException('Install failed, ' . $expectedSharedObjectLocation . ' was not installed.');
+            }
         }
 
         $output->writeln('<info>Install complete:</info> ' . $expectedSharedObjectLocation);
@@ -73,6 +75,10 @@ final class UnixInstall implements Install
             $downloadedPackage->package->extensionType === ExtensionType::PhpModule ? 'extension' : 'zend_extension',
             $downloadedPackage->package->extensionName->name(),
         ));
+
+        if ($dryRun) {
+            return BinaryFile::nonExistentForDryRun($expectedSharedObjectLocation);
+        }
 
         return BinaryFile::fromFileWithSha256Checksum($expectedSharedObjectLocation);
     }
