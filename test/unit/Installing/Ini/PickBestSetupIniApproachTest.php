@@ -14,6 +14,7 @@ use Php\Pie\Installing\Ini\PickBestSetupIniApproach;
 use Php\Pie\Installing\Ini\SetupIniApproach;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
+use Php\Pie\Platform\OperatingSystemFamily;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\ThreadSafetyMode;
@@ -28,6 +29,7 @@ final class PickBestSetupIniApproachTest extends TestCase
     {
         return new TargetPlatform(
             OperatingSystem::NonWindows,
+            OperatingSystemFamily::Linux,
             PhpBinaryPath::fromCurrentProcess(),
             Architecture::x86_64,
             ThreadSafetyMode::ThreadSafe,
@@ -99,6 +101,8 @@ final class PickBestSetupIniApproachTest extends TestCase
                     true,
                     true,
                     null,
+                    null,
+                    null,
                 ),
                 '/path/to/extracted/source',
             ),
@@ -138,6 +142,8 @@ final class PickBestSetupIniApproachTest extends TestCase
                     true,
                     true,
                     null,
+                    null,
+                    null,
                 ),
                 '/path/to/extracted/source',
             ),
@@ -176,6 +182,8 @@ final class PickBestSetupIniApproachTest extends TestCase
                     [],
                     true,
                     true,
+                    null,
+                    null,
                     null,
                 ),
                 '/path/to/extracted/source',

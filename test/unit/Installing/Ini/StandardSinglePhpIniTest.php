@@ -15,6 +15,7 @@ use Php\Pie\Installing\Ini\IsExtensionAlreadyInTheIniFile;
 use Php\Pie\Installing\Ini\StandardSinglePhpIni;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
+use Php\Pie\Platform\OperatingSystemFamily;
 use Php\Pie\Platform\TargetPhp\Exception\ExtensionIsNotLoaded;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
@@ -57,6 +58,7 @@ final class StandardSinglePhpIniTest extends TestCase
 
         $this->targetPlatform = new TargetPlatform(
             OperatingSystem::NonWindows,
+            OperatingSystemFamily::Linux,
             $this->mockPhpBinary,
             Architecture::x86_64,
             ThreadSafetyMode::ThreadSafe,
@@ -75,6 +77,8 @@ final class StandardSinglePhpIniTest extends TestCase
                 [],
                 true,
                 true,
+                null,
+                null,
                 null,
             ),
             '/path/to/extracted/source',
