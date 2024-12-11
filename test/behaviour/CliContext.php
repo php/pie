@@ -37,7 +37,7 @@ class CliContext implements Context
     /** @param list<non-empty-string> $command */
     public function runPieCommand(array $command): void
     {
-        $pieCommand = array_merge(['php', ...$this->phpArguments, 'bin/pie'], $command);
+        $pieCommand = array_merge(['php', ...$this->phpArguments, 'bin/pie'], $command, ['--skip-enable-extension']);
 
         $proc = (new Process($pieCommand))->mustRun();
 
