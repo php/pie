@@ -8,6 +8,7 @@ use Composer\Composer;
 use Composer\Installer;
 use Composer\IO\IOInterface;
 use Composer\Repository\PlatformRepository;
+use Php\Pie\ExtensionName;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Webmozart\Assert\Assert;
 
@@ -18,17 +19,23 @@ use Webmozart\Assert\Assert;
  */
 class PieComposerInstaller extends Installer
 {
-    private PhpBinaryPath|null $phpBinaryPath = null;
+    private PhpBinaryPath|null $phpBinaryPath           = null;
+    private ExtensionName|null $extensionBeingInstalled = null;
 
     protected function createPlatformRepo(bool $forUpdate): PlatformRepository
     {
-        Assert::notNull($this->phpBinaryPath, 'PHP Binary path was not set, maybe createWithPhpBinary was not used?');
+        Assert::notNull($this->phpBinaryPath, '$phpBinaryPath was not set, maybe createWithPhpBinary was not used?');
+        Assert::notNull($this->extensionBeingInstalled, '$extensionBeingInstalled was not set, maybe createWithPhpBinary was not used?');
 
-        return new PhpBinaryPathBasedPlatformRepository($this->phpBinaryPath);
+        return new PhpBinaryPathBasedPlatformRepository($this->phpBinaryPath, $this->extensionBeingInstalled);
     }
 
-    public static function createWithPhpBinary(PhpBinaryPath $php, IOInterface $io, Composer $composer): self
-    {
+    public static function createWithPhpBinary(
+        PhpBinaryPath $php,
+        ExtensionName $extensionBeingInstalled,
+        IOInterface $io,
+        Composer $composer,
+    ): self {
         /** @psalm-suppress InvalidArgument some kind of unrelated type mismatch, defined in parent */
         $composerInstaller = new self(
             $io,
@@ -42,7 +49,8 @@ class PieComposerInstaller extends Installer
             $composer->getAutoloadGenerator(),
         );
 
-        $composerInstaller->phpBinaryPath = $php;
+        $composerInstaller->phpBinaryPath           = $php;
+        $composerInstaller->extensionBeingInstalled = $extensionBeingInstalled;
 
         return $composerInstaller;
     }

@@ -8,6 +8,7 @@ use Composer\Package\CompletePackage;
 use Composer\Pcre\Preg;
 use Composer\Repository\PlatformRepository;
 use Composer\Semver\VersionParser;
+use Php\Pie\ExtensionName;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use UnexpectedValueException;
 
@@ -19,7 +20,7 @@ class PhpBinaryPathBasedPlatformRepository extends PlatformRepository
 {
     private VersionParser $versionParser;
 
-    public function __construct(PhpBinaryPath $phpBinaryPath)
+    public function __construct(PhpBinaryPath $phpBinaryPath, ExtensionName|null $extensionBeingInstalled)
     {
         $this->versionParser = new VersionParser();
         $this->packages      = [];
@@ -32,6 +33,16 @@ class PhpBinaryPathBasedPlatformRepository extends PlatformRepository
         $extVersions = $phpBinaryPath->extensions();
 
         foreach ($extVersions as $extension => $extensionVersion) {
+            /**
+             * If the extension we're trying to exclude is not excluded from this list if it is already installed
+             * and enabled, it conflicts when running {@see ComposerIntegrationHandler}.
+             *
+             * @link https://github.com/php/pie/issues/150
+             */
+            if ($extensionBeingInstalled !== null && $extension === $extensionBeingInstalled->name()) {
+                continue;
+            }
+
             $this->addPackage($this->packageForExtension($extension, $extensionVersion));
         }
 

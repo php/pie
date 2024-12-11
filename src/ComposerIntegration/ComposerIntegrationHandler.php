@@ -55,6 +55,7 @@ class ComposerIntegrationHandler
 
         $composerInstaller = PieComposerInstaller::createWithPhpBinary(
             $targetPlatform->phpBinaryPath,
+            $package->extensionName,
             $this->arrayCollectionIo,
             $composer,
         );
