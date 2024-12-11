@@ -11,6 +11,7 @@ use Php\Pie\ExtensionType;
 use Php\Pie\Installing\Ini\AddExtensionToTheIniFile;
 use Php\Pie\Platform\TargetPhp\Exception\ExtensionIsNotLoaded;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
+use Php\Pie\Platform\TargetPlatform;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -41,6 +42,10 @@ final class AddExtensionToTheIniFileTest extends TestCase
 
     public function testReturnsFalseWhenFileIsNotWritable(): void
     {
+        if (TargetPlatform::isRunningAsRoot()) {
+            self::markTestSkipped('Test cannot be run as root, as root can always write files');
+        }
+
         $unwritableFilename = tempnam(sys_get_temp_dir(), 'PIE_unwritable_ini_file');
         touch($unwritableFilename);
         chmod($unwritableFilename, 000);
@@ -76,6 +81,10 @@ final class AddExtensionToTheIniFileTest extends TestCase
 
     public function testReturnsFalseWhenExistingIniCouldNotBeRead(): void
     {
+        if (TargetPlatform::isRunningAsRoot()) {
+            self::markTestSkipped('Test cannot be run as root, as root can always read files');
+        }
+
         $unreadableIniFile = tempnam(sys_get_temp_dir(), 'PIE_unreadable_ini_file');
         touch($unreadableIniFile);
         chmod($unreadableIniFile, 222);

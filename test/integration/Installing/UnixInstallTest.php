@@ -111,6 +111,7 @@ final class UnixInstallTest extends TestCase
             $downloadedPackage,
             $targetPlatform,
             $output,
+            true,
         );
         $outputString          = $output->fetch();
 

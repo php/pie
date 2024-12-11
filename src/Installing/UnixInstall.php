@@ -25,8 +25,12 @@ final class UnixInstall implements Install
     {
     }
 
-    public function __invoke(DownloadedPackage $downloadedPackage, TargetPlatform $targetPlatform, OutputInterface $output): BinaryFile
-    {
+    public function __invoke(
+        DownloadedPackage $downloadedPackage,
+        TargetPlatform $targetPlatform,
+        OutputInterface $output,
+        bool $attemptToSetupIniFile,
+    ): BinaryFile {
         $targetExtensionPath = $targetPlatform->phpBinaryPath->extensionPath();
 
         $sharedObjectName             = $downloadedPackage->package->extensionName->name() . '.so';
@@ -73,6 +77,7 @@ final class UnixInstall implements Install
             $downloadedPackage,
             $binaryFile,
             $output,
+            $attemptToSetupIniFile,
         );
 
         return $binaryFile;
