@@ -77,7 +77,7 @@ final class WindowsInstallTest extends TestCase
 
         $installer = new WindowsInstall(new SetupIniFile(new PickBestSetupIniApproach([])));
 
-        $installedDll = $installer->__invoke($downloadedPackage, $targetPlatform, $output);
+        $installedDll = $installer->__invoke($downloadedPackage, $targetPlatform, $output, true);
         self::assertSame($extensionPath . '\php_pie_test_ext.dll', $installedDll->filePath);
 
         $outputString = $output->fetch();

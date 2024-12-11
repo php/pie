@@ -35,8 +35,12 @@ final class WindowsInstall implements Install
     {
     }
 
-    public function __invoke(DownloadedPackage $downloadedPackage, TargetPlatform $targetPlatform, OutputInterface $output): BinaryFile
-    {
+    public function __invoke(
+        DownloadedPackage $downloadedPackage,
+        TargetPlatform $targetPlatform,
+        OutputInterface $output,
+        bool $attemptToSetupIniFile,
+    ): BinaryFile {
         $extractedSourcePath = $downloadedPackage->extractedSourcePath;
         $sourceDllName       = WindowsExtensionAssetName::determineDllName($targetPlatform, $downloadedPackage);
         $sourcePdbName       = str_replace('.dll', '.pdb', $sourceDllName);
@@ -93,6 +97,7 @@ final class WindowsInstall implements Install
             $downloadedPackage,
             $binaryFile,
             $output,
+            $attemptToSetupIniFile,
         );
 
         return $binaryFile;

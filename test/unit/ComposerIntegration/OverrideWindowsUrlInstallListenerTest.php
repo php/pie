@@ -80,6 +80,7 @@ final class OverrideWindowsUrlInstallListenerTest extends TestCase
                 PieOperation::Install,
                 [],
                 null,
+                false,
             ),
         );
     }
@@ -125,6 +126,7 @@ final class OverrideWindowsUrlInstallListenerTest extends TestCase
                 PieOperation::Install,
                 [],
                 null,
+                false,
             ),
         ))($installerEvent);
 
@@ -182,6 +184,7 @@ final class OverrideWindowsUrlInstallListenerTest extends TestCase
                 PieOperation::Install,
                 [],
                 null,
+                false,
             ),
         ))($installerEvent);
 

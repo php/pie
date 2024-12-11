@@ -26,9 +26,11 @@ class SetupIniFile
         DownloadedPackage $downloadedPackage,
         BinaryFile $binaryFile,
         OutputInterface $output,
+        bool $attemptToSetupIniFile,
     ): void {
         if (
-            $this->setupIniApproach->canBeUsed($targetPlatform)
+            $attemptToSetupIniFile
+            && $this->setupIniApproach->canBeUsed($targetPlatform)
             && $this->setupIniApproach->setup($targetPlatform, $downloadedPackage, $binaryFile, $output)
         ) {
             $output->writeln(sprintf(
@@ -36,6 +38,10 @@ class SetupIniFile
                 $targetPlatform->phpBinaryPath->phpBinaryPath,
             ));
         } else {
+            if (! $attemptToSetupIniFile) {
+                $output->writeln('Automatic extension enabling was skipped.', OutputInterface::VERBOSITY_VERBOSE);
+            }
+
             $output->writeln('<comment>⚠️  Extension has NOT been automatically enabled.</comment>');
             $output->writeln(sprintf(
                 '<comment>You must now add "%s=%s" to your php.ini</comment>',
