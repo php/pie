@@ -6,6 +6,7 @@ namespace Php\PieUnitTest\ComposerIntegration;
 
 use Composer\Package\PackageInterface;
 use Php\Pie\ComposerIntegration\PhpBinaryPathBasedPlatformRepository;
+use Php\Pie\ExtensionName;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
@@ -30,7 +31,7 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
                 'another' => '1.2.3-alpha.34',
             ]);
 
-        $platformRepository = new PhpBinaryPathBasedPlatformRepository($phpBinaryPath);
+        $platformRepository = new PhpBinaryPathBasedPlatformRepository($phpBinaryPath, null);
 
         self::assertSame(
             [
@@ -39,6 +40,35 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
                 'ext-foo:8.1.0',
                 'ext-without-version:0',
                 'ext-another:1.2.3-alpha.34',
+            ],
+            array_map(
+                static fn (PackageInterface $package): string => $package->getName() . ':' . $package->getPrettyVersion(),
+                $platformRepository->getPackages(),
+            ),
+        );
+    }
+
+    public function testPlatformRepositoryExcludesExtensionBeingInstalled(): void
+    {
+        $extensionBeingInstalled = ExtensionName::normaliseFromString('extension_being_installed');
+
+        $phpBinaryPath = $this->createMock(PhpBinaryPath::class);
+        $phpBinaryPath->expects(self::once())
+            ->method('version')
+            ->willReturn('8.1.0');
+        $phpBinaryPath->expects(self::once())
+            ->method('extensions')
+            ->willReturn([
+                'foo' => '8.1.0',
+                'extension_being_installed' => '1.2.3',
+            ]);
+
+        $platformRepository = new PhpBinaryPathBasedPlatformRepository($phpBinaryPath, $extensionBeingInstalled);
+
+        self::assertSame(
+            [
+                'php:8.1.0',
+                'ext-foo:8.1.0',
             ],
             array_map(
                 static fn (PackageInterface $package): string => $package->getName() . ':' . $package->getPrettyVersion(),

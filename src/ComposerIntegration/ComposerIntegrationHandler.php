@@ -53,7 +53,12 @@ class ComposerIntegrationHandler
             $composer->getRepositoryManager()->getLocalRepository()->removePackage($pkg);
         }
 
-        $composerInstaller = Installer::create($this->arrayCollectionIo, $composer);
+        $composerInstaller = PieComposerInstaller::createWithPhpBinary(
+            $targetPlatform->phpBinaryPath,
+            $package->extensionName,
+            $this->arrayCollectionIo,
+            $composer,
+        );
         $composerInstaller
             ->setAllowedTypes(['php-ext', 'php-ext-zend'])
             ->setInstall(true)
