@@ -1,5 +1,10 @@
 # 🥧 PIE (PHP Installer for Extensions)
 
+> [!WARNING]
+> PIE is still in early development. We welcome you to try this out, but please
+> exercise caution when using PIE, as things may go wrong! If you do encounter
+> issues, please do report an issue!
+
 You will need PHP 8.1 or newer to run PIE, but PIE can install an extension to
 any installed PHP version.
 
