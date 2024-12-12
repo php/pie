@@ -13,6 +13,7 @@ use Php\Pie\Platform\TargetPhp\Exception\ExtensionIsNotLoaded;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\RequiresOperatingSystemFamily;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Output\BufferedOutput;
@@ -25,6 +26,8 @@ use function sys_get_temp_dir;
 use function tempnam;
 use function touch;
 use function unlink;
+
+use const PHP_EOL;
 
 #[CoversClass(AddExtensionToTheIniFile::class)]
 final class AddExtensionToTheIniFileTest extends TestCase
@@ -82,6 +85,7 @@ final class AddExtensionToTheIniFileTest extends TestCase
         }
     }
 
+    #[RequiresOperatingSystemFamily('Linux')]
     public function testReturnsFalseWhenExistingIniCouldNotBeRead(): void
     {
         if (TargetPlatform::isRunningAsRoot()) {
@@ -211,7 +215,10 @@ final class AddExtensionToTheIniFileTest extends TestCase
             ));
 
             $iniContent = file_get_contents($iniFile);
-            self::assertSame("\n; PIE automatically added this to enable the foo/bar extension\nextension=foobar\n", $iniContent);
+            self::assertSame(
+                PHP_EOL . '; PIE automatically added this to enable the foo/bar extension' . PHP_EOL . 'extension=foobar' . PHP_EOL,
+                $iniContent,
+            );
 
             self::assertStringContainsString(
                 sprintf('Enabled extension foobar in the INI file %s', $iniFile),
