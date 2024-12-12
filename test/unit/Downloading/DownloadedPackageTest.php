@@ -35,6 +35,7 @@ final class DownloadedPackageTest extends TestCase
             null,
             null,
             null,
+            99,
         );
 
         $extractedSourcePath = uniqid('/path/to/downloaded/package', true);
@@ -60,6 +61,7 @@ final class DownloadedPackageTest extends TestCase
             'Downloading',
             null,
             null,
+            99,
         );
 
         $extractedSourcePath = realpath(__DIR__ . '/../');
