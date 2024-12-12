@@ -10,13 +10,11 @@ use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
-use Php\Pie\Installing\Ini\AddExtensionToTheIniFile;
-use Php\Pie\Installing\Ini\IsExtensionAlreadyInTheIniFile;
+use Php\Pie\Installing\Ini\CheckAndAddExtensionToIniIfNeeded;
 use Php\Pie\Installing\Ini\StandardSinglePhpIni;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
 use Php\Pie\Platform\OperatingSystemFamily;
-use Php\Pie\Platform\TargetPhp\Exception\ExtensionIsNotLoaded;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\ThreadSafetyMode;
@@ -32,8 +30,7 @@ final class StandardSinglePhpIniTest extends TestCase
 
     private BufferedOutput $output;
     private PhpBinaryPath&MockObject $mockPhpBinary;
-    private IsExtensionAlreadyInTheIniFile&MockObject $isExtensionAlreadyInTheIniFile;
-    private AddExtensionToTheIniFile&MockObject $addExtensionToTheIniFile;
+    private CheckAndAddExtensionToIniIfNeeded&MockObject $checkAndAddExtensionToIniIfNeeded;
     private TargetPlatform $targetPlatform;
     private DownloadedPackage $downloadedPackage;
     private BinaryFile $binaryFile;
@@ -53,8 +50,7 @@ final class StandardSinglePhpIniTest extends TestCase
         (fn () => $this->phpBinaryPath = '/path/to/php')
             ->bindTo($this->mockPhpBinary, PhpBinaryPath::class)();
 
-        $this->isExtensionAlreadyInTheIniFile = $this->createMock(IsExtensionAlreadyInTheIniFile::class);
-        $this->addExtensionToTheIniFile       = $this->createMock(AddExtensionToTheIniFile::class);
+        $this->checkAndAddExtensionToIniIfNeeded = $this->createMock(CheckAndAddExtensionToIniIfNeeded::class);
 
         $this->targetPlatform = new TargetPlatform(
             OperatingSystem::NonWindows,
@@ -88,8 +84,7 @@ final class StandardSinglePhpIniTest extends TestCase
         $this->binaryFile = new BinaryFile('/path/to/compiled/extension.so', 'fake checksum');
 
         $this->standardSinglePhpIni = new StandardSinglePhpIni(
-            $this->isExtensionAlreadyInTheIniFile,
-            $this->addExtensionToTheIniFile,
+            $this->checkAndAddExtensionToIniIfNeeded,
         );
     }
 
@@ -113,37 +108,14 @@ final class StandardSinglePhpIniTest extends TestCase
         self::assertTrue($this->standardSinglePhpIni->canBeUsed($this->targetPlatform));
     }
 
-    public function testSetupReturnsWhenCannotBeUsed(): void
+    public function testSetupReturnsWhenIniFileIsNotSet(): void
     {
         $this->mockPhpBinary
             ->expects(self::once())
             ->method('phpinfo')
             ->willReturn('Loaded Configuration File => (none)');
 
-        self::assertFalse($this->standardSinglePhpIni->setup(
-            $this->targetPlatform,
-            $this->downloadedPackage,
-            $this->binaryFile,
-            $this->output,
-        ));
-    }
-
-    public function testSetupWhenIniFileDoesNotExist(): void
-    {
-        $this->mockPhpBinary
-            ->expects(self::once())
-            ->method('phpinfo')
-            ->willReturn('Loaded Configuration File => /path/to/non/existent/php.ini');
-
-        $this->isExtensionAlreadyInTheIniFile
-            ->expects(self::never())
-            ->method('__invoke');
-
-        $this->mockPhpBinary
-            ->expects(self::never())
-            ->method('assertExtensionIsLoadedInRuntime');
-
-        $this->addExtensionToTheIniFile
+        $this->checkAndAddExtensionToIniIfNeeded
             ->expects(self::never())
             ->method('__invoke');
 
@@ -153,117 +125,22 @@ final class StandardSinglePhpIniTest extends TestCase
             $this->binaryFile,
             $this->output,
         ));
-
-        self::assertStringContainsString(
-            'PHP is configured to use /path/to/non/existent/php.ini, but it did not exist, or is not readable by PIE.',
-            $this->output->fetch(),
-        );
     }
 
-    public function testExtensionIsAlreadyEnabledButExtensionDoesNotLoad(): void
+    public function testReturnsTrueWhenCheckAndAddExtensionIsInvoked(): void
     {
         $this->mockPhpBinary
             ->expects(self::once())
             ->method('phpinfo')
             ->willReturn('Loaded Configuration File => ' . self::INI_FILE);
 
-        $this->isExtensionAlreadyInTheIniFile
-            ->expects(self::once())
-            ->method('__invoke')
-            ->with(self::INI_FILE, $this->downloadedPackage->package->extensionName)
-            ->willReturn(true);
-
-        $this->mockPhpBinary
-            ->expects(self::once())
-            ->method('assertExtensionIsLoadedInRuntime')
-            ->with($this->downloadedPackage->package->extensionName, $this->output)
-            ->willThrowException(ExtensionIsNotLoaded::fromExpectedExtension(
-                $this->mockPhpBinary,
-                $this->downloadedPackage->package->extensionName,
-            ));
-
-        $this->addExtensionToTheIniFile
-            ->expects(self::never())
-            ->method('__invoke');
-
-        self::assertFalse($this->standardSinglePhpIni->setup(
-            $this->targetPlatform,
-            $this->downloadedPackage,
-            $this->binaryFile,
-            $this->output,
-        ));
-
-        $output = $this->output->fetch();
-        self::assertStringContainsString(
-            'Extension is already enabled in the INI file',
-            $output,
-        );
-        self::assertStringContainsString(
-            'Something went wrong verifying the foobar extension is enabled: Expected extension foobar to be loaded in PHP /path/to/php, but it was not detected.',
-            $output,
-        );
-    }
-
-    public function testExtensionIsAlreadyEnabledAndExtensionLoaded(): void
-    {
-        $this->mockPhpBinary
-            ->expects(self::once())
-            ->method('phpinfo')
-            ->willReturn('Loaded Configuration File => ' . self::INI_FILE);
-
-        $this->isExtensionAlreadyInTheIniFile
-            ->expects(self::once())
-            ->method('__invoke')
-            ->with(self::INI_FILE, $this->downloadedPackage->package->extensionName)
-            ->willReturn(true);
-
-        $this->mockPhpBinary
-            ->expects(self::once())
-            ->method('assertExtensionIsLoadedInRuntime')
-            ->with($this->downloadedPackage->package->extensionName, $this->output);
-
-        $this->addExtensionToTheIniFile
-            ->expects(self::never())
-            ->method('__invoke');
-
-        self::assertTrue($this->standardSinglePhpIni->setup(
-            $this->targetPlatform,
-            $this->downloadedPackage,
-            $this->binaryFile,
-            $this->output,
-        ));
-
-        $output = $this->output->fetch();
-        self::assertStringContainsString(
-            'Extension is already enabled in the INI file',
-            $output,
-        );
-    }
-
-    public function testExtensionIsNotYetAdded(): void
-    {
-        $this->mockPhpBinary
-            ->expects(self::once())
-            ->method('phpinfo')
-            ->willReturn('Loaded Configuration File => ' . self::INI_FILE);
-
-        $this->isExtensionAlreadyInTheIniFile
-            ->expects(self::once())
-            ->method('__invoke')
-            ->with(self::INI_FILE, $this->downloadedPackage->package->extensionName)
-            ->willReturn(false);
-
-        $this->mockPhpBinary
-            ->expects(self::never())
-            ->method('assertExtensionIsLoadedInRuntime');
-
-        $this->addExtensionToTheIniFile
+        $this->checkAndAddExtensionToIniIfNeeded
             ->expects(self::once())
             ->method('__invoke')
             ->with(
                 self::INI_FILE,
-                $this->downloadedPackage->package,
-                $this->targetPlatform->phpBinaryPath,
+                $this->targetPlatform,
+                $this->downloadedPackage,
                 $this->output,
             )
             ->willReturn(true);
@@ -276,30 +153,20 @@ final class StandardSinglePhpIniTest extends TestCase
         ));
     }
 
-    public function testExtensionIsNotYetAddedButFailsToBeAdded(): void
+    public function testReturnsFalseWhenCheckAndAddExtensionIsInvoked(): void
     {
         $this->mockPhpBinary
             ->expects(self::once())
             ->method('phpinfo')
             ->willReturn('Loaded Configuration File => ' . self::INI_FILE);
 
-        $this->isExtensionAlreadyInTheIniFile
-            ->expects(self::once())
-            ->method('__invoke')
-            ->with(self::INI_FILE, $this->downloadedPackage->package->extensionName)
-            ->willReturn(false);
-
-        $this->mockPhpBinary
-            ->expects(self::never())
-            ->method('assertExtensionIsLoadedInRuntime');
-
-        $this->addExtensionToTheIniFile
+        $this->checkAndAddExtensionToIniIfNeeded
             ->expects(self::once())
             ->method('__invoke')
             ->with(
                 self::INI_FILE,
-                $this->downloadedPackage->package,
-                $this->targetPlatform->phpBinaryPath,
+                $this->targetPlatform,
+                $this->downloadedPackage,
                 $this->output,
             )
             ->willReturn(false);
