@@ -1,0 +1,244 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Php\PieUnitTest\Installing\Ini;
+
+use Composer\Package\CompletePackageInterface;
+use Php\Pie\BinaryFile;
+use Php\Pie\DependencyResolver\Package;
+use Php\Pie\Downloading\DownloadedPackage;
+use Php\Pie\ExtensionName;
+use Php\Pie\ExtensionType;
+use Php\Pie\Installing\Ini\CheckAndAddExtensionToIniIfNeeded;
+use Php\Pie\Installing\Ini\StandardAdditionalPhpIniDirectory;
+use Php\Pie\Platform\Architecture;
+use Php\Pie\Platform\OperatingSystem;
+use Php\Pie\Platform\OperatingSystemFamily;
+use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
+use Php\Pie\Platform\TargetPlatform;
+use Php\Pie\Platform\ThreadSafetyMode;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
+use Symfony\Component\Console\Output\BufferedOutput;
+
+use function mkdir;
+use function rmdir;
+use function sys_get_temp_dir;
+use function tempnam;
+use function touch;
+use function unlink;
+
+use const DIRECTORY_SEPARATOR;
+
+#[CoversClass(StandardAdditionalPhpIniDirectory::class)]
+final class StandardAdditionalPhpIniDirectoryTest extends TestCase
+{
+    private BufferedOutput $output;
+    private PhpBinaryPath&MockObject $mockPhpBinary;
+    private CheckAndAddExtensionToIniIfNeeded&MockObject $checkAndAddExtensionToIniIfNeeded;
+    private TargetPlatform $targetPlatform;
+    private DownloadedPackage $downloadedPackage;
+    private BinaryFile $binaryFile;
+    private StandardAdditionalPhpIniDirectory $standardAdditionalPhpIniDirectory;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->output = new BufferedOutput(BufferedOutput::VERBOSITY_VERBOSE);
+
+        $this->mockPhpBinary = $this->createMock(PhpBinaryPath::class);
+        /**
+         * @psalm-suppress PossiblyNullFunctionCall
+         * @psalm-suppress UndefinedThisPropertyAssignment
+         */
+        (fn () => $this->phpBinaryPath = '/path/to/php')
+            ->bindTo($this->mockPhpBinary, PhpBinaryPath::class)();
+
+        $this->checkAndAddExtensionToIniIfNeeded = $this->createMock(CheckAndAddExtensionToIniIfNeeded::class);
+
+        $this->targetPlatform = new TargetPlatform(
+            OperatingSystem::NonWindows,
+            OperatingSystemFamily::Linux,
+            $this->mockPhpBinary,
+            Architecture::x86_64,
+            ThreadSafetyMode::ThreadSafe,
+            1,
+            null,
+        );
+
+        $this->downloadedPackage = DownloadedPackage::fromPackageAndExtractedPath(
+            new Package(
+                $this->createMock(CompletePackageInterface::class),
+                ExtensionType::PhpModule,
+                ExtensionName::normaliseFromString('foobar'),
+                'foo/bar',
+                '1.2.3',
+                null,
+                [],
+                true,
+                true,
+                null,
+                null,
+                null,
+                99,
+            ),
+            '/path/to/extracted/source',
+        );
+
+        $this->binaryFile = new BinaryFile('/path/to/compiled/extension.so', 'fake checksum');
+
+        $this->standardAdditionalPhpIniDirectory = new StandardAdditionalPhpIniDirectory(
+            $this->checkAndAddExtensionToIniIfNeeded,
+        );
+    }
+
+    public function testCannotBeUsedWithNoDefinedAdditionalPhpIniDirectory(): void
+    {
+        $this->mockPhpBinary
+            ->expects(self::once())
+            ->method('phpinfo')
+            ->willReturn('Scan this dir for additional .ini files => (none)');
+
+        self::assertFalse($this->standardAdditionalPhpIniDirectory->canBeUsed($this->targetPlatform));
+    }
+
+    public function testCanBeUsedWithDefinedAdditionalPhpIniDirectory(): void
+    {
+        $this->mockPhpBinary
+            ->expects(self::once())
+            ->method('phpinfo')
+            ->willReturn('Scan this dir for additional .ini files => /path/to/the/php.d');
+
+        self::assertTrue($this->standardAdditionalPhpIniDirectory->canBeUsed($this->targetPlatform));
+    }
+
+    public function testSetupReturnsWhenAdditionalPhpIniDirectoryIsNotSet(): void
+    {
+        $this->mockPhpBinary
+            ->expects(self::once())
+            ->method('phpinfo')
+            ->willReturn('Scan this dir for additional .ini files => (none)');
+
+        $this->checkAndAddExtensionToIniIfNeeded
+            ->expects(self::never())
+            ->method('__invoke');
+
+        self::assertFalse($this->standardAdditionalPhpIniDirectory->setup(
+            $this->targetPlatform,
+            $this->downloadedPackage,
+            $this->binaryFile,
+            $this->output,
+        ));
+    }
+
+    public function testReturnsTrueWhenCheckAndAddExtensionIsInvoked(): void
+    {
+        $additionalPhpIniDirectory = tempnam(sys_get_temp_dir(), 'pie_additional_php_ini_path');
+        unlink($additionalPhpIniDirectory);
+        mkdir($additionalPhpIniDirectory, recursive: true);
+
+        $expectedIniFile = $additionalPhpIniDirectory . DIRECTORY_SEPARATOR . '99-foobar.ini';
+
+        $this->mockPhpBinary
+            ->expects(self::once())
+            ->method('phpinfo')
+            ->willReturn('Scan this dir for additional .ini files => ' . $additionalPhpIniDirectory);
+
+        $this->checkAndAddExtensionToIniIfNeeded
+            ->expects(self::once())
+            ->method('__invoke')
+            ->with(
+                $expectedIniFile,
+                $this->targetPlatform,
+                $this->downloadedPackage,
+                $this->output,
+            )
+            ->willReturn(true);
+
+        self::assertTrue($this->standardAdditionalPhpIniDirectory->setup(
+            $this->targetPlatform,
+            $this->downloadedPackage,
+            $this->binaryFile,
+            $this->output,
+        ));
+        self::assertFileExists($expectedIniFile);
+
+        unlink($expectedIniFile);
+        rmdir($additionalPhpIniDirectory);
+    }
+
+    public function testReturnsFalseAndRemovesPieCreatedIniFileWhenCheckAndAddExtensionIsInvoked(): void
+    {
+        $additionalPhpIniDirectory = tempnam(sys_get_temp_dir(), 'pie_additional_php_ini_path');
+        unlink($additionalPhpIniDirectory);
+        mkdir($additionalPhpIniDirectory, recursive: true);
+
+        $expectedIniFile = $additionalPhpIniDirectory . DIRECTORY_SEPARATOR . '99-foobar.ini';
+
+        $this->mockPhpBinary
+            ->expects(self::once())
+            ->method('phpinfo')
+            ->willReturn('Scan this dir for additional .ini files => ' . $additionalPhpIniDirectory);
+
+        $this->checkAndAddExtensionToIniIfNeeded
+            ->expects(self::once())
+            ->method('__invoke')
+            ->with(
+                $expectedIniFile,
+                $this->targetPlatform,
+                $this->downloadedPackage,
+                $this->output,
+            )
+            ->willReturn(false);
+
+        self::assertFalse($this->standardAdditionalPhpIniDirectory->setup(
+            $this->targetPlatform,
+            $this->downloadedPackage,
+            $this->binaryFile,
+            $this->output,
+        ));
+        self::assertFileDoesNotExist($expectedIniFile);
+
+        rmdir($additionalPhpIniDirectory);
+    }
+
+    public function testReturnsFalseAndLeavesNonPieCreatedIniFileWhenCheckAndAddExtensionIsInvoked(): void
+    {
+        $additionalPhpIniDirectory = tempnam(sys_get_temp_dir(), 'pie_additional_php_ini_path');
+        unlink($additionalPhpIniDirectory);
+        mkdir($additionalPhpIniDirectory, recursive: true);
+
+        $expectedIniFile = $additionalPhpIniDirectory . DIRECTORY_SEPARATOR . '99-foobar.ini';
+        touch($expectedIniFile);
+
+        $this->mockPhpBinary
+            ->expects(self::once())
+            ->method('phpinfo')
+            ->willReturn('Scan this dir for additional .ini files => ' . $additionalPhpIniDirectory);
+
+        $this->checkAndAddExtensionToIniIfNeeded
+            ->expects(self::once())
+            ->method('__invoke')
+            ->with(
+                $expectedIniFile,
+                $this->targetPlatform,
+                $this->downloadedPackage,
+                $this->output,
+            )
+            ->willReturn(false);
+
+        self::assertFalse($this->standardAdditionalPhpIniDirectory->setup(
+            $this->targetPlatform,
+            $this->downloadedPackage,
+            $this->binaryFile,
+            $this->output,
+        ));
+        self::assertFileExists($expectedIniFile);
+
+        unlink($expectedIniFile);
+        rmdir($additionalPhpIniDirectory);
+    }
+}
