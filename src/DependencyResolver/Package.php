@@ -47,6 +47,7 @@ final class Package
         public readonly string|null $buildPath,
         public readonly array|null $compatibleOsFamilies,
         public readonly array|null $incompatibleOsFamilies,
+        public readonly int $priority,
     ) {
     }
 
@@ -93,6 +94,7 @@ final class Package
             $buildPath,
             self::convertInputStringsToOperatingSystemFamilies($compatibleOsFamilies),
             self::convertInputStringsToOperatingSystemFamilies($incompatibleOsFamilies),
+            $phpExtOptions['priority'] ?? 80,
         );
     }
 

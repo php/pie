@@ -71,6 +71,7 @@ final class PreCheckExtensionAlreadyLoadedTest extends TestCase
                 null,
                 null,
                 null,
+                99,
             ),
             '/path/to/extracted/source',
         );
