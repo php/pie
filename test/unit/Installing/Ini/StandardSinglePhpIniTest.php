@@ -80,6 +80,7 @@ final class StandardSinglePhpIniTest extends TestCase
                 null,
                 null,
                 null,
+                99,
             ),
             '/path/to/extracted/source',
         );
