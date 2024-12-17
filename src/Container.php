@@ -77,6 +77,7 @@ final class Container
             static function (ContainerInterface $container): Ini\SetupIniApproach {
                 return new Ini\PickBestSetupIniApproach([
                     $container->get(Ini\PreCheckExtensionAlreadyLoaded::class),
+                    $container->get(Ini\DockerPhpExtEnable::class),
                     $container->get(Ini\StandardAdditionalPhpIniDirectory::class),
                     $container->get(Ini\StandardSinglePhpIni::class),
                 ]);
