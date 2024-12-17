@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+echo "something bad happened"
+exit 1
