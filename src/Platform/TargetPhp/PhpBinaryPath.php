@@ -138,6 +138,36 @@ class PhpBinaryPath
         );
     }
 
+    /** @return non-empty-string|null */
+    public function additionalIniDirectory(): string|null
+    {
+        if (
+            preg_match('/Scan this dir for additional \.ini files([ =>\t]*)(.*)/', $this->phpinfo(), $m)
+            && array_key_exists(2, $m)
+            && $m[2] !== ''
+            && $m[2] !== '(none)'
+        ) {
+            return $m[2];
+        }
+
+        return null;
+    }
+
+    /** @return non-empty-string|null */
+    public function loadedIniConfigurationFile(): string|null
+    {
+        if (
+            preg_match('/Loaded Configuration File([ =>\t]*)(.*)/', $this->phpinfo(), $m)
+            && array_key_exists(2, $m)
+            && $m[2] !== ''
+            && $m[2] !== '(none)'
+        ) {
+            return $m[2];
+        }
+
+        return null;
+    }
+
     /**
      * Returns a map where the key is the name of the extension and the value is the version ('0' if not defined)
      *
