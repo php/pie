@@ -9,9 +9,6 @@ use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\Platform\TargetPlatform;
 use Symfony\Component\Console\Output\OutputInterface;
 
-use function array_key_exists;
-use function preg_match;
-
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class StandardSinglePhpIni implements SetupIniApproach
 {
@@ -22,7 +19,7 @@ final class StandardSinglePhpIni implements SetupIniApproach
 
     public function canBeUsed(TargetPlatform $targetPlatform): bool
     {
-        return $this->extractPhpIniFromPhpInfo($targetPlatform->phpBinaryPath->phpinfo()) !== null;
+        return $targetPlatform->phpBinaryPath->loadedIniConfigurationFile() !== null;
     }
 
     public function setup(
@@ -31,7 +28,7 @@ final class StandardSinglePhpIni implements SetupIniApproach
         BinaryFile $binaryFile,
         OutputInterface $output,
     ): bool {
-        $ini = $this->extractPhpIniFromPhpInfo($targetPlatform->phpBinaryPath->phpinfo());
+        $ini = $targetPlatform->phpBinaryPath->loadedIniConfigurationFile();
 
         /** In practice, this shouldn't happen since {@see canBeUsed()} checks this */
         if ($ini === null) {
@@ -44,20 +41,5 @@ final class StandardSinglePhpIni implements SetupIniApproach
             $downloadedPackage,
             $output,
         );
-    }
-
-    /** @return non-empty-string|null */
-    private function extractPhpIniFromPhpInfo(string $phpinfoString): string|null
-    {
-        if (
-            preg_match('/Loaded Configuration File([ =>\t]*)(.*)/', $phpinfoString, $m)
-            && array_key_exists(2, $m)
-            && $m[2] !== ''
-            && $m[2] !== '(none)'
-        ) {
-            return $m[2];
-        }
-
-        return null;
     }
 }

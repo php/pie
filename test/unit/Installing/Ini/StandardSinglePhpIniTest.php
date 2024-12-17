@@ -92,8 +92,8 @@ final class StandardSinglePhpIniTest extends TestCase
     {
         $this->mockPhpBinary
             ->expects(self::once())
-            ->method('phpinfo')
-            ->willReturn('Loaded Configuration File => (none)');
+            ->method('loadedIniConfigurationFile')
+            ->willReturn(null);
 
         self::assertFalse($this->standardSinglePhpIni->canBeUsed($this->targetPlatform));
     }
@@ -102,8 +102,8 @@ final class StandardSinglePhpIniTest extends TestCase
     {
         $this->mockPhpBinary
             ->expects(self::once())
-            ->method('phpinfo')
-            ->willReturn('Loaded Configuration File => /path/to/php.ini');
+            ->method('loadedIniConfigurationFile')
+            ->willReturn('/path/to/php.ini');
 
         self::assertTrue($this->standardSinglePhpIni->canBeUsed($this->targetPlatform));
     }
@@ -112,8 +112,8 @@ final class StandardSinglePhpIniTest extends TestCase
     {
         $this->mockPhpBinary
             ->expects(self::once())
-            ->method('phpinfo')
-            ->willReturn('Loaded Configuration File => (none)');
+            ->method('loadedIniConfigurationFile')
+            ->willReturn(null);
 
         $this->checkAndAddExtensionToIniIfNeeded
             ->expects(self::never())
@@ -131,8 +131,8 @@ final class StandardSinglePhpIniTest extends TestCase
     {
         $this->mockPhpBinary
             ->expects(self::once())
-            ->method('phpinfo')
-            ->willReturn('Loaded Configuration File => ' . self::INI_FILE);
+            ->method('loadedIniConfigurationFile')
+            ->willReturn(self::INI_FILE);
 
         $this->checkAndAddExtensionToIniIfNeeded
             ->expects(self::once())
@@ -157,8 +157,8 @@ final class StandardSinglePhpIniTest extends TestCase
     {
         $this->mockPhpBinary
             ->expects(self::once())
-            ->method('phpinfo')
-            ->willReturn('Loaded Configuration File => ' . self::INI_FILE);
+            ->method('loadedIniConfigurationFile')
+            ->willReturn(self::INI_FILE);
 
         $this->checkAndAddExtensionToIniIfNeeded
             ->expects(self::once())

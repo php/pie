@@ -99,8 +99,8 @@ final class StandardAdditionalPhpIniDirectoryTest extends TestCase
     {
         $this->mockPhpBinary
             ->expects(self::once())
-            ->method('phpinfo')
-            ->willReturn('Scan this dir for additional .ini files => (none)');
+            ->method('additionalIniDirectory')
+            ->willReturn(null);
 
         self::assertFalse($this->standardAdditionalPhpIniDirectory->canBeUsed($this->targetPlatform));
     }
@@ -109,8 +109,8 @@ final class StandardAdditionalPhpIniDirectoryTest extends TestCase
     {
         $this->mockPhpBinary
             ->expects(self::once())
-            ->method('phpinfo')
-            ->willReturn('Scan this dir for additional .ini files => /path/to/the/php.d');
+            ->method('additionalIniDirectory')
+            ->willReturn('/path/to/the/php.d');
 
         self::assertTrue($this->standardAdditionalPhpIniDirectory->canBeUsed($this->targetPlatform));
     }
@@ -119,8 +119,8 @@ final class StandardAdditionalPhpIniDirectoryTest extends TestCase
     {
         $this->mockPhpBinary
             ->expects(self::once())
-            ->method('phpinfo')
-            ->willReturn('Scan this dir for additional .ini files => (none)');
+            ->method('additionalIniDirectory')
+            ->willReturn(null);
 
         $this->checkAndAddExtensionToIniIfNeeded
             ->expects(self::never())
@@ -144,8 +144,8 @@ final class StandardAdditionalPhpIniDirectoryTest extends TestCase
 
         $this->mockPhpBinary
             ->expects(self::once())
-            ->method('phpinfo')
-            ->willReturn('Scan this dir for additional .ini files => ' . $additionalPhpIniDirectory);
+            ->method('additionalIniDirectory')
+            ->willReturn($additionalPhpIniDirectory);
 
         $this->checkAndAddExtensionToIniIfNeeded
             ->expects(self::once())
@@ -180,8 +180,8 @@ final class StandardAdditionalPhpIniDirectoryTest extends TestCase
 
         $this->mockPhpBinary
             ->expects(self::once())
-            ->method('phpinfo')
-            ->willReturn('Scan this dir for additional .ini files => ' . $additionalPhpIniDirectory);
+            ->method('additionalIniDirectory')
+            ->willReturn($additionalPhpIniDirectory);
 
         $this->checkAndAddExtensionToIniIfNeeded
             ->expects(self::once())
@@ -216,8 +216,8 @@ final class StandardAdditionalPhpIniDirectoryTest extends TestCase
 
         $this->mockPhpBinary
             ->expects(self::once())
-            ->method('phpinfo')
-            ->willReturn('Scan this dir for additional .ini files => ' . $additionalPhpIniDirectory);
+            ->method('additionalIniDirectory')
+            ->willReturn($additionalPhpIniDirectory);
 
         $this->checkAndAddExtensionToIniIfNeeded
             ->expects(self::once())

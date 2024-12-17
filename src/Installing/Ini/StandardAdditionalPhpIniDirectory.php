@@ -9,9 +9,7 @@ use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\Platform\TargetPlatform;
 use Symfony\Component\Console\Output\OutputInterface;
 
-use function array_key_exists;
 use function file_exists;
-use function preg_match;
 use function rtrim;
 use function sprintf;
 use function touch;
@@ -29,7 +27,7 @@ final class StandardAdditionalPhpIniDirectory implements SetupIniApproach
 
     public function canBeUsed(TargetPlatform $targetPlatform): bool
     {
-        return $this->extractIniDirectoryFromPhpInfo($targetPlatform->phpBinaryPath->phpinfo()) !== null;
+        return $targetPlatform->phpBinaryPath->additionalIniDirectory() !== null;
     }
 
     public function setup(
@@ -38,9 +36,9 @@ final class StandardAdditionalPhpIniDirectory implements SetupIniApproach
         BinaryFile $binaryFile,
         OutputInterface $output,
     ): bool {
-        $phpinfo = $targetPlatform->phpBinaryPath->phpinfo();
+        $additionalIniFilesPath = $targetPlatform->phpBinaryPath->additionalIniDirectory();
 
-        $additionalIniFilesPath = $this->extractIniDirectoryFromPhpInfo($phpinfo);
+        /** In practice, this shouldn't happen since {@see canBeUsed()} checks this */
         if ($additionalIniFilesPath === null) {
             return false;
         }
@@ -78,19 +76,5 @@ final class StandardAdditionalPhpIniDirectory implements SetupIniApproach
         }
 
         return $addingExtensionWasSuccessful;
-    }
-
-    private function extractIniDirectoryFromPhpInfo(string $phpinfoString): string|null
-    {
-        if (
-            preg_match('/Scan this dir for additional \.ini files([ =>\t]*)(.*)/', $phpinfoString, $m)
-            && array_key_exists(2, $m)
-            && $m[2] !== ''
-            && $m[2] !== '(none)'
-        ) {
-            return $m[2];
-        }
-
-        return null;
     }
 }
