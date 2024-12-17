@@ -90,6 +90,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
                     PieOperation::Resolve,
                     [],
                     null,
+                    false,
                 ),
             ),
             $targetPlatform,

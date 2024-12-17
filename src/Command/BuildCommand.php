@@ -54,6 +54,7 @@ final class BuildCommand extends Command
                 PieOperation::Resolve,
                 [], // Configure options are not needed for resolve only
                 null,
+                false, // setting up INI not needed for build
             ),
         );
 
@@ -74,6 +75,7 @@ final class BuildCommand extends Command
                 PieOperation::Build,
                 $configureOptionsValues,
                 CommandHelper::determinePhpizePathFromInputs($input),
+                false, // setting up INI not needed for build
             ),
         );
 
