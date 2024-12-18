@@ -52,11 +52,7 @@ class AddExtensionToTheIniFile
         try {
             file_put_contents(
                 $ini,
-                $originalIniContent . PHP_EOL
-                . '; PIE automatically added this to enable the ' . $package->name . ' extension' . PHP_EOL
-                . ($package->extensionType === ExtensionType::PhpModule ? 'extension' : 'zend_extension')
-                . '='
-                . $package->extensionName->name() . PHP_EOL,
+                $originalIniContent . $this->iniFileContent($package),
             );
             $output->writeln(
                 sprintf(
@@ -81,5 +77,16 @@ class AddExtensionToTheIniFile
 
             return false;
         }
+    }
+
+    /** @return non-empty-string */
+    private function iniFileContent(Package $package): string
+    {
+        return PHP_EOL
+            . '; PIE automatically added this to enable the ' . $package->name . ' extension' . PHP_EOL
+            . '; priority=' . $package->priority . PHP_EOL
+            . ($package->extensionType === ExtensionType::PhpModule ? 'extension' : 'zend_extension')
+            . '='
+            . $package->extensionName->name() . PHP_EOL;
     }
 }
