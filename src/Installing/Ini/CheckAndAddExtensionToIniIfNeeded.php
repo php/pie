@@ -22,12 +22,16 @@ class CheckAndAddExtensionToIniIfNeeded
     ) {
     }
 
-    /** @param non-empty-string $iniFile */
+    /**
+     * @param non-empty-string     $iniFile
+     * @param callable():bool|null $additionalEnableStep
+     */
     public function __invoke(
         string $iniFile,
         TargetPlatform $targetPlatform,
         DownloadedPackage $downloadedPackage,
         OutputInterface $output,
+        callable|null $additionalEnableStep,
     ): bool {
         if (! file_exists($iniFile) || ! is_readable($iniFile)) {
             $output->writeln(
@@ -50,6 +54,10 @@ class CheckAndAddExtensionToIniIfNeeded
                 OutputInterface::VERBOSITY_VERBOSE,
             );
 
+            if ($additionalEnableStep !== null && ! $additionalEnableStep()) {
+                return false;
+            }
+
             try {
                 $targetPlatform->phpBinaryPath->assertExtensionIsLoadedInRuntime($downloadedPackage->package->extensionName, $output);
 
@@ -65,6 +73,12 @@ class CheckAndAddExtensionToIniIfNeeded
             }
         }
 
-        return ($this->addExtensionToTheIniFile)($iniFile, $downloadedPackage->package, $targetPlatform->phpBinaryPath, $output);
+        return ($this->addExtensionToTheIniFile)(
+            $iniFile,
+            $downloadedPackage->package,
+            $targetPlatform->phpBinaryPath,
+            $output,
+            $additionalEnableStep,
+        );
     }
 }

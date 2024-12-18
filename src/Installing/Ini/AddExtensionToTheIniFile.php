@@ -21,8 +21,14 @@ use const PHP_EOL;
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 class AddExtensionToTheIniFile
 {
-    public function __invoke(string $ini, Package $package, PhpBinaryPath $phpBinaryPath, OutputInterface $output): bool
-    {
+    /** @param callable():bool|null $additionalEnableStep */
+    public function __invoke(
+        string $ini,
+        Package $package,
+        PhpBinaryPath $phpBinaryPath,
+        OutputInterface $output,
+        callable|null $additionalEnableStep,
+    ): bool {
         if (! is_writable($ini)) {
             $output->writeln(
                 sprintf(
@@ -62,6 +68,10 @@ class AddExtensionToTheIniFile
                 ),
                 OutputInterface::VERBOSITY_VERBOSE,
             );
+
+            if ($additionalEnableStep !== null && ! $additionalEnableStep()) {
+                return false;
+            }
 
             $phpBinaryPath->assertExtensionIsLoadedInRuntime($package->extensionName, $output);
 
