@@ -7,6 +7,9 @@ namespace Php\Pie\Util;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process as SymfonyProcess;
 
+use function explode;
+use function implode;
+use function preg_match;
 use function trim;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
@@ -36,9 +39,31 @@ final class Process
         string|null $workingDirectory = null,
         int|null $timeout = 5,
         callable|null $outputCallback = null,
+        bool $cleanWarningsAndDeprecations = false,
     ): string {
-        return trim((new SymfonyProcess($command, $workingDirectory, timeout: $timeout))
+        $output = trim((new SymfonyProcess($command, $workingDirectory, timeout: $timeout))
             ->mustRun($outputCallback)
             ->getOutput());
+
+        if ($cleanWarningsAndDeprecations) {
+            return self::cleanLanguageWarningAndDeprecations($output);
+        }
+
+        return $output;
+    }
+
+    private static function cleanLanguageWarningAndDeprecations(string $testOutput): string
+    {
+        $testOutput = explode("\n", $testOutput);
+
+        foreach ($testOutput as $key => $line) {
+            if (! preg_match('/^(Deprecated|Warning):/', $line)) {
+                continue;
+            }
+
+            unset($testOutput[$key]);
+        }
+
+        return implode("\n", $testOutput);
     }
 }
