@@ -58,7 +58,7 @@ class PhpBinaryPath
 
         // This is somewhat of a rudimentary check that the target PHP really is a PHP instance; not sure why you
         // WOULDN'T want to use a real PHP, but this should stop obvious hiccups at least (rather than for security)
-        $testOutput = Process::run([$phpBinaryPath, '-r', 'echo "PHP";']);
+        $testOutput = Process::run([$phpBinaryPath, '-r', 'echo "PHP";'], cleanWarningsAndDeprecations: true);
 
         if ($testOutput !== 'PHP') {
             throw Exception\InvalidPhpBinaryPath::fromInvalidPhpBinary($phpBinaryPath);
@@ -139,7 +139,7 @@ echo implode("\n", array_map(
     $extVersions
 ));
 PHP,
-        ]);
+        ], cleanWarningsAndDeprecations: true);
 
         $pairs = array_map(
             static fn (string $row) => explode(':', $row),
@@ -158,7 +158,7 @@ PHP,
             $this->phpBinaryPath,
             '-r',
             'echo \\defined(\'PHP_WINDOWS_VERSION_BUILD\') ? \'win\' : \'not\';',
-        ]);
+        ], cleanWarningsAndDeprecations: true);
         Assert::stringNotEmpty($winOrNot, 'Could not determine PHP version');
 
         return $winOrNot === 'win' ? OperatingSystem::Windows : OperatingSystem::NonWindows;
@@ -171,7 +171,7 @@ PHP,
             $this->phpBinaryPath,
             '-r',
             'echo PHP_MAJOR_VERSION . "." . PHP_MINOR_VERSION . "." . PHP_RELEASE_VERSION;',
-        ]);
+        ], cleanWarningsAndDeprecations: true);
         Assert::stringNotEmpty($phpVersion, 'Could not determine PHP version');
 
         // normalizing the version will throw an exception if it is not a valid version
@@ -187,7 +187,7 @@ PHP,
             $this->phpBinaryPath,
             '-r',
             'echo PHP_MAJOR_VERSION . "." . PHP_MINOR_VERSION;',
-        ]);
+        ], cleanWarningsAndDeprecations: true);
         Assert::stringNotEmpty($phpVersion, 'Could not determine PHP version');
 
         // normalizing the version will throw an exception if it is not a valid version
@@ -202,7 +202,7 @@ PHP,
             $this->phpBinaryPath,
             '-r',
             'echo php_uname("m");',
-        ]);
+        ], cleanWarningsAndDeprecations: true);
         Assert::stringNotEmpty($phpMachineType, 'Could not determine PHP machine type');
 
         return Architecture::parseArchitecture($phpMachineType);
@@ -214,7 +214,7 @@ PHP,
             $this->phpBinaryPath,
             '-r',
             'echo PHP_INT_SIZE;',
-        ]);
+        ], cleanWarningsAndDeprecations: true);
         Assert::stringNotEmpty($phpIntSize, 'Could not fetch PHP_INT_SIZE');
         Assert::same($phpIntSize, (string) (int) $phpIntSize, 'PHP_INT_SIZE was not an integer processed %2$s from %s');
 
@@ -227,7 +227,7 @@ PHP,
         $phpInfo = Process::run([
             $this->phpBinaryPath,
             '-i',
-        ]);
+        ], cleanWarningsAndDeprecations: true);
 
         Assert::stringNotEmpty($phpInfo, sprintf('Could not run phpinfo using %s', $this->phpBinaryPath));
 
@@ -248,7 +248,7 @@ PHP,
     /** @param non-empty-string $phpConfig */
     public static function fromPhpConfigExecutable(string $phpConfig): self
     {
-        $phpExecutable = Process::run([$phpConfig, '--php-binary']);
+        $phpExecutable = Process::run([$phpConfig, '--php-binary'], cleanWarningsAndDeprecations: true);
         Assert::stringNotEmpty($phpExecutable, 'Could not find path to PHP executable.');
 
         self::assertValidLookingPhpBinary($phpExecutable);
