@@ -73,6 +73,7 @@ final class AddExtensionToTheIniFileTest extends TestCase
                 ),
                 $this->mockPhpBinary,
                 $this->output,
+                null,
             ));
 
             self::assertStringContainsString(
@@ -116,6 +117,7 @@ final class AddExtensionToTheIniFileTest extends TestCase
                 ),
                 $this->mockPhpBinary,
                 $this->output,
+                null,
             ));
 
             self::assertStringContainsString(
@@ -169,6 +171,7 @@ final class AddExtensionToTheIniFileTest extends TestCase
                 ),
                 $this->mockPhpBinary,
                 $this->output,
+                null,
             ));
 
             self::assertStringContainsString(
@@ -212,6 +215,7 @@ final class AddExtensionToTheIniFileTest extends TestCase
                 ),
                 $this->mockPhpBinary,
                 $this->output,
+                null,
             ));
 
             $iniContent = file_get_contents($iniFile);
@@ -219,6 +223,62 @@ final class AddExtensionToTheIniFileTest extends TestCase
                 PHP_EOL . '; PIE automatically added this to enable the foo/bar extension' . PHP_EOL
                     . '; priority=99' . PHP_EOL
                     . 'extension=foobar' . PHP_EOL,
+                $iniContent,
+            );
+
+            self::assertStringContainsString(
+                sprintf('Enabled extension foobar in the INI file %s', $iniFile),
+                $this->output->fetch(),
+            );
+        } finally {
+            unlink($iniFile);
+        }
+    }
+
+    public function testReturnsTrueWhenExtensionAddedWithAdditionalStep(): void
+    {
+        $iniFile = tempnam(sys_get_temp_dir(), 'PIE_ini_file');
+        touch($iniFile);
+
+        $this->mockPhpBinary
+            ->expects(self::once())
+            ->method('assertExtensionIsLoadedInRuntime');
+
+        try {
+            $additionalStepInvoked = false;
+            self::assertTrue((new AddExtensionToTheIniFile())(
+                $iniFile,
+                new Package(
+                    $this->createMock(CompletePackage::class),
+                    ExtensionType::PhpModule,
+                    ExtensionName::normaliseFromString('foobar'),
+                    'foo/bar',
+                    '1.0.0',
+                    null,
+                    [],
+                    true,
+                    true,
+                    null,
+                    null,
+                    null,
+                    99,
+                ),
+                $this->mockPhpBinary,
+                $this->output,
+                static function () use (&$additionalStepInvoked): bool {
+                    $additionalStepInvoked = true;
+
+                    return true;
+                },
+            ));
+
+            self::assertTrue($additionalStepInvoked, 'Failed asserting that the additional step was invoked');
+
+            $iniContent = file_get_contents($iniFile);
+            self::assertSame(
+                PHP_EOL . '; PIE automatically added this to enable the foo/bar extension' . PHP_EOL
+                . '; priority=99' . PHP_EOL
+                . 'extension=foobar' . PHP_EOL,
                 $iniContent,
             );
 

@@ -69,6 +69,7 @@ final class StandardAdditionalPhpIniDirectory implements SetupIniApproach
             $targetPlatform,
             $downloadedPackage,
             $output,
+            null,
         );
 
         if (! $addingExtensionWasSuccessful && $pieCreatedTheIniFile) {

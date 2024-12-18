@@ -108,6 +108,7 @@ final class CheckAndAddExtensionToIniIfNeededTest extends TestCase
             $this->targetPlatform,
             $this->downloadedPackage,
             $this->output,
+            null,
         ));
 
         self::assertStringContainsString(
@@ -142,6 +143,7 @@ final class CheckAndAddExtensionToIniIfNeededTest extends TestCase
             $this->targetPlatform,
             $this->downloadedPackage,
             $this->output,
+            null,
         ));
 
         $output = $this->output->fetch();
@@ -177,7 +179,47 @@ final class CheckAndAddExtensionToIniIfNeededTest extends TestCase
             $this->targetPlatform,
             $this->downloadedPackage,
             $this->output,
+            null,
         ));
+
+        $output = $this->output->fetch();
+        self::assertStringContainsString(
+            'Extension is already enabled in the INI file',
+            $output,
+        );
+    }
+
+    public function testExtensionIsAlreadyEnabledWithAdditionalStepAndExtensionLoaded(): void
+    {
+        $this->isExtensionAlreadyInTheIniFile
+            ->expects(self::once())
+            ->method('__invoke')
+            ->with(self::INI_FILE, $this->downloadedPackage->package->extensionName)
+            ->willReturn(true);
+
+        $this->mockPhpBinary
+            ->expects(self::once())
+            ->method('assertExtensionIsLoadedInRuntime')
+            ->with($this->downloadedPackage->package->extensionName, $this->output);
+
+        $this->addExtensionToTheIniFile
+            ->expects(self::never())
+            ->method('__invoke');
+
+        $additionalStepInvoked = false;
+        self::assertTrue($this->checkAndAddExtensionToIniIfNeeded->__invoke(
+            self::INI_FILE,
+            $this->targetPlatform,
+            $this->downloadedPackage,
+            $this->output,
+            static function () use (&$additionalStepInvoked): bool {
+                $additionalStepInvoked = true;
+
+                return true;
+            },
+        ));
+
+        self::assertTrue($additionalStepInvoked, 'Failed asserting that the additional step was invoked');
 
         $output = $this->output->fetch();
         self::assertStringContainsString(
@@ -214,6 +256,7 @@ final class CheckAndAddExtensionToIniIfNeededTest extends TestCase
             $this->targetPlatform,
             $this->downloadedPackage,
             $this->output,
+            null,
         ));
     }
 
@@ -245,6 +288,7 @@ final class CheckAndAddExtensionToIniIfNeededTest extends TestCase
             $this->targetPlatform,
             $this->downloadedPackage,
             $this->output,
+            null,
         ));
     }
 }

@@ -40,6 +40,7 @@ final class StandardSinglePhpIni implements SetupIniApproach
             $targetPlatform,
             $downloadedPackage,
             $output,
+            null,
         );
     }
 }
