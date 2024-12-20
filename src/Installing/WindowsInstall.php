@@ -31,8 +31,16 @@ use const DIRECTORY_SEPARATOR;
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class WindowsInstall implements Install
 {
-    public function __invoke(DownloadedPackage $downloadedPackage, TargetPlatform $targetPlatform, OutputInterface $output): BinaryFile
+    public function __construct(private readonly SetupIniFile $setupIniFile)
     {
+    }
+
+    public function __invoke(
+        DownloadedPackage $downloadedPackage,
+        TargetPlatform $targetPlatform,
+        OutputInterface $output,
+        bool $attemptToSetupIniFile,
+    ): BinaryFile {
         $extractedSourcePath = $downloadedPackage->extractedSourcePath;
         $sourceDllName       = WindowsExtensionAssetName::determineDllName($targetPlatform, $downloadedPackage);
         $sourcePdbName       = str_replace('.dll', '.pdb', $sourceDllName);
@@ -82,7 +90,17 @@ final class WindowsInstall implements Install
             $downloadedPackage->package->extensionName->name(),
         ));
 
-        return BinaryFile::fromFileWithSha256Checksum($destinationDllName);
+        $binaryFile = BinaryFile::fromFileWithSha256Checksum($destinationDllName);
+
+        ($this->setupIniFile)(
+            $targetPlatform,
+            $downloadedPackage,
+            $binaryFile,
+            $output,
+            $attemptToSetupIniFile,
+        );
+
+        return $binaryFile;
     }
 
     /**

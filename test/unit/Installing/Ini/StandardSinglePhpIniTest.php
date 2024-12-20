@@ -1,0 +1,181 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Php\PieUnitTest\Installing\Ini;
+
+use Composer\Package\CompletePackageInterface;
+use Php\Pie\BinaryFile;
+use Php\Pie\DependencyResolver\Package;
+use Php\Pie\Downloading\DownloadedPackage;
+use Php\Pie\ExtensionName;
+use Php\Pie\ExtensionType;
+use Php\Pie\Installing\Ini\CheckAndAddExtensionToIniIfNeeded;
+use Php\Pie\Installing\Ini\StandardSinglePhpIni;
+use Php\Pie\Platform\Architecture;
+use Php\Pie\Platform\OperatingSystem;
+use Php\Pie\Platform\OperatingSystemFamily;
+use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
+use Php\Pie\Platform\TargetPlatform;
+use Php\Pie\Platform\ThreadSafetyMode;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
+use Symfony\Component\Console\Output\BufferedOutput;
+
+#[CoversClass(StandardSinglePhpIni::class)]
+final class StandardSinglePhpIniTest extends TestCase
+{
+    private const INI_FILE = __DIR__ . '/../../../assets/example_ini_files/with_commented_extension.ini';
+
+    private BufferedOutput $output;
+    private PhpBinaryPath&MockObject $mockPhpBinary;
+    private CheckAndAddExtensionToIniIfNeeded&MockObject $checkAndAddExtensionToIniIfNeeded;
+    private TargetPlatform $targetPlatform;
+    private DownloadedPackage $downloadedPackage;
+    private BinaryFile $binaryFile;
+    private StandardSinglePhpIni $standardSinglePhpIni;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->output = new BufferedOutput(BufferedOutput::VERBOSITY_VERBOSE);
+
+        $this->mockPhpBinary = $this->createMock(PhpBinaryPath::class);
+        /**
+         * @psalm-suppress PossiblyNullFunctionCall
+         * @psalm-suppress UndefinedThisPropertyAssignment
+         */
+        (fn () => $this->phpBinaryPath = '/path/to/php')
+            ->bindTo($this->mockPhpBinary, PhpBinaryPath::class)();
+
+        $this->checkAndAddExtensionToIniIfNeeded = $this->createMock(CheckAndAddExtensionToIniIfNeeded::class);
+
+        $this->targetPlatform = new TargetPlatform(
+            OperatingSystem::NonWindows,
+            OperatingSystemFamily::Linux,
+            $this->mockPhpBinary,
+            Architecture::x86_64,
+            ThreadSafetyMode::ThreadSafe,
+            1,
+            null,
+        );
+
+        $this->downloadedPackage = DownloadedPackage::fromPackageAndExtractedPath(
+            new Package(
+                $this->createMock(CompletePackageInterface::class),
+                ExtensionType::PhpModule,
+                ExtensionName::normaliseFromString('foobar'),
+                'foo/bar',
+                '1.2.3',
+                null,
+                [],
+                true,
+                true,
+                null,
+                null,
+                null,
+                99,
+            ),
+            '/path/to/extracted/source',
+        );
+
+        $this->binaryFile = new BinaryFile('/path/to/compiled/extension.so', 'fake checksum');
+
+        $this->standardSinglePhpIni = new StandardSinglePhpIni(
+            $this->checkAndAddExtensionToIniIfNeeded,
+        );
+    }
+
+    public function testCannotBeUsedWithNoDefinedPhpIni(): void
+    {
+        $this->mockPhpBinary
+            ->expects(self::once())
+            ->method('loadedIniConfigurationFile')
+            ->willReturn(null);
+
+        self::assertFalse($this->standardSinglePhpIni->canBeUsed($this->targetPlatform));
+    }
+
+    public function testCanBeUsedWithDefinedPhpIni(): void
+    {
+        $this->mockPhpBinary
+            ->expects(self::once())
+            ->method('loadedIniConfigurationFile')
+            ->willReturn('/path/to/php.ini');
+
+        self::assertTrue($this->standardSinglePhpIni->canBeUsed($this->targetPlatform));
+    }
+
+    public function testSetupReturnsWhenIniFileIsNotSet(): void
+    {
+        $this->mockPhpBinary
+            ->expects(self::once())
+            ->method('loadedIniConfigurationFile')
+            ->willReturn(null);
+
+        $this->checkAndAddExtensionToIniIfNeeded
+            ->expects(self::never())
+            ->method('__invoke');
+
+        self::assertFalse($this->standardSinglePhpIni->setup(
+            $this->targetPlatform,
+            $this->downloadedPackage,
+            $this->binaryFile,
+            $this->output,
+        ));
+    }
+
+    public function testReturnsTrueWhenCheckAndAddExtensionIsInvoked(): void
+    {
+        $this->mockPhpBinary
+            ->expects(self::once())
+            ->method('loadedIniConfigurationFile')
+            ->willReturn(self::INI_FILE);
+
+        $this->checkAndAddExtensionToIniIfNeeded
+            ->expects(self::once())
+            ->method('__invoke')
+            ->with(
+                self::INI_FILE,
+                $this->targetPlatform,
+                $this->downloadedPackage,
+                $this->output,
+            )
+            ->willReturn(true);
+
+        self::assertTrue($this->standardSinglePhpIni->setup(
+            $this->targetPlatform,
+            $this->downloadedPackage,
+            $this->binaryFile,
+            $this->output,
+        ));
+    }
+
+    public function testReturnsFalseWhenCheckAndAddExtensionIsInvoked(): void
+    {
+        $this->mockPhpBinary
+            ->expects(self::once())
+            ->method('loadedIniConfigurationFile')
+            ->willReturn(self::INI_FILE);
+
+        $this->checkAndAddExtensionToIniIfNeeded
+            ->expects(self::once())
+            ->method('__invoke')
+            ->with(
+                self::INI_FILE,
+                $this->targetPlatform,
+                $this->downloadedPackage,
+                $this->output,
+            )
+            ->willReturn(false);
+
+        self::assertFalse($this->standardSinglePhpIni->setup(
+            $this->targetPlatform,
+            $this->downloadedPackage,
+            $this->binaryFile,
+            $this->output,
+        ));
+    }
+}

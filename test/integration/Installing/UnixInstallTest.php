@@ -12,6 +12,8 @@ use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
+use Php\Pie\Installing\Ini\PickBestSetupIniApproach;
+use Php\Pie\Installing\SetupIniFile;
 use Php\Pie\Installing\UnixInstall;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
@@ -93,6 +95,7 @@ final class UnixInstallTest extends TestCase
                 null,
                 null,
                 null,
+                99,
             ),
             self::TEST_EXTENSION_PATH,
         );
@@ -105,10 +108,11 @@ final class UnixInstallTest extends TestCase
             null,
         );
 
-        $installedSharedObject = (new UnixInstall())->__invoke(
+        $installedSharedObject = (new UnixInstall(new SetupIniFile(new PickBestSetupIniApproach([]))))->__invoke(
             $downloadedPackage,
             $targetPlatform,
             $output,
+            true,
         );
         $outputString          = $output->fetch();
 

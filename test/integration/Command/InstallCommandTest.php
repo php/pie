@@ -79,7 +79,11 @@ class InstallCommandTest extends TestCase
         }
 
         $this->commandTester->execute(
-            ['requested-package-and-version' => self::TEST_PACKAGE, '--with-php-config' => $phpConfigPath],
+            [
+                'requested-package-and-version' => self::TEST_PACKAGE,
+                '--with-php-config' => $phpConfigPath,
+                '--skip-enable-extension' => true,
+            ],
             ['verbosity' => BufferedOutput::VERBOSITY_VERY_VERBOSE],
         );
 
@@ -112,7 +116,10 @@ class InstallCommandTest extends TestCase
     #[RequiresOperatingSystemFamily('Windows')]
     public function testInstallCommandWillInstallCompatibleExtensionWindows(): void
     {
-        $this->commandTester->execute(['requested-package-and-version' => self::TEST_PACKAGE]);
+        $this->commandTester->execute([
+            'requested-package-and-version' => self::TEST_PACKAGE,
+            '--skip-enable-extension' => true,
+        ]);
 
         $this->commandTester->assertCommandIsSuccessful();
 

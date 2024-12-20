@@ -19,6 +19,7 @@ use Php\Pie\DependencyResolver\DependencyResolver;
 use Php\Pie\DependencyResolver\ResolveDependencyWithComposer;
 use Php\Pie\Downloading\GithubPackageReleaseAssets;
 use Php\Pie\Downloading\PackageReleaseAssets;
+use Php\Pie\Installing\Ini;
 use Php\Pie\Installing\Install;
 use Php\Pie\Installing\UnixInstall;
 use Php\Pie\Installing\WindowsInstall;
@@ -68,6 +69,19 @@ final class Container
                 }
 
                 return $container->get(UnixBuild::class);
+            },
+        );
+
+        $container->singleton(
+            Ini\SetupIniApproach::class,
+            static function (ContainerInterface $container): Ini\SetupIniApproach {
+                return new Ini\PickBestSetupIniApproach([
+                    $container->get(Ini\PreCheckExtensionAlreadyLoaded::class),
+                    $container->get(Ini\OndrejPhpenmod::class),
+                    $container->get(Ini\DockerPhpExtEnable::class),
+                    $container->get(Ini\StandardAdditionalPhpIniDirectory::class),
+                    $container->get(Ini\StandardSinglePhpIni::class),
+                ]);
             },
         );
 

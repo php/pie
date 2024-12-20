@@ -38,6 +38,7 @@ final class CommandHelper
     private const OPTION_WITH_PHP_PATH              = 'with-php-path';
     private const OPTION_WITH_PHPIZE_PATH           = 'with-phpize-path';
     private const OPTION_MAKE_PARALLEL_JOBS         = 'make-parallel-jobs';
+    private const OPTION_SKIP_ENABLE_EXTENSION      = 'skip-enable-extension';
 
     /** @psalm-suppress UnusedConstructor */
     private function __construct()
@@ -78,6 +79,12 @@ final class CommandHelper
             null,
             InputOption::VALUE_REQUIRED,
             'The path to the `phpize` binary to use as the target PHP platform, e.g. --' . self::OPTION_WITH_PHPIZE_PATH . '=/usr/bin/phpize7.4',
+        );
+        $command->addOption(
+            self::OPTION_SKIP_ENABLE_EXTENSION,
+            null,
+            InputOption::VALUE_NONE,
+            'Specify this to skip attempting to enable the extension in php.ini',
         );
 
         self::configurePhpConfigOptions($command);
@@ -152,6 +159,11 @@ final class CommandHelper
         ));
 
         return $targetPlatform;
+    }
+
+    public static function determineAttemptToSetupIniFile(InputInterface $input): bool
+    {
+        return ! $input->hasOption(self::OPTION_SKIP_ENABLE_EXTENSION) || ! $input->getOption(self::OPTION_SKIP_ENABLE_EXTENSION);
     }
 
     public static function determinePhpizePathFromInputs(InputInterface $input): PhpizePath|null
