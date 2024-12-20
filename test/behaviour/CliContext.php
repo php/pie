@@ -12,12 +12,15 @@ use Symfony\Component\Process\Process;
 use Webmozart\Assert\Assert;
 
 use function array_merge;
+use function explode;
 
 /** @psalm-api */
 class CliContext implements Context
 {
     private string|null $output = null;
     private int|null $exitCode  = null;
+    /** @var list<string> */
+    private array $phpArguments = [];
 
     #[When('I run a command to download the latest version of an extension')]
     public function iRunACommandToDownloadTheLatestVersionOfAnExtension(): void
@@ -34,7 +37,7 @@ class CliContext implements Context
     /** @param list<non-empty-string> $command */
     public function runPieCommand(array $command): void
     {
-        $pieCommand = array_merge(['php', 'bin/pie'], $command);
+        $pieCommand = array_merge(['php', ...$this->phpArguments, 'bin/pie'], $command);
 
         $proc = (new Process($pieCommand))->mustRun();
 
@@ -127,5 +130,11 @@ class CliContext implements Context
         }
 
         Assert::regex($this->output, '#Install complete: [-_a-zA-Z0-9/]+/example_pie_extension.so#');
+    }
+
+    #[When('I use the :phpArguments PHP arguments')]
+    public function iUsePhpArguments(string $phpArguments): void
+    {
+        $this->phpArguments = explode(' ', $phpArguments);
     }
 }
