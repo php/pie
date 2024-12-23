@@ -77,6 +77,7 @@ class InstallAndBuildProcess
                 $downloadedPackage,
                 $composerRequest->targetPlatform,
                 $output,
+                $composerRequest->attemptToSetupIniFile,
             ),
         );
     }

@@ -140,6 +140,7 @@ final class PackageTest extends TestCase
             null,
             null,
             null,
+            99,
         );
 
         self::assertSame($expectedGithubOrgAndRepo, $package->githubOrgAndRepository());

@@ -56,6 +56,7 @@ final class DownloadCommand extends Command
                 PieOperation::Download,
                 [], // Configure options are not needed for download only
                 null,
+                false, // setting up INI not needed for download
             ),
         );
 

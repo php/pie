@@ -50,6 +50,7 @@ final class UnixBuildTest extends TestCase
                 null,
                 null,
                 null,
+                99,
             ),
             self::TEST_EXTENSION_PATH,
         );
@@ -105,6 +106,7 @@ final class UnixBuildTest extends TestCase
                 null,
                 null,
                 null,
+                99,
             ),
             self::TEST_EXTENSION_PATH,
         );
@@ -148,6 +150,7 @@ final class UnixBuildTest extends TestCase
                 'pie_test_ext',
                 null,
                 null,
+                99,
             ),
             dirname(self::TEST_EXTENSION_PATH),
         );
@@ -207,6 +210,7 @@ final class UnixBuildTest extends TestCase
                 null,
                 null,
                 null,
+                99,
             ),
             self::TEST_EXTENSION_PATH,
         );
@@ -251,6 +255,7 @@ final class UnixBuildTest extends TestCase
                 null,
                 null,
                 null,
+                99,
             ),
             self::TEST_EXTENSION_PATH,
         );

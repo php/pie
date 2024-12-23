@@ -59,6 +59,7 @@ final class InstallCommand extends Command
                 PieOperation::Resolve,
                 [], // Configure options are not needed for resolve only
                 null,
+                false, // setting up INI not needed for resolve step
             ),
         );
 
@@ -79,6 +80,7 @@ final class InstallCommand extends Command
                 PieOperation::Install,
                 $configureOptionsValues,
                 CommandHelper::determinePhpizePathFromInputs($input),
+                CommandHelper::determineAttemptToSetupIniFile($input),
             ),
         );
 
