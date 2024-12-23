@@ -23,7 +23,7 @@ Feature: Extensions can be installed with Behat
     Then the extension should have been built
 
   Example: An extension can be built with warnings at PHP startup
-    Given I use the "-d extension=invalid_extension.so" PHP arguments
+    Given I have an invalid extension installed
     When I run a command to build an extension
     Then the extension should have been built
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\PieBehaviourTest;
 
 use Behat\Behat\Context\Context;
+use Behat\Step\Given;
 use Behat\Step\Then;
 use Behat\Step\When;
 use Composer\Util\Platform;
@@ -12,7 +13,6 @@ use Symfony\Component\Process\Process;
 use Webmozart\Assert\Assert;
 
 use function array_merge;
-use function explode;
 
 /** @psalm-api */
 class CliContext implements Context
@@ -132,9 +132,9 @@ class CliContext implements Context
         Assert::regex($this->output, '#Install complete: [-_a-zA-Z0-9/]+/example_pie_extension.so#');
     }
 
-    #[When('I use the :phpArguments PHP arguments')]
-    public function iUsePhpArguments(string $phpArguments): void
+    #[Given('I have an invalid extension installed')]
+    public function iHaveAnInvalidExtensionInstalled(): void
     {
-        $this->phpArguments = explode(' ', $phpArguments);
+        $this->phpArguments = ['-d', 'extension=invalid_extension'];
     }
 }
