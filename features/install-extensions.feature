@@ -22,6 +22,11 @@ Feature: Extensions can be installed with Behat
     When I run a command to build an extension
     Then the extension should have been built
 
+  Example: An extension can be built with warnings at PHP startup
+    Given I have an invalid extension installed
+    When I run a command to build an extension
+    Then the extension should have been built
+
   Example: An extension can be built with configure options
     When I run a command to build an extension with configure options
     Then the extension should have been built with options
