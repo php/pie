@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Php\PieUnitTest\ComposerIntegration;
 
 use Composer\IO\IOInterface;
+use Php\Pie\ComposerIntegration\MinimalHelperSet;
 use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\Output;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -29,7 +29,7 @@ final class QuieterConsoleIOTest extends TestCase
             ->method('write')
             ->with('Oh no');
 
-        $io = new QuieterConsoleIO($symfonyInput, $symfonyOutput, new HelperSet([]));
+        $io = new QuieterConsoleIO($symfonyInput, $symfonyOutput, $this->createMock(MinimalHelperSet::class));
         $io->writeError('Oh no');
 
         self::assertSame(['Oh no'], $io->errors);
@@ -47,7 +47,7 @@ final class QuieterConsoleIOTest extends TestCase
             ->method('write')
             ->with(['Oh no', 'Bad things']);
 
-        $io = new QuieterConsoleIO($symfonyInput, $symfonyOutput, new HelperSet([]));
+        $io = new QuieterConsoleIO($symfonyInput, $symfonyOutput, $this->createMock(MinimalHelperSet::class));
         $io->writeError(['Oh no', 'Bad things']);
 
         self::assertSame(['Oh no', 'Bad things'], $io->errors);
@@ -64,7 +64,7 @@ final class QuieterConsoleIOTest extends TestCase
             ->expects(self::never())
             ->method('write');
 
-        $io = new QuieterConsoleIO($symfonyInput, $symfonyOutput, new HelperSet([]));
+        $io = new QuieterConsoleIO($symfonyInput, $symfonyOutput, $this->createMock(MinimalHelperSet::class));
         $io->writeError('Oh no');
 
         self::assertSame(['Oh no'], $io->errors);
@@ -105,7 +105,7 @@ final class QuieterConsoleIOTest extends TestCase
         };
         $symfonyOutput->setVerbosity($symfonyVerbosity);
 
-        $io = new QuieterConsoleIO($symfonyInput, $symfonyOutput, new HelperSet([]));
+        $io = new QuieterConsoleIO($symfonyInput, $symfonyOutput, $this->createMock(MinimalHelperSet::class));
 
         $io->write('Quiet', verbosity: IOInterface::QUIET);
         $io->write('Normal', verbosity: IOInterface::NORMAL);
