@@ -25,7 +25,6 @@ use Php\Pie\Installing\Install;
 use Php\Pie\Installing\UnixInstall;
 use Php\Pie\Installing\WindowsInstall;
 use Psr\Container\ContainerInterface;
-use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
