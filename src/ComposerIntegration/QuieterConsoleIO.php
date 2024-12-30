@@ -7,7 +7,6 @@ namespace Php\Pie\ComposerIntegration;
 use Closure;
 use Composer\IO\ConsoleIO;
 use Composer\IO\IOInterface;
-use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -21,7 +20,7 @@ class QuieterConsoleIO extends ConsoleIO
     /** @var string[] */
     public array $errors = [];
 
-    public function __construct(InputInterface $input, OutputInterface $output, HelperSet $helperSet)
+    public function __construct(InputInterface $input, OutputInterface $output, MinimalHelperSet $helperSet)
     {
         parent::__construct($input, $output, $helperSet);
 

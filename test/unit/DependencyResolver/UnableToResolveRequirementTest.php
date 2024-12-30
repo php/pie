@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Php\PieUnitTest\DependencyResolver;
 
 use Composer\Package\PackageInterface;
+use Php\Pie\ComposerIntegration\MinimalHelperSet;
 use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\DependencyResolver\UnableToResolveRequirement;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -42,7 +42,7 @@ final class UnableToResolveRequirementTest extends TestCase
         $io = new QuieterConsoleIO(
             $this->createMock(InputInterface::class),
             $this->createMock(OutputInterface::class),
-            $this->createMock(HelperSet::class),
+            $this->createMock(MinimalHelperSet::class),
         );
         $io->writeError('message1');
         $io->writeError('message2', true, QuieterConsoleIO::VERY_VERBOSE);
@@ -58,7 +58,7 @@ final class UnableToResolveRequirementTest extends TestCase
         $io = new QuieterConsoleIO(
             $this->createMock(InputInterface::class),
             $this->createMock(OutputInterface::class),
-            $this->createMock(HelperSet::class),
+            $this->createMock(MinimalHelperSet::class),
         );
         $io->writeError('message1');
         $io->writeError('message2', true, QuieterConsoleIO::VERY_VERBOSE);
