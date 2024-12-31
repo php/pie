@@ -152,22 +152,23 @@ class DownloadCommandTest extends TestCase
         $this->commandTester->execute(['requested-package-and-version' => self::TEST_PACKAGE . ':1.0.0']);
     }
 
-    #[RequiresPhp('<8.3')]
+    #[RequiresPhp('<8.2')]
     public function testDownloadCommandPassesWhenUsingIncompatiblePhpVersionWithForceOption(): void
     {
-        $incompatiblePackage = self::TEST_PACKAGE . ':' . '1.x-dev';
+        // 1.0.1 is only compatible with PHP 8.3.0
+        $incompatiblePackage = self::TEST_PACKAGE . ':1.0.1';
 
-        // 1.0.0 is only compatible with PHP 8.3.0
         $this->commandTester->execute(
             [
-                '--force' => true,
                 'requested-package-and-version' => $incompatiblePackage,
+                '--force' => true,
             ],
         );
 
         $this->commandTester->assertCommandIsSuccessful();
 
         $outputString = $this->commandTester->getDisplay();
+
         self::assertStringContainsString('Found package: ' . $incompatiblePackage . ' which provides', $outputString);
         self::assertStringContainsString('Extracted ' . $incompatiblePackage . ' source to', $outputString);
     }
