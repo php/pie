@@ -67,7 +67,7 @@ final class InstallCommand extends Command
             $composer,
             $targetPlatform,
             $requestedNameAndVersion,
-            $forceInstallPackageVersion
+            $forceInstallPackageVersion,
         );
         $output->writeln(sprintf('<info>Found package:</info> %s which provides <info>%s</info>', $package->prettyNameAndVersion(), $package->extensionName->nameWithExtPrefix()));
 
