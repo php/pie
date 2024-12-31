@@ -95,6 +95,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
             ),
             $targetPlatform,
             $requestedPackageAndVersion,
+            false,
         );
 
         self::assertSame($expectedVersion, $package->version);

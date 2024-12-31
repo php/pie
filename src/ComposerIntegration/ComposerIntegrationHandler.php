@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\Pie\ComposerIntegration;
 
 use Composer\Composer;
+use Composer\Filter\PlatformRequirementFilter\PlatformRequirementFilterFactory;
 use Composer\Installer;
 use Composer\Json\JsonManipulator;
 use Php\Pie\DependencyResolver\Package;
@@ -27,8 +28,13 @@ class ComposerIntegrationHandler
     ) {
     }
 
-    public function __invoke(Package $package, Composer $composer, TargetPlatform $targetPlatform, RequestedPackageAndVersion $requestedPackageAndVersion): void
-    {
+    public function __invoke(
+        Package $package,
+        Composer $composer,
+        TargetPlatform $targetPlatform,
+        RequestedPackageAndVersion $requestedPackageAndVersion,
+        bool $forceInstallPackageVersion,
+    ): void {
         $versionSelector = VersionSelectorFactory::make($composer, $requestedPackageAndVersion, $targetPlatform);
 
         $recommendedRequireVersion = $requestedPackageAndVersion->version;
@@ -64,6 +70,7 @@ class ComposerIntegrationHandler
             ->setInstall(true)
             ->setIgnoredTypes([])
             ->setDryRun(false)
+            ->setPlatformRequirementFilter(PlatformRequirementFilterFactory::fromBoolOrList($forceInstallPackageVersion))
             ->setDownloadOnly(false);
 
         if (file_exists(PieComposerFactory::getLockFile($pieComposerJson))) {

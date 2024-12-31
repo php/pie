@@ -64,7 +64,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
 
         $package = (new ResolveDependencyWithComposer(
             $this->createMock(QuieterConsoleIO::class),
-        ))($this->composer, $targetPlatform, new RequestedPackageAndVersion('asgrim/example-pie-extension', '^1.0'));
+        ))($this->composer, $targetPlatform, new RequestedPackageAndVersion('asgrim/example-pie-extension', '^1.0'), false);
 
         self::assertSame('asgrim/example-pie-extension', $package->name);
         self::assertStringStartsWith('1.', $package->version);
@@ -118,7 +118,49 @@ final class ResolveDependencyWithComposerTest extends TestCase
                 $package,
                 $version,
             ),
+            false,
         );
+    }
+
+    /**
+     * @param array<string, string> $platformOverrides
+     * @param non-empty-string      $package
+     * @param non-empty-string      $version
+     */
+    #[DataProvider('unresolvableDependencies')]
+    public function testUnresolvedPackageCanBeInstalledWithForceOption(array $platformOverrides, string $package, string $version): void
+    {
+        $phpBinaryPath = $this->createMock(PhpBinaryPath::class);
+        $phpBinaryPath->expects(self::once())
+            ->method('version')
+            ->willReturn($platformOverrides['php']);
+
+        $targetPlatform = new TargetPlatform(
+            OperatingSystem::NonWindows,
+            OperatingSystemFamily::Linux,
+            $phpBinaryPath,
+            Architecture::x86_64,
+            ThreadSafetyMode::ThreadSafe,
+            1,
+            null,
+        );
+
+        $this->expectException(UnableToResolveRequirement::class);
+
+        $package = (new ResolveDependencyWithComposer(
+            $this->createMock(QuieterConsoleIO::class),
+        ))(
+            $this->composer,
+            $targetPlatform,
+            new RequestedPackageAndVersion(
+                $package,
+                $version,
+            ),
+            true,
+        );
+
+        self::assertSame('asgrim/example-pie-extension', $package->name);
+        self::assertStringStartsWith('1.', $package->version);
     }
 
     public function testZtsOnlyPackageCannotBeInstalledOnNtsSystem(): void
@@ -164,6 +206,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
                 'test-vendor/test-package',
                 '1.0.0',
             ),
+            false,
         );
     }
 
@@ -210,6 +253,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
                 'test-vendor/test-package',
                 '1.0.0',
             ),
+            false,
         );
     }
 
@@ -256,6 +300,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
                 'test-vendor/test-package',
                 '1.0.0',
             ),
+            false,
         );
     }
 
@@ -302,6 +347,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
                 'test-vendor/test-package',
                 '1.0.0',
             ),
+            false,
         );
     }
 }

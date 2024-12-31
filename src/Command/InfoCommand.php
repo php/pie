@@ -58,7 +58,12 @@ final class InfoCommand extends Command
             ),
         );
 
-        $package = ($this->dependencyResolver)($composer, $targetPlatform, $requestedNameAndVersion);
+        $package = ($this->dependencyResolver)(
+            $composer,
+            $targetPlatform,
+            $requestedNameAndVersion,
+            CommandHelper::determineForceInstallingPackageVersion($input),
+        );
         $output->writeln(sprintf('<info>Found package:</info> %s which provides <info>%s</info>', $package->prettyNameAndVersion(), $package->extensionName->nameWithExtPrefix()));
 
         $output->writeln(sprintf('Extension name: %s', $package->extensionName->name()));

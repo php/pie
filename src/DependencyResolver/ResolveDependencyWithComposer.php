@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\Pie\DependencyResolver;
 
 use Composer\Composer;
+use Composer\Filter\PlatformRequirementFilter\PlatformRequirementFilterFactory;
 use Composer\Package\CompletePackageInterface;
 use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use Php\Pie\ComposerIntegration\VersionSelectorFactory;
@@ -23,13 +24,18 @@ final class ResolveDependencyWithComposer implements DependencyResolver
     ) {
     }
 
-    public function __invoke(Composer $composer, TargetPlatform $targetPlatform, RequestedPackageAndVersion $requestedPackageAndVersion): Package
-    {
+    public function __invoke(
+        Composer $composer,
+        TargetPlatform $targetPlatform,
+        RequestedPackageAndVersion $requestedPackageAndVersion,
+        bool $forceInstallPackageVersion,
+    ): Package {
         $versionSelector = VersionSelectorFactory::make($composer, $requestedPackageAndVersion, $targetPlatform);
 
         $package = $versionSelector->findBestCandidate(
             $requestedPackageAndVersion->package,
             $requestedPackageAndVersion->version,
+            platformRequirementFilter: PlatformRequirementFilterFactory::fromBoolOrList($forceInstallPackageVersion),
             io: $this->arrayCollectionIo,
         );
 

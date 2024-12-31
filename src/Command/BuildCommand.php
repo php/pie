@@ -41,9 +41,9 @@ final class BuildCommand extends Command
 
     public function execute(InputInterface $input, OutputInterface $output): int
     {
-        $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $output);
-
-        $requestedNameAndVersion = CommandHelper::requestedNameAndVersionPair($input);
+        $targetPlatform             = CommandHelper::determineTargetPlatformFromInputs($input, $output);
+        $requestedNameAndVersion    = CommandHelper::requestedNameAndVersionPair($input);
+        $forceInstallPackageVersion = CommandHelper::determineForceInstallingPackageVersion($input);
 
         $composer = PieComposerFactory::createPieComposer(
             $this->container,
@@ -58,7 +58,12 @@ final class BuildCommand extends Command
             ),
         );
 
-        $package = ($this->dependencyResolver)($composer, $targetPlatform, $requestedNameAndVersion);
+        $package = ($this->dependencyResolver)(
+            $composer,
+            $targetPlatform,
+            $requestedNameAndVersion,
+            $forceInstallPackageVersion,
+        );
         $output->writeln(sprintf('<info>Found package:</info> %s which provides <info>%s</info>', $package->prettyNameAndVersion(), $package->extensionName->nameWithExtPrefix()));
 
         // Now we know what package we have, we can validate the configure options for the command and re-create the
@@ -80,7 +85,13 @@ final class BuildCommand extends Command
         );
 
         try {
-            ($this->composerIntegrationHandler)($package, $composer, $targetPlatform, $requestedNameAndVersion);
+            ($this->composerIntegrationHandler)(
+                $package,
+                $composer,
+                $targetPlatform,
+                $requestedNameAndVersion,
+                $forceInstallPackageVersion,
+            );
         } catch (ComposerRunFailed $composerRunFailed) {
             $output->writeln('<error>' . $composerRunFailed->getMessage() . '</error>');
 
