@@ -11,5 +11,10 @@ use Php\Pie\Platform\TargetPlatform;
 interface DependencyResolver
 {
     /** @throws UnableToResolveRequirement */
-    public function __invoke(Composer $composer, TargetPlatform $targetPlatform, RequestedPackageAndVersion $requestedPackageAndVersion): Package;
+    public function __invoke(
+        Composer $composer,
+        TargetPlatform $targetPlatform,
+        RequestedPackageAndVersion $requestedPackageAndVersion,
+        bool $forceInstallPackageVersion
+    ): Package;
 }
