@@ -39,6 +39,7 @@ final class CommandHelper
     private const OPTION_WITH_PHPIZE_PATH           = 'with-phpize-path';
     private const OPTION_MAKE_PARALLEL_JOBS         = 'make-parallel-jobs';
     private const OPTION_SKIP_ENABLE_EXTENSION      = 'skip-enable-extension';
+    private const OPTION_FORCE                      = 'force';
 
     /** @psalm-suppress UnusedConstructor */
     private function __construct()
@@ -85,6 +86,12 @@ final class CommandHelper
             null,
             InputOption::VALUE_NONE,
             'Specify this to skip attempting to enable the extension in php.ini',
+        );
+        $command->addOption(
+            self::OPTION_FORCE,
+            null,
+            InputOption::VALUE_NONE,
+            'To attempt to install a version that doesn\'t match the version constraints from the meta-data, for instance to install an older version than recommended, or when the signature is not available.',
         );
 
         self::configurePhpConfigOptions($command);
