@@ -41,8 +41,8 @@ final class BuildCommand extends Command
 
     public function execute(InputInterface $input, OutputInterface $output): int
     {
-        $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $output);
-        $requestedNameAndVersion = CommandHelper::requestedNameAndVersionPair($input);
+        $targetPlatform             = CommandHelper::determineTargetPlatformFromInputs($input, $output);
+        $requestedNameAndVersion    = CommandHelper::requestedNameAndVersionPair($input);
         $forceInstallPackageVersion = CommandHelper::determineForceInstallingPackageVersion($input);
 
         $composer = PieComposerFactory::createPieComposer(
@@ -62,7 +62,7 @@ final class BuildCommand extends Command
             $composer,
             $targetPlatform,
             $requestedNameAndVersion,
-            $forceInstallPackageVersion
+            $forceInstallPackageVersion,
         );
         $output->writeln(sprintf('<info>Found package:</info> %s which provides <info>%s</info>', $package->prettyNameAndVersion(), $package->extensionName->nameWithExtPrefix()));
 
@@ -90,7 +90,7 @@ final class BuildCommand extends Command
                 $composer,
                 $targetPlatform,
                 $requestedNameAndVersion,
-                $forceInstallPackageVersion
+                $forceInstallPackageVersion,
             );
         } catch (ComposerRunFailed $composerRunFailed) {
             $output->writeln('<error>' . $composerRunFailed->getMessage() . '</error>');
