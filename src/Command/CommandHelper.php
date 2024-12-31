@@ -173,6 +173,11 @@ final class CommandHelper
         return ! $input->hasOption(self::OPTION_SKIP_ENABLE_EXTENSION) || ! $input->getOption(self::OPTION_SKIP_ENABLE_EXTENSION);
     }
 
+    public static function determineForceInstallingPackageVersion(InputInterface $input): bool
+    {
+        return ! $input->hasOption(self::OPTION_FORCE) || ! $input->getOption(self::OPTION_FORCE);
+    }
+
     public static function determinePhpizePathFromInputs(InputInterface $input): PhpizePath|null
     {
         if ($input->hasOption(self::OPTION_WITH_PHPIZE_PATH)) {
