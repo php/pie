@@ -42,12 +42,12 @@ final class InstallCommand extends Command
 
     public function execute(InputInterface $input, OutputInterface $output): int
     {
-        if (!TargetPlatform::isRunningAsRoot()) {
+        if (! TargetPlatform::isRunningAsRoot()) {
             $output->writeln('This command may need elevated privileges, and may prompt you for your password.');
         }
 
-        $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $output);
-        $requestedNameAndVersion = CommandHelper::requestedNameAndVersionPair($input);
+        $targetPlatform             = CommandHelper::determineTargetPlatformFromInputs($input, $output);
+        $requestedNameAndVersion    = CommandHelper::requestedNameAndVersionPair($input);
         $forceInstallPackageVersion = CommandHelper::determineForceInstallingPackageVersion($input);
 
         $composer = PieComposerFactory::createPieComposer(
@@ -95,7 +95,7 @@ final class InstallCommand extends Command
                 $composer,
                 $targetPlatform,
                 $requestedNameAndVersion,
-                $forceInstallPackageVersion
+                $forceInstallPackageVersion,
             );
         } catch (ComposerRunFailed $composerRunFailed) {
             $output->writeln('<error>' . $composerRunFailed->getMessage() . '</error>');

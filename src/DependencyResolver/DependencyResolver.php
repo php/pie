@@ -15,6 +15,6 @@ interface DependencyResolver
         Composer $composer,
         TargetPlatform $targetPlatform,
         RequestedPackageAndVersion $requestedPackageAndVersion,
-        bool $forceInstallPackageVersion
+        bool $forceInstallPackageVersion,
     ): Package;
 }

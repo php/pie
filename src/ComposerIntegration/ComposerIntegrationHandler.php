@@ -33,7 +33,7 @@ class ComposerIntegrationHandler
         Composer $composer,
         TargetPlatform $targetPlatform,
         RequestedPackageAndVersion $requestedPackageAndVersion,
-        bool $forceInstallPackageVersion
+        bool $forceInstallPackageVersion,
     ): void {
         $versionSelector = VersionSelectorFactory::make($composer, $requestedPackageAndVersion, $targetPlatform);
 
