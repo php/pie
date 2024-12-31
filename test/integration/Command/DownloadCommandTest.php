@@ -152,6 +152,7 @@ class DownloadCommandTest extends TestCase
         $this->commandTester->execute(['requested-package-and-version' => self::TEST_PACKAGE . ':1.0.0']);
     }
 
+    #[RequiresOperatingSystemFamily('Linux')]
     #[RequiresPhp('<8.2')]
     public function testDownloadCommandPassesWhenUsingIncompatiblePhpVersionWithForceOption(): void
     {
