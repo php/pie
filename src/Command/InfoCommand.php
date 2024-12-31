@@ -62,7 +62,7 @@ final class InfoCommand extends Command
             $composer,
             $targetPlatform,
             $requestedNameAndVersion,
-            CommandHelper::determineForceInstallingPackageVersion($input)
+            CommandHelper::determineForceInstallingPackageVersion($input),
         );
         $output->writeln(sprintf('<info>Found package:</info> %s which provides <info>%s</info>', $package->prettyNameAndVersion(), $package->extensionName->nameWithExtPrefix()));
 

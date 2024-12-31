@@ -64,7 +64,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
 
         $package = (new ResolveDependencyWithComposer(
             $this->createMock(QuieterConsoleIO::class),
-        ))($this->composer, $targetPlatform, new RequestedPackageAndVersion('asgrim/example-pie-extension', '^1.0'));
+        ))($this->composer, $targetPlatform, new RequestedPackageAndVersion('asgrim/example-pie-extension', '^1.0'), false);
 
         self::assertSame('asgrim/example-pie-extension', $package->name);
         self::assertStringStartsWith('1.', $package->version);
@@ -118,6 +118,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
                 $package,
                 $version,
             ),
+            false,
         );
     }
 
@@ -164,6 +165,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
                 'test-vendor/test-package',
                 '1.0.0',
             ),
+            false,
         );
     }
 
@@ -210,6 +212,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
                 'test-vendor/test-package',
                 '1.0.0',
             ),
+            false,
         );
     }
 
@@ -256,6 +259,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
                 'test-vendor/test-package',
                 '1.0.0',
             ),
+            false,
         );
     }
 
@@ -302,6 +306,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
                 'test-vendor/test-package',
                 '1.0.0',
             ),
+            false,
         );
     }
 }
