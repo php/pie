@@ -27,4 +27,23 @@ final class PieComposerRequest
         public readonly bool $attemptToSetupIniFile,
     ) {
     }
+
+    /**
+     * Useful for when we don't want to perform any "write" style operations;
+     * for example just reading metadata about the installed system.
+     */
+    public static function noOperation(
+        OutputInterface $pieOutput,
+        TargetPlatform $targetPlatform,
+    ): self {
+        return new PieComposerRequest(
+            $pieOutput,
+            $targetPlatform,
+            new RequestedPackageAndVersion('null', null),
+            PieOperation::Resolve,
+            [],
+            null,
+            false,
+        );
+    }
 }

@@ -225,11 +225,11 @@ PHP,
 
     public function operatingSystemFamily(): OperatingSystemFamily
     {
-        $output = Process::run([
+        $output = self::cleanWarningAndDeprecationsFromOutput(Process::run([
             $this->phpBinaryPath,
             '-r',
             'echo PHP_OS_FAMILY;',
-        ]);
+        ]));
 
         $osFamily = OperatingSystemFamily::tryFrom(strtolower(trim($output)));
         Assert::notNull($osFamily, 'Could not determine operating system family');
