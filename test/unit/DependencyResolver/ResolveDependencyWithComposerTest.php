@@ -122,6 +122,47 @@ final class ResolveDependencyWithComposerTest extends TestCase
         );
     }
 
+    /**
+     * @param array<string, string> $platformOverrides
+     * @param non-empty-string      $package
+     * @param non-empty-string      $version
+     */
+    #[DataProvider('unresolvableDependencies')]
+    public function testUnresolvedPackageCanBeInstalledWithForceOption(array $platformOverrides, string $package, string $version): void
+    {
+        $phpBinaryPath = $this->createMock(PhpBinaryPath::class);
+        $phpBinaryPath->expects(self::once())
+            ->method('version')
+            ->willReturn($platformOverrides['php']);
+
+        $targetPlatform = new TargetPlatform(
+            OperatingSystem::NonWindows,
+            OperatingSystemFamily::Linux,
+            $phpBinaryPath,
+            Architecture::x86_64,
+            ThreadSafetyMode::ThreadSafe,
+            1,
+            null,
+        );
+
+        $this->expectException(UnableToResolveRequirement::class);
+
+        $package = (new ResolveDependencyWithComposer(
+            $this->createMock(QuieterConsoleIO::class),
+        ))(
+            $this->composer,
+            $targetPlatform,
+            new RequestedPackageAndVersion(
+                $package,
+                $version,
+            ),
+            true,
+        );
+
+        self::assertSame('asgrim/example-pie-extension', $package->name);
+        self::assertStringStartsWith('1.', $package->version);
+    }
+
     public function testZtsOnlyPackageCannotBeInstalledOnNtsSystem(): void
     {
         $pkg = new CompletePackage('test-vendor/test-package', '1.0.0.0', '1.0.0');
