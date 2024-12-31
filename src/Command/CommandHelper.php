@@ -175,7 +175,7 @@ final class CommandHelper
 
     public static function determineForceInstallingPackageVersion(InputInterface $input): bool
     {
-        return ! $input->hasOption(self::OPTION_FORCE) || ! $input->getOption(self::OPTION_FORCE);
+        return $input->getOption(self::OPTION_FORCE);
     }
 
     public static function determinePhpizePathFromInputs(InputInterface $input): PhpizePath|null
