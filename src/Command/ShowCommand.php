@@ -119,7 +119,7 @@ final class ShowCommand extends Command
             return ' ⚠️ was ' . substr($actualInstalledBinary->checksum, 0, 8) . '..., expected ' . substr($pieExpectedChecksum, 0, 8) . '...';
         }
 
-        return ' ✅ ' . substr($pieExpectedChecksum, 0, 8) . '...';
+        return ' ✅';
     }
 
     /** @return array<non-empty-string, Package> */
