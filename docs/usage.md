@@ -40,6 +40,32 @@ Instead of `bin` tag (which represents latest binary-only image) you can also us
 > [!IMPORTANT]  
 > Binary-only images don't include PHP runtime so you can't use them for _running_ PIE. This is just an alternative way of distributing PHAR file, you still need to satisfy PIE's runtime requirements on your own.
 
+#### Example of PIE working in a Dockerfile
+
+This is an example of how PIE could be used to install an extension inside a
+Docker image. Note that, like Composer, you need something like `unzip`, the
+[Zip](https://www.php.net/manual/en/book.zip.php) extension, or `git` to be
+installed.
+
+```Dockerfile
+FROM php:8.4-cli
+
+# Add the `unzip` package which PIE uses to extract .zip files
+RUN export DEBIAN_FRONTEND="noninteractive"; \
+    set -eux; \
+    apt-get update; apt-get install -y --no-install-recommends unzip; \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy the pie.phar from the latest `:bin` release
+COPY --from=ghcr.io/php/pie:bin /pie /usr/bin/pie
+
+# Use PIE to install an extension...
+RUN pie install asgrim/example-pie-extension
+```
+
+If the extension you would like to install needs additional libraries or other
+dependencies, then these must be installed beforehand too.
+
 ## Prerequisites for PIE
 
 Running PIE requires PHP 8.1 or newer. However, you may still use PIE to install
