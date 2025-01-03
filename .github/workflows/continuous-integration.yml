@@ -29,6 +29,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/checkout@v4
+      - run: composer config --global github-oauth.github.com ${{ secrets.GITHUB_TOKEN }}
       # temporarily remove Psalm until ready for PHP 8.4
       - name: remove psalm
         if: matrix.php-versions == '8.4'

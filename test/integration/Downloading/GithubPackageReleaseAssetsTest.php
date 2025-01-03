@@ -23,6 +23,9 @@ use Php\Pie\Platform\WindowsCompiler;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
+use function getenv;
+use function is_string;
+
 #[CoversClass(GithubPackageReleaseAssets::class)]
 final class GithubPackageReleaseAssetsTest extends TestCase
 {
@@ -59,7 +62,16 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             99,
         );
 
-        $io     = $this->createMock(IOInterface::class);
+        $io = $this->createMock(IOInterface::class);
+
+        $githubToken = getenv('GITHUB_TOKEN');
+        if (is_string($githubToken) && $githubToken !== '') {
+            $io->method('hasAuthentication')
+                ->willReturn(true);
+            $io->method('getAuthentication')
+                ->willReturn(['username' => $githubToken, 'password' => 'x-oauth-basic']);
+        }
+
         $config = new Config();
 
         self::assertSame(
