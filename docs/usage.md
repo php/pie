@@ -51,9 +51,10 @@ installed.
 FROM php:8.4-cli
 
 # Add the `unzip` package which PIE uses to extract .zip files
-RUN apt-get -y update \
-    && apt-get install -y --no-install-recommends unzip \
-    && rm -rf /var/lib/apt/lists/*
+RUN export DEBIAN_FRONTEND="noninteractive"; \
+    set -eux; \
+    apt-get update; apt-get install -y --no-install-recommends unzip; \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy the pie.phar from the latest `:bin` release
 COPY --from=ghcr.io/php/pie:bin /pie /usr/bin/pie
