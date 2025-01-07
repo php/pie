@@ -12,6 +12,7 @@ use Composer\PartialComposer;
 use Composer\Repository\InstalledRepositoryInterface;
 use Composer\Util\Filesystem;
 use Php\Pie\ExtensionType;
+use Symfony\Component\Console\Output\OutputInterface;
 
 use function sprintf;
 
@@ -39,11 +40,14 @@ class PiePackageInstaller extends LibraryInstaller
                 $output = $this->composerRequest->pieOutput;
 
                 if ($this->composerRequest->requestedPackage->package !== $composerPackage->getName()) {
-                    $output->writeln(sprintf(
-                        '<error>Not using PIE to install %s as it was not the expected package %s</error>',
-                        $composerPackage->getName(),
-                        $this->composerRequest->requestedPackage->package,
-                    ));
+                    $output->writeln(
+                        sprintf(
+                            '<comment>Skipping %s install request from Composer as it was not the expected PIE package %s</comment>',
+                            $composerPackage->getName(),
+                            $this->composerRequest->requestedPackage->package,
+                        ),
+                        OutputInterface::VERBOSITY_VERY_VERBOSE,
+                    );
 
                     return null;
                 }
