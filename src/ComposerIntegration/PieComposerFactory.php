@@ -75,6 +75,7 @@ class PieComposerFactory extends Factory
         );
 
         OverrideWindowsUrlInstallListener::selfRegister($composer, $io, $container, $composerRequest);
+        RemoveUnrelatedInstallOperations::selfRegister($composer, $composerRequest);
 
         $composer->getConfig()->merge(['config' => ['__PIE_REQUEST__' => $composerRequest]]);
         $io->loadConfiguration($composer->getConfig());
