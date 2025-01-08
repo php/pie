@@ -13,6 +13,11 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use function restore_error_handler;
+use function set_error_handler;
+
+use const E_WARNING;
+
 #[CoversClass(VendorCleanup::class)]
 final class VendorCleanupTest extends TestCase
 {
@@ -56,7 +61,19 @@ final class VendorCleanupTest extends TestCase
                 OutputInterface::VERBOSITY_VERY_VERBOSE,
             );
 
+        /**
+         * scandir will emit a warning in this case, causing phpunit to fail with warning
+         *
+         * @psalm-suppress InvalidArgument
+         */
+        set_error_handler(
+            static function (): bool|null {
+                return null;
+            },
+            E_WARNING,
+        );
         ($this->vendorCleanup)($this->composerWithVendorDirConfig('/path/that/does/not/exist'));
+        restore_error_handler();
     }
 
     public function testVendorDirIsCleaned(): void
