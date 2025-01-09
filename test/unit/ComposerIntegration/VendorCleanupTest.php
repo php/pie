@@ -16,6 +16,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use function restore_error_handler;
 use function set_error_handler;
 
+use const DIRECTORY_SEPARATOR;
 use const E_WARNING;
 
 #[CoversClass(VendorCleanup::class)]
@@ -86,8 +87,8 @@ final class VendorCleanupTest extends TestCase
             ->method('remove')
             ->willReturnCallback(static function (string $path) use (&$vendor1Removed, &$vendor2Removed): bool {
                 return match ($path) {
-                    self::VENDOR_DIR . '/vendor1' => $vendor1Removed = true,
-                    self::VENDOR_DIR . '/vendor2' => $vendor2Removed = true,
+                    self::VENDOR_DIR . DIRECTORY_SEPARATOR . 'vendor1' => $vendor1Removed = true,
+                    self::VENDOR_DIR . DIRECTORY_SEPARATOR . 'vendor2' => $vendor2Removed = true,
                 };
             });
 

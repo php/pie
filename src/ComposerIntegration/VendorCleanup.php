@@ -61,16 +61,15 @@ class VendorCleanup
         array_walk(
             $toRemove,
             function (string $pathToRemove) use ($vendorDir): void {
+                $fullPathToRemove = $vendorDir . DIRECTORY_SEPARATOR . $pathToRemove;
+
                 $this->output->writeln(
                     sprintf(
-                        '<comment>Removing: %s/%s</comment>',
-                        $vendorDir,
-                        $pathToRemove,
+                        '<comment>Removing: %s</comment>',
+                        $fullPathToRemove,
                     ),
                     OutputInterface::VERBOSITY_VERY_VERBOSE,
                 );
-
-                $fullPathToRemove = $vendorDir . DIRECTORY_SEPARATOR . $pathToRemove;
 
                 if ($this->filesystem->remove($fullPathToRemove)) {
                     return;
