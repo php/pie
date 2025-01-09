@@ -25,6 +25,7 @@ class ComposerIntegrationHandler
     public function __construct(
         private readonly ContainerInterface $container,
         private readonly QuieterConsoleIO $arrayCollectionIo,
+        private readonly VendorCleanup $vendorCleanup,
     ) {
     }
 
@@ -86,5 +87,7 @@ class ComposerIntegrationHandler
 
             throw ComposerRunFailed::fromExitCode($resultCode);
         }
+
+        ($this->vendorCleanup)($composer);
     }
 }
