@@ -29,7 +29,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/checkout@v4
-      - run: composer config --global github-oauth.github.com ${{ secrets.GITHUB_TOKEN }}
       # temporarily remove Psalm until ready for PHP 8.4
       - name: remove psalm
         if: matrix.php-versions == '8.4'
@@ -38,9 +37,13 @@ jobs:
       - name: Run PHPUnit on Windows
         if: matrix.operating-system == 'windows-latest'
         run: vendor/bin/phpunit
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run PHPUnit on non-Windows
         if: matrix.operating-system != 'windows-latest'
         run: sudo vendor/bin/phpunit
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   behaviour-tests:
     runs-on: ${{ matrix.operating-system }}
