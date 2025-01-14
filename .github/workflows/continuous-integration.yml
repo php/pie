@@ -10,8 +10,6 @@ permissions:
 jobs:
   unit-tests:
     runs-on: ${{ matrix.operating-system }}
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     strategy:
       matrix:
         operating-system:
@@ -28,6 +26,8 @@ jobs:
         with:
           php-version: ${{ matrix.php-versions }}
           extensions: intl, sodium, zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/checkout@v4
       # temporarily remove Psalm until ready for PHP 8.4
       - name: remove psalm
@@ -37,9 +37,13 @@ jobs:
       - name: Run PHPUnit on Windows
         if: matrix.operating-system == 'windows-latest'
         run: vendor/bin/phpunit
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run PHPUnit on non-Windows
         if: matrix.operating-system != 'windows-latest'
         run: sudo vendor/bin/phpunit
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   behaviour-tests:
     runs-on: ${{ matrix.operating-system }}
