@@ -42,9 +42,9 @@ class SetupIniFile
                 $output->writeln('Automatic extension enabling was skipped.', OutputInterface::VERBOSITY_VERBOSE);
             }
 
-            $output->writeln('<comment>⚠️  Extension has NOT been automatically enabled.</comment>');
+            $output->writeln('<comment>⚠️  Extension is not enabled.</comment>');
             $output->writeln(sprintf(
-                '<comment>You must now add "%s=%s" to your php.ini</comment>',
+                '<comment>Add "%s=%s" to your php.ini to enable this extension.</comment>',
                 $downloadedPackage->package->extensionType === ExtensionType::PhpModule ? 'extension' : 'zend_extension',
                 $downloadedPackage->package->extensionName->name(),
             ));
