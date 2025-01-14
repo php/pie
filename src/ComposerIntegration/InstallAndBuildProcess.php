@@ -10,7 +10,12 @@ use Php\Pie\Building\Build;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\Installing\Install;
+use Php\Pie\Platform\Git\Exception\InvalidGitBinaryPath;
+use Php\Pie\Platform\Git\GitBinaryPath;
 
+use function file_exists;
+use function implode;
+use function rtrim;
 use function sprintf;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
@@ -42,6 +47,27 @@ class InstallAndBuildProcess
             $downloadedPackage->package->prettyNameAndVersion(),
             $downloadedPackage->extractedSourcePath,
         ));
+
+        if (file_exists(rtrim($downloadedPackage->extractedSourcePath, '/') . '/.gitmodules')) {
+            try {
+                $output->writeln(sprintf(
+                    '<info>Found .gitmodules file in</info> %s<info>, fetching submodules...</info>',
+                    $downloadedPackage->extractedSourcePath,
+                ));
+
+                $git              = GitBinaryPath::fromGitBinaryPath('/opt/homebrew/bin/git');
+                $clonedSubmodules = $git->fetchSubmodules($downloadedPackage->extractedSourcePath);
+
+                $output->writeln(sprintf(
+                    '<info>Cloned submodules:</info> %s',
+                    implode(', ', $clonedSubmodules),
+                ));
+            } catch (InvalidGitBinaryPath $exception) {
+                $output->writeln('<error>Could not find a valid git binary path to clone submodules.</error>');
+
+                throw $exception;
+            }
+        }
 
         $this->installedJsonMetadata->addDownloadMetadata(
             $composer,
