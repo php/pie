@@ -6,8 +6,6 @@ namespace Php\Pie\ComposerIntegration;
 
 use Composer\Config\JsonConfigSource;
 use Composer\Json\JsonFile;
-use Composer\Json\JsonManipulator;
-use Php\Pie\Platform\TargetPlatform;
 
 use function file_exists;
 use function file_get_contents;
@@ -46,9 +44,12 @@ class PieJsonEditor
     public function addRequire(string $package, string $version): string
     {
         $originalPieJsonContent = file_get_contents($this->pieJsonFilename);
-        $manipulator            = new JsonManipulator($originalPieJsonContent);
-        $manipulator->addLink('require', $package, $version, true);
-        file_put_contents($this->pieJsonFilename, $manipulator->getContents());
+
+        (new JsonConfigSource(
+            new JsonFile(
+                $this->pieJsonFilename,
+            ),
+        ))->addLink('require', $package, $version);
 
         return $originalPieJsonContent;
     }
@@ -56,5 +57,33 @@ class PieJsonEditor
     public function revert(string $originalPieJsonContent): void
     {
         file_put_contents($this->pieJsonFilename, $originalPieJsonContent);
+    }
+
+    /**
+     * Add a repository to the given `pie.json`. Returns the original
+     * `pie.json` content, in case it needs to be restored later.
+     *
+     * @param non-empty-string $name
+     * @param 'vcs'|'path'     $type
+     * @param non-empty-string $url
+     */
+    public function addRepository(
+        string $name,
+        string $type,
+        string $url,
+    ): string {
+        $originalPieJsonContent = file_get_contents($this->pieJsonFilename);
+
+        (new JsonConfigSource(
+            new JsonFile(
+                $this->pieJsonFilename,
+            ),
+        ))
+            ->addRepository($name, [
+                'type' => $type,
+                'url' => $url,
+            ]);
+
+        return $originalPieJsonContent;
     }
 }

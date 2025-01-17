@@ -40,12 +40,12 @@ final class PieJsonEditorTest extends TestCase
         $editor->addRequire('foo/bar', '^1.2');
         self::assertSame(
             <<<'EOF'
-{
-    "require": {
-        "foo/bar": "^1.2"
-    }
-}
-EOF,
+            {
+                "require": {
+                    "foo/bar": "^1.2"
+                }
+            }
+            EOF,
             trim(file_get_contents($testPieJson)),
         );
     }
@@ -59,5 +59,35 @@ EOF,
         $originalContent = $editor->addRequire('foo/bar', '^1.2');
         $editor->revert($originalContent);
         self::assertSame($originalContent, file_get_contents($testPieJson));
+    }
+
+    public function testCanAddRepostiory(): void
+    {
+        $testPieJson = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('pie_json_test_', true) . '.json';
+
+        $editor = new PieJsonEditor($testPieJson);
+        $editor->ensureExists();
+
+        $originalContent = $editor->addRepository(
+            'myrepo',
+            'vcs',
+            'https://github.com/php/pie',
+        );
+
+        self::assertSame("{\n}\n", $originalContent);
+
+        self::assertSame(
+            <<<'EOF'
+            {
+                "repositories": {
+                    "myrepo": {
+                        "type": "vcs",
+                        "url": "https://github.com/php/pie"
+                    }
+                }
+            }
+            EOF,
+            trim(file_get_contents($testPieJson)),
+        );
     }
 }
