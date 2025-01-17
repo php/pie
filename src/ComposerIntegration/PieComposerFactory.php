@@ -17,7 +17,6 @@ use Psr\Container\ContainerInterface;
 use Webmozart\Assert\Assert;
 
 use function file_exists;
-use function file_put_contents;
 use function mkdir;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
@@ -60,12 +59,7 @@ class PieComposerFactory extends Factory
 
         $pieComposer = Platform::getPieJsonFilename($composerRequest->targetPlatform);
 
-        if (! file_exists($pieComposer)) {
-            file_put_contents(
-                $pieComposer,
-                "{\n}\n",
-            );
-        }
+        (new PieJsonEditor($pieComposer))->ensureExists();
 
         $io       = $container->get(QuieterConsoleIO::class);
         $composer = (new PieComposerFactory($container, $composerRequest))->createComposer(

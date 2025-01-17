@@ -7,7 +7,6 @@ namespace Php\Pie\ComposerIntegration;
 use Composer\Composer;
 use Composer\Filter\PlatformRequirementFilter\PlatformRequirementFilterFactory;
 use Composer\Installer;
-use Composer\Json\JsonManipulator;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\Platform;
@@ -15,8 +14,6 @@ use Php\Pie\Platform\TargetPlatform;
 use Psr\Container\ContainerInterface;
 
 use function file_exists;
-use function file_get_contents;
-use function file_put_contents;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 class ComposerIntegrationHandler
@@ -47,10 +44,11 @@ class ComposerIntegrationHandler
 
         // Write the new requirement to pie.json; because we later essentially just do a `composer install` using that file
         $pieComposerJson        = Platform::getPieJsonFilename($targetPlatform);
-        $originalPieJsonContent = file_get_contents($pieComposerJson);
-        $manipulator            = new JsonManipulator($originalPieJsonContent);
-        $manipulator->addLink('require', $requestedPackageAndVersion->package, $recommendedRequireVersion, true);
-        file_put_contents($pieComposerJson, $manipulator->getContents());
+        $pieJsonEditor          = new PieJsonEditor($pieComposerJson);
+        $originalPieJsonContent = $pieJsonEditor->addRequire(
+            $requestedPackageAndVersion->package,
+            $recommendedRequireVersion !== '' ? $recommendedRequireVersion : '*',
+        );
 
         // Refresh the Composer instance so it re-reads the updated pie.json
         $composer = PieComposerFactory::recreatePieComposer($this->container, $composer);
@@ -83,7 +81,7 @@ class ComposerIntegrationHandler
 
         if ($resultCode !== Installer::ERROR_NONE) {
             // Revert composer.json change
-            file_put_contents($pieComposerJson, $originalPieJsonContent);
+            $pieJsonEditor->revert($originalPieJsonContent);
 
             throw ComposerRunFailed::fromExitCode($resultCode);
         }
