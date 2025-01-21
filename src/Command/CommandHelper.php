@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace Php\Pie\Command;
 
+use Composer\Composer;
 use Composer\Package\Version\VersionParser;
+use Composer\Repository\ComposerRepository;
+use Composer\Repository\PathRepository;
+use Composer\Repository\VcsRepository;
 use Composer\Util\Platform;
 use InvalidArgumentException;
 use Php\Pie\DependencyResolver\Package;
@@ -262,5 +266,36 @@ final class CommandHelper
         }
 
         return $configureOptionsValues;
+    }
+
+    public static function listRepositories(Composer $composer, OutputInterface $output): void
+    {
+        $output->writeln('The following repositories are in use for this Target PHP:');
+
+        foreach ($composer->getRepositoryManager()->getRepositories() as $repo) {
+            if ($repo instanceof ComposerRepository) {
+                $output->writeln('  - Packagist (cannot be removed)');
+                continue;
+            }
+
+            if ($repo instanceof VcsRepository) {
+                /** @psalm-suppress InternalMethod */
+                $output->writeln(sprintf(
+                    '  - VCS Repository (%s)',
+                    $repo->getDriver()?->getUrl() ?? 'no url?',
+                ));
+                continue;
+            }
+
+            if (! $repo instanceof PathRepository) {
+                continue;
+            }
+
+            $repoConfig = $repo->getRepoConfig();
+            $output->writeln(sprintf(
+                '  - Path Repository (%s)',
+                array_key_exists('url', $repoConfig) && is_string($repoConfig['url']) && $repoConfig['url'] !== '' ? $repoConfig['url'] : 'no path?',
+            ));
+        }
     }
 }

@@ -4,7 +4,13 @@ declare(strict_types=1);
 
 namespace Php\PieUnitTest\Command;
 
+use Composer\Composer;
 use Composer\Package\CompletePackage;
+use Composer\Repository\ComposerRepository;
+use Composer\Repository\PathRepository;
+use Composer\Repository\RepositoryManager;
+use Composer\Repository\Vcs\GitHubDriver;
+use Composer\Repository\VcsRepository;
 use Composer\Util\Platform;
 use InvalidArgumentException;
 use Php\Pie\Command\CommandHelper;
@@ -22,10 +28,12 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\NullOutput;
 
 use function array_combine;
 use function array_map;
+use function trim;
 
 #[CoversClass(CommandHelper::class)]
 final class CommandHelperTest extends TestCase
@@ -174,5 +182,43 @@ final class CommandHelperTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('The --with-phpize-path=/path/to/phpize cannot be used on Windows.');
         CommandHelper::determineTargetPlatformFromInputs($input, $output);
+    }
+
+    public function testListRepositories(): void
+    {
+        $output = new BufferedOutput();
+
+        $composerRepo = $this->createMock(ComposerRepository::class);
+
+        $githubRepoDriver = $this->createMock(GitHubDriver::class);
+        $githubRepoDriver->method('getUrl')->willReturn('https://github.com/php/pie');
+
+        $vcsRepo = $this->createMock(VcsRepository::class);
+        $vcsRepo->method('getDriver')->willReturn($githubRepoDriver);
+
+        $pathRepo = $this->createMock(PathRepository::class);
+        $pathRepo->method('getRepoConfig')->willReturn(['url' => '/path/to/repo']);
+
+        $repoManager = $this->createMock(RepositoryManager::class);
+        $repoManager->method('getRepositories')->willReturn([
+            $composerRepo,
+            $vcsRepo,
+            $pathRepo,
+        ]);
+
+        $composer = $this->createMock(Composer::class);
+        $composer->method('getRepositoryManager')->willReturn($repoManager);
+
+        CommandHelper::listRepositories($composer, $output);
+
+        self::assertSame(
+            <<<'OUTPUT'
+            The following repositories are in use for this Target PHP:
+              - Packagist (cannot be removed)
+              - VCS Repository (https://github.com/php/pie)
+              - Path Repository (/path/to/repo)
+            OUTPUT,
+            trim($output->fetch()),
+        );
     }
 }
