@@ -61,7 +61,7 @@ final class PieJsonEditorTest extends TestCase
         self::assertSame($originalContent, file_get_contents($testPieJson));
     }
 
-    public function testCanAddRepostiory(): void
+    public function testCanAddAndRemoveRepositories(): void
     {
         $testPieJson = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('pie_json_test_', true) . '.json';
 
@@ -69,21 +69,32 @@ final class PieJsonEditorTest extends TestCase
         $editor->ensureExists();
 
         $originalContent = $editor->addRepository(
-            'myrepo',
             'vcs',
             'https://github.com/php/pie',
         );
 
         self::assertSame("{\n}\n", $originalContent);
 
+        $expectedRepoContent = <<<'EOF'
+            {
+                "repositories": {
+                    "https://github.com/php/pie": {
+                        "type": "vcs",
+                        "url": "https://github.com/php/pie"
+                    }
+                }
+            }
+            EOF;
+
+        self::assertSame($expectedRepoContent, trim(file_get_contents($testPieJson)));
+
+        $originalContent2 = $editor->removeRepository('https://github.com/php/pie');
+        self::assertSame($expectedRepoContent, trim($originalContent2));
+
         self::assertSame(
             <<<'EOF'
             {
                 "repositories": {
-                    "myrepo": {
-                        "type": "vcs",
-                        "url": "https://github.com/php/pie"
-                    }
                 }
             }
             EOF,

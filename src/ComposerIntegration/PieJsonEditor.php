@@ -63,12 +63,10 @@ class PieJsonEditor
      * Add a repository to the given `pie.json`. Returns the original
      * `pie.json` content, in case it needs to be restored later.
      *
-     * @param non-empty-string $name
      * @param 'vcs'|'path'     $type
      * @param non-empty-string $url
      */
     public function addRepository(
-        string $name,
         string $type,
         string $url,
     ): string {
@@ -79,10 +77,31 @@ class PieJsonEditor
                 $this->pieJsonFilename,
             ),
         ))
-            ->addRepository($name, [
+            ->addRepository($url, [
                 'type' => $type,
                 'url' => $url,
             ]);
+
+        return $originalPieJsonContent;
+    }
+
+    /**
+     * Remove a repository from the given `pie.json`. Returns the original
+     * `pie.json` content, in case it needs to be restored later.
+     *
+     * @param non-empty-string $name
+     */
+    public function removeRepository(
+        string $name,
+    ): string {
+        $originalPieJsonContent = file_get_contents($this->pieJsonFilename);
+
+        (new JsonConfigSource(
+            new JsonFile(
+                $this->pieJsonFilename,
+            ),
+        ))
+            ->removeRepository($name);
 
         return $originalPieJsonContent;
     }
