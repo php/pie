@@ -274,7 +274,16 @@ final class CommandHelper
 
         foreach ($composer->getRepositoryManager()->getRepositories() as $repo) {
             if ($repo instanceof ComposerRepository) {
-                $output->writeln('  - Packagist (cannot be removed)');
+                $repoConfig = $repo->getRepoConfig();
+
+                $repoUrl = array_key_exists('url', $repoConfig) && is_string($repoConfig['url']) && $repoConfig['url'] !== '' ? $repoConfig['url'] : null;
+
+                if ($repoUrl === 'https://repo.packagist.org') {
+                    $output->writeln('  - Packagist');
+                    continue;
+                }
+
+                $output->writeln(sprintf('  - Composer (%s)', $repoUrl ?? 'no url?'));
                 continue;
             }
 

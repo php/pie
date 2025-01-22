@@ -188,7 +188,11 @@ final class CommandHelperTest extends TestCase
     {
         $output = new BufferedOutput();
 
-        $composerRepo = $this->createMock(ComposerRepository::class);
+        $packagistRepo = $this->createMock(ComposerRepository::class);
+        $packagistRepo->method('getRepoConfig')->willReturn(['url' => 'https://repo.packagist.org']);
+
+        $privatePackagistRepo = $this->createMock(ComposerRepository::class);
+        $privatePackagistRepo->method('getRepoConfig')->willReturn(['url' => 'https://repo.packagist.com/example']);
 
         $githubRepoDriver = $this->createMock(GitHubDriver::class);
         $githubRepoDriver->method('getUrl')->willReturn('https://github.com/php/pie');
@@ -201,7 +205,8 @@ final class CommandHelperTest extends TestCase
 
         $repoManager = $this->createMock(RepositoryManager::class);
         $repoManager->method('getRepositories')->willReturn([
-            $composerRepo,
+            $packagistRepo,
+            $privatePackagistRepo,
             $vcsRepo,
             $pathRepo,
         ]);
@@ -214,7 +219,8 @@ final class CommandHelperTest extends TestCase
         self::assertSame(
             <<<'OUTPUT'
             The following repositories are in use for this Target PHP:
-              - Packagist (cannot be removed)
+              - Packagist
+              - Composer (https://repo.packagist.com/example)
               - VCS Repository (https://github.com/php/pie)
               - Path Repository (/path/to/repo)
             OUTPUT,

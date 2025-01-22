@@ -46,7 +46,7 @@ final class RepositoryManagementCommandsTest extends TestCase
 
     public function testPathRepositoriesCanBeManaged(): void
     {
-        $this->assertRepositoryListDisplayed(['Packagist (cannot be removed)']);
+        $this->assertRepositoryListDisplayed(['Packagist']);
 
         $this->addCommand->execute([
             'type' => 'path',
@@ -56,17 +56,17 @@ final class RepositoryManagementCommandsTest extends TestCase
         $this->assertRepositoryListDisplayed(
             [
                 'Path Repository (' . self::EXAMPLE_PATH_REPOSITORY_URL . ')',
-                'Packagist (cannot be removed)',
+                'Packagist',
             ],
         );
 
         $this->removeCommand->execute(['url' => self::EXAMPLE_PATH_REPOSITORY_URL]);
-        $this->assertRepositoryListDisplayed(['Packagist (cannot be removed)']);
+        $this->assertRepositoryListDisplayed(['Packagist']);
     }
 
     public function testVcsRepositoriesCanBeManaged(): void
     {
-        $this->assertRepositoryListDisplayed(['Packagist (cannot be removed)']);
+        $this->assertRepositoryListDisplayed(['Packagist']);
 
         $this->addCommand->execute([
             'type' => 'vcs',
@@ -76,12 +76,12 @@ final class RepositoryManagementCommandsTest extends TestCase
         $this->assertRepositoryListDisplayed(
             [
                 'VCS Repository (' . self::EXAMPLE_VCS_REPOSITORY_URL . '.git)',
-                'Packagist (cannot be removed)',
+                'Packagist',
             ],
         );
 
         $this->removeCommand->execute(['url' => self::EXAMPLE_VCS_REPOSITORY_URL]);
-        $this->assertRepositoryListDisplayed(['Packagist (cannot be removed)']);
+        $this->assertRepositoryListDisplayed(['Packagist']);
     }
 
     /** @param list<non-empty-string> $expectedRepositories */

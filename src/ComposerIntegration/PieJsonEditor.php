@@ -63,8 +63,8 @@ class PieJsonEditor
      * Add a repository to the given `pie.json`. Returns the original
      * `pie.json` content, in case it needs to be restored later.
      *
-     * @param 'vcs'|'path'     $type
-     * @param non-empty-string $url
+     * @param 'vcs'|'path'|'composer' $type
+     * @param non-empty-string        $url
      */
     public function addRepository(
         string $type,
