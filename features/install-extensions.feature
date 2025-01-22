@@ -1,4 +1,4 @@
-Feature: Extensions can be installed with Behat
+Feature: Extensions can be installed with PIE
 
   Example: The latest version of an extension can be downloaded
     When I run a command to download the latest version of an extension

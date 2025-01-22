@@ -13,6 +13,9 @@ use Php\Pie\Command\BuildCommand;
 use Php\Pie\Command\DownloadCommand;
 use Php\Pie\Command\InfoCommand;
 use Php\Pie\Command\InstallCommand;
+use Php\Pie\Command\RepositoryAddCommand;
+use Php\Pie\Command\RepositoryListCommand;
+use Php\Pie\Command\RepositoryRemoveCommand;
 use Php\Pie\Command\ShowCommand;
 use Php\Pie\ComposerIntegration\MinimalHelperSet;
 use Php\Pie\ComposerIntegration\QuieterConsoleIO;
@@ -46,6 +49,9 @@ final class Container
         $container->singleton(InstallCommand::class);
         $container->singleton(InfoCommand::class);
         $container->singleton(ShowCommand::class);
+        $container->singleton(RepositoryListCommand::class);
+        $container->singleton(RepositoryAddCommand::class);
+        $container->singleton(RepositoryRemoveCommand::class);
 
         $container->singleton(QuieterConsoleIO::class, static function (ContainerInterface $container): QuieterConsoleIO {
             return new QuieterConsoleIO(
