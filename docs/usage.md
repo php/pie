@@ -239,6 +239,7 @@ to use some other repository types:
 * `pie repository:add [--with-php-config=...] path /path/to/your/local/extension`
 * `pie repository:add [--with-php-config=...] vcs https://github.com/youruser/yourextension`
 * `pie repository:add [--with-php-config=...] composer https://repo.packagist.com/your-private-packagist/`
+* `pie repository:add [--with-php-config=...] composer packagist.org`
 
 The `repository:*` commands all support the optional `--with-php-config` flag
 to allow you to specify which PHP installation to use (for example, if you have
@@ -248,6 +249,7 @@ removed too, using the inverse `repository:remove` commands:
 * `pie repository:remove [--with-php-config=...] /path/to/your/local/extension`
 * `pie repository:remove [--with-php-config=...] https://github.com/youruser/yourextension`
 * `pie repository:remove [--with-php-config=...] https://repo.packagist.com/your-private-packagist/`
+* `pie repository:remove [--with-php-config=...] packagist.org`
 
 Note you do not need to specify the repository type in `repository:remove`,
 just the URL.

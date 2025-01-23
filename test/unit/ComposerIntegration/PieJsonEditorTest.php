@@ -107,10 +107,29 @@ final class PieJsonEditorTest extends TestCase
             $this->normaliseJson($originalContent2),
         );
 
+        $noRepositoriesContent = $this->normaliseJson(<<<'EOF'
+            {
+                "repositories": {
+                }
+            }
+            EOF);
+
+        self::assertSame(
+            $noRepositoriesContent,
+            $this->normaliseJson(file_get_contents($testPieJson)),
+        );
+
+        $originalContent3 = $editor->excludePackagistOrg();
+        self::assertSame(
+            $noRepositoriesContent,
+            $this->normaliseJson($originalContent3),
+        );
+
         self::assertSame(
             $this->normaliseJson(<<<'EOF'
             {
                 "repositories": {
+                    "packagist.org": false
                 }
             }
             EOF),

@@ -15,6 +15,8 @@ use function str_replace;
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 class PieJsonEditor
 {
+    public const PACKAGIST_ORG_KEY = 'packagist.org';
+
     public function __construct(private readonly string $pieJsonFilename)
     {
     }
@@ -58,6 +60,20 @@ class PieJsonEditor
     public function revert(string $originalPieJsonContent): void
     {
         file_put_contents($this->pieJsonFilename, $originalPieJsonContent);
+    }
+
+    public function excludePackagistOrg(): string
+    {
+        $originalPieJsonContent = file_get_contents($this->pieJsonFilename);
+
+        (new JsonConfigSource(
+            new JsonFile(
+                $this->pieJsonFilename,
+            ),
+        ))
+            ->addRepository(self::PACKAGIST_ORG_KEY, false);
+
+        return $originalPieJsonContent;
     }
 
     /**

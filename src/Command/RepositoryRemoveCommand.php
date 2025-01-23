@@ -16,6 +16,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Webmozart\Assert\Assert;
 
+use function str_contains;
+
 #[AsCommand(
     name: 'repository:remove',
     description: 'Remove a repository for packages that PIE can use.',
@@ -52,14 +54,19 @@ final class RepositoryRemoveCommand extends Command
         $url = (string) $input->getArgument(self::ARG_URL);
         Assert::stringNotEmpty($url);
 
-        (new PieJsonEditor($pieJsonFilename))->removeRepository($url);
+        if (str_contains($url, 'packagist.org')) {
+            // "removing packagist" is really just adding an exclusion
+            (new PieJsonEditor($pieJsonFilename))->excludePackagistOrg();
+        } else {
+            (new PieJsonEditor($pieJsonFilename))->removeRepository($url);
+        }
 
         CommandHelper::listRepositories(
             PieComposerFactory::createPieComposer(
                 $this->container,
                 PieComposerRequest::noOperation(
                     $output,
-                    CommandHelper::determineTargetPlatformFromInputs($input, $output),
+                    $targetPlatform,
                 ),
             ),
             $output,

@@ -17,6 +17,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Webmozart\Assert\Assert;
 
 use function realpath;
+use function str_contains;
 
 #[AsCommand(
     name: 'repository:add',
@@ -69,16 +70,21 @@ final class RepositoryAddCommand extends Command
             $url = realpath($originalUrl);
         }
 
-        Assert::stringNotEmpty($url, 'Could not resolve ' . $originalUrl . ' to a real path');
+        if ($type === 'composer' && str_contains($url, 'packagist.org')) {
+            // "adding packagist" is really just removing an exclusion
+            (new PieJsonEditor($pieJsonFilename))->removeRepository('packagist.org');
+        } else {
+            Assert::stringNotEmpty($url, 'Could not resolve ' . $originalUrl . ' to a real path');
 
-        (new PieJsonEditor($pieJsonFilename))->addRepository($type, $url);
+            (new PieJsonEditor($pieJsonFilename))->addRepository($type, $url);
+        }
 
         CommandHelper::listRepositories(
             PieComposerFactory::createPieComposer(
                 $this->container,
                 PieComposerRequest::noOperation(
                     $output,
-                    CommandHelper::determineTargetPlatformFromInputs($input, $output),
+                    $targetPlatform,
                 ),
             ),
             $output,

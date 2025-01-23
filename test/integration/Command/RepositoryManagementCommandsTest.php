@@ -28,6 +28,7 @@ final class RepositoryManagementCommandsTest extends TestCase
 {
     private const EXAMPLE_PATH_REPOSITORY_URL = __DIR__;
     private const EXAMPLE_VCS_REPOSITORY_URL  = 'https://github.com/asgrim/example-pie-extension';
+    private const PACKAGIST_ORG_URL           = 'packagist.org';
 
     private CommandTester $listCommand;
     private CommandTester $addCommand;
@@ -39,6 +40,10 @@ final class RepositoryManagementCommandsTest extends TestCase
         $this->addCommand    = new CommandTester(Container::factory()->get(RepositoryAddCommand::class));
         $this->removeCommand = new CommandTester(Container::factory()->get(RepositoryRemoveCommand::class));
 
+        $this->addCommand->execute([
+            'type' => 'composer',
+            'url' => self::PACKAGIST_ORG_URL,
+        ]);
         $this->removeCommand->execute(['url' => self::EXAMPLE_PATH_REPOSITORY_URL]);
         $this->removeCommand->execute(['url' => self::EXAMPLE_VCS_REPOSITORY_URL]);
         $this->removeCommand->execute(['url' => self::EXAMPLE_VCS_REPOSITORY_URL . '.git']);
@@ -81,6 +86,21 @@ final class RepositoryManagementCommandsTest extends TestCase
         );
 
         $this->removeCommand->execute(['url' => self::EXAMPLE_VCS_REPOSITORY_URL]);
+        $this->assertRepositoryListDisplayed(['Packagist']);
+    }
+
+    public function testPackagistOrgCanBeManaged(): void
+    {
+        $this->assertRepositoryListDisplayed(['Packagist']);
+
+        $this->removeCommand->execute(['url' => self::PACKAGIST_ORG_URL]);
+
+        $this->assertRepositoryListDisplayed([]);
+
+        $this->addCommand->execute([
+            'type' => 'composer',
+            'url' => self::PACKAGIST_ORG_URL,
+        ]);
         $this->assertRepositoryListDisplayed(['Packagist']);
     }
 
