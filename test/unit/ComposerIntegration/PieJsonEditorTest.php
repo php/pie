@@ -9,8 +9,9 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 use function file_get_contents;
+use function json_decode;
+use function json_encode;
 use function sys_get_temp_dir;
-use function trim;
 use function uniqid;
 
 use const DIRECTORY_SEPARATOR;
@@ -27,7 +28,10 @@ final class PieJsonEditorTest extends TestCase
         (new PieJsonEditor($testPieJson))->ensureExists();
 
         self::assertFileExists($testPieJson);
-        self::assertSame("{\n}\n", file_get_contents($testPieJson));
+        self::assertSame(
+            $this->normaliseJson("{\n}\n"),
+            $this->normaliseJson(file_get_contents($testPieJson)),
+        );
     }
 
     public function testCanAddRequire(): void
@@ -39,14 +43,14 @@ final class PieJsonEditorTest extends TestCase
 
         $editor->addRequire('foo/bar', '^1.2');
         self::assertSame(
-            <<<'EOF'
+            $this->normaliseJson(<<<'EOF'
             {
                 "require": {
                     "foo/bar": "^1.2"
                 }
             }
-            EOF,
-            trim(file_get_contents($testPieJson)),
+            EOF),
+            $this->normaliseJson(file_get_contents($testPieJson)),
         );
     }
 
@@ -58,7 +62,10 @@ final class PieJsonEditorTest extends TestCase
         $editor->ensureExists();
         $originalContent = $editor->addRequire('foo/bar', '^1.2');
         $editor->revert($originalContent);
-        self::assertSame($originalContent, file_get_contents($testPieJson));
+        self::assertSame(
+            $this->normaliseJson($originalContent),
+            $this->normaliseJson(file_get_contents($testPieJson)),
+        );
     }
 
     public function testCanAddAndRemoveRepositories(): void
@@ -73,9 +80,12 @@ final class PieJsonEditorTest extends TestCase
             'https://github.com/php/pie',
         );
 
-        self::assertSame("{\n}\n", $originalContent);
+        self::assertSame(
+            $this->normaliseJson("{\n}\n"),
+            $this->normaliseJson($originalContent),
+        );
 
-        $expectedRepoContent = <<<'EOF'
+        $expectedRepoContent = $this->normaliseJson(<<<'EOF'
             {
                 "repositories": {
                     "https://github.com/php/pie": {
@@ -84,21 +94,32 @@ final class PieJsonEditorTest extends TestCase
                     }
                 }
             }
-            EOF;
-
-        self::assertSame($expectedRepoContent, trim(file_get_contents($testPieJson)));
-
-        $originalContent2 = $editor->removeRepository('https://github.com/php/pie');
-        self::assertSame($expectedRepoContent, trim($originalContent2));
+            EOF);
 
         self::assertSame(
-            <<<'EOF'
+            $expectedRepoContent,
+            $this->normaliseJson(file_get_contents($testPieJson)),
+        );
+
+        $originalContent2 = $editor->removeRepository('https://github.com/php/pie');
+        self::assertSame(
+            $expectedRepoContent,
+            $this->normaliseJson($originalContent2),
+        );
+
+        self::assertSame(
+            $this->normaliseJson(<<<'EOF'
             {
                 "repositories": {
                 }
             }
-            EOF,
-            trim(file_get_contents($testPieJson)),
+            EOF),
+            $this->normaliseJson(file_get_contents($testPieJson)),
         );
+    }
+
+    private function normaliseJson(string $fileContent): string
+    {
+        return json_encode(json_decode($fileContent));
     }
 }

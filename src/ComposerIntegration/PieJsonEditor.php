@@ -10,6 +10,7 @@ use Composer\Json\JsonFile;
 use function file_exists;
 use function file_get_contents;
 use function file_put_contents;
+use function str_replace;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 class PieJsonEditor
@@ -77,7 +78,7 @@ class PieJsonEditor
                 $this->pieJsonFilename,
             ),
         ))
-            ->addRepository($url, [
+            ->addRepository($this->normaliseRepositoryName($url), [
                 'type' => $type,
                 'url' => $url,
             ]);
@@ -101,8 +102,13 @@ class PieJsonEditor
                 $this->pieJsonFilename,
             ),
         ))
-            ->removeRepository($name);
+            ->removeRepository($this->normaliseRepositoryName($name));
 
         return $originalPieJsonContent;
+    }
+
+    private function normaliseRepositoryName(string $url): string
+    {
+        return str_replace('\\', '/', $url);
     }
 }

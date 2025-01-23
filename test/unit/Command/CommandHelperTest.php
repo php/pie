@@ -33,6 +33,7 @@ use Symfony\Component\Console\Output\NullOutput;
 
 use function array_combine;
 use function array_map;
+use function str_replace;
 use function trim;
 
 #[CoversClass(CommandHelper::class)]
@@ -217,14 +218,14 @@ final class CommandHelperTest extends TestCase
         CommandHelper::listRepositories($composer, $output);
 
         self::assertSame(
-            <<<'OUTPUT'
+            str_replace("\r\n", "\n", <<<'OUTPUT'
             The following repositories are in use for this Target PHP:
               - Packagist
               - Composer (https://repo.packagist.com/example)
               - VCS Repository (https://github.com/php/pie)
               - Path Repository (/path/to/repo)
-            OUTPUT,
-            trim($output->fetch()),
+            OUTPUT),
+            str_replace("\r\n", "\n", trim($output->fetch())),
         );
     }
 }
