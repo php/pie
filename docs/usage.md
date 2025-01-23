@@ -37,7 +37,7 @@ COPY --from=ghcr.io/php/pie:bin /pie /usr/bin/pie
 
 Instead of `bin` tag (which represents latest binary-only image) you can also use explicit version (in `x.y.z-bin` format). Use [GitHub registry](https://ghcr.io/php/pie) to find available tags.
 
-> [!IMPORTANT]  
+> [!IMPORTANT]
 > Binary-only images don't include PHP runtime so you can't use them for _running_ PIE. This is just an alternative way of distributing PHAR file, you still need to satisfy PIE's runtime requirements on your own.
 
 #### Example of PIE working in a Dockerfile
@@ -215,6 +215,43 @@ pie install example/some-extension --with-some-library-name=/path/to/the/lib --e
 
 ### Configuring the INI file
 
-At the moment, PIE does not configure the INI file, although this improvement
-is planned soon. In the meantime, you must enable the extension after installing
-by adding a line such as `extension=foo` to your `php.ini`.
+PIE will automatically try to enable the extension by adding `extension=...` or
+`zend_extension=...` in the appropriate INI file. If you want to disable this
+behaviour, pass the `--skip-enable-extension` flag to your `pie install`
+command. The following techniques are used to attempt to enable the extension:
+
+ * `phpenmod`, if using the deb.sury.org distribution
+ * `docker-php-ext-enable` if using Docker's PHP image
+ * Add a new file to the "additional .ini file" path, if configured
+ * Append to the standard php.ini, if configured
+
+If none of these techniques work, or you used the `--skip-enable-extension`
+flag, PIE will warn you that the extension was not enabled, and will note that
+you must enable the extension yourself.
+
+### Adding non-Packagist.org repositories
+
+Sometimes you may want to install an extension from a package repository other
+than Packagist.org (such as [Private Packagist](https://packagist.com/)), or
+from a local directory. Since PIE is based heavily on Composer, it is possible
+to use some other repository types:
+
+* `pie repository:add [--with-php-config=...] path /path/to/your/local/extension`
+* `pie repository:add [--with-php-config=...] vcs https://github.com/youruser/yourextension`
+* `pie repository:add [--with-php-config=...] composer https://repo.packagist.com/your-private-packagist/`
+
+The `repository:*` commands all support the optional `--with-php-config` flag
+to allow you to specify which PHP installation to use (for example, if you have
+multiple PHP installations on one machine). The above added repositories can be
+removed too, using the inverse `repository:remove` commands:
+
+* `pie repository:remove [--with-php-config=...] /path/to/your/local/extension`
+* `pie repository:remove [--with-php-config=...] https://github.com/youruser/yourextension`
+* `pie repository:remove [--with-php-config=...] https://repo.packagist.com/your-private-packagist/`
+
+Note you do not need to specify the repository type in `repository:remove`,
+just the URL.
+
+You can list the repositories for the target PHP installation with:
+
+* `pie repository:list [--with-php-config=...]`
