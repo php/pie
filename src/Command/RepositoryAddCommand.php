@@ -27,7 +27,7 @@ final class RepositoryAddCommand extends Command
     private const ARG_TYPE = 'type';
     private const ARG_URL  = 'url';
 
-    private const ALLOWED_TYPES = ['vcs', 'path'];
+    private const ALLOWED_TYPES = ['vcs', 'path', 'composer'];
 
     public function __construct(
         private readonly ContainerInterface $container,
@@ -44,12 +44,12 @@ final class RepositoryAddCommand extends Command
         $this->addArgument(
             self::ARG_TYPE,
             InputArgument::REQUIRED,
-            'Specify the type of the repository, e.g. vcs, path',
+            'Specify the type of the repository, e.g. vcs, path, composer',
         );
         $this->addArgument(
             self::ARG_URL,
             InputArgument::REQUIRED,
-            'Specify the URL of the repository, e.g. a Github/Gitlab URL, or a filesystem path',
+            'Specify the URL of the repository, e.g. a Github/Gitlab URL, a filesystem path, or Private Packagist URL',
         );
         $this->addUsage('lol');
     }
@@ -60,7 +60,7 @@ final class RepositoryAddCommand extends Command
         $pieJsonFilename = Platform::getPieJsonFilename($targetPlatform);
 
         $type = (string) $input->getArgument(self::ARG_TYPE);
-        /** @psalm-var 'vcs'|'path' $type */
+        /** @psalm-var 'vcs'|'path'|'composer' $type */
         Assert::inArray($type, self::ALLOWED_TYPES);
 
         $url = $originalUrl = (string) $input->getArgument(self::ARG_URL);
