@@ -197,7 +197,7 @@ functionality, or to provide paths to libraries not automatically detected.
 In order to determine what configure options are available for an extension,
 you may use `pie info <vendor>/<package>` which will return a list, such as:
 
-```
+```text
 Configure options:
     --enable-some-functionality  (whether to enable some additional functionality provided)
     --with-some-library-name=?  (Path for some-library)

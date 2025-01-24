@@ -137,7 +137,7 @@ specify a default value in the `configure-options` definition.
 The `build-path` setting may be used if your source code is not in the root
 of your repository. For example, if your repository structure is like:
 
-```
+```text
 /
   docs/
   src/
