@@ -43,7 +43,6 @@ final class RepositoryRemoveCommand extends Command
             InputArgument::REQUIRED,
             'Specify the URL of the repository, e.g. a Github/Gitlab URL, or a filesystem path',
         );
-        $this->addUsage('lol');
     }
 
     public function execute(InputInterface $input, OutputInterface $output): int

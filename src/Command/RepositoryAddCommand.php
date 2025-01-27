@@ -52,7 +52,6 @@ final class RepositoryAddCommand extends Command
             InputArgument::REQUIRED,
             'Specify the URL of the repository, e.g. a Github/Gitlab URL, a filesystem path, or Private Packagist URL',
         );
-        $this->addUsage('lol');
     }
 
     public function execute(InputInterface $input, OutputInterface $output): int

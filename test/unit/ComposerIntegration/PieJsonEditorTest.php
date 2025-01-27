@@ -157,7 +157,7 @@ final class PieJsonEditorTest extends TestCase
         $expectedRepoContent = $this->normaliseJson(<<<'EOF'
             {
                 "repositories": {
-                    "/pwd/dummy/": {
+                    "/pwd/dummy": {
                         "type": "path",
                         "url": "/pwd/dummy/"
                     }
