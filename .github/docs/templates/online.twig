@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>PIE Documentation</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.22.0/themes/prism.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" rel="stylesheet" />
     <style>
         .selected {
             background-color: #7A86B8;
@@ -14,6 +16,41 @@
         }
         .hidden {
             display: none;
+        }
+        .markdown-alert {
+            border-left: 0.25em solid black;
+            padding: 1em 1em 0.25em;
+            background-color: #f7f7f7;
+        }
+        .markdown-alert-note {
+            border-left-color: #0d68d5;
+        }
+        .markdown-alert-note .markdown-alert-title {
+            color: #0d68d5;
+        }
+        .markdown-alert-tip {
+            border-left-color: #188337;
+        }
+        .markdown-alert-tip .markdown-alert-title {
+            color: #188337;
+        }
+        .markdown-alert-important {
+            border-left-color: #7844d6;
+        }
+        .markdown-alert-important .markdown-alert-title {
+            color: #7844d6;
+        }
+        .markdown-alert-warning {
+            border-left-color: #a67003;
+        }
+        .markdown-alert-warning .markdown-alert-title {
+            color: #a67003;
+        }
+        .markdown-alert-caution {
+            border-left-color: #d61c28;
+        }
+        .markdown-alert-caution .markdown-alert-title {
+            color: #d61c28;
         }
     </style>
 </head>
@@ -47,6 +84,10 @@
      * @param {string} title
      */
     function loadDocBookNavigation(title) {
+        document.querySelectorAll('table').forEach((table) => {
+            table.classList.add("table");
+        })
+
         /**
          * @param {NodeListOf<HTMLElement>} unselectedListElements
          * @param {HTMLElement} selectedListElement
@@ -184,5 +225,7 @@
 
     loadDocBookNavigation("PIE Documentation");
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.js"></script>
 </body>
 </html>

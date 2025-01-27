@@ -1,4 +1,4 @@
-FROM ghcr.io/roave/docbooktool:1.16.0 AS builder
+FROM ghcr.io/roave/docbooktool:1.19.0 AS builder
 
 COPY ./.github/docs/templates /docs-src/templates
 COPY ./docs /docs-src/book

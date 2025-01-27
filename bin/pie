@@ -9,6 +9,9 @@ use Php\Pie\Command\BuildCommand;
 use Php\Pie\Command\DownloadCommand;
 use Php\Pie\Command\InfoCommand;
 use Php\Pie\Command\InstallCommand;
+use Php\Pie\Command\RepositoryAddCommand;
+use Php\Pie\Command\RepositoryListCommand;
+use Php\Pie\Command\RepositoryRemoveCommand;
 use Php\Pie\Command\ShowCommand;
 use Php\Pie\Util\PieVersion;
 use Symfony\Component\Console\Application;
@@ -31,6 +34,9 @@ $application->setCommandLoader(new ContainerCommandLoader(
         'install' => InstallCommand::class,
         'info' => InfoCommand::class,
         'show' => ShowCommand::class,
+        'repository:list' => RepositoryListCommand::class,
+        'repository:add' => RepositoryAddCommand::class,
+        'repository:remove' => RepositoryRemoveCommand::class,
     ]
 ));
 

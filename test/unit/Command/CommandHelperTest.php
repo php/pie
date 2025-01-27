@@ -4,7 +4,13 @@ declare(strict_types=1);
 
 namespace Php\PieUnitTest\Command;
 
+use Composer\Composer;
 use Composer\Package\CompletePackage;
+use Composer\Repository\ComposerRepository;
+use Composer\Repository\PathRepository;
+use Composer\Repository\RepositoryManager;
+use Composer\Repository\Vcs\GitHubDriver;
+use Composer\Repository\VcsRepository;
 use Composer\Util\Platform;
 use InvalidArgumentException;
 use Php\Pie\Command\CommandHelper;
@@ -22,10 +28,13 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\NullOutput;
 
 use function array_combine;
 use function array_map;
+use function str_replace;
+use function trim;
 
 #[CoversClass(CommandHelper::class)]
 final class CommandHelperTest extends TestCase
@@ -174,5 +183,49 @@ final class CommandHelperTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('The --with-phpize-path=/path/to/phpize cannot be used on Windows.');
         CommandHelper::determineTargetPlatformFromInputs($input, $output);
+    }
+
+    public function testListRepositories(): void
+    {
+        $output = new BufferedOutput();
+
+        $packagistRepo = $this->createMock(ComposerRepository::class);
+        $packagistRepo->method('getRepoConfig')->willReturn(['url' => 'https://repo.packagist.org']);
+
+        $privatePackagistRepo = $this->createMock(ComposerRepository::class);
+        $privatePackagistRepo->method('getRepoConfig')->willReturn(['url' => 'https://repo.packagist.com/example']);
+
+        $githubRepoDriver = $this->createMock(GitHubDriver::class);
+        $githubRepoDriver->method('getUrl')->willReturn('https://github.com/php/pie');
+
+        $vcsRepo = $this->createMock(VcsRepository::class);
+        $vcsRepo->method('getDriver')->willReturn($githubRepoDriver);
+
+        $pathRepo = $this->createMock(PathRepository::class);
+        $pathRepo->method('getRepoConfig')->willReturn(['url' => '/path/to/repo']);
+
+        $repoManager = $this->createMock(RepositoryManager::class);
+        $repoManager->method('getRepositories')->willReturn([
+            $packagistRepo,
+            $privatePackagistRepo,
+            $vcsRepo,
+            $pathRepo,
+        ]);
+
+        $composer = $this->createMock(Composer::class);
+        $composer->method('getRepositoryManager')->willReturn($repoManager);
+
+        CommandHelper::listRepositories($composer, $output);
+
+        self::assertSame(
+            str_replace("\r\n", "\n", <<<'OUTPUT'
+            The following repositories are in use for this Target PHP:
+              - Packagist
+              - Composer (https://repo.packagist.com/example)
+              - VCS Repository (https://github.com/php/pie)
+              - Path Repository (/path/to/repo)
+            OUTPUT),
+            str_replace("\r\n", "\n", trim($output->fetch())),
+        );
     }
 }

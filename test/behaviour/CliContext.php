@@ -146,4 +146,43 @@ class CliContext implements Context
     {
         $this->phpArguments = ['-d', 'extension=invalid_extension'];
     }
+
+    #[When('I add a package repository')]
+    public function iAddAPackageRepository(): void
+    {
+        $this->runPieCommand(['repository:add', 'path', __DIR__]);
+    }
+
+    #[Then('I should see the package repository can be used by PIE')]
+    public function iShouldSeeThePackageRepositoryCanBeUsedByPie(): void
+    {
+        Assert::notNull($this->output);
+        Assert::contains($this->output, 'Path Repository (' . __DIR__ . ')');
+    }
+
+    #[Given('I have previously added a package repository')]
+    public function iHavePreviouslyAddedAPackageRepository(): void
+    {
+        $this->noRepositoriesHavePreviouslyBeenAdded();
+        $this->iAddAPackageRepository();
+    }
+
+    #[Given('no repositories have previously been added')]
+    public function noRepositoriesHavePreviouslyBeenAdded(): void
+    {
+        $this->iRemoveThePackageRepository();
+    }
+
+    #[When('I remove the package repository')]
+    public function iRemoveThePackageRepository(): void
+    {
+        $this->runPieCommand(['repository:remove', __DIR__]);
+    }
+
+    #[Then('I should see the package repository is not used by PIE')]
+    public function iShouldSeeThePackageRepositoryIsNotUsedByPie(): void
+    {
+        Assert::notNull($this->output);
+        Assert::notContains($this->output, 'Path repository (' . __DIR__ . ')');
+    }
 }
