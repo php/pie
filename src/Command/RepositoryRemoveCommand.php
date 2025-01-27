@@ -7,7 +7,6 @@ namespace Php\Pie\Command;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieJsonEditor;
-use Php\Pie\Platform;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -47,17 +46,21 @@ final class RepositoryRemoveCommand extends Command
 
     public function execute(InputInterface $input, OutputInterface $output): int
     {
-        $targetPlatform  = CommandHelper::determineTargetPlatformFromInputs($input, $output);
-        $pieJsonFilename = Platform::getPieJsonFilename($targetPlatform);
+        $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $output);
+        $pieJsonEditor  = PieJsonEditor::fromTargetPlatform($targetPlatform);
 
         $url = (string) $input->getArgument(self::ARG_URL);
         Assert::stringNotEmpty($url);
 
         if (str_contains($url, 'packagist.org')) {
             // "removing packagist" is really just adding an exclusion
-            (new PieJsonEditor($pieJsonFilename))->excludePackagistOrg();
+            $pieJsonEditor
+                ->ensureExists()
+                ->excludePackagistOrg();
         } else {
-            (new PieJsonEditor($pieJsonFilename))->removeRepository($url);
+            $pieJsonEditor
+                ->ensureExists()
+                ->removeRepository($url);
         }
 
         CommandHelper::listRepositories(

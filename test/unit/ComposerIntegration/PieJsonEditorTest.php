@@ -8,6 +8,7 @@ use Php\Pie\ComposerIntegration\PieJsonEditor;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
+use function dirname;
 use function file_get_contents;
 use function json_decode;
 use function json_encode;
@@ -25,7 +26,7 @@ final class PieJsonEditorTest extends TestCase
 
         self::assertFileDoesNotExist($testPieJson);
 
-        (new PieJsonEditor($testPieJson))->ensureExists();
+        (new PieJsonEditor($testPieJson, dirname($testPieJson)))->ensureExists();
 
         self::assertFileExists($testPieJson);
         self::assertSame(
@@ -38,7 +39,7 @@ final class PieJsonEditorTest extends TestCase
     {
         $testPieJson = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('pie_json_test_', true) . '.json';
 
-        $editor = new PieJsonEditor($testPieJson);
+        $editor = new PieJsonEditor($testPieJson, dirname($testPieJson));
         $editor->ensureExists();
 
         $editor->addRequire('foo/bar', '^1.2');
@@ -58,7 +59,7 @@ final class PieJsonEditorTest extends TestCase
     {
         $testPieJson = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('pie_json_test_', true) . '.json';
 
-        $editor = new PieJsonEditor($testPieJson);
+        $editor = new PieJsonEditor($testPieJson, dirname($testPieJson));
         $editor->ensureExists();
         $originalContent = $editor->addRequire('foo/bar', '^1.2');
         $editor->revert($originalContent);
@@ -72,7 +73,7 @@ final class PieJsonEditorTest extends TestCase
     {
         $testPieJson = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('pie_json_test_', true) . '.json';
 
-        $editor = new PieJsonEditor($testPieJson);
+        $editor = new PieJsonEditor($testPieJson, dirname($testPieJson));
         $editor->ensureExists();
 
         $originalContent = $editor->addRepository(
@@ -141,7 +142,7 @@ final class PieJsonEditorTest extends TestCase
     {
         $testPieJson = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('pie_json_test_', true) . '.json';
 
-        $editor = new PieJsonEditor($testPieJson);
+        $editor = new PieJsonEditor($testPieJson, dirname($testPieJson));
         $editor->ensureExists();
 
         $originalContent = $editor->addRepository(

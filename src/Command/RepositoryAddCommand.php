@@ -7,7 +7,6 @@ namespace Php\Pie\Command;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieJsonEditor;
-use Php\Pie\Platform;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -56,8 +55,8 @@ final class RepositoryAddCommand extends Command
 
     public function execute(InputInterface $input, OutputInterface $output): int
     {
-        $targetPlatform  = CommandHelper::determineTargetPlatformFromInputs($input, $output);
-        $pieJsonFilename = Platform::getPieJsonFilename($targetPlatform);
+        $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $output);
+        $pieJsonEditor  = PieJsonEditor::fromTargetPlatform($targetPlatform);
 
         $type = (string) $input->getArgument(self::ARG_TYPE);
         /** @psalm-var 'vcs'|'path'|'composer' $type */
@@ -71,11 +70,15 @@ final class RepositoryAddCommand extends Command
 
         if ($type === 'composer' && str_contains($url, 'packagist.org')) {
             // "adding packagist" is really just removing an exclusion
-            (new PieJsonEditor($pieJsonFilename))->removeRepository('packagist.org');
+            $pieJsonEditor
+                ->ensureExists()
+                ->removeRepository('packagist.org');
         } else {
             Assert::stringNotEmpty($url, 'Could not resolve ' . $originalUrl . ' to a real path');
 
-            (new PieJsonEditor($pieJsonFilename))->addRepository($type, $url);
+            $pieJsonEditor
+                ->ensureExists()
+                ->addRepository($type, $url);
         }
 
         CommandHelper::listRepositories(
