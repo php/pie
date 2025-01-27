@@ -69,6 +69,26 @@ final class RepositoryManagementCommandsTest extends TestCase
         $this->assertRepositoryListDisplayed(['Packagist']);
     }
 
+    public function testPathRepositoriesWithTrailingSlashesCanBeManaged(): void
+    {
+        $this->assertRepositoryListDisplayed(['Packagist']);
+
+        $this->addCommand->execute([
+            'type' => 'path',
+            'url' => self::EXAMPLE_PATH_REPOSITORY_URL . '/',
+        ]);
+
+        $this->assertRepositoryListDisplayed(
+            [
+                'Path Repository (' . self::EXAMPLE_PATH_REPOSITORY_URL . ')',
+                'Packagist',
+            ],
+        );
+
+        $this->removeCommand->execute(['url' => self::EXAMPLE_PATH_REPOSITORY_URL . '/']);
+        $this->assertRepositoryListDisplayed(['Packagist']);
+    }
+
     public function testVcsRepositoriesCanBeManaged(): void
     {
         $this->assertRepositoryListDisplayed(['Packagist']);

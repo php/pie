@@ -137,6 +137,58 @@ final class PieJsonEditorTest extends TestCase
         );
     }
 
+    public function testCanAddAndRemoveWithTrailingSlash(): void
+    {
+        $testPieJson = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('pie_json_test_', true) . '.json';
+
+        $editor = new PieJsonEditor($testPieJson);
+        $editor->ensureExists();
+
+        $originalContent = $editor->addRepository(
+            'path',
+            '/pwd/dummy/',
+        );
+
+        self::assertSame(
+            $this->normaliseJson("{\n}\n"),
+            $this->normaliseJson($originalContent),
+        );
+
+        $expectedRepoContent = $this->normaliseJson(<<<'EOF'
+            {
+                "repositories": {
+                    "/pwd/dummy/": {
+                        "type": "path",
+                        "url": "/pwd/dummy/"
+                    }
+                }
+            }
+            EOF);
+
+        self::assertSame(
+            $expectedRepoContent,
+            $this->normaliseJson(file_get_contents($testPieJson)),
+        );
+
+        $originalContent2 = $editor->removeRepository('/pwd/dummy/');
+        self::assertSame(
+            $expectedRepoContent,
+            $this->normaliseJson($originalContent2),
+        );
+
+        $noRepositoriesContent = $this->normaliseJson(<<<'EOF'
+            {
+                "repositories": {
+                }
+            }
+            EOF);
+
+        self::assertSame(
+            $noRepositoriesContent,
+            $this->normaliseJson(file_get_contents($testPieJson)),
+        );
+    }
+
     private function normaliseJson(string $fileContent): string
     {
         return json_encode(json_decode($fileContent));
