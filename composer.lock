@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3e5b020be2a72ed28762d64d89b63795",
+    "content-hash": "d80fd7d72d44bbdeefa246853be6835a",
     "packages": [
         {
             "name": "composer/ca-bundle",
@@ -3853,24 +3853,24 @@
         },
         {
             "name": "psalm/plugin-phpunit",
-            "version": "0.19.0",
+            "version": "0.19.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/psalm/psalm-plugin-phpunit.git",
-                "reference": "e344eaaa27871e79c6cb97b9efe52a735f9d1966"
+                "reference": "bc31ef11ce007a181a09dde201f73ac8d0b3b107"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/psalm/psalm-plugin-phpunit/zipball/e344eaaa27871e79c6cb97b9efe52a735f9d1966",
-                "reference": "e344eaaa27871e79c6cb97b9efe52a735f9d1966",
+                "url": "https://api.github.com/repos/psalm/psalm-plugin-phpunit/zipball/bc31ef11ce007a181a09dde201f73ac8d0b3b107",
+                "reference": "bc31ef11ce007a181a09dde201f73ac8d0b3b107",
                 "shasum": ""
             },
             "require": {
                 "composer/package-versions-deprecated": "^1.10",
                 "composer/semver": "^1.4 || ^2.0 || ^3.0",
                 "ext-simplexml": "*",
-                "php": "^7.4 || ^8.0",
-                "vimeo/psalm": "dev-master || ^5@beta || ^5.0"
+                "php": ">=7.4",
+                "vimeo/psalm": "dev-master || ^5@beta || ^5.0 || ^6.0"
             },
             "conflict": {
                 "phpunit/phpunit": "<7.5"
@@ -3907,9 +3907,9 @@
             "description": "Psalm plugin for PHPUnit",
             "support": {
                 "issues": "https://github.com/psalm/psalm-plugin-phpunit/issues",
-                "source": "https://github.com/psalm/psalm-plugin-phpunit/tree/0.19.0"
+                "source": "https://github.com/psalm/psalm-plugin-phpunit/tree/0.19.1"
             },
-            "time": "2024-03-15T10:43:15+00:00"
+            "time": "2025-01-26T09:41:04+00:00"
         },
         {
             "name": "psr/event-dispatcher",
