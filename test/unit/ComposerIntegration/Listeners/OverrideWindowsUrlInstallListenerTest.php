@@ -157,7 +157,7 @@ final class OverrideWindowsUrlInstallListenerTest extends TestCase
         $packageReleaseAssets = $this->createMock(PackageReleaseAssets::class);
         $packageReleaseAssets
             ->expects(self::once())
-            ->method('findWindowsDownloadUrlForPackage')
+            ->method('findMatchingReleaseAssetUrl')
             ->willReturn('https://example.com/windows-download-url');
 
         $this->container

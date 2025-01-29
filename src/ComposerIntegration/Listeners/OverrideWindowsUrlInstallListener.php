@@ -16,6 +16,7 @@ use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\PackageReleaseAssets;
 use Php\Pie\Platform\OperatingSystem;
+use Php\Pie\Platform\WindowsExtensionAssetName;
 use Psr\Container\ContainerInterface;
 use Webmozart\Assert\Assert;
 
@@ -62,12 +63,17 @@ class OverrideWindowsUrlInstallListener
         $composerPackage = $operation->getPackage();
         Assert::isInstanceOf($composerPackage, CompletePackageInterface::class, 'I can only handle %2$s, got %s');
 
+        $piePackage           = Package::fromComposerCompletePackage($composerPackage);
         $packageReleaseAssets = $this->container->get(PackageReleaseAssets::class);
-        $url                  = $packageReleaseAssets->findWindowsDownloadUrlForPackage(
+        $url                  = $packageReleaseAssets->findMatchingReleaseAssetUrl(
             $this->composerRequest->targetPlatform,
-            Package::fromComposerCompletePackage($composerPackage),
+            $piePackage,
             new AuthHelper($this->io, $this->composer->getConfig()),
             new HttpDownloader($this->io, $this->composer->getConfig()),
+            WindowsExtensionAssetName::zipNames(
+                $this->composerRequest->targetPlatform,
+                $piePackage,
+            ),
         );
 
         $this->composerRequest->pieOutput->writeln('Found prebuilt archive: ' . $url);

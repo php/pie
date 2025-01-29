@@ -9,7 +9,6 @@ use Composer\Util\AuthHelper;
 use Composer\Util\HttpDownloader;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Platform\TargetPlatform;
-use Php\Pie\Platform\WindowsExtensionAssetName;
 use Webmozart\Assert\Assert;
 
 use function array_map;
@@ -25,47 +24,48 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
     ) {
     }
 
-    /** @return non-empty-string */
-    public function findWindowsDownloadUrlForPackage(
+    /**
+     * @param non-empty-list<non-empty-string> $possibleReleaseAssetNames
+     *
+     * @return non-empty-string
+     */
+    public function findMatchingReleaseAssetUrl(
         TargetPlatform $targetPlatform,
         Package $package,
         AuthHelper $authHelper,
         HttpDownloader $httpDownloader,
+        array $possibleReleaseAssetNames,
     ): string {
         $releaseAsset = $this->selectMatchingReleaseAsset(
-            $targetPlatform,
             $package,
             $this->getReleaseAssetsForPackage($package, $authHelper, $httpDownloader),
+            $possibleReleaseAssetNames,
         );
 
         return $releaseAsset['browser_download_url'];
-    }
-
-    /** @return non-empty-list<non-empty-string> */
-    private function expectedWindowsAssetNames(TargetPlatform $targetPlatform, Package $package): array
-    {
-        return WindowsExtensionAssetName::zipNames($targetPlatform, $package);
     }
 
     /** @link https://github.com/squizlabs/PHP_CodeSniffer/issues/3734 */
     // phpcs:disable Squiz.Commenting.FunctionComment.MissingParamName
     /**
      * @param list<array{name: non-empty-string, browser_download_url: non-empty-string, ...}> $releaseAssets
+     * @param non-empty-list<non-empty-string> $possibleReleaseAssetNames
      *
      * @return array{name: non-empty-string, browser_download_url: non-empty-string, ...}
      */
     // phpcs:enable
-    private function selectMatchingReleaseAsset(TargetPlatform $targetPlatform, Package $package, array $releaseAssets): array
-    {
-        $expectedAssetNames = $this->expectedWindowsAssetNames($targetPlatform, $package);
-
+    private function selectMatchingReleaseAsset(
+        Package $package,
+        array $releaseAssets,
+        array $possibleReleaseAssetNames,
+    ): array {
         foreach ($releaseAssets as $releaseAsset) {
-            if (in_array(strtolower($releaseAsset['name']), $expectedAssetNames, true)) {
+            if (in_array(strtolower($releaseAsset['name']), $possibleReleaseAssetNames, true)) {
                 return $releaseAsset;
             }
         }
 
-        throw Exception\CouldNotFindReleaseAsset::forPackage($package, $expectedAssetNames);
+        throw Exception\CouldNotFindReleaseAsset::forPackage($package, $possibleReleaseAssetNames);
     }
 
     /** @return list<array{name: non-empty-string, browser_download_url: non-empty-string, ...}> */
