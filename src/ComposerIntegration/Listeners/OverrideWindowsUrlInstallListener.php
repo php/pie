@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Php\Pie\ComposerIntegration;
+namespace Php\Pie\ComposerIntegration\Listeners;
 
 use Composer\Composer;
 use Composer\DependencyResolver\Operation\InstallOperation;
@@ -12,6 +12,7 @@ use Composer\IO\IOInterface;
 use Composer\Package\CompletePackageInterface;
 use Composer\Util\AuthHelper;
 use Composer\Util\HttpDownloader;
+use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\PackageReleaseAssets;
 use Php\Pie\Platform\OperatingSystem;
