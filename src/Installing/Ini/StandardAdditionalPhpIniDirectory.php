@@ -10,6 +10,7 @@ use Php\Pie\Platform\TargetPlatform;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use function file_exists;
+use function is_writable;
 use function rtrim;
 use function sprintf;
 use function touch;
@@ -40,6 +41,18 @@ final class StandardAdditionalPhpIniDirectory implements SetupIniApproach
 
         /** In practice, this shouldn't happen since {@see canBeUsed()} checks this */
         if ($additionalIniFilesPath === null) {
+            return false;
+        }
+
+        if (! file_exists($additionalIniFilesPath) || ! is_writable($additionalIniFilesPath)) {
+            $output->writeln(
+                sprintf(
+                    'PHP is configured to use additional INI file path %s, but it did not exist, or is not writable by PIE.',
+                    $additionalIniFilesPath,
+                ),
+                OutputInterface::VERBOSITY_VERBOSE,
+            );
+
             return false;
         }
 

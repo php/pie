@@ -134,6 +134,29 @@ final class StandardAdditionalPhpIniDirectoryTest extends TestCase
         ));
     }
 
+    public function testSetupReturnsWhenAdditionalPhpIniDirectoryDoesNotExist(): void
+    {
+        $this->mockPhpBinary
+            ->expects(self::once())
+            ->method('additionalIniDirectory')
+            ->willReturn('/path/to/something/does/not/exist');
+
+        $this->checkAndAddExtensionToIniIfNeeded
+            ->expects(self::never())
+            ->method('__invoke');
+
+        self::assertFalse($this->standardAdditionalPhpIniDirectory->setup(
+            $this->targetPlatform,
+            $this->downloadedPackage,
+            $this->binaryFile,
+            $this->output,
+        ));
+        self::assertStringContainsString(
+            'PHP is configured to use additional INI file path /path/to/something/does/not/exist, but it did not exist, or is not writable by PIE.',
+            $this->output->fetch(),
+        );
+    }
+
     public function testReturnsTrueWhenCheckAndAddExtensionIsInvoked(): void
     {
         $additionalPhpIniDirectory = tempnam(sys_get_temp_dir(), 'pie_additional_php_ini_path');
