@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Php\PieUnitTest\ComposerIntegration;
+namespace Php\PieUnitTest\ComposerIntegration\Listeners;
 
 use Composer\Composer;
 use Composer\DependencyResolver\Transaction;
@@ -11,7 +11,7 @@ use Composer\Installer\InstallerEvent;
 use Composer\Installer\InstallerEvents;
 use Composer\IO\IOInterface;
 use Composer\Package\CompletePackage;
-use Php\Pie\ComposerIntegration\OverrideWindowsUrlInstallListener;
+use Php\Pie\ComposerIntegration\Listeners\OverrideWindowsUrlInstallListener;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieOperation;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
