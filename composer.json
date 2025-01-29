@@ -42,8 +42,8 @@
         "behat/behat": "^3.17",
         "doctrine/coding-standard": "^12.0",
         "phpunit/phpunit": "^10.5.39",
-        "psalm/plugin-phpunit": "^0.19.0",
-        "vimeo/psalm": "^5.26.1"
+        "psalm/plugin-phpunit": "^0.19.1",
+        "vimeo/psalm": "^6.0.0"
     },
     "replace": {
         "symfony/polyfill-php81": "*",
@@ -58,7 +58,7 @@
             "dealerdirect/phpcodesniffer-composer-installer": true
         },
         "platform": {
-            "php": "8.1.0"
+            "php": "8.1.99"
         }
     }
 }

@@ -43,6 +43,7 @@ final class PhpizePath
         $phpizeAttempts[] = preg_replace('((.*)php)', '$1phpize', $phpBinaryPath->phpBinaryPath);
 
         foreach ($phpizeAttempts as $phpizeAttempt) {
+            assert($phpizeAttempt !== null);
             assert($phpizeAttempt !== '');
             if (! file_exists($phpizeAttempt) || ! is_executable($phpizeAttempt)) {
                 continue;
