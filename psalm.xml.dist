@@ -8,7 +8,6 @@
     findUnusedBaselineEntry="true"
     findUnusedCode="true"
     ignoreInternalFunctionFalseReturn="true"
-    errorBaseline="psalm-baseline.xml"
 >
     <projectFiles>
         <file name="bin/pie"/>
