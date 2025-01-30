@@ -297,7 +297,7 @@ applicable to the new tooling.
 | `pecl login`                   |                                                                                                                         |
 | `pecl logout`                  |                                                                                                                         |
 | `pecl makerpm`                 |                                                                                                                         |
-| `pecl package`                 | Linux - just tag a release. Window - use [`php/php-windows-builder` action](https://github.com/php/php-windows-builder) |
+| `pecl package`                 | Linux - just tag a release. Windows - use [`php/php-windows-builder` action](https://github.com/php/php-windows-builder) |
 | `pecl package-dependencies`    |                                                                                                                         |
 | `pecl package-validate`        | In your extension checkout: `composer validate`                                                                         |
 | `pecl pickle`                  |                                                                                                                         |
