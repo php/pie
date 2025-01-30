@@ -11,7 +11,7 @@ use Composer\Installer\InstallerEvent;
 use Composer\Installer\InstallerEvents;
 use Composer\IO\IOInterface;
 use Composer\Package\CompletePackage;
-use Php\Pie\ComposerIntegration\Listeners\OverrideWindowsUrlInstallListener;
+use Php\Pie\ComposerIntegration\Listeners\OverrideDownloadUrlInstallListener;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieOperation;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
@@ -29,8 +29,8 @@ use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-#[CoversClass(OverrideWindowsUrlInstallListener::class)]
-final class OverrideWindowsUrlInstallListenerTest extends TestCase
+#[CoversClass(OverrideDownloadUrlInstallListener::class)]
+final class OverrideDownloadUrlInstallListenerTest extends TestCase
 {
     private Composer&MockObject $composer;
     private IOInterface&MockObject $io;
@@ -53,7 +53,7 @@ final class OverrideWindowsUrlInstallListenerTest extends TestCase
             ->method('addListener')
             ->with(
                 InstallerEvents::PRE_OPERATIONS_EXEC,
-                self::isInstanceOf(OverrideWindowsUrlInstallListener::class),
+                self::isInstanceOf(OverrideDownloadUrlInstallListener::class),
             );
 
         $this->composer
@@ -61,7 +61,7 @@ final class OverrideWindowsUrlInstallListenerTest extends TestCase
             ->method('getEventDispatcher')
             ->willReturn($eventDispatcher);
 
-        OverrideWindowsUrlInstallListener::selfRegister(
+        OverrideDownloadUrlInstallListener::selfRegister(
             $this->composer,
             $this->io,
             $this->container,
@@ -83,6 +83,21 @@ final class OverrideWindowsUrlInstallListenerTest extends TestCase
                 false,
             ),
         );
+    }
+
+    public function testNonInstallOperationsAreIgnored(): void
+    {
+        self::markTestIncomplete('todo'); // @todo
+    }
+
+    public function testNonCompletePackagesAreIgnored(): void
+    {
+        self::markTestIncomplete('todo'); // @todo
+    }
+
+    public function testInstallOperationsForDifferentPackagesAreIgnored(): void
+    {
+        self::markTestIncomplete('todo'); // @todo
     }
 
     public function testWindowsUrlInstallerDoesNotRunOnNonWindows(): void
@@ -107,7 +122,7 @@ final class OverrideWindowsUrlInstallListenerTest extends TestCase
             ->expects(self::never())
             ->method('get');
 
-        (new OverrideWindowsUrlInstallListener(
+        (new OverrideDownloadUrlInstallListener(
             $this->composer,
             $this->io,
             $this->container,
@@ -165,7 +180,7 @@ final class OverrideWindowsUrlInstallListenerTest extends TestCase
             ->with(PackageReleaseAssets::class)
             ->willReturn($packageReleaseAssets);
 
-        (new OverrideWindowsUrlInstallListener(
+        (new OverrideDownloadUrlInstallListener(
             $this->composer,
             $this->io,
             $this->container,
@@ -192,5 +207,66 @@ final class OverrideWindowsUrlInstallListenerTest extends TestCase
             'https://example.com/windows-download-url',
             $composerPackage->getDistUrl(),
         );
+    }
+
+    public function testDistUrlIsUpdatedForPrePackagedTgzSource(): void
+    {
+        $composerPackage = new CompletePackage('foo/bar', '1.2.3.0', '1.2.3');
+        $composerPackage->setDistType('zip');
+        $composerPackage->setDistUrl('https://example.com/git-archive-zip-url');
+        $composerPackage->setPhpExt(['extension-name' => 'mongodb']);
+
+        /**
+         * @psalm-suppress InternalClass
+         * @psalm-suppress InternalMethod
+         */
+        $installerEvent = new InstallerEvent(
+            InstallerEvents::PRE_OPERATIONS_EXEC,
+            $this->composer,
+            $this->io,
+            false,
+            true,
+            new Transaction([], [$composerPackage]),
+        );
+
+        $packageReleaseAssets = $this->createMock(PackageReleaseAssets::class);
+        $packageReleaseAssets
+            ->expects(self::once())
+            ->method('findMatchingReleaseAssetUrl')
+            ->willReturn('https://example.com/pre-packaged-source-download-url.tgz');
+
+        $this->container
+            ->method('get')
+            ->with(PackageReleaseAssets::class)
+            ->willReturn($packageReleaseAssets);
+
+        (new OverrideDownloadUrlInstallListener(
+            $this->composer,
+            $this->io,
+            $this->container,
+            new PieComposerRequest(
+                $this->createMock(OutputInterface::class),
+                new TargetPlatform(
+                    OperatingSystem::NonWindows,
+                    OperatingSystemFamily::Linux,
+                    PhpBinaryPath::fromCurrentProcess(),
+                    Architecture::x86_64,
+                    ThreadSafetyMode::NonThreadSafe,
+                    1,
+                    WindowsCompiler::VC15,
+                ),
+                new RequestedPackageAndVersion('foo/bar', '^1.1'),
+                PieOperation::Install,
+                [],
+                null,
+                false,
+            ),
+        ))($installerEvent);
+
+        self::assertSame(
+            'https://example.com/pre-packaged-source-download-url.tgz',
+            $composerPackage->getDistUrl(),
+        );
+        self::assertSame('tar', $composerPackage->getDistType());
     }
 }
