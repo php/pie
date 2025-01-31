@@ -45,7 +45,7 @@ class CheckAndAddExtensionToIniIfNeeded
             return false;
         }
 
-        if (($this->isExtensionAlreadyInTheIniFile)($iniFile, $downloadedPackage->package->extensionName)) {
+        if (($this->isExtensionAlreadyInTheIniFile)($iniFile, $downloadedPackage->package->extensionName())) {
             $output->writeln(
                 sprintf(
                     'Extension is already enabled in the INI file %s',
@@ -59,13 +59,13 @@ class CheckAndAddExtensionToIniIfNeeded
             }
 
             try {
-                $targetPlatform->phpBinaryPath->assertExtensionIsLoadedInRuntime($downloadedPackage->package->extensionName, $output);
+                $targetPlatform->phpBinaryPath->assertExtensionIsLoadedInRuntime($downloadedPackage->package->extensionName(), $output);
 
                 return true;
             } catch (Throwable $anything) {
                 $output->writeln(sprintf(
                     '<error>Something went wrong verifying the %s extension is enabled: %s</error>',
-                    $downloadedPackage->package->extensionName->name(),
+                    $downloadedPackage->package->extensionName()->name(),
                     $anything->getMessage(),
                 ));
 

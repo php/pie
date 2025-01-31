@@ -66,7 +66,7 @@ final class DownloadCommand extends Command
             $requestedNameAndVersion,
             $forceInstallPackageVersion,
         );
-        $output->writeln(sprintf('<info>Found package:</info> %s which provides <info>%s</info>', $package->prettyNameAndVersion(), $package->extensionName->nameWithExtPrefix()));
+        $output->writeln(sprintf('<info>Found package:</info> %s which provides <info>%s</info>', $package->prettyNameAndVersion(), $package->extensionName()->nameWithExtPrefix()));
 
         try {
             ($this->composerIntegrationHandler)(

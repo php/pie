@@ -226,7 +226,7 @@ final class CommandHelper
 
     public static function bindConfigureOptionsFromPackage(Command $command, Package $package, InputInterface $input): void
     {
-        foreach ($package->configureOptions as $configureOption) {
+        foreach ($package->configureOptions() as $configureOption) {
             $command->addOption(
                 $configureOption->name,
                 null,
@@ -242,7 +242,7 @@ final class CommandHelper
     public static function processConfigureOptionsFromInput(Package $package, InputInterface $input): array
     {
         $configureOptionsValues = [];
-        foreach ($package->configureOptions as $configureOption) {
+        foreach ($package->configureOptions() as $configureOption) {
             if (! $input->hasOption($configureOption->name)) {
                 continue;
             }

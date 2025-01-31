@@ -63,7 +63,7 @@ class AddExtensionToTheIniFile
             $output->writeln(
                 sprintf(
                     'Enabled extension %s in the INI file %s',
-                    $package->extensionName->name(),
+                    $package->extensionName()->name(),
                     $ini,
                 ),
                 OutputInterface::VERBOSITY_VERBOSE,
@@ -73,7 +73,7 @@ class AddExtensionToTheIniFile
                 return false;
             }
 
-            $phpBinaryPath->assertExtensionIsLoadedInRuntime($package->extensionName, $output);
+            $phpBinaryPath->assertExtensionIsLoadedInRuntime($package->extensionName(), $output);
 
             return true;
         } catch (Throwable $anything) {
@@ -81,7 +81,7 @@ class AddExtensionToTheIniFile
 
             $output->writeln(sprintf(
                 '<error>Something went wrong enabling the %s extension: %s</error>',
-                $package->extensionName->name(),
+                $package->extensionName()->name(),
                 $anything->getMessage(),
             ));
 
@@ -93,10 +93,10 @@ class AddExtensionToTheIniFile
     private function iniFileContent(Package $package): string
     {
         return PHP_EOL
-            . '; PIE automatically added this to enable the ' . $package->name . ' extension' . PHP_EOL
-            . '; priority=' . $package->priority . PHP_EOL
-            . ($package->extensionType === ExtensionType::PhpModule ? 'extension' : 'zend_extension')
+            . '; PIE automatically added this to enable the ' . $package->name() . ' extension' . PHP_EOL
+            . '; priority=' . $package->priority() . PHP_EOL
+            . ($package->extensionType() === ExtensionType::PhpModule ? 'extension' : 'zend_extension')
             . '='
-            . $package->extensionName->name() . PHP_EOL;
+            . $package->extensionName()->name() . PHP_EOL;
     }
 }

@@ -41,12 +41,12 @@ final class DockerPhpExtEnable implements SetupIniApproach
         }
 
         try {
-            $enableOutput = Process::run([$dockerPhpExtEnable, $downloadedPackage->package->extensionName->name()]);
+            $enableOutput = Process::run([$dockerPhpExtEnable, $downloadedPackage->package->extensionName()->name()]);
         } catch (ProcessFailedException $processFailed) {
             $output->writeln(
                 sprintf(
                     'Could not enable extension %s using %s. Exception was: %s',
-                    $downloadedPackage->package->extensionName->name(),
+                    $downloadedPackage->package->extensionName()->name(),
                     $this->dockerPhpExtEnableName,
                     $processFailed->getMessage(),
                 ),
@@ -58,7 +58,7 @@ final class DockerPhpExtEnable implements SetupIniApproach
 
         try {
             $targetPlatform->phpBinaryPath->assertExtensionIsLoadedInRuntime(
-                $downloadedPackage->package->extensionName,
+                $downloadedPackage->package->extensionName(),
                 $output,
             );
 
@@ -67,7 +67,7 @@ final class DockerPhpExtEnable implements SetupIniApproach
             $output->writeln(
                 sprintf(
                     'Asserting that extension %s was enabled using %s failed. Output was: %s',
-                    $downloadedPackage->package->extensionName->name(),
+                    $downloadedPackage->package->extensionName()->name(),
                     $this->dockerPhpExtEnableName,
                     $enableOutput !== '' ? $enableOutput : '(empty)',
                 ),

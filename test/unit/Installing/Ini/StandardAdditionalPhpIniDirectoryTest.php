@@ -77,13 +77,6 @@ final class StandardAdditionalPhpIniDirectoryTest extends TestCase
                 'foo/bar',
                 '1.2.3',
                 null,
-                [],
-                true,
-                true,
-                null,
-                null,
-                null,
-                99,
             ),
             '/path/to/extracted/source',
         );
@@ -163,7 +156,7 @@ final class StandardAdditionalPhpIniDirectoryTest extends TestCase
         unlink($additionalPhpIniDirectory);
         mkdir($additionalPhpIniDirectory, recursive: true);
 
-        $expectedIniFile = $additionalPhpIniDirectory . DIRECTORY_SEPARATOR . '99-foobar.ini';
+        $expectedIniFile = $additionalPhpIniDirectory . DIRECTORY_SEPARATOR . '80-foobar.ini';
 
         $this->mockPhpBinary
             ->expects(self::once())
@@ -199,7 +192,7 @@ final class StandardAdditionalPhpIniDirectoryTest extends TestCase
         unlink($additionalPhpIniDirectory);
         mkdir($additionalPhpIniDirectory, recursive: true);
 
-        $expectedIniFile = $additionalPhpIniDirectory . DIRECTORY_SEPARATOR . '99-foobar.ini';
+        $expectedIniFile = $additionalPhpIniDirectory . DIRECTORY_SEPARATOR . '80-foobar.ini';
 
         $this->mockPhpBinary
             ->expects(self::once())
@@ -234,7 +227,7 @@ final class StandardAdditionalPhpIniDirectoryTest extends TestCase
         unlink($additionalPhpIniDirectory);
         mkdir($additionalPhpIniDirectory, recursive: true);
 
-        $expectedIniFile = $additionalPhpIniDirectory . DIRECTORY_SEPARATOR . '99-foobar.ini';
+        $expectedIniFile = $additionalPhpIniDirectory . DIRECTORY_SEPARATOR . '80-foobar.ini';
         touch($expectedIniFile);
 
         $this->mockPhpBinary

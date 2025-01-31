@@ -26,53 +26,62 @@ use function strtolower;
  * @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks
  *
  * @immutable
+ *
+ * @psalm-suppress PropertyNotSetInConstructor
  */
 final class Package
 {
-    /**
-     * @param list<ConfigureOption>                      $configureOptions
-     * @param non-empty-list<OperatingSystemFamily>|null $compatibleOsFamilies
-     * @param non-empty-list<OperatingSystemFamily>|null $incompatibleOsFamilies
-     */
+    /** @var list<ConfigureOption> */
+    private array $configureOptions;
+    private int $priority;
+    private string|null $buildPath;
+    /** @var non-empty-list<OperatingSystemFamily>|null */
+    private array|null $compatibleOsFamilies;
+    /** @var non-empty-list<OperatingSystemFamily>|null */
+    private array|null $incompatibleOsFamilies;
+    private bool $supportZts;
+    private bool $supportNts;
+
     public function __construct(
-        public readonly CompletePackageInterface $composerPackage,
-        public readonly ExtensionType $extensionType,
-        public readonly ExtensionName $extensionName,
-        public readonly string $name,
-        public readonly string $version,
-        public readonly string|null $downloadUrl,
-        public readonly array $configureOptions,
-        public readonly bool $supportZts,
-        public readonly bool $supportNts,
-        public readonly string|null $buildPath,
-        public readonly array|null $compatibleOsFamilies,
-        public readonly array|null $incompatibleOsFamilies,
-        public readonly int $priority,
+        private readonly CompletePackageInterface $composerPackage,
+        private readonly ExtensionType $extensionType,
+        private readonly ExtensionName $extensionName,
+        private readonly string $name,
+        private readonly string $version,
+        private readonly string|null $downloadUrl,
     ) {
+        $this->configureOptions       = [];
+        $this->supportZts             = true;
+        $this->supportNts             = true;
+        $this->buildPath              = null;
+        $this->compatibleOsFamilies   = null;
+        $this->incompatibleOsFamilies = null;
+        $this->priority               = 80;
     }
 
     public static function fromComposerCompletePackage(CompletePackageInterface $completePackage): self
     {
+        $package = new self(
+            $completePackage,
+            ExtensionType::tryFrom($completePackage->getType()) ?? ExtensionType::PhpModule,
+            ExtensionName::determineFromComposerPackage($completePackage),
+            $completePackage->getPrettyName(),
+            $completePackage->getPrettyVersion(),
+            $completePackage->getDistUrl(),
+        );
+
         $phpExtOptions = $completePackage->getPhpExt();
 
-        $configureOptions = $phpExtOptions !== null && array_key_exists('configure-options', $phpExtOptions)
+        $package->configureOptions = $phpExtOptions !== null && array_key_exists('configure-options', $phpExtOptions)
             ? array_map(
                 static fn (array $configureOption): ConfigureOption => ConfigureOption::fromComposerJsonDefinition($configureOption),
                 $phpExtOptions['configure-options'],
             )
             : [];
 
-        $supportZts = $phpExtOptions !== null && array_key_exists('support-zts', $phpExtOptions)
-            ? $phpExtOptions['support-zts']
-            : true;
-
-        $supportNts = $phpExtOptions !== null && array_key_exists('support-nts', $phpExtOptions)
-            ? $phpExtOptions['support-nts']
-            : true;
-
-        $buildPath = $phpExtOptions !== null && array_key_exists('build-path', $phpExtOptions)
-            ? $phpExtOptions['build-path']
-            : null;
+        $package->supportZts = $phpExtOptions['support-zts'] ?? true;
+        $package->supportNts = $phpExtOptions['support-nts'] ?? true;
+        $package->buildPath  = $phpExtOptions['build-path'] ?? null;
 
         $compatibleOsFamilies   = $phpExtOptions['os-families'] ?? null;
         $incompatibleOsFamilies = $phpExtOptions['os-families-exclude'] ?? null;
@@ -81,21 +90,12 @@ final class Package
             throw new InvalidArgumentException('Cannot specify both "os-families" and "os-families-exclude" in composer.json');
         }
 
-        return new self(
-            $completePackage,
-            ExtensionType::tryFrom($completePackage->getType()) ?? ExtensionType::PhpModule,
-            ExtensionName::determineFromComposerPackage($completePackage),
-            $completePackage->getPrettyName(),
-            $completePackage->getPrettyVersion(),
-            $completePackage->getDistUrl(),
-            $configureOptions,
-            $supportZts,
-            $supportNts,
-            $buildPath,
-            self::convertInputStringsToOperatingSystemFamilies($compatibleOsFamilies),
-            self::convertInputStringsToOperatingSystemFamilies($incompatibleOsFamilies),
-            $phpExtOptions['priority'] ?? 80,
-        );
+        $package->compatibleOsFamilies   = self::convertInputStringsToOperatingSystemFamilies($compatibleOsFamilies);
+        $package->incompatibleOsFamilies = self::convertInputStringsToOperatingSystemFamilies($incompatibleOsFamilies);
+
+        $package->priority = $phpExtOptions['priority'] ?? 80;
+
+        return $package;
     }
 
     public function prettyNameAndVersion(): string
@@ -145,5 +145,73 @@ final class Package
         Assert::isNonEmptyList($osFamilies, 'Expected operating systems families to be a non-empty list.');
 
         return $osFamilies;
+    }
+
+    public function composerPackage(): CompletePackageInterface
+    {
+        return $this->composerPackage;
+    }
+
+    public function extensionType(): ExtensionType
+    {
+        return $this->extensionType;
+    }
+
+    public function extensionName(): ExtensionName
+    {
+        return $this->extensionName;
+    }
+
+    public function name(): string
+    {
+        return $this->name;
+    }
+
+    public function version(): string
+    {
+        return $this->version;
+    }
+
+    /** @return list<ConfigureOption> */
+    public function configureOptions(): array
+    {
+        return $this->configureOptions;
+    }
+
+    public function downloadUrl(): string|null
+    {
+        return $this->downloadUrl;
+    }
+
+    public function priority(): int
+    {
+        return $this->priority;
+    }
+
+    public function buildPath(): string|null
+    {
+        return $this->buildPath;
+    }
+
+    /** @return non-empty-list<OperatingSystemFamily>|null */
+    public function compatibleOsFamilies(): array|null
+    {
+        return $this->compatibleOsFamilies;
+    }
+
+    /** @return non-empty-list<OperatingSystemFamily>|null */
+    public function incompatibleOsFamilies(): array|null
+    {
+        return $this->incompatibleOsFamilies;
+    }
+
+    public function supportZts(): bool
+    {
+        return $this->supportZts;
+    }
+
+    public function supportNts(): bool
+    {
+        return $this->supportNts;
     }
 }

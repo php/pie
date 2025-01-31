@@ -70,27 +70,27 @@ final class ResolveDependencyWithComposer implements DependencyResolver
 
     private function assertCompatibleThreadSafetyMode(ThreadSafetyMode $threadSafetyMode, Package $resolvedPackage): void
     {
-        if ($threadSafetyMode === ThreadSafetyMode::NonThreadSafe && ! $resolvedPackage->supportNts) {
+        if ($threadSafetyMode === ThreadSafetyMode::NonThreadSafe && ! $resolvedPackage->supportNts()) {
             throw IncompatibleThreadSafetyMode::ztsExtensionOnNtsPlatform();
         }
 
-        if ($threadSafetyMode === ThreadSafetyMode::ThreadSafe && ! $resolvedPackage->supportZts) {
+        if ($threadSafetyMode === ThreadSafetyMode::ThreadSafe && ! $resolvedPackage->supportZts()) {
             throw IncompatibleThreadSafetyMode::ntsExtensionOnZtsPlatform();
         }
     }
 
     private function assertCompatibleOsFamily(TargetPlatform $targetPlatform, Package $resolvedPackage): void
     {
-        if ($resolvedPackage->compatibleOsFamilies !== null && ! in_array($targetPlatform->operatingSystemFamily, $resolvedPackage->compatibleOsFamilies, true)) {
+        if ($resolvedPackage->compatibleOsFamilies() !== null && ! in_array($targetPlatform->operatingSystemFamily, $resolvedPackage->compatibleOsFamilies(), true)) {
             throw IncompatibleOperatingSystemFamily::notInCompatibleOperatingSystemFamilies(
-                $resolvedPackage->compatibleOsFamilies,
+                $resolvedPackage->compatibleOsFamilies(),
                 $targetPlatform->operatingSystemFamily,
             );
         }
 
-        if ($resolvedPackage->incompatibleOsFamilies !== null && in_array($targetPlatform->operatingSystemFamily, $resolvedPackage->incompatibleOsFamilies, true)) {
+        if ($resolvedPackage->incompatibleOsFamilies() !== null && in_array($targetPlatform->operatingSystemFamily, $resolvedPackage->incompatibleOsFamilies(), true)) {
             throw IncompatibleOperatingSystemFamily::inIncompatibleOperatingSystemFamily(
-                $resolvedPackage->incompatibleOsFamilies,
+                $resolvedPackage->incompatibleOsFamilies(),
                 $targetPlatform->operatingSystemFamily,
             );
         }

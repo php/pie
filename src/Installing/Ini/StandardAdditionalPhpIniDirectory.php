@@ -60,8 +60,8 @@ final class StandardAdditionalPhpIniDirectory implements SetupIniApproach
             '%s%s%d-%s.ini',
             rtrim($additionalIniFilesPath, DIRECTORY_SEPARATOR),
             DIRECTORY_SEPARATOR,
-            $downloadedPackage->package->priority,
-            $downloadedPackage->package->extensionName->name(),
+            $downloadedPackage->package->priority(),
+            $downloadedPackage->package->extensionName()->name(),
         );
 
         $pieCreatedTheIniFile = false;

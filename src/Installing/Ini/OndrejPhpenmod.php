@@ -119,7 +119,7 @@ final class OndrejPhpenmod implements SetupIniApproach
             '%s%s%s.ini',
             rtrim($expectedModsAvailablePath, DIRECTORY_SEPARATOR),
             DIRECTORY_SEPARATOR,
-            $downloadedPackage->package->extensionName->name(),
+            $downloadedPackage->package->extensionName()->name(),
         );
 
         $pieCreatedTheIniFile = false;
@@ -148,7 +148,7 @@ final class OndrejPhpenmod implements SetupIniApproach
                         $targetPlatform->phpBinaryPath->majorMinorVersion(),
                         '-s',
                         'ALL',
-                        $downloadedPackage->package->extensionName->name(),
+                        $downloadedPackage->package->extensionName()->name(),
                     ]);
 
                     return true;
@@ -157,7 +157,7 @@ final class OndrejPhpenmod implements SetupIniApproach
                         sprintf(
                             'Failed to use %s to enable %s for PHP %s: %s',
                             $phpenmodPath,
-                            $downloadedPackage->package->extensionName->name(),
+                            $downloadedPackage->package->extensionName()->name(),
                             $targetPlatform->phpBinaryPath->majorMinorVersion(),
                             $processFailedException->getMessage(),
                         ),
