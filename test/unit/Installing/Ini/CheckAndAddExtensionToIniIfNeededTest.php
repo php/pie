@@ -72,13 +72,6 @@ final class CheckAndAddExtensionToIniIfNeededTest extends TestCase
                 'foo/bar',
                 '1.2.3',
                 null,
-                [],
-                true,
-                true,
-                null,
-                null,
-                null,
-                66,
             ),
             '/path/to/extracted/source',
         );
@@ -122,16 +115,16 @@ final class CheckAndAddExtensionToIniIfNeededTest extends TestCase
         $this->isExtensionAlreadyInTheIniFile
             ->expects(self::once())
             ->method('__invoke')
-            ->with(self::INI_FILE, $this->downloadedPackage->package->extensionName)
+            ->with(self::INI_FILE, $this->downloadedPackage->package->extensionName())
             ->willReturn(true);
 
         $this->mockPhpBinary
             ->expects(self::once())
             ->method('assertExtensionIsLoadedInRuntime')
-            ->with($this->downloadedPackage->package->extensionName, $this->output)
+            ->with($this->downloadedPackage->package->extensionName(), $this->output)
             ->willThrowException(ExtensionIsNotLoaded::fromExpectedExtension(
                 $this->mockPhpBinary,
-                $this->downloadedPackage->package->extensionName,
+                $this->downloadedPackage->package->extensionName(),
             ));
 
         $this->addExtensionToTheIniFile
@@ -162,13 +155,13 @@ final class CheckAndAddExtensionToIniIfNeededTest extends TestCase
         $this->isExtensionAlreadyInTheIniFile
             ->expects(self::once())
             ->method('__invoke')
-            ->with(self::INI_FILE, $this->downloadedPackage->package->extensionName)
+            ->with(self::INI_FILE, $this->downloadedPackage->package->extensionName())
             ->willReturn(true);
 
         $this->mockPhpBinary
             ->expects(self::once())
             ->method('assertExtensionIsLoadedInRuntime')
-            ->with($this->downloadedPackage->package->extensionName, $this->output);
+            ->with($this->downloadedPackage->package->extensionName(), $this->output);
 
         $this->addExtensionToTheIniFile
             ->expects(self::never())
@@ -194,13 +187,13 @@ final class CheckAndAddExtensionToIniIfNeededTest extends TestCase
         $this->isExtensionAlreadyInTheIniFile
             ->expects(self::once())
             ->method('__invoke')
-            ->with(self::INI_FILE, $this->downloadedPackage->package->extensionName)
+            ->with(self::INI_FILE, $this->downloadedPackage->package->extensionName())
             ->willReturn(true);
 
         $this->mockPhpBinary
             ->expects(self::once())
             ->method('assertExtensionIsLoadedInRuntime')
-            ->with($this->downloadedPackage->package->extensionName, $this->output);
+            ->with($this->downloadedPackage->package->extensionName(), $this->output);
 
         $this->addExtensionToTheIniFile
             ->expects(self::never())
@@ -233,7 +226,7 @@ final class CheckAndAddExtensionToIniIfNeededTest extends TestCase
         $this->isExtensionAlreadyInTheIniFile
             ->expects(self::once())
             ->method('__invoke')
-            ->with(self::INI_FILE, $this->downloadedPackage->package->extensionName)
+            ->with(self::INI_FILE, $this->downloadedPackage->package->extensionName())
             ->willReturn(false);
 
         $this->mockPhpBinary
@@ -265,7 +258,7 @@ final class CheckAndAddExtensionToIniIfNeededTest extends TestCase
         $this->isExtensionAlreadyInTheIniFile
             ->expects(self::once())
             ->method('__invoke')
-            ->with(self::INI_FILE, $this->downloadedPackage->package->extensionName)
+            ->with(self::INI_FILE, $this->downloadedPackage->package->extensionName())
             ->willReturn(false);
 
         $this->mockPhpBinary

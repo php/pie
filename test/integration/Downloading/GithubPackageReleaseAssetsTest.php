@@ -54,13 +54,6 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             'asgrim/example-pie-extension',
             '2.0.2',
             'https://api.github.com/repos/asgrim/example-pie-extension/zipball/f9ed13ea95dada34c6cc5a052da258dbda059d27',
-            [],
-            true,
-            true,
-            null,
-            null,
-            null,
-            99,
         );
 
         $io = $this->createMock(IOInterface::class);

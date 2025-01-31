@@ -14,11 +14,8 @@ use Composer\Repository\VcsRepository;
 use Composer\Util\Platform;
 use InvalidArgumentException;
 use Php\Pie\Command\CommandHelper;
-use Php\Pie\ConfigureOption;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
-use Php\Pie\ExtensionName;
-use Php\Pie\ExtensionType;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\RequiresOperatingSystemFamily;
@@ -102,27 +99,21 @@ final class CommandHelperTest extends TestCase
 
     public function testProcessingConfigureOptionsFromInput(): void
     {
-        $package         = new Package(
-            $this->createMock(CompletePackage::class),
-            ExtensionType::PhpModule,
-            ExtensionName::normaliseFromString('lolz'),
-            'foo/bar',
-            '1.0.0',
-            null,
-            [
-                ConfigureOption::fromComposerJsonDefinition([
+        $composerPackage = $this->createMock(CompletePackage::class);
+        $composerPackage->method('getPrettyName')->willReturn('foo/bar');
+        $composerPackage->method('getPrettyVersion')->willReturn('1.0.0');
+        $composerPackage->method('getType')->willReturn('php-ext');
+        $composerPackage->method('getPhpExt')->willReturn([
+            'configure-options' => [
+                [
                     'name' => 'with-stuff',
                     'needs-value' => true,
-                ]),
-                ConfigureOption::fromComposerJsonDefinition(['name' => 'enable-thing']),
+                ],
+                ['name' => 'enable-thing'],
             ],
-            true,
-            true,
-            null,
-            null,
-            null,
-            99,
-        );
+        ]);
+        $package = Package::fromComposerCompletePackage($composerPackage);
+
         $inputDefinition = new InputDefinition();
         $inputDefinition->addOption(new InputOption('with-stuff', null, InputOption::VALUE_REQUIRED));
         $inputDefinition->addOption(new InputOption('enable-thing', null, InputOption::VALUE_NONE));

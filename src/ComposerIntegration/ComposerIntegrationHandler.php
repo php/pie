@@ -39,7 +39,7 @@ class ComposerIntegrationHandler
 
         // If user did not request a specific require version, use Composer to recommend one for the pie.json
         if ($recommendedRequireVersion === null) {
-            $recommendedRequireVersion = $versionSelector->findRecommendedRequireVersion($package->composerPackage);
+            $recommendedRequireVersion = $versionSelector->findRecommendedRequireVersion($package->composerPackage());
         }
 
         // Write the new requirement to pie.json; because we later essentially just do a `composer install` using that file
@@ -60,7 +60,7 @@ class ComposerIntegrationHandler
 
         $composerInstaller = PieComposerInstaller::createWithPhpBinary(
             $targetPlatform->phpBinaryPath,
-            $package->extensionName,
+            $package->extensionName(),
             $this->arrayCollectionIo,
             $composer,
         );

@@ -83,13 +83,6 @@ final class OndrejPhpenmodTest extends TestCase
                 'foo/bar',
                 '1.2.3',
                 null,
-                [],
-                true,
-                true,
-                null,
-                null,
-                null,
-                99,
             ),
             '/path/to/extracted/source',
         );

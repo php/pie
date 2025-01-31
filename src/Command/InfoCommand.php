@@ -64,17 +64,17 @@ final class InfoCommand extends Command
             $requestedNameAndVersion,
             CommandHelper::determineForceInstallingPackageVersion($input),
         );
-        $output->writeln(sprintf('<info>Found package:</info> %s which provides <info>%s</info>', $package->prettyNameAndVersion(), $package->extensionName->nameWithExtPrefix()));
+        $output->writeln(sprintf('<info>Found package:</info> %s which provides <info>%s</info>', $package->prettyNameAndVersion(), $package->extensionName()->nameWithExtPrefix()));
 
-        $output->writeln(sprintf('Extension name: %s', $package->extensionName->name()));
-        $output->writeln(sprintf('Extension type: %s (%s)', $package->extensionType->value, $package->extensionType->name));
-        $output->writeln(sprintf('Composer package name: %s', $package->name));
-        $output->writeln(sprintf('Version: %s', $package->version));
-        $output->writeln(sprintf('Download URL: %s', $package->downloadUrl ?? '(not specified)'));
+        $output->writeln(sprintf('Extension name: %s', $package->extensionName()->name()));
+        $output->writeln(sprintf('Extension type: %s (%s)', $package->extensionType()->value, $package->extensionType()->name));
+        $output->writeln(sprintf('Composer package name: %s', $package->name()));
+        $output->writeln(sprintf('Version: %s', $package->version()));
+        $output->writeln(sprintf('Download URL: %s', $package->downloadUrl() ?? '(not specified)'));
 
-        if (count($package->configureOptions)) {
+        if (count($package->configureOptions())) {
             $output->writeln('Configure options:');
-            foreach ($package->configureOptions as $configureOption) {
+            foreach ($package->configureOptions() as $configureOption) {
                 $output->writeln(sprintf('    --%s%s  (%s)', $configureOption->name, $configureOption->needsValue ? '=?' : '', $configureOption->description));
             }
         } else {

@@ -66,8 +66,8 @@ final class ResolveDependencyWithComposerTest extends TestCase
             $this->createMock(QuieterConsoleIO::class),
         ))($this->composer, $targetPlatform, new RequestedPackageAndVersion('asgrim/example-pie-extension', '^1.0'), false);
 
-        self::assertSame('asgrim/example-pie-extension', $package->name);
-        self::assertStringStartsWith('1.', $package->version);
+        self::assertSame('asgrim/example-pie-extension', $package->name());
+        self::assertStringStartsWith('1.', $package->version());
     }
 
     /**
@@ -159,8 +159,8 @@ final class ResolveDependencyWithComposerTest extends TestCase
             true,
         );
 
-        self::assertSame('asgrim/example-pie-extension', $package->name);
-        self::assertStringStartsWith('1.', $package->version);
+        self::assertSame('asgrim/example-pie-extension', $package->name());
+        self::assertStringStartsWith('1.', $package->version());
     }
 
     public function testZtsOnlyPackageCannotBeInstalledOnNtsSystem(): void

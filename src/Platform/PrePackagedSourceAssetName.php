@@ -23,19 +23,19 @@ final class PrePackagedSourceAssetName
         return [
             strtolower(sprintf(
                 'php_%s-%s-src.tgz',
-                $package->extensionName->name(),
-                $package->version,
+                $package->extensionName()->name(),
+                $package->version(),
             )),
             strtolower(sprintf(
                 'php_%s-%s-src.zip',
-                $package->extensionName->name(),
-                $package->version,
+                $package->extensionName()->name(),
+                $package->version(),
             )),
             // @todo remove this:
             strtolower(sprintf(
                 '%s-%s.tgz',
-                $package->extensionName->name(),
-                $package->version,
+                $package->extensionName()->name(),
+                $package->version(),
             )),
         ];
     }

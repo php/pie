@@ -74,16 +74,16 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
         AuthHelper $authHelper,
         HttpDownloader $httpDownloader,
     ): array {
-        Assert::notNull($package->downloadUrl);
+        Assert::notNull($package->downloadUrl());
 
         try {
             $decodedRepsonse = $httpDownloader->get(
-                $this->githubApiBaseUrl . '/repos/' . $package->githubOrgAndRepository() . '/releases/tags/' . $package->version,
+                $this->githubApiBaseUrl . '/repos/' . $package->githubOrgAndRepository() . '/releases/tags/' . $package->version(),
                 [
                     'retry-auth-failure' => false,
                     'http' => [
                         'method' => 'GET',
-                        'header' => $authHelper->addAuthenticationHeader([], $this->githubApiBaseUrl, $package->downloadUrl),
+                        'header' => $authHelper->addAuthenticationHeader([], $this->githubApiBaseUrl, $package->downloadUrl()),
                     ],
                 ],
             )->decodeJson();

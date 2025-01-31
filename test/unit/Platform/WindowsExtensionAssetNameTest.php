@@ -49,13 +49,6 @@ final class WindowsExtensionAssetNameTest extends TestCase
             'phpf/foo',
             '1.2.3',
             null,
-            [],
-            true,
-            true,
-            null,
-            null,
-            null,
-            99,
         );
     }
 

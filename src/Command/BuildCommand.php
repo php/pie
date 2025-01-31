@@ -64,7 +64,7 @@ final class BuildCommand extends Command
             $requestedNameAndVersion,
             $forceInstallPackageVersion,
         );
-        $output->writeln(sprintf('<info>Found package:</info> %s which provides <info>%s</info>', $package->prettyNameAndVersion(), $package->extensionName->nameWithExtPrefix()));
+        $output->writeln(sprintf('<info>Found package:</info> %s which provides <info>%s</info>', $package->prettyNameAndVersion(), $package->extensionName()->nameWithExtPrefix()));
 
         // Now we know what package we have, we can validate the configure options for the command and re-create the
         // Composer instance with the populated configure options

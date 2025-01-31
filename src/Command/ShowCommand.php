@@ -80,7 +80,7 @@ final class ShowCommand extends Command
                         $extensionPath,
                         $phpExtensionName,
                         $extensionEnding,
-                        PieInstalledJsonMetadataKeys::pieMetadataFromComposerPackage($piePackage->composerPackage),
+                        PieInstalledJsonMetadataKeys::pieMetadataFromComposerPackage($piePackage->composerPackage()),
                     ),
                 ));
             },
@@ -152,7 +152,7 @@ final class ShowCommand extends Command
             array_map(
             /** @return non-empty-string */
                 static function (Package $package): string {
-                    return $package->extensionName->name();
+                    return $package->extensionName()->name();
                 },
                 $composerInstalledPackages,
             ),

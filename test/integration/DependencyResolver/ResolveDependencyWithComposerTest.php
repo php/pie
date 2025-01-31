@@ -98,8 +98,8 @@ final class ResolveDependencyWithComposerTest extends TestCase
             false,
         );
 
-        self::assertSame($expectedVersion, $package->version);
-        self::assertNotNull($package->downloadUrl);
-        self::assertStringMatchesFormat($expectedDownloadUrl, $package->downloadUrl);
+        self::assertSame($expectedVersion, $package->version());
+        self::assertNotNull($package->downloadUrl());
+        self::assertStringMatchesFormat($expectedDownloadUrl, $package->downloadUrl());
     }
 }

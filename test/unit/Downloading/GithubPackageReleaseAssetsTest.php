@@ -79,13 +79,6 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             'asgrim/example-pie-extension',
             '1.2.3',
             'https://test-uri/' . uniqid('downloadUrl', true),
-            [],
-            true,
-            true,
-            null,
-            null,
-            null,
-            99,
         );
 
         $releaseAssets = new GithubPackageReleaseAssets('https://test-github-api-base-url.thephp.foundation');
@@ -154,13 +147,6 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             'asgrim/example-pie-extension',
             '1.2.3',
             'https://test-uri/' . uniqid('downloadUrl', true),
-            [],
-            true,
-            true,
-            null,
-            null,
-            null,
-            99,
         );
 
         $releaseAssets = new GithubPackageReleaseAssets('https://test-github-api-base-url.thephp.foundation');
@@ -210,13 +196,6 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             'asgrim/example-pie-extension',
             '1.2.3',
             'https://test-uri/' . uniqid('downloadUrl', true),
-            [],
-            true,
-            true,
-            null,
-            null,
-            null,
-            99,
         );
 
         $releaseAssets = new GithubPackageReleaseAssets('https://test-github-api-base-url.thephp.foundation');
