@@ -7,6 +7,7 @@ namespace Php\Pie\DependencyResolver;
 use Composer\Package\CompletePackageInterface;
 use InvalidArgumentException;
 use Php\Pie\ConfigureOption;
+use Php\Pie\Downloading\DownloadUrlMethod;
 use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
 use Php\Pie\Platform\OperatingSystemFamily;
@@ -41,6 +42,7 @@ final class Package
     private array|null $incompatibleOsFamilies;
     private bool $supportZts;
     private bool $supportNts;
+    private DownloadUrlMethod|null $overrideDownloadUrlMethod;
 
     public function __construct(
         private readonly CompletePackageInterface $composerPackage,
@@ -50,13 +52,14 @@ final class Package
         private readonly string $version,
         private readonly string|null $downloadUrl,
     ) {
-        $this->configureOptions       = [];
-        $this->supportZts             = true;
-        $this->supportNts             = true;
-        $this->buildPath              = null;
-        $this->compatibleOsFamilies   = null;
-        $this->incompatibleOsFamilies = null;
-        $this->priority               = 80;
+        $this->configureOptions          = [];
+        $this->supportZts                = true;
+        $this->supportNts                = true;
+        $this->buildPath                 = null;
+        $this->compatibleOsFamilies      = null;
+        $this->incompatibleOsFamilies    = null;
+        $this->priority                  = 80;
+        $this->overrideDownloadUrlMethod = null;
     }
 
     public static function fromComposerCompletePackage(CompletePackageInterface $completePackage): self
@@ -94,6 +97,10 @@ final class Package
         $package->incompatibleOsFamilies = self::convertInputStringsToOperatingSystemFamilies($incompatibleOsFamilies);
 
         $package->priority = $phpExtOptions['priority'] ?? 80;
+
+        if (array_key_exists('override-download-url-method', $phpExtOptions)) {
+            $package->overrideDownloadUrlMethod = DownloadUrlMethod::tryFrom($phpExtOptions['override-download-url-method']);
+        }
 
         return $package;
     }
@@ -213,5 +220,10 @@ final class Package
     public function supportNts(): bool
     {
         return $this->supportNts;
+    }
+
+    public function overrideDownloadUrlMethod(): DownloadUrlMethod|null
+    {
+        return $this->overrideDownloadUrlMethod;
     }
 }

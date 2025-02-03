@@ -10,11 +10,11 @@ use Php\Pie\Platform\PrePackagedSourceAssetName;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\WindowsExtensionAssetName;
 
-enum DownloadUrlMethod
+enum DownloadUrlMethod: string
 {
-    case ComposerDefaultDownload;
-    case WindowsBinaryDownload;
-    case PrePackagedSourceDownload;
+    case ComposerDefaultDownload   = 'composer-default';
+    case WindowsBinaryDownload     = 'windows-binary';
+    case PrePackagedSourceDownload = 'pre-packaged-source';
 
     /** @return non-empty-list<non-empty-string>|null */
     public function possibleAssetNames(Package $package, TargetPlatform $targetPlatform): array|null
@@ -41,7 +41,7 @@ enum DownloadUrlMethod
          * external dependencies in Git submodules that otherwise aren't
          * included in GitHub/Gitlab/etc "dist" downloads
          */
-        if (false) { // @todo check $package `php-ext`
+        if ($package->overrideDownloadUrlMethod() === DownloadUrlMethod::PrePackagedSourceDownload) {
             return self::PrePackagedSourceDownload;
         }
 
