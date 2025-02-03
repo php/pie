@@ -15,6 +15,7 @@ use Php\Pie\ComposerIntegration\Listeners\OverrideDownloadUrlInstallListener;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieOperation;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
+use Php\Pie\Downloading\DownloadUrlMethod;
 use Php\Pie\Downloading\PackageReleaseAssets;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
@@ -214,7 +215,10 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
         $composerPackage = new CompletePackage('foo/bar', '1.2.3.0', '1.2.3');
         $composerPackage->setDistType('zip');
         $composerPackage->setDistUrl('https://example.com/git-archive-zip-url');
-        $composerPackage->setPhpExt(['extension-name' => 'mongodb']);
+        $composerPackage->setPhpExt([
+            'extension-name' => 'foobar',
+            'override-download-url-method' => 'pre-packaged-source',
+        ]);
 
         /**
          * @psalm-suppress InternalClass
