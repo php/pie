@@ -27,7 +27,11 @@ final class DownloadedPackage
     public static function fromPackageAndExtractedPath(Package $package, string $extractedSourcePath): self
     {
         if ($package->buildPath() !== null) {
-            $extractedSourcePathWithBuildPath = realpath($extractedSourcePath . DIRECTORY_SEPARATOR . $package->buildPath());
+            $extractedSourcePathWithBuildPath = realpath(
+                $extractedSourcePath
+                . DIRECTORY_SEPARATOR
+                . str_replace("{version}", $package->version(), $package->buildPath())
+            );
 
             if (is_string($extractedSourcePathWithBuildPath)) {
                 $extractedSourcePath = $extractedSourcePathWithBuildPath;
