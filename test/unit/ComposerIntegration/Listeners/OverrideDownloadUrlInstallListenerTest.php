@@ -15,7 +15,6 @@ use Php\Pie\ComposerIntegration\Listeners\OverrideDownloadUrlInstallListener;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieOperation;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
-use Php\Pie\Downloading\DownloadUrlMethod;
 use Php\Pie\Downloading\PackageReleaseAssets;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;

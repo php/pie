@@ -18,6 +18,7 @@ use function array_map;
 use function array_slice;
 use function explode;
 use function implode;
+use function is_string;
 use function parse_url;
 use function str_contains;
 use function str_starts_with;
@@ -98,7 +99,11 @@ final class Package
 
         $package->priority = $phpExtOptions['priority'] ?? 80;
 
-        if (array_key_exists('override-download-url-method', $phpExtOptions)) {
+        if (
+            $phpExtOptions !== null
+            && array_key_exists('override-download-url-method', $phpExtOptions)
+            && is_string($phpExtOptions['override-download-url-method'])
+        ) {
             $package->overrideDownloadUrlMethod = DownloadUrlMethod::tryFrom($phpExtOptions['override-download-url-method']);
         }
 

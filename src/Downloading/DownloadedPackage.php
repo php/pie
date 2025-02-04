@@ -8,6 +8,7 @@ use Php\Pie\DependencyResolver\Package;
 
 use function is_string;
 use function realpath;
+use function str_replace;
 
 use const DIRECTORY_SEPARATOR;
 
@@ -30,7 +31,7 @@ final class DownloadedPackage
             $extractedSourcePathWithBuildPath = realpath(
                 $extractedSourcePath
                 . DIRECTORY_SEPARATOR
-                . str_replace("{version}", $package->version(), $package->buildPath())
+                . str_replace('{version}', $package->version(), $package->buildPath()),
             );
 
             if (is_string($extractedSourcePathWithBuildPath)) {
