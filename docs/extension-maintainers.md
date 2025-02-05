@@ -166,9 +166,9 @@ The `build-path` may contain some templated values which are replaced:
    with version 1.2.3 with a `build-path` of `myext-{version}` the actual build
    path would become `myext-1.2.3`.
 
-#### `override-download-url-method`
+#### `download-url-method`
 
-The `override-download-url-method` directive allows extension maintainers to
+The `download-url-method` directive allows extension maintainers to
 change the behaviour of downloading the source package.
 
  * Setting this to `composer-default`, which is the default value if not
