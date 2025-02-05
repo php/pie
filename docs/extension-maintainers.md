@@ -164,7 +164,7 @@ The `build-path` may contain some templated values which are replaced:
 
  * `{version}` to be replaced with the package version. For example a package
    with version 1.2.3 with a `build-path` of `myext-{version}` the actual build
-   path would become `myext-{version}`.
+   path would become `myext-1.2.3`.
 
 #### `override-download-url-method`
 
