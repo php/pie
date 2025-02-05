@@ -41,7 +41,7 @@ enum DownloadUrlMethod: string
          * external dependencies in Git submodules that otherwise aren't
          * included in GitHub/Gitlab/etc "dist" downloads
          */
-        if ($package->overrideDownloadUrlMethod() === DownloadUrlMethod::PrePackagedSourceDownload) {
+        if ($package->downloadUrlMethod() === DownloadUrlMethod::PrePackagedSourceDownload) {
             return self::PrePackagedSourceDownload;
         }
 

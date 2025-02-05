@@ -18,7 +18,6 @@ use function array_map;
 use function array_slice;
 use function explode;
 use function implode;
-use function is_string;
 use function parse_url;
 use function str_contains;
 use function str_starts_with;
@@ -43,7 +42,7 @@ final class Package
     private array|null $incompatibleOsFamilies;
     private bool $supportZts;
     private bool $supportNts;
-    private DownloadUrlMethod|null $overrideDownloadUrlMethod;
+    private DownloadUrlMethod|null $downloadUrlMethod;
 
     public function __construct(
         private readonly CompletePackageInterface $composerPackage,
@@ -53,14 +52,14 @@ final class Package
         private readonly string $version,
         private readonly string|null $downloadUrl,
     ) {
-        $this->configureOptions          = [];
-        $this->supportZts                = true;
-        $this->supportNts                = true;
-        $this->buildPath                 = null;
-        $this->compatibleOsFamilies      = null;
-        $this->incompatibleOsFamilies    = null;
-        $this->priority                  = 80;
-        $this->overrideDownloadUrlMethod = null;
+        $this->configureOptions       = [];
+        $this->supportZts             = true;
+        $this->supportNts             = true;
+        $this->buildPath              = null;
+        $this->compatibleOsFamilies   = null;
+        $this->incompatibleOsFamilies = null;
+        $this->priority               = 80;
+        $this->downloadUrlMethod      = null;
     }
 
     public static function fromComposerCompletePackage(CompletePackageInterface $completePackage): self
@@ -99,12 +98,8 @@ final class Package
 
         $package->priority = $phpExtOptions['priority'] ?? 80;
 
-        if (
-            $phpExtOptions !== null
-            && array_key_exists('override-download-url-method', $phpExtOptions)
-            && is_string($phpExtOptions['override-download-url-method'])
-        ) {
-            $package->overrideDownloadUrlMethod = DownloadUrlMethod::tryFrom($phpExtOptions['override-download-url-method']);
+        if ($phpExtOptions !== null && array_key_exists('download-url-method', $phpExtOptions)) {
+            $package->downloadUrlMethod = DownloadUrlMethod::tryFrom($phpExtOptions['download-url-method']);
         }
 
         return $package;
@@ -227,8 +222,8 @@ final class Package
         return $this->supportNts;
     }
 
-    public function overrideDownloadUrlMethod(): DownloadUrlMethod|null
+    public function downloadUrlMethod(): DownloadUrlMethod|null
     {
-        return $this->overrideDownloadUrlMethod;
+        return $this->downloadUrlMethod;
     }
 }

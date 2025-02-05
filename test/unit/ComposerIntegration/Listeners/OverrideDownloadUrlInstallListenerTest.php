@@ -216,7 +216,7 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
         $composerPackage->setDistUrl('https://example.com/git-archive-zip-url');
         $composerPackage->setPhpExt([
             'extension-name' => 'foobar',
-            'override-download-url-method' => 'pre-packaged-source',
+            'download-url-method' => 'pre-packaged-source',
         ]);
 
         /**
