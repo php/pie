@@ -33,16 +33,16 @@ use function strtolower;
 final class Package
 {
     /** @var list<ConfigureOption> */
-    private array $configureOptions;
-    private int $priority;
-    private string|null $buildPath;
+    private array $configureOptions = [];
+    private int $priority           = 80;
+    private string|null $buildPath  = null;
     /** @var non-empty-list<OperatingSystemFamily>|null */
-    private array|null $compatibleOsFamilies;
+    private array|null $compatibleOsFamilies = null;
     /** @var non-empty-list<OperatingSystemFamily>|null */
-    private array|null $incompatibleOsFamilies;
-    private bool $supportZts;
-    private bool $supportNts;
-    private DownloadUrlMethod|null $downloadUrlMethod;
+    private array|null $incompatibleOsFamilies        = null;
+    private bool $supportZts                          = true;
+    private bool $supportNts                          = true;
+    private DownloadUrlMethod|null $downloadUrlMethod = null;
 
     public function __construct(
         private readonly CompletePackageInterface $composerPackage,
@@ -52,14 +52,6 @@ final class Package
         private readonly string $version,
         private readonly string|null $downloadUrl,
     ) {
-        $this->configureOptions       = [];
-        $this->supportZts             = true;
-        $this->supportNts             = true;
-        $this->buildPath              = null;
-        $this->compatibleOsFamilies   = null;
-        $this->incompatibleOsFamilies = null;
-        $this->priority               = 80;
-        $this->downloadUrlMethod      = null;
     }
 
     public static function fromComposerCompletePackage(CompletePackageInterface $completePackage): self
@@ -140,18 +132,20 @@ final class Package
             return null;
         }
 
-        $osFamilies = [];
-        foreach ($input as $value) {
-            $valueToTry = strtolower($value);
+        Assert::isNonEmptyList($input, 'Expected operating systems families to be a non-empty list.');
 
-            Assert::inArray($valueToTry, OperatingSystemFamily::asValuesList(), 'Expected operating system family to be one of: %2$s. Got: %s');
+        return array_map(
+            static function ($value): OperatingSystemFamily {
+                Assert::inArray(
+                    strtolower($value),
+                    OperatingSystemFamily::asValuesList(),
+                    'Expected operating system family to be one of: %2$s. Got: %s',
+                );
 
-            $osFamilies[] = OperatingSystemFamily::from($valueToTry);
-        }
-
-        Assert::isNonEmptyList($osFamilies, 'Expected operating systems families to be a non-empty list.');
-
-        return $osFamilies;
+                return OperatingSystemFamily::from(strtolower($value));
+            },
+            $input,
+        );
     }
 
     public function composerPackage(): CompletePackageInterface
