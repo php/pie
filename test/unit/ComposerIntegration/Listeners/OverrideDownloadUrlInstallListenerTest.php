@@ -11,6 +11,7 @@ use Composer\Installer\InstallerEvent;
 use Composer\Installer\InstallerEvents;
 use Composer\IO\IOInterface;
 use Composer\Package\CompletePackage;
+use Composer\Package\Package;
 use Php\Pie\ComposerIntegration\Listeners\OverrideDownloadUrlInstallListener;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieOperation;
@@ -87,17 +88,140 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
 
     public function testNonInstallOperationsAreIgnored(): void
     {
-        self::markTestIncomplete('todo'); // @todo
+        $composerPackage = new CompletePackage('foo/bar', '1.2.3.0', '1.2.3');
+        $composerPackage->setDistUrl('https://example.com/git-archive-zip-url');
+
+        /**
+         * @psalm-suppress InternalClass
+         * @psalm-suppress InternalMethod
+         */
+        $installerEvent = new InstallerEvent(
+            InstallerEvents::PRE_OPERATIONS_EXEC,
+            $this->composer,
+            $this->io,
+            false,
+            true,
+            new Transaction([$composerPackage], []),
+        );
+
+        $this->container
+            ->expects(self::never())
+            ->method('get');
+
+        (new OverrideDownloadUrlInstallListener(
+            $this->composer,
+            $this->io,
+            $this->container,
+            new PieComposerRequest(
+                $this->createMock(OutputInterface::class),
+                new TargetPlatform(
+                    OperatingSystem::NonWindows,
+                    OperatingSystemFamily::Linux,
+                    PhpBinaryPath::fromCurrentProcess(),
+                    Architecture::x86_64,
+                    ThreadSafetyMode::NonThreadSafe,
+                    1,
+                    WindowsCompiler::VC15,
+                ),
+                new RequestedPackageAndVersion('foo/bar', '^1.1'),
+                PieOperation::Install,
+                [],
+                null,
+                false,
+            ),
+        ))($installerEvent);
     }
 
     public function testNonCompletePackagesAreIgnored(): void
     {
-        self::markTestIncomplete('todo'); // @todo
+        $composerPackage = new Package('foo/bar', '1.2.3.0', '1.2.3');
+        $composerPackage->setDistUrl('https://example.com/git-archive-zip-url');
+
+        /**
+         * @psalm-suppress InternalClass
+         * @psalm-suppress InternalMethod
+         */
+        $installerEvent = new InstallerEvent(
+            InstallerEvents::PRE_OPERATIONS_EXEC,
+            $this->composer,
+            $this->io,
+            false,
+            true,
+            new Transaction([], [$composerPackage]),
+        );
+
+        $this->container
+            ->expects(self::never())
+            ->method('get');
+
+        (new OverrideDownloadUrlInstallListener(
+            $this->composer,
+            $this->io,
+            $this->container,
+            new PieComposerRequest(
+                $this->createMock(OutputInterface::class),
+                new TargetPlatform(
+                    OperatingSystem::NonWindows,
+                    OperatingSystemFamily::Linux,
+                    PhpBinaryPath::fromCurrentProcess(),
+                    Architecture::x86_64,
+                    ThreadSafetyMode::NonThreadSafe,
+                    1,
+                    WindowsCompiler::VC15,
+                ),
+                new RequestedPackageAndVersion('foo/bar', '^1.1'),
+                PieOperation::Install,
+                [],
+                null,
+                false,
+            ),
+        ))($installerEvent);
     }
 
     public function testInstallOperationsForDifferentPackagesAreIgnored(): void
     {
-        self::markTestIncomplete('todo'); // @todo
+        $composerPackage = new CompletePackage('different/package', '1.2.3.0', '1.2.3');
+        $composerPackage->setDistUrl('https://example.com/git-archive-zip-url');
+
+        /**
+         * @psalm-suppress InternalClass
+         * @psalm-suppress InternalMethod
+         */
+        $installerEvent = new InstallerEvent(
+            InstallerEvents::PRE_OPERATIONS_EXEC,
+            $this->composer,
+            $this->io,
+            false,
+            true,
+            new Transaction([], [$composerPackage]),
+        );
+
+        $this->container
+            ->expects(self::never())
+            ->method('get');
+
+        (new OverrideDownloadUrlInstallListener(
+            $this->composer,
+            $this->io,
+            $this->container,
+            new PieComposerRequest(
+                $this->createMock(OutputInterface::class),
+                new TargetPlatform(
+                    OperatingSystem::NonWindows,
+                    OperatingSystemFamily::Linux,
+                    PhpBinaryPath::fromCurrentProcess(),
+                    Architecture::x86_64,
+                    ThreadSafetyMode::NonThreadSafe,
+                    1,
+                    WindowsCompiler::VC15,
+                ),
+                new RequestedPackageAndVersion('foo/bar', '^1.1'),
+                PieOperation::Install,
+                [],
+                null,
+                false,
+            ),
+        ))($installerEvent);
     }
 
     public function testWindowsUrlInstallerDoesNotRunOnNonWindows(): void
