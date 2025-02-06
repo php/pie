@@ -31,12 +31,6 @@ final class PrePackagedSourceAssetName
                 $package->extensionName()->name(),
                 $package->version(),
             )),
-            // @todo remove this:
-            strtolower(sprintf(
-                '%s-%s.tgz',
-                $package->extensionName()->name(),
-                $package->version(),
-            )),
         ];
     }
 }
