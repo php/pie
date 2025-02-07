@@ -4,25 +4,16 @@ declare(strict_types=1);
 
 namespace Php\Pie\Command;
 
-use Composer\Package\BasePackage;
-use Composer\Package\CompletePackageInterface;
 use Php\Pie\BinaryFile;
-use Php\Pie\ComposerIntegration\PieComposerFactory;
-use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieInstalledJsonMetadataKeys;
-use Php\Pie\DependencyResolver\Package;
+use Php\Pie\Platform\InstalledPiePackages;
 use Php\Pie\Platform\OperatingSystem;
-use Php\Pie\Platform\TargetPlatform;
-use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-use function array_combine;
-use function array_filter;
 use function array_key_exists;
-use function array_map;
 use function array_walk;
 use function file_exists;
 use function sprintf;
@@ -38,7 +29,7 @@ use const DIRECTORY_SEPARATOR;
 final class ShowCommand extends Command
 {
     public function __construct(
-        private readonly ContainerInterface $container,
+        private readonly InstalledPiePackages $installedPiePackages,
     ) {
         parent::__construct();
     }
@@ -54,7 +45,7 @@ final class ShowCommand extends Command
     {
         $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $output);
 
-        $piePackages          = $this->buildListOfPieInstalledPackages($output, $targetPlatform);
+        $piePackages          = $this->installedPiePackages->allPiePackages($targetPlatform);
         $phpEnabledExtensions = $targetPlatform->phpBinaryPath->extensions();
         $extensionPath        = $targetPlatform->phpBinaryPath->extensionPath();
         $extensionEnding      = $targetPlatform->operatingSystem === OperatingSystem::Windows ? '.dll' : '.so';
@@ -120,43 +111,5 @@ final class ShowCommand extends Command
         }
 
         return ' ✅';
-    }
-
-    /** @return array<non-empty-string, Package> */
-    private function buildListOfPieInstalledPackages(
-        OutputInterface $output,
-        TargetPlatform $targetPlatform,
-    ): array {
-        $composerInstalledPackages = array_map(
-            static function (CompletePackageInterface $package): Package {
-                return Package::fromComposerCompletePackage($package);
-            },
-            array_filter(
-                PieComposerFactory::createPieComposer(
-                    $this->container,
-                    PieComposerRequest::noOperation(
-                        $output,
-                        $targetPlatform,
-                    ),
-                )
-                    ->getRepositoryManager()
-                    ->getLocalRepository()
-                    ->getPackages(),
-                static function (BasePackage $basePackage): bool {
-                    return $basePackage instanceof CompletePackageInterface;
-                },
-            ),
-        );
-
-        return array_combine(
-            array_map(
-            /** @return non-empty-string */
-                static function (Package $package): string {
-                    return $package->extensionName()->name();
-                },
-                $composerInstalledPackages,
-            ),
-            $composerInstalledPackages,
-        );
     }
 }
