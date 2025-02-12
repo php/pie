@@ -25,6 +25,8 @@ use Php\Pie\Downloading\GithubPackageReleaseAssets;
 use Php\Pie\Downloading\PackageReleaseAssets;
 use Php\Pie\Installing\Ini;
 use Php\Pie\Installing\Install;
+use Php\Pie\Installing\Uninstall;
+use Php\Pie\Installing\UninstallUsingUnlink;
 use Php\Pie\Installing\UnixInstall;
 use Php\Pie\Installing\WindowsInstall;
 use Psr\Container\ContainerInterface;
@@ -106,6 +108,8 @@ final class Container
                 return $container->get(UnixInstall::class);
             },
         );
+
+        $container->alias(UninstallUsingUnlink::class, Uninstall::class);
 
         $container->alias(Ini\RemoveIniEntryWithFileGetContents::class, Ini\RemoveIniEntry::class);
 
