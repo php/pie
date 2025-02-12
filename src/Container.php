@@ -107,6 +107,8 @@ final class Container
             },
         );
 
+        $container->alias(Ini\RemoveIniEntryWithFileGetContents::class, Ini\RemoveIniEntry::class);
+
         return $container;
     }
 }
