@@ -6,6 +6,7 @@ namespace Php\Pie\Command;
 
 use Php\Pie\BinaryFile;
 use Php\Pie\ComposerIntegration\PieInstalledJsonMetadataKeys;
+use Php\Pie\Installing\BinaryFileFailedVerification;
 use Php\Pie\Platform\InstalledPiePackages;
 use Php\Pie\Platform\OperatingSystem;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -90,10 +91,10 @@ final class ShowCommand extends Command
         string $extensionEnding,
         array $installedJsonMetadata,
     ): string {
-        $expectedConventionalBinaryPath = $extensionPath . DIRECTORY_SEPARATOR . $phpExtensionName . $extensionEnding;
+        $actualBinaryPathByConvention = $extensionPath . DIRECTORY_SEPARATOR . $phpExtensionName . $extensionEnding;
 
         // The extension may not be in the usual path (since you can specify a full path to an extension in the INI file)
-        if (! file_exists($expectedConventionalBinaryPath)) {
+        if (! file_exists($actualBinaryPathByConvention)) {
             return '';
         }
 
@@ -101,13 +102,21 @@ final class ShowCommand extends Command
         $pieExpectedChecksum   = array_key_exists(PieInstalledJsonMetadataKeys::BinaryChecksum->value, $installedJsonMetadata) ? $installedJsonMetadata[PieInstalledJsonMetadataKeys::BinaryChecksum->value] : null;
 
         // Some other kind of mismatch of file path, or we don't have a stored checksum available
-        if ($expectedConventionalBinaryPath !== $pieExpectedBinaryPath || $pieExpectedChecksum === null) {
+        if (
+            $pieExpectedBinaryPath === null
+            || $pieExpectedChecksum === null
+            || $pieExpectedBinaryPath !== $actualBinaryPathByConvention
+        ) {
             return '';
         }
 
-        $actualInstalledBinary = BinaryFile::fromFileWithSha256Checksum($expectedConventionalBinaryPath);
-        if ($actualInstalledBinary->checksum !== $pieExpectedChecksum) {
-            return ' ⚠️ was ' . substr($actualInstalledBinary->checksum, 0, 8) . '..., expected ' . substr($pieExpectedChecksum, 0, 8) . '...';
+        $expectedBinaryFileFromMetadata = new BinaryFile($pieExpectedBinaryPath, $pieExpectedChecksum);
+        $actualBinaryFile               = BinaryFile::fromFileWithSha256Checksum($actualBinaryPathByConvention);
+
+        try {
+            $expectedBinaryFileFromMetadata->verifyAgainstOther($actualBinaryFile);
+        } catch (BinaryFileFailedVerification) {
+            return ' ⚠️ was ' . substr($actualBinaryFile->checksum, 0, 8) . '..., expected ' . substr($expectedBinaryFileFromMetadata->checksum, 0, 8) . '...';
         }
 
         return ' ✅';
