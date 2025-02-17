@@ -26,7 +26,7 @@ class ComposerIntegrationHandler
     ) {
     }
 
-    public function __invoke(
+    public function runInstall(
         Package $package,
         Composer $composer,
         TargetPlatform $targetPlatform,
