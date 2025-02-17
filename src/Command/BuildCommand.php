@@ -85,7 +85,7 @@ final class BuildCommand extends Command
         );
 
         try {
-            ($this->composerIntegrationHandler)(
+            $this->composerIntegrationHandler->runInstall(
                 $package,
                 $composer,
                 $targetPlatform,

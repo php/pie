@@ -90,7 +90,7 @@ final class InstallCommand extends Command
         );
 
         try {
-            ($this->composerIntegrationHandler)(
+            $this->composerIntegrationHandler->runInstall(
                 $package,
                 $composer,
                 $targetPlatform,

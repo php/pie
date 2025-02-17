@@ -69,7 +69,7 @@ final class DownloadCommand extends Command
         $output->writeln(sprintf('<info>Found package:</info> %s which provides <info>%s</info>', $package->prettyNameAndVersion(), $package->extensionName()->nameWithExtPrefix()));
 
         try {
-            ($this->composerIntegrationHandler)(
+            $this->composerIntegrationHandler->runInstall(
                 $package,
                 $composer,
                 $targetPlatform,
