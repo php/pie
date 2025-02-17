@@ -25,6 +25,7 @@ class PiePackageInstaller extends LibraryInstaller
         ExtensionType $type,
         Filesystem $filesystem,
         private readonly InstallAndBuildProcess $installAndBuildProcess,
+        private readonly UninstallProcess $uninstallProcess,
         private readonly PieComposerRequest $composerRequest,
     ) {
         parent::__construct($io, $composer, $type->value, $filesystem);
@@ -66,6 +67,47 @@ class PiePackageInstaller extends LibraryInstaller
                     $this->composerRequest,
                     $composerPackage,
                     $this->getInstallPath($composerPackage),
+                );
+
+                return null;
+            });
+    }
+
+    /** @inheritDoc */
+    public function uninstall(InstalledRepositoryInterface $repo, PackageInterface $package)
+    {
+        $composerPackage = $package;
+
+        // @todo check into why not being removed from `vendor/composer/installed.json`
+        return parent::uninstall($repo, $composerPackage)
+            ?->then(function () use ($composerPackage) {
+                $output = $this->composerRequest->pieOutput;
+
+                if ($this->composerRequest->requestedPackage->package !== $composerPackage->getName()) {
+                    $output->writeln(
+                        sprintf(
+                            '<comment>Skipping %s uninstall request from Composer as it was not the expected PIE package %s</comment>',
+                            $composerPackage->getName(),
+                            $this->composerRequest->requestedPackage->package,
+                        ),
+                        OutputInterface::VERBOSITY_VERY_VERBOSE,
+                    );
+
+                    return null;
+                }
+
+                if (! $composerPackage instanceof CompletePackage) {
+                    $output->writeln(sprintf(
+                        '<error>Not using PIE to install %s as it was not a Complete Package</error>',
+                        $composerPackage->getName(),
+                    ));
+
+                    return null;
+                }
+
+                ($this->uninstallProcess)(
+                    $this->composerRequest,
+                    $composerPackage,
                 );
 
                 return null;

@@ -17,6 +17,7 @@ use Php\Pie\Command\RepositoryAddCommand;
 use Php\Pie\Command\RepositoryListCommand;
 use Php\Pie\Command\RepositoryRemoveCommand;
 use Php\Pie\Command\ShowCommand;
+use Php\Pie\Command\UninstallCommand;
 use Php\Pie\ComposerIntegration\MinimalHelperSet;
 use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use Php\Pie\DependencyResolver\DependencyResolver;
@@ -54,6 +55,7 @@ final class Container
         $container->singleton(RepositoryListCommand::class);
         $container->singleton(RepositoryAddCommand::class);
         $container->singleton(RepositoryRemoveCommand::class);
+        $container->singleton(UninstallCommand::class);
 
         $container->singleton(QuieterConsoleIO::class, static function (ContainerInterface $container): QuieterConsoleIO {
             return new QuieterConsoleIO(

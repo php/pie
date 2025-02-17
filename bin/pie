@@ -13,6 +13,7 @@ use Php\Pie\Command\RepositoryAddCommand;
 use Php\Pie\Command\RepositoryListCommand;
 use Php\Pie\Command\RepositoryRemoveCommand;
 use Php\Pie\Command\ShowCommand;
+use Php\Pie\Command\UninstallCommand;
 use Php\Pie\Util\PieVersion;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\CommandLoader\ContainerCommandLoader;
@@ -37,6 +38,7 @@ $application->setCommandLoader(new ContainerCommandLoader(
         'repository:list' => RepositoryListCommand::class,
         'repository:add' => RepositoryAddCommand::class,
         'repository:remove' => RepositoryRemoveCommand::class,
+        'uninstall' => UninstallCommand::class,
     ]
 ));
 

@@ -39,6 +39,7 @@ class PieComposerFactory extends Factory
                 $type,
                 $fs,
                 $this->container->get(InstallAndBuildProcess::class),
+                $this->container->get(UninstallProcess::class),
                 $this->composerRequest,
             );
         };
