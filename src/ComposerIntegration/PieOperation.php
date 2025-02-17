@@ -11,6 +11,7 @@ enum PieOperation
     case Download;
     case Build;
     case Install;
+    case Uninstall;
 
     public function shouldBuild(): bool
     {

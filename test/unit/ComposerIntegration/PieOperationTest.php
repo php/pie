@@ -17,6 +17,7 @@ final class PieOperationTest extends TestCase
         self::assertFalse(PieOperation::Download->shouldBuild());
         self::assertTrue(PieOperation::Build->shouldBuild());
         self::assertTrue(PieOperation::Install->shouldBuild());
+        self::assertFalse(PieOperation::Uninstall->shouldBuild());
     }
 
     public function testShouldInstall(): void
@@ -25,5 +26,6 @@ final class PieOperationTest extends TestCase
         self::assertFalse(PieOperation::Download->shouldInstall());
         self::assertFalse(PieOperation::Build->shouldInstall());
         self::assertTrue(PieOperation::Install->shouldInstall());
+        self::assertFalse(PieOperation::Uninstall->shouldBuild());
     }
 }
