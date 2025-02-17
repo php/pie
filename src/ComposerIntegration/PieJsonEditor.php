@@ -82,6 +82,26 @@ class PieJsonEditor
         return $originalPieJsonContent;
     }
 
+    /**
+     * Remove a package from the `require` section of the given `pie.json`.
+     * Returns the original `pie.json` content, in case it needs to be
+     * restored later.
+     *
+     * @param non-empty-string $package
+     */
+    public function removeRequire(string $package): string
+    {
+        $originalPieJsonContent = file_get_contents($this->pieJsonFilename);
+
+        (new JsonConfigSource(
+            new JsonFile(
+                $this->pieJsonFilename,
+            ),
+        ))->removeLink('require', $package);
+
+        return $originalPieJsonContent;
+    }
+
     public function revert(string $originalPieJsonContent): void
     {
         file_put_contents($this->pieJsonFilename, $originalPieJsonContent);
