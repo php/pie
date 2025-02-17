@@ -53,6 +53,12 @@ final class PieJsonEditorTest extends TestCase
             EOF),
             $this->normaliseJson(file_get_contents($testPieJson)),
         );
+
+        $editor->removeRequire('foo/bar');
+        self::assertSame(
+            $this->normaliseJson('{}'),
+            $this->normaliseJson(file_get_contents($testPieJson)),
+        );
     }
 
     public function testCanRevert(): void
