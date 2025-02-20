@@ -4,13 +4,10 @@ declare(strict_types=1);
 
 namespace Php\Pie\Platform;
 
+use Composer\Composer;
 use Composer\Package\BasePackage;
 use Composer\Package\CompletePackageInterface;
-use Php\Pie\ComposerIntegration\PieComposerFactory;
-use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\DependencyResolver\Package;
-use Psr\Container\ContainerInterface;
-use Symfony\Component\Console\Output\NullOutput;
 
 use function array_combine;
 use function array_filter;
@@ -23,31 +20,20 @@ use function array_map;
  */
 class InstalledPiePackages
 {
-    /** @psalm-suppress PossiblyUnusedMethod no direct reference; used in service locator */
-    public function __construct(private readonly ContainerInterface $container)
-    {
-    }
-
     /**
      * Returns a list of PIE packages according to PIE; this does NOT check if
      * the extension is actually enabled in the target PHP.
      *
      * @return ListOfPiePackages
      */
-    public function allPiePackages(TargetPlatform $targetPlatform): array
+    public function allPiePackages(Composer $composer): array
     {
         $composerInstalledPackages = array_map(
             static function (CompletePackageInterface $package): Package {
                 return Package::fromComposerCompletePackage($package);
             },
             array_filter(
-                PieComposerFactory::createPieComposer(
-                    $this->container,
-                    PieComposerRequest::noOperation(
-                        new NullOutput(),
-                        $targetPlatform,
-                    ),
-                )
+                $composer
                     ->getRepositoryManager()
                     ->getLocalRepository()
                     ->getPackages(),

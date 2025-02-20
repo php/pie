@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\Pie\Command;
 
+use Composer\Composer;
 use Php\Pie\ComposerIntegration\ComposerIntegrationHandler;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
@@ -11,12 +12,12 @@ use Php\Pie\ComposerIntegration\PieOperation;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\Platform\InstalledPiePackages;
-use Php\Pie\Platform\TargetPlatform;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Webmozart\Assert\Assert;
 
@@ -57,7 +58,15 @@ final class UninstallCommand extends Command
 
         $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $output);
 
-        $piePackage = $this->findPiePackageByPackageName($packageToRemove, $targetPlatform);
+        $composer = PieComposerFactory::createPieComposer(
+            $this->container,
+            PieComposerRequest::noOperation(
+                new NullOutput(),
+                $targetPlatform,
+            ),
+        );
+
+        $piePackage = $this->findPiePackageByPackageName($packageToRemove, $composer);
 
         if ($piePackage === null) {
             $output->writeln('<error>No package found: ' . $packageToRemove . '</error>');
@@ -88,9 +97,9 @@ final class UninstallCommand extends Command
         return 0;
     }
 
-    private function findPiePackageByPackageName(string $packageToRemove, TargetPlatform $targetPlatform): Package|null
+    private function findPiePackageByPackageName(string $packageToRemove, Composer $composer): Package|null
     {
-        $piePackages = $this->installedPiePackages->allPiePackages($targetPlatform);
+        $piePackages = $this->installedPiePackages->allPiePackages($composer);
 
         foreach ($piePackages as $piePackage) {
             if ($piePackage->name() === $packageToRemove) {

@@ -5,13 +5,17 @@ declare(strict_types=1);
 namespace Php\Pie\Command;
 
 use Php\Pie\BinaryFile;
+use Php\Pie\ComposerIntegration\PieComposerFactory;
+use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieInstalledJsonMetadataKeys;
 use Php\Pie\Installing\BinaryFileFailedVerification;
 use Php\Pie\Platform\InstalledPiePackages;
 use Php\Pie\Platform\OperatingSystem;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use function array_key_exists;
@@ -31,6 +35,7 @@ final class ShowCommand extends Command
 {
     public function __construct(
         private readonly InstalledPiePackages $installedPiePackages,
+        private readonly ContainerInterface $container,
     ) {
         parent::__construct();
     }
@@ -46,7 +51,15 @@ final class ShowCommand extends Command
     {
         $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $output);
 
-        $piePackages          = $this->installedPiePackages->allPiePackages($targetPlatform);
+        $composer = PieComposerFactory::createPieComposer(
+            $this->container,
+            PieComposerRequest::noOperation(
+                new NullOutput(),
+                $targetPlatform,
+            ),
+        );
+
+        $piePackages          = $this->installedPiePackages->allPiePackages($composer);
         $phpEnabledExtensions = $targetPlatform->phpBinaryPath->extensions();
         $extensionPath        = $targetPlatform->phpBinaryPath->extensionPath();
         $extensionEnding      = $targetPlatform->operatingSystem === OperatingSystem::Windows ? '.dll' : '.so';
