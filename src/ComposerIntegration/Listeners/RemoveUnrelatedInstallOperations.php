@@ -8,6 +8,7 @@ use Closure;
 use Composer\Composer;
 use Composer\DependencyResolver\Operation\InstallOperation;
 use Composer\DependencyResolver\Operation\OperationInterface;
+use Composer\DependencyResolver\Operation\UninstallOperation;
 use Composer\DependencyResolver\Transaction;
 use Composer\Installer\InstallerEvent;
 use Composer\Installer\InstallerEvents;
@@ -49,7 +50,7 @@ class RemoveUnrelatedInstallOperations
         $newOperations = array_filter(
             $installerEvent->getTransaction()?->getOperations() ?? [],
             function (OperationInterface $operation) use ($pieOutput): bool {
-                if (! $operation instanceof InstallOperation) {
+                if (! $operation instanceof InstallOperation && ! $operation instanceof UninstallOperation) {
                     $pieOutput->writeln(
                         sprintf(
                             'Unexpected operation during installer: %s',
