@@ -146,7 +146,7 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | IMS                  | ?                                                                                                                                                  |
 | inclued              | ❌ Abandoned                                                                                                                                        |
 | ingres               | ❌ Abandoned                                                                                                                                        |
-| inotify              | ?                                                                                                                                                  |
+| inotify              | ✅ Supported: [arnaud-lb/inotify](https://packagist.org/packages/arnaud-lb/inotify)                                                                 |
 | intercept            | ?                                                                                                                                                  |
 | intl                 | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                                                                  |
 | ion                  | ?                                                                                                                                                  |
@@ -184,7 +184,7 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | memcache             | ⏰ PR: [websupport-sk/pecl-memcache#116](https://github.com/websupport-sk/pecl-memcache/pull/116)                                                   |
 | memcached            | ⏰ PR [php-memcached-dev/php-memcached#560](https://github.com/php-memcached-dev/php-memcached/pull/560) was merged, but not yet added to Packagist |
 | memoize              | ?                                                                                                                                                  |
-| memprof              | ?                                                                                                                                                  |
+| memprof              | ✅ Supported: [arnaud-lb/memprof](https://packagist.org/packages/arnaud-lb/memprof)                                                                 |
 | memsession           | ❌ Abandoned                                                                                                                                        |
 | memtrack             | ❌ Abandoned                                                                                                                                        |
 | meta                 | ?                                                                                                                                                  |
@@ -285,7 +285,7 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | radius               | ?                                                                                                                                                  |
 | raphf                | ?                                                                                                                                                  |
 | rar                  | ?                                                                                                                                                  |
-| rdkafka              | ?                                                                                                                                                  |
+| rdkafka              | ✅ Supported: [rdkafka/rdkafka](https://packagist.org/packages/rdkafka/rdkafka)                                                                     |
 | re2                  | ❌ Abandoned                                                                                                                                        |
 | redis                | ✅ Supported: [phpredis/phpredis](https://packagist.org/packages/phpredis/phpredis)                                                                 |
 | ref                  | ?                                                                                                                                                  |
