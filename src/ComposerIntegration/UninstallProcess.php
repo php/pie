@@ -8,6 +8,7 @@ use Composer\Package\CompletePackageInterface;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Installing\Ini\RemoveIniEntry;
 use Php\Pie\Installing\Uninstall;
+use Symfony\Component\Console\Output\OutputInterface;
 
 use function array_walk;
 use function count;
@@ -35,14 +36,23 @@ class UninstallProcess
         $affectedIniFiles = ($this->removeIniEntry)($piePackage, $composerRequest->targetPlatform);
 
         if (count($affectedIniFiles) === 1) {
-            $output->writeln(sprintf('INI file "%s" was updated to remove the extension.', reset($affectedIniFiles)));
+            $output->writeln(
+                sprintf('INI file "%s" was updated to remove the extension.', reset($affectedIniFiles)),
+                OutputInterface::VERBOSITY_VERBOSE,
+            );
         } elseif (count($affectedIniFiles) === 0) {
-            $output->writeln('No INI files were updated to remove the extension.');
+            $output->writeln(
+                'No INI files were updated to remove the extension.',
+                OutputInterface::VERBOSITY_VERBOSE,
+            );
         } else {
-            $output->writeln('The following INI files were updated to remove the extnesion:');
+            $output->writeln(
+                'The following INI files were updated to remove the extnesion:',
+                OutputInterface::VERBOSITY_VERBOSE,
+            );
             array_walk($affectedIniFiles, static fn (string $ini) => $output->writeln(' - ' . $ini));
         }
 
-        ($this->uninstall)($piePackage);
+        $output->writeln(sprintf('👋 <info>Removed extension:</info> %s', ($this->uninstall)($piePackage)->filePath));
     }
 }

@@ -14,7 +14,7 @@ use function unlink;
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 class UninstallUsingUnlink implements Uninstall
 {
-    public function __invoke(Package $package): void
+    public function __invoke(Package $package): BinaryFile
     {
         $pieMetadata = PieInstalledJsonMetadataKeys::pieMetadataFromComposerPackage($package->composerPackage());
 
@@ -40,6 +40,8 @@ class UninstallUsingUnlink implements Uninstall
         $expectedBinaryFile->verify();
 
         unlink($expectedBinaryFile->filePath);
+
         // @todo verify the unlink worked etc, maybe permissions failed
+        return $expectedBinaryFile;
     }
 }

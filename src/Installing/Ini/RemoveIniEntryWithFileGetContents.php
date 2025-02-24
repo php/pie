@@ -28,7 +28,12 @@ class RemoveIniEntryWithFileGetContents implements RemoveIniEntry
     /** @return list<string> Returns a list of INI files that were updated to remove the extension */
     public function __invoke(Package $package, TargetPlatform $targetPlatform): array
     {
-        $allIniFiles = [$targetPlatform->phpBinaryPath->loadedIniConfigurationFile()];
+        $allIniFiles = [];
+
+        $mainIni = $targetPlatform->phpBinaryPath->loadedIniConfigurationFile();
+        if ($mainIni !== null) {
+            $allIniFiles[] = $mainIni;
+        }
 
         $additionalIniDirectory = $targetPlatform->phpBinaryPath->additionalIniDirectory();
         if ($additionalIniDirectory !== null) {
