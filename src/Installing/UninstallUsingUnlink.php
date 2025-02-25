@@ -8,6 +8,7 @@ use Php\Pie\BinaryFile;
 use Php\Pie\ComposerIntegration\PieInstalledJsonMetadataKeys;
 use Php\Pie\DependencyResolver\Package;
 
+use Php\Pie\Util\Process;
 use function array_key_exists;
 use function unlink;
 
@@ -39,7 +40,17 @@ class UninstallUsingUnlink implements Uninstall
 
         $expectedBinaryFile->verify();
 
-        if (! unlink($expectedBinaryFile->filePath)) {
+        // If the target directory isn't writable, or a .so file already exists and isn't writable, try to use sudo
+        if (file_exists($expectedBinaryFile->filePath) && ! is_writable($expectedBinaryFile->filePath)) {
+            Process::run(['sudo', 'rm', $expectedBinaryFile->filePath]);
+
+            // Removal worked, bail out
+            if (! file_exists($expectedBinaryFile->filePath)) {
+                return $expectedBinaryFile;
+            }
+        }
+
+        if (file_exists($expectedBinaryFile->filePath) && ! unlink($expectedBinaryFile->filePath)) {
             throw FailedToRemoveExtension::withFilename($expectedBinaryFile);
         }
 

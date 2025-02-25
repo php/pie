@@ -83,8 +83,10 @@ class RemoveIniEntryWithFileGetContents implements RemoveIniEntry
                     return;
                 }
 
-                // @todo verify it was written; permissions may have failed etc
-                file_put_contents($iniFile, $replacedContent);
+                if (! file_put_contents($iniFile, $replacedContent)) {
+                    return;
+                }
+
                 $updatedIniFiles[] = $iniFile;
             },
         );

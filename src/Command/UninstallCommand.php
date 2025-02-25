@@ -13,6 +13,7 @@ use Php\Pie\ComposerIntegration\PieOperation;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\Platform\InstalledPiePackages;
+use Php\Pie\Platform\TargetPlatform;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -61,6 +62,10 @@ final class UninstallCommand extends Command
             $output->writeln('<warning>Uninstalling extensions on Windows is not currently supported.</warning>');
 
             return 1;
+        }
+
+        if (! TargetPlatform::isRunningAsRoot()) {
+            $output->writeln('This command may need elevated privileges, and may prompt you for your password.');
         }
 
         $packageToRemove = (string) $input->getArgument(self::ARG_PACKAGE_NAME);
