@@ -39,9 +39,10 @@ class UninstallUsingUnlink implements Uninstall
 
         $expectedBinaryFile->verify();
 
-        unlink($expectedBinaryFile->filePath);
+        if (! unlink($expectedBinaryFile->filePath)) {
+            throw FailedToRemoveExtension::withFilename($expectedBinaryFile);
+        }
 
-        // @todo verify the unlink worked etc, maybe permissions failed
         return $expectedBinaryFile;
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\Pie\Command;
 
 use Composer\Composer;
+use Composer\Util\Platform;
 use Php\Pie\ComposerIntegration\ComposerIntegrationHandler;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
@@ -52,6 +53,16 @@ final class UninstallCommand extends Command
 
     public function execute(InputInterface $input, OutputInterface $output): int
     {
+        if (Platform::isWindows()) {
+            /**
+             * @todo add support for uninstalling in Windows - see
+             *       {@link https://github.com/php/pie/issues/190} for details
+             */
+            $output->writeln('<warning>Uninstalling extensions on Windows is not currently supported.</warning>');
+
+            return 1;
+        }
+
         $packageToRemove = (string) $input->getArgument(self::ARG_PACKAGE_NAME);
         Assert::stringNotEmpty($packageToRemove);
         $requestedPackageAndVersionToRemove = new RequestedPackageAndVersion($packageToRemove, null);
