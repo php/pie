@@ -19,6 +19,7 @@ use Php\Pie\Platform\ThreadSafetyMode;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Console\Output\OutputInterface;
 use Webmozart\Assert\Assert;
 
 use function file_get_contents;
@@ -65,7 +66,7 @@ final class RemoveIniEntryWithFileGetContentsTest extends TestCase
      *
      * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
      */
-    public function extensionTypeProvider(): array
+    public static function extensionTypeProvider(): array
     {
         return [
             'phpModule' => [ExtensionType::PhpModule, "; extension=foobar ; removed by PIE\nzend_extension=foobar\n"],
@@ -106,6 +107,7 @@ final class RemoveIniEntryWithFileGetContentsTest extends TestCase
         $affectedFiles = (new RemoveIniEntryWithFileGetContents())(
             $package,
             $targetPlatform,
+            $this->createMock(OutputInterface::class),
         );
 
         self::assertSame(

@@ -6,7 +6,10 @@ namespace Php\Pie\Installing\Ini;
 
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\ExtensionType;
+use Php\Pie\File\FailedToWriteFile;
+use Php\Pie\File\SudoFilePut;
 use Php\Pie\Platform\TargetPlatform;
+use Symfony\Component\Console\Output\OutputInterface;
 
 use function array_filter;
 use function array_map;
@@ -14,7 +17,6 @@ use function array_merge;
 use function array_walk;
 use function file_exists;
 use function file_get_contents;
-use function file_put_contents;
 use function in_array;
 use function preg_replace;
 use function scandir;
@@ -26,7 +28,7 @@ use const DIRECTORY_SEPARATOR;
 class RemoveIniEntryWithFileGetContents implements RemoveIniEntry
 {
     /** @return list<string> Returns a list of INI files that were updated to remove the extension */
-    public function __invoke(Package $package, TargetPlatform $targetPlatform): array
+    public function __invoke(Package $package, TargetPlatform $targetPlatform, OutputInterface $output): array
     {
         $allIniFiles = [];
 
@@ -58,7 +60,7 @@ class RemoveIniEntryWithFileGetContents implements RemoveIniEntry
         }
 
         $regex = sprintf(
-            '/^(%s\w*=\w*%s)$/m',
+            '/^(%s\w*=\w*%s)/m',
             $package->extensionType() === ExtensionType::PhpModule ? 'extension' : 'zend_extension',
             $package->extensionName()->name(),
         );
@@ -66,7 +68,7 @@ class RemoveIniEntryWithFileGetContents implements RemoveIniEntry
         $updatedIniFiles = [];
         array_walk(
             $allIniFiles,
-            static function (string $iniFile) use (&$updatedIniFiles, $regex): void {
+            static function (string $iniFile) use (&$updatedIniFiles, $regex, $package, $output): void {
                 $currentContent = file_get_contents($iniFile);
 
                 if ($currentContent === false || $currentContent === '') {
@@ -83,7 +85,15 @@ class RemoveIniEntryWithFileGetContents implements RemoveIniEntry
                     return;
                 }
 
-                if (! file_put_contents($iniFile, $replacedContent)) {
+                try {
+                    SudoFilePut::contents($iniFile, $replacedContent);
+                } catch (FailedToWriteFile) {
+                    $output->writeln(sprintf(
+                        '<error>Failed to remove extension "%s" from INI file "%s"</error>',
+                        $package->extensionName()->name(),
+                        $iniFile,
+                    ));
+
                     return;
                 }
 
