@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Php\Pie\Command;
 
-use Php\Pie\BinaryFile;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieInstalledJsonMetadataKeys;
-use Php\Pie\Installing\BinaryFileFailedVerification;
+use Php\Pie\File\BinaryFile;
+use Php\Pie\File\BinaryFileFailedVerification;
 use Php\Pie\Platform\InstalledPiePackages;
 use Php\Pie\Platform\OperatingSystem;
 use Psr\Container\ContainerInterface;

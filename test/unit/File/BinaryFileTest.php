@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Php\PieUnitTest;
+namespace Php\PieUnitTest\File;
 
-use Php\Pie\BinaryFile;
-use Php\Pie\Installing\BinaryFileFailedVerification;
+use Php\Pie\File\BinaryFile;
+use Php\Pie\File\BinaryFileFailedVerification;
 use Php\Pie\Util\FileNotFound;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
@@ -13,7 +13,7 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(BinaryFile::class)]
 final class BinaryFileTest extends TestCase
 {
-    private const TEST_FILE      = __DIR__ . '/../assets/test-zip.zip';
+    private const TEST_FILE      = __DIR__ . '/../../assets/test-zip.zip';
     private const TEST_FILE_HASH = '64e40b4a66831437a3cc6b899ea71a36765ccb435f8831ab20d49f8ce3f806fa';
 
     public function testVerifySucceedsWithGoodHash(): void
