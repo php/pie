@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\PieUnitTest\File;
 
+use Php\Pie\File\Sudo;
 use Php\Pie\File\SudoFilePut;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
@@ -21,6 +22,10 @@ final class SudoFilePutTest extends TestCase
 {
     public function testSudoFilePutContents(): void
     {
+        if (! Sudo::exists()) {
+            self::markTestSkipped('Cannot test sudo file_put_contents without sudo');
+        }
+
         $file = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('pie_test_sudo_file_put_contents_', true);
         touch($file);
         chmod($file, 0000);
