@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Php\Pie\Installing\Ini;
 
 use Composer\Util\Platform;
-use Php\Pie\BinaryFile;
 use Php\Pie\Downloading\DownloadedPackage;
+use Php\Pie\File\BinaryFile;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Util\Process;
 use Symfony\Component\Console\Output\OutputInterface;

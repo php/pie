@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Php\PieUnitTest\Installing\Ini;
 
 use Composer\Package\CompletePackageInterface;
-use Php\Pie\BinaryFile;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
+use Php\Pie\File\BinaryFile;
 use Php\Pie\Installing\Ini\CheckAndAddExtensionToIniIfNeeded;
 use Php\Pie\Installing\Ini\StandardSinglePhpIni;
 use Php\Pie\Platform\Architecture;

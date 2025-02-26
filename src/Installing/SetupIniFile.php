@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Php\Pie\Installing;
 
-use Php\Pie\BinaryFile;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\ExtensionType;
+use Php\Pie\File\BinaryFile;
 use Php\Pie\Installing\Ini\SetupIniApproach;
 use Php\Pie\Platform\TargetPlatform;
 use Symfony\Component\Console\Output\OutputInterface;

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Php\Pie;
+namespace Php\Pie\File;
 
-use Php\Pie\Installing\BinaryFileFailedVerification;
+use Php\Pie\Util;
 
 use function file_exists;
 use function hash_file;

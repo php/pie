@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Php\Pie\Installing\Ini;
 
-use Php\Pie\BinaryFile;
 use Php\Pie\Downloading\DownloadedPackage;
+use Php\Pie\File\BinaryFile;
 use Php\Pie\Platform\TargetPhp\Exception\ExtensionIsNotLoaded;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Util\Process;

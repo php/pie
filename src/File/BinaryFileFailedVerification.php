@@ -2,9 +2,8 @@
 
 declare(strict_types=1);
 
-namespace Php\Pie\Installing;
+namespace Php\Pie\File;
 
-use Php\Pie\BinaryFile;
 use RuntimeException;
 
 use function sprintf;
