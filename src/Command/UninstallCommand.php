@@ -59,7 +59,7 @@ final class UninstallCommand extends Command
              * @todo add support for uninstalling in Windows - see
              *       {@link https://github.com/php/pie/issues/190} for details
              */
-            $output->writeln('<warning>Uninstalling extensions on Windows is not currently supported.</warning>');
+            $output->writeln('<comment>Uninstalling extensions on Windows is not currently supported.</comment>');
 
             return 1;
         }

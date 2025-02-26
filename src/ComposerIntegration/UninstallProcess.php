@@ -33,7 +33,7 @@ class UninstallProcess
 
         $piePackage = Package::fromComposerCompletePackage($composerPackage);
 
-        $affectedIniFiles = ($this->removeIniEntry)($piePackage, $composerRequest->targetPlatform);
+        $affectedIniFiles = ($this->removeIniEntry)($piePackage, $composerRequest->targetPlatform, $output);
 
         if (count($affectedIniFiles) === 1) {
             $output->writeln(
