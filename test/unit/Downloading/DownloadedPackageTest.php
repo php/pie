@@ -74,4 +74,21 @@ final class DownloadedPackageTest extends TestCase
         self::assertSame($extractedSourcePath . DIRECTORY_SEPARATOR . 'package-1.2.3', $downloadedPackage->extractedSourcePath);
         self::assertSame($package, $downloadedPackage->package);
     }
+
+    public function testBuildPathDetectedFromExtractedPrePackagedSourceAsset(): void
+    {
+        $composerPackage = $this->createMock(CompletePackage::class);
+        $composerPackage->method('getPrettyName')->willReturn('foo/bar');
+        $composerPackage->method('getPrettyVersion')->willReturn('1.2.3');
+        $composerPackage->method('getType')->willReturn('php-ext');
+
+        $package = Package::fromComposerCompletePackage($composerPackage);
+
+        $extractedSourcePath = realpath(__DIR__ . '/../../assets');
+
+        $downloadedPackage = DownloadedPackage::fromPackageAndExtractedPath($package, $extractedSourcePath);
+
+        self::assertSame($extractedSourcePath . DIRECTORY_SEPARATOR . 'php_bar-1.2.3-src', $downloadedPackage->extractedSourcePath);
+        self::assertSame($package, $downloadedPackage->package);
+    }
 }
