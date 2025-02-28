@@ -13,6 +13,7 @@ use Composer\Util\Platform;
 use InvalidArgumentException;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
+use Php\Pie\Platform as PiePlatform;
 use Php\Pie\Platform\OperatingSystem;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPhp\PhpizePath;
@@ -64,6 +65,12 @@ final class CommandHelper
             InputOption::VALUE_REQUIRED,
             'The path to the `php` binary to use as the target PHP platform on ' . OperatingSystem::Windows->asFriendlyName() . ', e.g. --' . self::OPTION_WITH_PHP_PATH . '=C:\usr\php7.4.33\php.exe',
         );
+        $command->addOption(
+            self::OPTION_WITH_PHPIZE_PATH,
+            null,
+            InputOption::VALUE_REQUIRED,
+            'The path to the `phpize` binary to use as the target PHP platform, e.g. --' . self::OPTION_WITH_PHPIZE_PATH . '=/usr/bin/phpize7.4',
+        );
     }
 
     public static function configureDownloadBuildInstallOptions(Command $command): void
@@ -71,19 +78,13 @@ final class CommandHelper
         $command->addArgument(
             self::ARG_REQUESTED_PACKAGE_AND_VERSION,
             InputArgument::REQUIRED,
-            'The extension name and version constraint to use, in the format {ext-name}{?:{?version-constraint}{?@stability}}, for example `xdebug/xdebug:^3.4@alpha`, `xdebug/xdebug:@alpha`, `xdebug/xdebug:^3.4`, etc.',
+            'The PIE package name and version constraint to use, in the format {vendor/package}{?:{?version-constraint}{?@stability}}, for example `xdebug/xdebug:^3.4@alpha`, `xdebug/xdebug:@alpha`, `xdebug/xdebug:^3.4`, etc.',
         );
         $command->addOption(
             self::OPTION_MAKE_PARALLEL_JOBS,
             'j',
             InputOption::VALUE_REQUIRED,
             'Override many jobs to run in parallel when running compiling (this is passed to "make -jN" during build). PIE will try to detect this by default.',
-        );
-        $command->addOption(
-            self::OPTION_WITH_PHPIZE_PATH,
-            null,
-            InputOption::VALUE_REQUIRED,
-            'The path to the `phpize` binary to use as the target PHP platform, e.g. --' . self::OPTION_WITH_PHPIZE_PATH . '=/usr/bin/phpize7.4',
         );
         $command->addOption(
             self::OPTION_SKIP_ENABLE_EXTENSION,
@@ -168,6 +169,13 @@ final class CommandHelper
             $targetPlatform->architecture->name,
             $phpBinaryPath->phpBinaryPath,
         ));
+        $output->writeln(
+            sprintf(
+                '<info>Using pie.json:</info> %s',
+                PiePlatform::getPieJsonFilename($targetPlatform),
+            ),
+            OutputInterface::VERBOSITY_VERBOSE,
+        );
 
         return $targetPlatform;
     }

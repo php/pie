@@ -114,9 +114,34 @@ class CliContext implements Context
     }
 
     #[When('I run a command to install an extension')]
+    #[Given('an extension was previously installed')]
     public function iRunACommandToInstallAnExtension(): void
     {
         $this->runPieCommand(['install', 'asgrim/example-pie-extension']);
+    }
+
+    #[When('I run a command to uninstall an extension')]
+    public function iRunACommandToUninstallAnExtension(): void
+    {
+        $this->runPieCommand(['uninstall', 'asgrim/example-pie-extension']);
+    }
+
+    #[Then('the extension should not be installed anymore')]
+    public function theExtensionShouldNotBeInstalled(): void
+    {
+        $this->assertCommandSuccessful();
+
+        if (Platform::isWindows()) {
+            Assert::regex($this->output, '#👋 Removed extension: [-\\\_:.a-zA-Z0-9]+\\\php_example_pie_extension.dll#');
+        } else {
+            Assert::regex($this->output, '#👋 Removed extension: [-_a-zA-Z0-9/]+/example_pie_extension.so#');
+        }
+
+        $isExtEnabled = (new Process([self::PHP_BINARY, '-r', 'echo extension_loaded("example_pie_extension")?"yes":"no";']))
+            ->mustRun()
+            ->getOutput();
+
+        Assert::same($isExtEnabled, 'no');
     }
 
     #[Then('the extension should have been installed')]
@@ -138,7 +163,7 @@ class CliContext implements Context
             ->mustRun()
             ->getOutput();
 
-        Assert::same('yes', $isExtEnabled);
+        Assert::same($isExtEnabled, 'yes');
     }
 
     #[Given('I have an invalid extension installed')]

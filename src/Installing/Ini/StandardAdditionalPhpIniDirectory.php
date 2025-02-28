@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Php\Pie\Installing\Ini;
 
-use Php\Pie\BinaryFile;
 use Php\Pie\Downloading\DownloadedPackage;
+use Php\Pie\File\BinaryFile;
+use Php\Pie\File\Sudo;
+use Php\Pie\File\SudoFilePut;
+use Php\Pie\File\SudoUnlink;
 use Php\Pie\Platform\TargetPlatform;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -13,8 +16,6 @@ use function file_exists;
 use function is_writable;
 use function rtrim;
 use function sprintf;
-use function touch;
-use function unlink;
 
 use const DIRECTORY_SEPARATOR;
 
@@ -44,10 +45,22 @@ final class StandardAdditionalPhpIniDirectory implements SetupIniApproach
             return false;
         }
 
-        if (! file_exists($additionalIniFilesPath) || ! is_writable($additionalIniFilesPath)) {
+        if (! file_exists($additionalIniFilesPath)) {
             $output->writeln(
                 sprintf(
-                    'PHP is configured to use additional INI file path %s, but it did not exist, or is not writable by PIE.',
+                    'PHP is configured to use additional INI file path %s, but it did not exist.',
+                    $additionalIniFilesPath,
+                ),
+                OutputInterface::VERBOSITY_VERBOSE,
+            );
+
+            return false;
+        }
+
+        if (! is_writable($additionalIniFilesPath) && ! Sudo::exists()) {
+            $output->writeln(
+                sprintf(
+                    'PHP is configured to use additional INI file path %s, but it was not writable by PIE.',
                     $additionalIniFilesPath,
                 ),
                 OutputInterface::VERBOSITY_VERBOSE,
@@ -74,7 +87,7 @@ final class StandardAdditionalPhpIniDirectory implements SetupIniApproach
                 OutputInterface::VERBOSITY_VERY_VERBOSE,
             );
             $pieCreatedTheIniFile = true;
-            touch($expectedIniFile);
+            SudoFilePut::contents($expectedIniFile, '');
         }
 
         $addingExtensionWasSuccessful = ($this->checkAndAddExtensionToIniIfNeeded)(
@@ -86,7 +99,7 @@ final class StandardAdditionalPhpIniDirectory implements SetupIniApproach
         );
 
         if (! $addingExtensionWasSuccessful && $pieCreatedTheIniFile) {
-            unlink($expectedIniFile);
+            SudoUnlink::singleFile($expectedIniFile);
         }
 
         return $addingExtensionWasSuccessful;

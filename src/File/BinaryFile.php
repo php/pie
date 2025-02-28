@@ -2,8 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Php\Pie;
+namespace Php\Pie\File;
 
+use Php\Pie\Util;
+
+use function file_exists;
 use function hash_file;
 
 /**
@@ -32,5 +35,26 @@ final class BinaryFile
             $filePath,
             hash_file(self::HASH_TYPE_SHA256, $filePath),
         );
+    }
+
+    public function verify(): void
+    {
+        if (! file_exists($this->filePath)) {
+            throw Util\FileNotFound::fromFilename($this->filePath);
+        }
+
+        self::verifyAgainstOther(self::fromFileWithSha256Checksum($this->filePath));
+    }
+
+    /** @throws BinaryFileFailedVerification */
+    public function verifyAgainstOther(self $other): void
+    {
+        if ($this->filePath !== $other->filePath) {
+            throw BinaryFileFailedVerification::fromFilenameMismatch($this, $other);
+        }
+
+        if ($other->checksum !== $this->checksum) {
+            throw BinaryFileFailedVerification::fromChecksumMismatch($this, $other);
+        }
     }
 }

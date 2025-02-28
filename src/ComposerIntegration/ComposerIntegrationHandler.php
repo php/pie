@@ -26,7 +26,7 @@ class ComposerIntegrationHandler
     ) {
     }
 
-    public function __invoke(
+    public function runInstall(
         Package $package,
         Composer $composer,
         TargetPlatform $targetPlatform,
@@ -87,5 +87,47 @@ class ComposerIntegrationHandler
         }
 
         ($this->vendorCleanup)($composer);
+    }
+
+    public function runUninstall(
+        Package $packageToRemove,
+        Composer $composer,
+        TargetPlatform $targetPlatform,
+        RequestedPackageAndVersion $requestedPackageAndVersionToRemove,
+    ): void {
+        // Write the new requirement to pie.json; because we later essentially just do a `composer install` using that file
+        $pieComposerJson        = Platform::getPieJsonFilename($targetPlatform);
+        $pieJsonEditor          = PieJsonEditor::fromTargetPlatform($targetPlatform);
+        $originalPieJsonContent = $pieJsonEditor->removeRequire($requestedPackageAndVersionToRemove->package);
+
+        // Refresh the Composer instance so it re-reads the updated pie.json
+        $composer = PieComposerFactory::recreatePieComposer($this->container, $composer);
+
+        $composerInstaller = PieComposerInstaller::createWithPhpBinary(
+            $targetPlatform->phpBinaryPath,
+            $packageToRemove->extensionName(),
+            $this->arrayCollectionIo,
+            $composer,
+        );
+        $composerInstaller
+            ->setAllowedTypes(['php-ext', 'php-ext-zend'])
+            ->setInstall(true)
+            ->setIgnoredTypes([])
+            ->setDryRun(false)
+            ->setDownloadOnly(false);
+
+        if (file_exists(PieComposerFactory::getLockFile($pieComposerJson))) {
+            $composerInstaller->setUpdate(true);
+            $composerInstaller->setUpdateAllowList([$requestedPackageAndVersionToRemove->package]);
+        }
+
+        $resultCode = $composerInstaller->run();
+
+        if ($resultCode !== Installer::ERROR_NONE) {
+            // Revert composer.json change
+            $pieJsonEditor->revert($originalPieJsonContent);
+
+            throw ComposerRunFailed::fromExitCode($resultCode);
+        }
     }
 }

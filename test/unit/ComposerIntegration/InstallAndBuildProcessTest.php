@@ -6,13 +6,13 @@ namespace Php\PieUnitTest\ComposerIntegration;
 
 use Composer\Package\CompletePackage;
 use Composer\PartialComposer;
-use Php\Pie\BinaryFile;
 use Php\Pie\Building\Build;
 use Php\Pie\ComposerIntegration\InstallAndBuildProcess;
 use Php\Pie\ComposerIntegration\InstalledJsonMetadata;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieOperation;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
+use Php\Pie\File\BinaryFile;
 use Php\Pie\Installing\Install;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;

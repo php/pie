@@ -9,6 +9,7 @@ use Composer\Factory;
 use Composer\Installer;
 use Composer\IO\IOInterface;
 use Composer\PartialComposer;
+use Composer\Repository\InstalledRepositoryInterface;
 use Composer\Util\Filesystem;
 use Composer\Util\ProcessExecutor;
 use Php\Pie\ComposerIntegration\Listeners\OverrideDownloadUrlInstallListener;
@@ -38,6 +39,7 @@ class PieComposerFactory extends Factory
                 $type,
                 $fs,
                 $this->container->get(InstallAndBuildProcess::class),
+                $this->container->get(UninstallProcess::class),
                 $this->composerRequest,
             );
         };
@@ -68,6 +70,21 @@ class PieComposerFactory extends Factory
         $io->loadConfiguration($composer->getConfig());
 
         return $composer;
+    }
+
+    protected function purgePackages(InstalledRepositoryInterface $repo, Installer\InstallationManager $im): void
+    {
+        /**
+         * This is intentionally a no-op in PIE....
+         *
+         * Why not purge packages?
+         *
+         * We have a post install job in {@see VendorCleanup} that cleans up the vendor directory to remove all the
+         * actual package files; however, this means that Composer thinks they are not installed after that. When
+         * creating the Composer instance, the last step is to purge packages from the
+         * {@see InstalledRepositoryInterface} if they no longer exist on disk. But, that means we can't list the
+         * packages installed with PIE any more! So, we override this method to become a no-op ✅
+         */
     }
 
     public static function recreatePieComposer(

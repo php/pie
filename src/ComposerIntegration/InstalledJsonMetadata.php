@@ -7,8 +7,8 @@ namespace Php\Pie\ComposerIntegration;
 use Composer\Package\CompletePackage;
 use Composer\Package\CompletePackageInterface;
 use Composer\PartialComposer;
-use Php\Pie\BinaryFile;
 use Php\Pie\ComposerIntegration\PieInstalledJsonMetadataKeys as MetadataKey;
+use Php\Pie\File\BinaryFile;
 use Webmozart\Assert\Assert;
 
 use function array_merge;

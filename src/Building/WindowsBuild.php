@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Php\Pie\Building;
 
-use Php\Pie\BinaryFile;
 use Php\Pie\Downloading\DownloadedPackage;
+use Php\Pie\File\BinaryFile;
 use Php\Pie\Platform\TargetPhp\PhpizePath;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\WindowsExtensionAssetName;

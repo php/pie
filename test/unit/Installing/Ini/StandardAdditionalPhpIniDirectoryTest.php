@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Php\PieUnitTest\Installing\Ini;
 
 use Composer\Package\CompletePackageInterface;
-use Php\Pie\BinaryFile;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
+use Php\Pie\File\BinaryFile;
 use Php\Pie\Installing\Ini\CheckAndAddExtensionToIniIfNeeded;
 use Php\Pie\Installing\Ini\StandardAdditionalPhpIniDirectory;
 use Php\Pie\Platform\Architecture;
@@ -145,7 +145,7 @@ final class StandardAdditionalPhpIniDirectoryTest extends TestCase
             $this->output,
         ));
         self::assertStringContainsString(
-            'PHP is configured to use additional INI file path /path/to/something/does/not/exist, but it did not exist, or is not writable by PIE.',
+            'PHP is configured to use additional INI file path /path/to/something/does/not/exist, but it did not exist',
             $this->output->fetch(),
         );
     }

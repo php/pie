@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Php\Pie\Installing;
 
-use Php\Pie\BinaryFile;
 use Php\Pie\Downloading\DownloadedPackage;
+use Php\Pie\File\BinaryFile;
+use Php\Pie\File\Sudo;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Util\Process;
 use RuntimeException;
@@ -44,14 +45,17 @@ final class UnixInstall implements Install
 
         // If the target directory isn't writable, or a .so file already exists and isn't writable, try to use sudo
         if (
-            ! is_writable($targetExtensionPath)
-            || (file_exists($expectedSharedObjectLocation) && ! is_writable($expectedSharedObjectLocation))
+            Sudo::exists()
+            && (
+                ! is_writable($targetExtensionPath)
+                || (file_exists($expectedSharedObjectLocation) && ! is_writable($expectedSharedObjectLocation))
+            )
         ) {
             $output->writeln(sprintf(
                 '<comment>Cannot write to %s, so using sudo to elevate privileges.</comment>',
                 $targetExtensionPath,
             ));
-            array_unshift($makeInstallCommand, 'sudo');
+            array_unshift($makeInstallCommand, Sudo::find());
         }
 
         $makeInstallOutput = Process::run(

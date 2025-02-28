@@ -17,6 +17,7 @@ use Php\Pie\Command\RepositoryAddCommand;
 use Php\Pie\Command\RepositoryListCommand;
 use Php\Pie\Command\RepositoryRemoveCommand;
 use Php\Pie\Command\ShowCommand;
+use Php\Pie\Command\UninstallCommand;
 use Php\Pie\ComposerIntegration\MinimalHelperSet;
 use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use Php\Pie\DependencyResolver\DependencyResolver;
@@ -25,6 +26,8 @@ use Php\Pie\Downloading\GithubPackageReleaseAssets;
 use Php\Pie\Downloading\PackageReleaseAssets;
 use Php\Pie\Installing\Ini;
 use Php\Pie\Installing\Install;
+use Php\Pie\Installing\Uninstall;
+use Php\Pie\Installing\UninstallUsingUnlink;
 use Php\Pie\Installing\UnixInstall;
 use Php\Pie\Installing\WindowsInstall;
 use Psr\Container\ContainerInterface;
@@ -52,6 +55,7 @@ final class Container
         $container->singleton(RepositoryListCommand::class);
         $container->singleton(RepositoryAddCommand::class);
         $container->singleton(RepositoryRemoveCommand::class);
+        $container->singleton(UninstallCommand::class);
 
         $container->singleton(QuieterConsoleIO::class, static function (ContainerInterface $container): QuieterConsoleIO {
             return new QuieterConsoleIO(
@@ -106,6 +110,10 @@ final class Container
                 return $container->get(UnixInstall::class);
             },
         );
+
+        $container->alias(UninstallUsingUnlink::class, Uninstall::class);
+
+        $container->alias(Ini\RemoveIniEntryWithFileGetContents::class, Ini\RemoveIniEntry::class);
 
         return $container;
     }

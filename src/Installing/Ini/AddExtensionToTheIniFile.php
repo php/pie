@@ -6,12 +6,13 @@ namespace Php\Pie\Installing\Ini;
 
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\ExtensionType;
+use Php\Pie\File\Sudo;
+use Php\Pie\File\SudoFilePut;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 
 use function file_get_contents;
-use function file_put_contents;
 use function is_string;
 use function is_writable;
 use function sprintf;
@@ -29,7 +30,7 @@ class AddExtensionToTheIniFile
         OutputInterface $output,
         callable|null $additionalEnableStep,
     ): bool {
-        if (! is_writable($ini)) {
+        if (! is_writable($ini) && ! Sudo::exists()) {
             $output->writeln(
                 sprintf(
                     'PHP is configured to use %s, but it is not writable by PIE.',
@@ -56,7 +57,7 @@ class AddExtensionToTheIniFile
         }
 
         try {
-            file_put_contents(
+            SudoFilePut::contents(
                 $ini,
                 $originalIniContent . $this->iniFileContent($package),
             );
@@ -77,7 +78,7 @@ class AddExtensionToTheIniFile
 
             return true;
         } catch (Throwable $anything) {
-            file_put_contents($ini, $originalIniContent);
+            SudoFilePut::contents($ini, $originalIniContent);
 
             $output->writeln(sprintf(
                 '<error>Something went wrong enabling the %s extension: %s</error>',
