@@ -21,6 +21,7 @@ final class PrePackagedSourceAssetNameTest extends TestCase
             [
                 'php_foobar-1.2.3-src.tgz',
                 'php_foobar-1.2.3-src.zip',
+                'foobar-1.2.3.tgz',
             ],
             PrePackagedSourceAssetName::packageNames(
                 new Package(

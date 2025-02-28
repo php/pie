@@ -21,6 +21,7 @@ final class PrePackagedSourceAssetName
     public static function packageNames(Package $package): array
     {
         return [
+            // Ideal format for new PIE packages
             strtolower(sprintf(
                 'php_%s-%s-src.tgz',
                 $package->extensionName()->name(),
@@ -28,6 +29,12 @@ final class PrePackagedSourceAssetName
             )),
             strtolower(sprintf(
                 'php_%s-%s-src.zip',
+                $package->extensionName()->name(),
+                $package->version(),
+            )),
+            // Old PEAR/PECL convention
+            strtolower(sprintf(
+                '%s-%s.tgz',
                 $package->extensionName()->name(),
                 $package->version(),
             )),
