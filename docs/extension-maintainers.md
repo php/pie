@@ -160,6 +160,26 @@ should specify this path in `build-path`, for example:
 }
 ```
 
+The `build-path` may contain some templated values which are replaced:
+
+ * `{version}` to be replaced with the package version. For example a package
+   with version 1.2.3 with a `build-path` of `myext-{version}` the actual build
+   path would become `myext-1.2.3`.
+
+#### `download-url-method`
+
+The `download-url-method` directive allows extension maintainers to
+change the behaviour of downloading the source package.
+
+ * Setting this to `composer-default`, which is the default value if not
+   specified, will use the default behaviour implemented by Composer, which is
+   to use the standard ZIP archive from the GitHub API (or other source control
+   system).
+ * Using `pre-packaged-source` will locate a source code package in the release
+   assets list based matching one of the following naming conventions:
+   * `php_{ExtensionName}-{Version}-src.tgz` (e.g. `php_myext-1.20.1-src.tgz`)
+   * `php_{ExtensionName}-{Version}-src.zip` (e.g. `php_myext-1.20.1-src.zip`)
+
 ### Extension dependencies
 
 Extension authors may define some dependencies in `require`, but practically,

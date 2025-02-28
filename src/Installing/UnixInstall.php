@@ -33,7 +33,7 @@ final class UnixInstall implements Install
     ): BinaryFile {
         $targetExtensionPath = $targetPlatform->phpBinaryPath->extensionPath();
 
-        $sharedObjectName             = $downloadedPackage->package->extensionName->name() . '.so';
+        $sharedObjectName             = $downloadedPackage->package->extensionName()->name() . '.so';
         $expectedSharedObjectLocation = sprintf(
             '%s/%s',
             $targetExtensionPath,

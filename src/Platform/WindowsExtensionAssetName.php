@@ -36,8 +36,8 @@ final class WindowsExtensionAssetName
         return [
             strtolower(sprintf(
                 'php_%s-%s-%s-%s-%s-%s.%s',
-                $package->extensionName->name(),
-                $package->version,
+                $package->extensionName()->name(),
+                $package->version(),
                 $targetPlatform->phpBinaryPath->majorMinorVersion(),
                 $targetPlatform->threadSafety->asShort(),
                 strtolower($targetPlatform->windowsCompiler->name),
@@ -46,8 +46,8 @@ final class WindowsExtensionAssetName
             )),
             strtolower(sprintf(
                 'php_%s-%s-%s-%s-%s-%s.%s',
-                $package->extensionName->name(),
-                $package->version,
+                $package->extensionName()->name(),
+                $package->version(),
                 $targetPlatform->phpBinaryPath->majorMinorVersion(),
                 strtolower($targetPlatform->windowsCompiler->name),
                 $targetPlatform->threadSafety->asShort(),

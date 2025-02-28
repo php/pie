@@ -63,13 +63,6 @@ final class AddExtensionToTheIniFileTest extends TestCase
                     'foo/bar',
                     '1.0.0',
                     null,
-                    [],
-                    true,
-                    true,
-                    null,
-                    null,
-                    null,
-                    99,
                 ),
                 $this->mockPhpBinary,
                 $this->output,
@@ -107,13 +100,6 @@ final class AddExtensionToTheIniFileTest extends TestCase
                     'foo/bar',
                     '1.0.0',
                     null,
-                    [],
-                    true,
-                    true,
-                    null,
-                    null,
-                    null,
-                    99,
                 ),
                 $this->mockPhpBinary,
                 $this->output,
@@ -161,13 +147,6 @@ final class AddExtensionToTheIniFileTest extends TestCase
                     'foo/bar',
                     '1.0.0',
                     null,
-                    [],
-                    true,
-                    true,
-                    null,
-                    null,
-                    null,
-                    99,
                 ),
                 $this->mockPhpBinary,
                 $this->output,
@@ -205,13 +184,6 @@ final class AddExtensionToTheIniFileTest extends TestCase
                     'foo/bar',
                     '1.0.0',
                     null,
-                    [],
-                    true,
-                    true,
-                    null,
-                    null,
-                    null,
-                    99,
                 ),
                 $this->mockPhpBinary,
                 $this->output,
@@ -221,7 +193,7 @@ final class AddExtensionToTheIniFileTest extends TestCase
             $iniContent = file_get_contents($iniFile);
             self::assertSame(
                 PHP_EOL . '; PIE automatically added this to enable the foo/bar extension' . PHP_EOL
-                    . '; priority=99' . PHP_EOL
+                    . '; priority=80' . PHP_EOL
                     . 'extension=foobar' . PHP_EOL,
                 $iniContent,
             );
@@ -255,13 +227,6 @@ final class AddExtensionToTheIniFileTest extends TestCase
                     'foo/bar',
                     '1.0.0',
                     null,
-                    [],
-                    true,
-                    true,
-                    null,
-                    null,
-                    null,
-                    99,
                 ),
                 $this->mockPhpBinary,
                 $this->output,
@@ -277,7 +242,7 @@ final class AddExtensionToTheIniFileTest extends TestCase
             $iniContent = file_get_contents($iniFile);
             self::assertSame(
                 PHP_EOL . '; PIE automatically added this to enable the foo/bar extension' . PHP_EOL
-                . '; priority=99' . PHP_EOL
+                . '; priority=80' . PHP_EOL
                 . 'extension=foobar' . PHP_EOL,
                 $iniContent,
             );

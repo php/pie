@@ -86,8 +86,8 @@ final class WindowsInstall implements Install
          */
         $output->writeln(sprintf(
             '<comment>You must now add "%s=%s" to your php.ini</comment>',
-            $downloadedPackage->package->extensionType === ExtensionType::PhpModule ? 'extension' : 'zend_extension',
-            $downloadedPackage->package->extensionName->name(),
+            $downloadedPackage->package->extensionType() === ExtensionType::PhpModule ? 'extension' : 'zend_extension',
+            $downloadedPackage->package->extensionName()->name(),
         ));
 
         $binaryFile = BinaryFile::fromFileWithSha256Checksum($destinationDllName);
@@ -122,7 +122,7 @@ final class WindowsInstall implements Install
     private function copyExtensionDll(TargetPlatform $targetPlatform, DownloadedPackage $downloadedPackage, string $sourceDllName): string
     {
         $destinationDllName = $targetPlatform->phpBinaryPath->extensionPath() . DIRECTORY_SEPARATOR
-            . 'php_' . $downloadedPackage->package->extensionName->name() . '.dll';
+            . 'php_' . $downloadedPackage->package->extensionName()->name() . '.dll';
 
         if (! copy($sourceDllName, $destinationDllName) || ! file_exists($destinationDllName) && ! is_file($destinationDllName)) {
             throw new RuntimeException('Failed to install DLL to ' . $destinationDllName);
@@ -190,7 +190,7 @@ final class WindowsInstall implements Install
     {
         $destinationFullFilename = dirname($targetPlatform->phpBinaryPath->phpBinaryPath) . DIRECTORY_SEPARATOR
             . 'extras' . DIRECTORY_SEPARATOR
-            . $downloadedPackage->package->extensionName->name() . DIRECTORY_SEPARATOR
+            . $downloadedPackage->package->extensionName()->name() . DIRECTORY_SEPARATOR
             . substr($file->getPathname(), strlen($downloadedPackage->extractedSourcePath) + 1);
 
         $destinationPath = dirname($destinationFullFilename);

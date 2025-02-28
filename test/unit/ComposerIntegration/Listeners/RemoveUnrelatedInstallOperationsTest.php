@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Php\PieUnitTest\ComposerIntegration;
+namespace Php\PieUnitTest\ComposerIntegration\Listeners;
 
 use Composer\Composer;
 use Composer\DependencyResolver\Operation\InstallOperation;
@@ -13,9 +13,9 @@ use Composer\Installer\InstallerEvent;
 use Composer\Installer\InstallerEvents;
 use Composer\IO\IOInterface;
 use Composer\Package\CompletePackage;
+use Php\Pie\ComposerIntegration\Listeners\RemoveUnrelatedInstallOperations;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieOperation;
-use Php\Pie\ComposerIntegration\RemoveUnrelatedInstallOperations;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;

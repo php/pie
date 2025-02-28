@@ -20,6 +20,7 @@ use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\ThreadSafetyMode;
 use Php\Pie\Platform\WindowsCompiler;
+use Php\Pie\Platform\WindowsExtensionAssetName;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
@@ -53,13 +54,6 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             'asgrim/example-pie-extension',
             '2.0.2',
             'https://api.github.com/repos/asgrim/example-pie-extension/zipball/f9ed13ea95dada34c6cc5a052da258dbda059d27',
-            [],
-            true,
-            true,
-            null,
-            null,
-            null,
-            99,
         );
 
         $io = $this->createMock(IOInterface::class);
@@ -77,11 +71,15 @@ final class GithubPackageReleaseAssetsTest extends TestCase
         self::assertSame(
             'https://github.com/asgrim/example-pie-extension/releases/download/2.0.2/php_example_pie_extension-2.0.2-8.3-ts-vs16-x86_64.zip',
             (new GithubPackageReleaseAssets('https://api.github.com'))
-                ->findWindowsDownloadUrlForPackage(
+                ->findMatchingReleaseAssetUrl(
                     $targetPlatform,
                     $package,
                     new AuthHelper($io, $config),
                     new HttpDownloader($io, $config),
+                    WindowsExtensionAssetName::zipNames(
+                        $targetPlatform,
+                        $package,
+                    ),
                 ),
         );
     }

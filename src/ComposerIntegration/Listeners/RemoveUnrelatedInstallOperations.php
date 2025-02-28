@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Php\Pie\ComposerIntegration;
+namespace Php\Pie\ComposerIntegration\Listeners;
 
 use Closure;
 use Composer\Composer;
@@ -11,6 +11,7 @@ use Composer\DependencyResolver\Operation\OperationInterface;
 use Composer\DependencyResolver\Transaction;
 use Composer\Installer\InstallerEvent;
 use Composer\Installer\InstallerEvents;
+use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use function array_filter;

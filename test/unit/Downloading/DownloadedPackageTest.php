@@ -29,13 +29,6 @@ final class DownloadedPackageTest extends TestCase
             'foo/bar',
             '1.2.3',
             null,
-            [],
-            true,
-            true,
-            null,
-            null,
-            null,
-            99,
         );
 
         $extractedSourcePath = uniqid('/path/to/downloaded/package', true);
@@ -48,27 +41,54 @@ final class DownloadedPackageTest extends TestCase
 
     public function testFromPackageAndExtractedPathWithBuildPath(): void
     {
-        $package = new Package(
-            $this->createMock(CompletePackage::class),
-            ExtensionType::PhpModule,
-            ExtensionName::normaliseFromString('foo'),
-            'foo/bar',
-            '1.2.3',
-            null,
-            [],
-            true,
-            true,
-            'Downloading',
-            null,
-            null,
-            99,
-        );
+        $composerPackage = $this->createMock(CompletePackage::class);
+        $composerPackage->method('getPrettyName')->willReturn('foo/bar');
+        $composerPackage->method('getPrettyVersion')->willReturn('1.2.3');
+        $composerPackage->method('getType')->willReturn('php-ext');
+        $composerPackage->method('getPhpExt')->willReturn(['build-path' => 'Downloading']);
+
+        $package = Package::fromComposerCompletePackage($composerPackage);
 
         $extractedSourcePath = realpath(__DIR__ . '/../');
 
         $downloadedPackage = DownloadedPackage::fromPackageAndExtractedPath($package, $extractedSourcePath);
 
         self::assertSame($extractedSourcePath . DIRECTORY_SEPARATOR . 'Downloading', $downloadedPackage->extractedSourcePath);
+        self::assertSame($package, $downloadedPackage->package);
+    }
+
+    public function testFromPackageAndExtractedPathWithBuildPathWithVersionTemplate(): void
+    {
+        $composerPackage = $this->createMock(CompletePackage::class);
+        $composerPackage->method('getPrettyName')->willReturn('foo/bar');
+        $composerPackage->method('getPrettyVersion')->willReturn('1.2.3');
+        $composerPackage->method('getType')->willReturn('php-ext');
+        $composerPackage->method('getPhpExt')->willReturn(['build-path' => 'package-{version}']);
+
+        $package = Package::fromComposerCompletePackage($composerPackage);
+
+        $extractedSourcePath = realpath(__DIR__ . '/../../assets');
+
+        $downloadedPackage = DownloadedPackage::fromPackageAndExtractedPath($package, $extractedSourcePath);
+
+        self::assertSame($extractedSourcePath . DIRECTORY_SEPARATOR . 'package-1.2.3', $downloadedPackage->extractedSourcePath);
+        self::assertSame($package, $downloadedPackage->package);
+    }
+
+    public function testBuildPathDetectedFromExtractedPrePackagedSourceAsset(): void
+    {
+        $composerPackage = $this->createMock(CompletePackage::class);
+        $composerPackage->method('getPrettyName')->willReturn('foo/bar');
+        $composerPackage->method('getPrettyVersion')->willReturn('1.2.3');
+        $composerPackage->method('getType')->willReturn('php-ext');
+
+        $package = Package::fromComposerCompletePackage($composerPackage);
+
+        $extractedSourcePath = realpath(__DIR__ . '/../../assets');
+
+        $downloadedPackage = DownloadedPackage::fromPackageAndExtractedPath($package, $extractedSourcePath);
+
+        self::assertSame($extractedSourcePath . DIRECTORY_SEPARATOR . 'php_bar-1.2.3-src', $downloadedPackage->extractedSourcePath);
         self::assertSame($package, $downloadedPackage->package);
     }
 }

@@ -70,13 +70,6 @@ final class DockerPhpExtEnableTest extends TestCase
                 'foo/bar',
                 '1.2.3',
                 null,
-                [],
-                true,
-                true,
-                null,
-                null,
-                null,
-                99,
             ),
             '/path/to/extracted/source',
         );
@@ -122,7 +115,7 @@ final class DockerPhpExtEnableTest extends TestCase
         $this->mockPhpBinary
             ->expects(self::once())
             ->method('assertExtensionIsLoadedInRuntime')
-            ->with($this->downloadedPackage->package->extensionName, $this->output);
+            ->with($this->downloadedPackage->package->extensionName(), $this->output);
 
         self::assertTrue(
             (new DockerPhpExtEnable(self::GOOD_DOCKER_PHP_EXT_ENABLE))
@@ -157,10 +150,10 @@ final class DockerPhpExtEnableTest extends TestCase
         $this->mockPhpBinary
             ->expects(self::once())
             ->method('assertExtensionIsLoadedInRuntime')
-            ->with($this->downloadedPackage->package->extensionName, $this->output)
+            ->with($this->downloadedPackage->package->extensionName(), $this->output)
             ->willThrowException(ExtensionIsNotLoaded::fromExpectedExtension(
                 $this->mockPhpBinary,
-                $this->downloadedPackage->package->extensionName,
+                $this->downloadedPackage->package->extensionName(),
             ));
 
         self::assertFalse(

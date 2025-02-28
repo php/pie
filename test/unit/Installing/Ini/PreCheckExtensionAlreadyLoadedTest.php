@@ -65,13 +65,6 @@ final class PreCheckExtensionAlreadyLoadedTest extends TestCase
                 'foo/bar',
                 '1.2.3',
                 null,
-                [],
-                true,
-                true,
-                null,
-                null,
-                null,
-                99,
             ),
             '/path/to/extracted/source',
         );
@@ -93,7 +86,7 @@ final class PreCheckExtensionAlreadyLoadedTest extends TestCase
         $this->mockPhpBinary
             ->expects(self::once())
             ->method('assertExtensionIsLoadedInRuntime')
-            ->with($this->downloadedPackage->package->extensionName, $this->output);
+            ->with($this->downloadedPackage->package->extensionName(), $this->output);
 
         self::assertTrue($this->preCheckExtensionAlreadyLoaded->setup(
             $this->targetPlatform,
@@ -108,10 +101,10 @@ final class PreCheckExtensionAlreadyLoadedTest extends TestCase
         $this->mockPhpBinary
             ->expects(self::once())
             ->method('assertExtensionIsLoadedInRuntime')
-            ->with($this->downloadedPackage->package->extensionName, $this->output)
+            ->with($this->downloadedPackage->package->extensionName(), $this->output)
             ->willThrowException(ExtensionIsNotLoaded::fromExpectedExtension(
                 $this->mockPhpBinary,
-                $this->downloadedPackage->package->extensionName,
+                $this->downloadedPackage->package->extensionName(),
             ));
 
         self::assertFalse($this->preCheckExtensionAlreadyLoaded->setup(

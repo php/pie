@@ -76,7 +76,7 @@ final class UnixBuild implements Build
 
         $this->make($targetPlatform, $downloadedPackage, $output, $outputCallback);
 
-        $expectedSoFile = $downloadedPackage->extractedSourcePath . '/modules/' . $downloadedPackage->package->extensionName->name() . '.so';
+        $expectedSoFile = $downloadedPackage->extractedSourcePath . '/modules/' . $downloadedPackage->package->extensionName()->name() . '.so';
 
         if (! file_exists($expectedSoFile)) {
             throw ExtensionBinaryNotFound::fromExpectedBinary($expectedSoFile);

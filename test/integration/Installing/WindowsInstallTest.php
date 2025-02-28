@@ -53,13 +53,6 @@ final class WindowsInstallTest extends TestCase
                 'php/pie-test-ext',
                 '1.2.3',
                 null,
-                [],
-                true,
-                true,
-                null,
-                null,
-                null,
-                99,
             ),
             self::TEST_EXTENSION_PATH,
         );

@@ -23,6 +23,16 @@
         <pluginClass class="Psalm\PhpUnitPlugin\Plugin"/>
     </plugins>
     <issueHandlers>
+        <ClassMustBeFinal>
+            <errorLevel type="suppress">
+                <directory name="."/>
+            </errorLevel>
+        </ClassMustBeFinal>
+        <MissingOverrideAttribute>
+            <errorLevel type="suppress">
+                <directory name="."/>
+            </errorLevel>
+        </MissingOverrideAttribute>
         <PossiblyUnusedMethod>
             <errorLevel type="suppress">
                 <directory name="src/Command"/>

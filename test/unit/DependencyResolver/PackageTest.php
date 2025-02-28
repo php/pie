@@ -23,12 +23,12 @@ final class PackageTest extends TestCase
             new CompletePackage('vendor/foo', '1.2.3.0', '1.2.3'),
         );
 
-        self::assertSame('foo', $package->extensionName->name());
-        self::assertSame('vendor/foo', $package->name);
-        self::assertSame('1.2.3', $package->version);
+        self::assertSame('foo', $package->extensionName()->name());
+        self::assertSame('vendor/foo', $package->name());
+        self::assertSame('1.2.3', $package->version());
         self::assertSame('vendor/foo:1.2.3', $package->prettyNameAndVersion());
-        self::assertNull($package->downloadUrl);
-        self::assertNull($package->buildPath);
+        self::assertNull($package->downloadUrl());
+        self::assertNull($package->buildPath());
     }
 
     public function testFromComposerCompletePackageWithExtensionName(): void
@@ -38,11 +38,11 @@ final class PackageTest extends TestCase
 
         $package = Package::fromComposerCompletePackage($composerCompletePackage);
 
-        self::assertSame('something_else', $package->extensionName->name());
-        self::assertSame('vendor/foo', $package->name);
-        self::assertSame('1.2.3', $package->version);
+        self::assertSame('something_else', $package->extensionName()->name());
+        self::assertSame('vendor/foo', $package->name());
+        self::assertSame('1.2.3', $package->version());
         self::assertSame('vendor/foo:1.2.3', $package->prettyNameAndVersion());
-        self::assertNull($package->downloadUrl);
+        self::assertNull($package->downloadUrl());
     }
 
     public function testFromComposerCompletePackageWithExcludedOsFamilies(): void
@@ -52,11 +52,11 @@ final class PackageTest extends TestCase
 
         $package = Package::fromComposerCompletePackage($composerCompletePackage);
 
-        self::assertSame([OperatingSystemFamily::Windows, OperatingSystemFamily::Darwin], $package->incompatibleOsFamilies);
-        self::assertSame('vendor/foo', $package->name);
-        self::assertSame('1.2.3', $package->version);
+        self::assertSame([OperatingSystemFamily::Windows, OperatingSystemFamily::Darwin], $package->incompatibleOsFamilies());
+        self::assertSame('vendor/foo', $package->name());
+        self::assertSame('1.2.3', $package->version());
         self::assertSame('vendor/foo:1.2.3', $package->prettyNameAndVersion());
-        self::assertNull($package->downloadUrl);
+        self::assertNull($package->downloadUrl());
     }
 
     public function testFromComposerCompletePackageWithOsFamilies(): void
@@ -66,12 +66,12 @@ final class PackageTest extends TestCase
 
         $package = Package::fromComposerCompletePackage($composerCompletePackage);
 
-        self::assertEmpty($package->incompatibleOsFamilies);
-        self::assertSame([OperatingSystemFamily::Windows, OperatingSystemFamily::Darwin], $package->compatibleOsFamilies);
-        self::assertSame('vendor/foo', $package->name);
-        self::assertSame('1.2.3', $package->version);
+        self::assertEmpty($package->incompatibleOsFamilies());
+        self::assertSame([OperatingSystemFamily::Windows, OperatingSystemFamily::Darwin], $package->compatibleOsFamilies());
+        self::assertSame('vendor/foo', $package->name());
+        self::assertSame('1.2.3', $package->version());
         self::assertSame('vendor/foo:1.2.3', $package->prettyNameAndVersion());
-        self::assertNull($package->downloadUrl);
+        self::assertNull($package->downloadUrl());
     }
 
     public function testFromComposerCompletePackageWithBothOsFamiliesAndExcludedOsFamiliesThrows(): void
@@ -134,13 +134,6 @@ final class PackageTest extends TestCase
             $composerPackageName,
             '1.2.3',
             $downloadUrl,
-            [],
-            true,
-            true,
-            null,
-            null,
-            null,
-            99,
         );
 
         self::assertSame($expectedGithubOrgAndRepo, $package->githubOrgAndRepository());
@@ -154,6 +147,6 @@ final class PackageTest extends TestCase
         $package = Package::fromComposerCompletePackage($composerCompletePackage);
 
         self::assertSame('vendor/foo:1.2.3', $package->prettyNameAndVersion());
-        self::assertSame('some/subdirectory/path/', $package->buildPath);
+        self::assertSame('some/subdirectory/path/', $package->buildPath());
     }
 }

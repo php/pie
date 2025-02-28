@@ -11,6 +11,8 @@ use Composer\IO\IOInterface;
 use Composer\PartialComposer;
 use Composer\Util\Filesystem;
 use Composer\Util\ProcessExecutor;
+use Php\Pie\ComposerIntegration\Listeners\OverrideDownloadUrlInstallListener;
+use Php\Pie\ComposerIntegration\Listeners\RemoveUnrelatedInstallOperations;
 use Php\Pie\ExtensionType;
 use Php\Pie\Platform;
 use Psr\Container\ContainerInterface;
@@ -59,7 +61,7 @@ class PieComposerFactory extends Factory
             true,
         );
 
-        OverrideWindowsUrlInstallListener::selfRegister($composer, $io, $container, $composerRequest);
+        OverrideDownloadUrlInstallListener::selfRegister($composer, $io, $container, $composerRequest);
         RemoveUnrelatedInstallOperations::selfRegister($composer, $composerRequest);
 
         $composer->getConfig()->merge(['config' => ['__PIE_REQUEST__' => $composerRequest]]);

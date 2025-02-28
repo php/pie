@@ -21,6 +21,7 @@ use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\ThreadSafetyMode;
 use Php\Pie\Platform\WindowsCompiler;
+use Php\Pie\Platform\WindowsExtensionAssetName;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
@@ -78,18 +79,23 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             'asgrim/example-pie-extension',
             '1.2.3',
             'https://test-uri/' . uniqid('downloadUrl', true),
-            [],
-            true,
-            true,
-            null,
-            null,
-            null,
-            99,
         );
 
         $releaseAssets = new GithubPackageReleaseAssets('https://test-github-api-base-url.thephp.foundation');
 
-        self::assertSame('actual_download_url', $releaseAssets->findWindowsDownloadUrlForPackage($targetPlatform, $package, $authHelper, $httpDownloader));
+        self::assertSame(
+            'actual_download_url',
+            $releaseAssets->findMatchingReleaseAssetUrl(
+                $targetPlatform,
+                $package,
+                $authHelper,
+                $httpDownloader,
+                WindowsExtensionAssetName::zipNames(
+                    $targetPlatform,
+                    $package,
+                ),
+            ),
+        );
     }
 
     public function testUrlIsReturnedWhenFindingWindowsDownloadUrlWithCompilerAndThreadSafetySwapped(): void
@@ -141,18 +147,23 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             'asgrim/example-pie-extension',
             '1.2.3',
             'https://test-uri/' . uniqid('downloadUrl', true),
-            [],
-            true,
-            true,
-            null,
-            null,
-            null,
-            99,
         );
 
         $releaseAssets = new GithubPackageReleaseAssets('https://test-github-api-base-url.thephp.foundation');
 
-        self::assertSame('actual_download_url', $releaseAssets->findWindowsDownloadUrlForPackage($targetPlatform, $package, $authHelper, $httpDownloader));
+        self::assertSame(
+            'actual_download_url',
+            $releaseAssets->findMatchingReleaseAssetUrl(
+                $targetPlatform,
+                $package,
+                $authHelper,
+                $httpDownloader,
+                WindowsExtensionAssetName::zipNames(
+                    $targetPlatform,
+                    $package,
+                ),
+            ),
+        );
     }
 
     public function testFindWindowsDownloadUrlForPackageThrowsExceptionWhenAssetNotFound(): void
@@ -185,18 +196,20 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             'asgrim/example-pie-extension',
             '1.2.3',
             'https://test-uri/' . uniqid('downloadUrl', true),
-            [],
-            true,
-            true,
-            null,
-            null,
-            null,
-            99,
         );
 
         $releaseAssets = new GithubPackageReleaseAssets('https://test-github-api-base-url.thephp.foundation');
 
         $this->expectException(CouldNotFindReleaseAsset::class);
-        $releaseAssets->findWindowsDownloadUrlForPackage($targetPlatform, $package, $authHelper, $httpDownloader);
+        $releaseAssets->findMatchingReleaseAssetUrl(
+            $targetPlatform,
+            $package,
+            $authHelper,
+            $httpDownloader,
+            WindowsExtensionAssetName::zipNames(
+                $targetPlatform,
+                $package,
+            ),
+        );
     }
 }

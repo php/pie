@@ -7,7 +7,6 @@ namespace Php\PieIntegrationTest\Installing;
 use Composer\Package\CompletePackage;
 use Composer\Util\Platform;
 use Php\Pie\Building\UnixBuild;
-use Php\Pie\ConfigureOption;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\ExtensionName;
@@ -89,13 +88,6 @@ final class UnixInstallTest extends TestCase
                 'pie_test_ext',
                 '0.1.0',
                 null,
-                [ConfigureOption::fromComposerJsonDefinition(['name' => 'enable-pie_test_ext'])],
-                true,
-                true,
-                null,
-                null,
-                null,
-                99,
             ),
             self::TEST_EXTENSION_PATH,
         );

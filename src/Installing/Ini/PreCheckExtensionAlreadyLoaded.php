@@ -26,7 +26,7 @@ class PreCheckExtensionAlreadyLoaded implements SetupIniApproach
     ): bool {
         try {
             $targetPlatform->phpBinaryPath->assertExtensionIsLoadedInRuntime(
-                $downloadedPackage->package->extensionName,
+                $downloadedPackage->package->extensionName(),
                 $output,
             );
 
