@@ -8,6 +8,7 @@
          requireCoverageMetadata="true"
          beStrictAboutOutputDuringTests="true"
          displayDetailsOnSkippedTests="true"
+         displayDetailsOnTestsThatTriggerWarnings="true"
          failOnRisky="true"
          failOnWarning="true">
     <testsuites>

@@ -8,8 +8,10 @@ use Php\Pie\Util\CaptureErrors;
 use Php\Pie\Util\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 
+use function file_exists;
 use function file_put_contents;
 use function fileperms;
+use function is_string;
 use function is_writable;
 use function sprintf;
 use function substr;
@@ -19,9 +21,12 @@ final class SudoFilePut
 {
     public static function contents(string $filename, string $content): void
     {
-        $previousPermissions = substr(sprintf('%o', fileperms($filename)), -4);
+        $didChangePermissions = false;
+        if (file_exists($filename)) {
+            $previousPermissions = substr(sprintf('%o', fileperms($filename)), -4);
 
-        $didChangePermissions = self::attemptToMakeFileEditable($filename);
+            $didChangePermissions = self::attemptToMakeFileEditable($filename);
+        }
 
         $capturedErrors  = [];
         $writeSuccessful = CaptureErrors::for(
@@ -33,7 +38,7 @@ final class SudoFilePut
             throw FailedToWriteFile::fromFilePutContentErrors($filename, $capturedErrors);
         }
 
-        if (! $didChangePermissions || ! Sudo::exists()) {
+        if (! isset($previousPermissions) || ! is_string($previousPermissions) || ! $didChangePermissions || ! Sudo::exists()) {
             return;
         }
 
