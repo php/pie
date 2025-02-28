@@ -7,13 +7,14 @@ namespace Php\Pie\Installing;
 use Php\Pie\ComposerIntegration\PieInstalledJsonMetadataKeys;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\File\BinaryFile;
+use Php\Pie\File\FailedToUnlinkFile;
 use Php\Pie\File\Sudo;
+use Php\Pie\File\SudoUnlink;
 use Php\Pie\Util\Process;
 
 use function array_key_exists;
 use function file_exists;
 use function is_writable;
-use function unlink;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 class UninstallUsingUnlink implements Uninstall
@@ -53,8 +54,10 @@ class UninstallUsingUnlink implements Uninstall
             }
         }
 
-        if (file_exists($expectedBinaryFile->filePath) && ! unlink($expectedBinaryFile->filePath)) {
-            throw FailedToRemoveExtension::withFilename($expectedBinaryFile);
+        try {
+            SudoUnlink::singleFile($expectedBinaryFile->filePath);
+        } catch (FailedToUnlinkFile $failedToUnlinkFile) {
+            throw FailedToRemoveExtension::withFilename($expectedBinaryFile, $failedToUnlinkFile);
         }
 
         return $expectedBinaryFile;

@@ -145,7 +145,7 @@ final class StandardAdditionalPhpIniDirectoryTest extends TestCase
             $this->output,
         ));
         self::assertStringContainsString(
-            'PHP is configured to use additional INI file path /path/to/something/does/not/exist, but it did not exist, or is not writable by PIE.',
+            'PHP is configured to use additional INI file path /path/to/something/does/not/exist, but it did not exist',
             $this->output->fetch(),
         );
     }

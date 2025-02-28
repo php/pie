@@ -7,11 +7,14 @@ namespace Php\Pie\Installing\Ini;
 use Composer\Util\Platform;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\File\BinaryFile;
+use Php\Pie\File\Sudo;
+use Php\Pie\File\SudoUnlink;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Util\Process;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 
+use function array_unshift;
 use function file_exists;
 use function is_dir;
 use function is_writable;
@@ -19,7 +22,6 @@ use function preg_match;
 use function rtrim;
 use function sprintf;
 use function touch;
-use function unlink;
 
 use const DIRECTORY_SEPARATOR;
 
@@ -103,16 +105,21 @@ final class OndrejPhpenmod implements SetupIniApproach
             return false;
         }
 
+        $needSudo = false;
         if (! is_writable($expectedModsAvailablePath)) {
-            $output->writeln(
-                sprintf(
-                    'Mods available path %s is not writable',
-                    $expectedModsAvailablePath,
-                ),
-                OutputInterface::VERBOSITY_VERBOSE,
-            );
+            if (! Sudo::exists()) {
+                $output->writeln(
+                    sprintf(
+                        'Mods available path %s is not writable',
+                        $expectedModsAvailablePath,
+                    ),
+                    OutputInterface::VERBOSITY_VERBOSE,
+                );
 
-            return false;
+                return false;
+            }
+
+            $needSudo = true;
         }
 
         $expectedIniFile = sprintf(
@@ -140,16 +147,23 @@ final class OndrejPhpenmod implements SetupIniApproach
             $targetPlatform,
             $downloadedPackage,
             $output,
-            static function () use ($phpenmodPath, $targetPlatform, $downloadedPackage, $output): bool {
+            static function () use ($needSudo, $phpenmodPath, $targetPlatform, $downloadedPackage, $output): bool {
                 try {
-                    Process::run([
+                    $processArgs = [
                         $phpenmodPath,
                         '-v',
                         $targetPlatform->phpBinaryPath->majorMinorVersion(),
                         '-s',
                         'ALL',
                         $downloadedPackage->package->extensionName()->name(),
-                    ]);
+                    ];
+
+                    if ($needSudo && Sudo::exists()) {
+                        $output->writeln('Using sudo to elevate privileges for phpenmod', OutputInterface::VERBOSITY_VERBOSE);
+                        array_unshift($processArgs, Sudo::find());
+                    }
+
+                    Process::run($processArgs);
 
                     return true;
                 } catch (ProcessFailedException $processFailedException) {
@@ -170,7 +184,7 @@ final class OndrejPhpenmod implements SetupIniApproach
         );
 
         if (! $addingExtensionWasSuccessful && $pieCreatedTheIniFile) {
-            unlink($expectedIniFile);
+            SudoUnlink::singleFile($expectedIniFile);
         }
 
         return $addingExtensionWasSuccessful;
