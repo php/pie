@@ -90,6 +90,7 @@ final class DownloadUrlMethodTest extends TestCase
             [
                 'php_bar-1.2.3-src.tgz',
                 'php_bar-1.2.3-src.zip',
+                'bar-1.2.3.tgz',
             ],
             $downloadUrlMethod->possibleAssetNames($package, $targetPlatform),
         );
