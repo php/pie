@@ -13,6 +13,7 @@ use Composer\Util\Platform;
 use InvalidArgumentException;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
+use Php\Pie\Platform as PiePlatform;
 use Php\Pie\Platform\OperatingSystem;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPhp\PhpizePath;
@@ -168,6 +169,13 @@ final class CommandHelper
             $targetPlatform->architecture->name,
             $phpBinaryPath->phpBinaryPath,
         ));
+        $output->writeln(
+            sprintf(
+                '<info>Using pie.json:</info> %s',
+                PiePlatform::getPieJsonFilename($targetPlatform),
+            ),
+            OutputInterface::VERBOSITY_VERBOSE,
+        );
 
         return $targetPlatform;
     }

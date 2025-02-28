@@ -78,7 +78,6 @@ class PiePackageInstaller extends LibraryInstaller
     {
         $composerPackage = $package;
 
-        // @todo check into why not being removed from `vendor/composer/installed.json`
         return parent::uninstall($repo, $composerPackage)
             ?->then(function () use ($composerPackage) {
                 $output = $this->composerRequest->pieOutput;
