@@ -25,7 +25,7 @@ final class ShowCommandTest extends TestCase
 
     public function testExecute(): void
     {
-        $this->commandTester->execute([]);
+        $this->commandTester->execute(['--all' => true]);
 
         $this->commandTester->assertCommandIsSuccessful();
 

@@ -9,12 +9,14 @@ use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieInstalledJsonMetadataKeys;
 use Php\Pie\File\BinaryFile;
 use Php\Pie\File\BinaryFileFailedVerification;
+use Php\Pie\Platform as PiePlatform;
 use Php\Pie\Platform\InstalledPiePackages;
 use Php\Pie\Platform\OperatingSystem;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -33,6 +35,8 @@ use const DIRECTORY_SEPARATOR;
 )]
 final class ShowCommand extends Command
 {
+    private const OPTION_ALL = 'all';
+
     public function __construct(
         private readonly InstalledPiePackages $installedPiePackages,
         private readonly ContainerInterface $container,
@@ -45,11 +49,32 @@ final class ShowCommand extends Command
         parent::configure();
 
         CommandHelper::configurePhpConfigOptions($this);
+
+        $this->addOption(
+            self::OPTION_ALL,
+            null,
+            InputOption::VALUE_NONE,
+            'Show all extensions for the target PHP installation, even those PIE does not manage.',
+        );
     }
 
     public function execute(InputInterface $input, OutputInterface $output): int
     {
+        $showAll        = $input->hasOption(self::OPTION_ALL) && $input->getOption(self::OPTION_ALL);
         $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $output);
+
+        if ($output->getVerbosity() < OutputInterface::VERBOSITY_VERBOSE) {
+            $output->writeln(
+                sprintf(
+                    '<info>Using pie.json:</info> %s',
+                    PiePlatform::getPieJsonFilename($targetPlatform),
+                ),
+            );
+        }
+
+        if (! $showAll) {
+            $output->writeln('Tip: to include extensions in this list that PIE does not manage, use the --all flag.');
+        }
 
         $composer = PieComposerFactory::createPieComposer(
             $this->container,
@@ -64,12 +89,17 @@ final class ShowCommand extends Command
         $extensionPath        = $targetPlatform->phpBinaryPath->extensionPath();
         $extensionEnding      = $targetPlatform->operatingSystem === OperatingSystem::Windows ? '.dll' : '.so';
 
-        $output->writeln("\n" . '<info>Loaded extensions:</info>');
+        $output->writeln(sprintf(
+            "\n" . '<options=bold,underscore>%s:</>',
+            $showAll ? 'All loaded extensions' : 'Loaded PIE extensions',
+        ));
         array_walk(
             $phpEnabledExtensions,
-            static function (string $version, string $phpExtensionName) use ($output, $piePackages, $extensionPath, $extensionEnding): void {
+            static function (string $version, string $phpExtensionName) use ($showAll, $output, $piePackages, $extensionPath, $extensionEnding): void {
                 if (! array_key_exists($phpExtensionName, $piePackages)) {
-                    $output->writeln(sprintf('  <comment>%s:%s</comment>', $phpExtensionName, $version));
+                    if ($showAll) {
+                        $output->writeln(sprintf('  <comment>%s:%s</comment>', $phpExtensionName, $version));
+                    }
 
                     return;
                 }
