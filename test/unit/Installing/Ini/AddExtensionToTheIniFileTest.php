@@ -8,6 +8,7 @@ use Composer\Package\CompletePackage;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
+use Php\Pie\File\Sudo;
 use Php\Pie\Installing\Ini\AddExtensionToTheIniFile;
 use Php\Pie\Platform\TargetPhp\Exception\ExtensionIsNotLoaded;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
@@ -43,15 +44,15 @@ final class AddExtensionToTheIniFileTest extends TestCase
         $this->mockPhpBinary = $this->createMock(PhpBinaryPath::class);
     }
 
-    public function testReturnsFalseWhenFileIsNotWritable(): void
+    public function testReturnsFalseWhenFileIsNotWritableAndSudoDoesNotExist(): void
     {
-        if (TargetPlatform::isRunningAsRoot()) {
-            self::markTestSkipped('Test cannot be run as root, as root can always write files');
+        if (Sudo::exists()) {
+            self::markTestSkipped('Test needs sudo to NOT exist');
         }
 
         $unwritableFilename = tempnam(sys_get_temp_dir(), 'PIE_unwritable_ini_file');
         touch($unwritableFilename);
-        chmod($unwritableFilename, 000);
+        chmod($unwritableFilename, 0444);
 
         try {
             self::assertFalse((new AddExtensionToTheIniFile())(
@@ -73,6 +74,37 @@ final class AddExtensionToTheIniFileTest extends TestCase
                 sprintf('PHP is configured to use %s, but it is not writable by PIE.', $unwritableFilename),
                 $this->output->fetch(),
             );
+        } finally {
+            chmod($unwritableFilename, 644);
+            unlink($unwritableFilename);
+        }
+    }
+
+    public function testReturnsTrueWhenFileIsNotWritableAndSudoExists(): void
+    {
+        if (! Sudo::exists()) {
+            self::markTestSkipped('Test needs sudo to exist');
+        }
+
+        $unwritableFilename = tempnam(sys_get_temp_dir(), 'PIE_unwritable_ini_file');
+        touch($unwritableFilename);
+        chmod($unwritableFilename, 0444);
+
+        try {
+            self::assertTrue((new AddExtensionToTheIniFile())(
+                $unwritableFilename,
+                new Package(
+                    $this->createMock(CompletePackage::class),
+                    ExtensionType::PhpModule,
+                    ExtensionName::normaliseFromString('foobar'),
+                    'foo/bar',
+                    '1.0.0',
+                    null,
+                ),
+                $this->mockPhpBinary,
+                $this->output,
+                null,
+            ));
         } finally {
             chmod($unwritableFilename, 644);
             unlink($unwritableFilename);

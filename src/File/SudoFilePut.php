@@ -6,61 +6,64 @@ namespace Php\Pie\File;
 
 use Php\Pie\Util\CaptureErrors;
 use Php\Pie\Util\Process;
-use Symfony\Component\Process\Exception\ProcessFailedException;
 
+use function dirname;
 use function file_exists;
 use function file_put_contents;
-use function fileperms;
-use function is_string;
 use function is_writable;
-use function sprintf;
-use function substr;
+use function sha1;
+use function sys_get_temp_dir;
+
+use const DIRECTORY_SEPARATOR;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class SudoFilePut
 {
     public static function contents(string $filename, string $content): void
     {
-        $didChangePermissions = false;
-        if (file_exists($filename)) {
-            $previousPermissions = substr(sprintf('%o', fileperms($filename)), -4);
+        $fileWritable = file_exists($filename) && is_writable($filename);
+        $pathWritable = ! file_exists($filename) && file_exists(dirname($filename)) && is_writable(dirname($filename));
 
-            $didChangePermissions = self::attemptToMakeFileEditable($filename);
+        if ($fileWritable || $pathWritable) {
+            $capturedErrors  = [];
+            $writeSuccessful = CaptureErrors::for(
+                static fn () => file_put_contents($filename, $content),
+                $capturedErrors,
+            );
+
+            if ($writeSuccessful === false) {
+                throw FailedToWriteFile::fromFilePutContentErrors($filename, $capturedErrors);
+            }
+
+            return;
         }
+
+        if (! Sudo::exists()) {
+            throw FailedToWriteFile::fromNoPermissions($filename);
+        }
+
+        self::writeWithSudo($filename, $content);
+    }
+
+    private static function writeWithSudo(string $filename, string $content): void
+    {
+        $tempFilename = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'pie_tmp_' . sha1($content);
 
         $capturedErrors  = [];
         $writeSuccessful = CaptureErrors::for(
-            static fn () => file_put_contents($filename, $content),
+            static fn () => file_put_contents($tempFilename, $content),
             $capturedErrors,
         );
 
         if ($writeSuccessful === false) {
-            throw FailedToWriteFile::fromFilePutContentErrors($filename, $capturedErrors);
+            throw FailedToWriteFile::fromFilePutContentErrors($tempFilename, $capturedErrors);
         }
 
-        if (! isset($previousPermissions) || ! is_string($previousPermissions) || ! $didChangePermissions || ! Sudo::exists()) {
-            return;
+        if (file_exists($filename)) {
+            Process::run([Sudo::find(), 'chmod', '--reference=' . $filename, $tempFilename]);
+            Process::run([Sudo::find(), 'chown', '--reference=' . $filename, $tempFilename]);
         }
 
-        Process::run([Sudo::find(), 'chmod', $previousPermissions, $filename]);
-    }
-
-    private static function attemptToMakeFileEditable(string $filename): bool
-    {
-        if (! Sudo::exists()) {
-            return false;
-        }
-
-        if (! is_writable($filename)) {
-            try {
-                Process::run([Sudo::find(), 'chmod', '0777', $filename]);
-
-                return true;
-            } catch (ProcessFailedException) {
-                return false;
-            }
-        }
-
-        return false;
+        Process::run([Sudo::find(), 'mv', $tempFilename, $filename]);
     }
 }
