@@ -48,6 +48,6 @@ final class SudoUnlink
             return;
         }
 
-        FailedToUnlinkFile::fromNoPermissions($filename);
+        throw FailedToUnlinkFile::fromNoPermissions($filename);
     }
 }
