@@ -7,7 +7,7 @@ namespace Php\Pie\Installing\Ini;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\File\BinaryFile;
 use Php\Pie\File\Sudo;
-use Php\Pie\File\SudoFilePut;
+use Php\Pie\File\SudoCreate;
 use Php\Pie\File\SudoUnlink;
 use Php\Pie\Platform\TargetPlatform;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -87,7 +87,7 @@ final class StandardAdditionalPhpIniDirectory implements SetupIniApproach
                 OutputInterface::VERBOSITY_VERY_VERBOSE,
             );
             $pieCreatedTheIniFile = true;
-            SudoFilePut::contents($expectedIniFile, '');
+            SudoCreate::file($expectedIniFile);
         }
 
         $addingExtensionWasSuccessful = ($this->checkAndAddExtensionToIniIfNeeded)(

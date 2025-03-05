@@ -270,15 +270,36 @@ final class OndrejPhpenmodTest extends TestCase
         unlink($modsAvailablePath);
         mkdir($modsAvailablePath, 000, true);
 
+        $expectedIniFile = $modsAvailablePath . DIRECTORY_SEPARATOR . 'foobar.ini';
+
         $this->mockPhpBinary
             ->method('additionalIniDirectory')
             ->willReturn('/value/does/not/matter');
 
         $this->checkAndAddExtensionToIniIfNeeded
-            ->expects(self::never())
-            ->method('__invoke');
+            ->expects(self::once())
+            ->method('__invoke')
+            ->with(
+                $expectedIniFile,
+                $this->targetPlatform,
+                $this->downloadedPackage,
+                $this->output,
+                self::isType(IsType::TYPE_CALLABLE),
+            )
+            ->willReturnCallback(
+            /** @param callable():bool $additionalEnableStep */
+                static function (
+                    string $iniFile,
+                    TargetPlatform $targetPlatform,
+                    DownloadedPackage $downloadedPackage,
+                    OutputInterface $output,
+                    callable $additionalEnableStep,
+                ): bool {
+                    return $additionalEnableStep();
+                },
+            );
 
-        self::assertFalse(
+        self::assertTrue(
             (new OndrejPhpenmod(
                 $this->checkAndAddExtensionToIniIfNeeded,
                 self::GOOD_PHPENMOD,
@@ -289,11 +310,6 @@ final class OndrejPhpenmodTest extends TestCase
                 $this->binaryFile,
                 $this->output,
             ),
-        );
-
-        self::assertStringContainsString(
-            'Mods available path ' . $modsAvailablePath . ' is not writable',
-            $this->output->fetch(),
         );
 
         rmdir($modsAvailablePath);

@@ -23,4 +23,12 @@ class FailedToWriteFile extends RuntimeException
             implode("\n - ", array_column($recorded, 'message')),
         ));
     }
+
+    public static function fromNoPermissions(string $filename): self
+    {
+        return new self(sprintf(
+            'Failed to write file %s as PIE does not have enough permissions',
+            $filename,
+        ));
+    }
 }

@@ -8,6 +8,7 @@ use Composer\Util\Platform;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\File\BinaryFile;
 use Php\Pie\File\Sudo;
+use Php\Pie\File\SudoCreate;
 use Php\Pie\File\SudoUnlink;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Util\Process;
@@ -21,7 +22,6 @@ use function is_writable;
 use function preg_match;
 use function rtrim;
 use function sprintf;
-use function touch;
 
 use const DIRECTORY_SEPARATOR;
 
@@ -139,7 +139,7 @@ final class OndrejPhpenmod implements SetupIniApproach
                 OutputInterface::VERBOSITY_VERY_VERBOSE,
             );
             $pieCreatedTheIniFile = true;
-            touch($expectedIniFile);
+            SudoCreate::file($expectedIniFile);
         }
 
         $addingExtensionWasSuccessful = ($this->checkAndAddExtensionToIniIfNeeded)(
