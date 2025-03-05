@@ -11,10 +11,8 @@ use function dirname;
 use function file_exists;
 use function file_put_contents;
 use function is_writable;
-use function sha1;
 use function sys_get_temp_dir;
-
-use const DIRECTORY_SEPARATOR;
+use function tempnam;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class SudoFilePut
@@ -47,7 +45,10 @@ final class SudoFilePut
 
     private static function writeWithSudo(string $filename, string $content): void
     {
-        $tempFilename = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'pie_tmp_' . sha1($content);
+        $tempFilename = tempnam(sys_get_temp_dir(), 'pie_tmp_');
+        if ($tempFilename === false) {
+            throw FailedToWriteFile::fromNoPermissions($filename);
+        }
 
         $capturedErrors  = [];
         $writeSuccessful = CaptureErrors::for(
