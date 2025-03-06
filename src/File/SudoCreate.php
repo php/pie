@@ -13,6 +13,7 @@ use function file_exists;
 use function is_writable;
 use function touch;
 
+/** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class SudoCreate
 {
     public static function file(string $filename): void
