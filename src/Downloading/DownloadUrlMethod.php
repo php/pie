@@ -10,6 +10,7 @@ use Php\Pie\Platform\PrePackagedSourceAssetName;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\WindowsExtensionAssetName;
 
+/** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 enum DownloadUrlMethod: string
 {
     case ComposerDefaultDownload   = 'composer-default';

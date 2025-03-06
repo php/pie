@@ -60,7 +60,7 @@ class RemoveIniEntryWithFileGetContents implements RemoveIniEntry
         }
 
         $regex = sprintf(
-            '/^(%s\w*=\w*%s)/m',
+            '/^(%s\s*=\s*%s)/m',
             $package->extensionType() === ExtensionType::PhpModule ? 'extension' : 'zend_extension',
             $package->extensionName()->name(),
         );
