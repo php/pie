@@ -58,7 +58,7 @@ final class VendorCleanupTest extends TestCase
             ->expects(self::once())
             ->method('writeln')
             ->with(
-                '<comment>Vendor directory (vendor-dir config) /path/that/does/not/exist seemed invalid?/comment>',
+                '<comment>Vendor directory (vendor-dir config) /path/that/does/not/exist seemed invalid?</comment>',
                 OutputInterface::VERBOSITY_VERY_VERBOSE,
             );
 
