@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://raw.githubusercontent.com/php/pie/main/composer-json-php-ext-schema.json",
+    "$id": "https://raw.githubusercontent.com/php/pie/main/resources/composer-json-php-ext-schema.json",
     "title": "composer.json php-ext schema",
     "description": "Schema for the proposed php-ext section in composer.json that the new PECL will use to build packages",
     "type": "object",
