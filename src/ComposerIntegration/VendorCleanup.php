@@ -34,7 +34,7 @@ class VendorCleanup
         if (! is_array($vendorContents)) {
             $this->output->writeln(
                 sprintf(
-                    '<comment>Vendor directory (vendor-dir config) %s seemed invalid?/comment>',
+                    '<comment>Vendor directory (vendor-dir config) %s seemed invalid?</comment>',
                     $vendorDir,
                 ),
                 OutputInterface::VERBOSITY_VERY_VERBOSE,
