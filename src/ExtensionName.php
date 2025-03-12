@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Php\Pie;
 
 use Composer\Package\PackageInterface;
+use InvalidArgumentException;
 use Webmozart\Assert\Assert;
 
 use function array_key_exists;
-use function assert;
 use function explode;
 use function is_string;
+use function preg_match;
+use function sprintf;
 use function str_starts_with;
 use function strlen;
 use function substr;
@@ -37,15 +39,20 @@ final class ExtensionName
 
     private function __construct(string $normalisedExtensionName)
     {
-        Assert::regex(
-            $normalisedExtensionName,
-            self::VALID_PACKAGE_NAME_REGEX,
-            'The value %s is not a valid extension name. An extension must start with a letter, and only'
-            . ' contain alphanumeric characters or underscores',
-        );
-        assert($normalisedExtensionName !== '');
+        if (! self::isValidExtensionName($normalisedExtensionName)) {
+            throw new InvalidArgumentException(sprintf(
+                'The value %s is not a valid extension name. An extension must start with a letter, and only contain alphanumeric characters or underscores',
+                $normalisedExtensionName,
+            ));
+        }
 
         $this->normalisedExtensionName = $normalisedExtensionName;
+    }
+
+    /** @psalm-assert-if-true non-empty-string $extensionName */
+    public static function isValidExtensionName(string $extensionName): bool
+    {
+        return preg_match(self::VALID_PACKAGE_NAME_REGEX, $extensionName) !== false;
     }
 
     public static function determineFromComposerPackage(PackageInterface $package): self
