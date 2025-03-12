@@ -25,7 +25,10 @@ include $_composer_autoload_path ?? __DIR__ . '/../vendor/autoload.php';
 
 $container = Container::factory();
 
-$application = new Application('🥧 PHP Installer for Extensions (PIE)', PieVersion::get());
+$pieAppName = '🥧 PHP Installer for Extensions (PIE)';
+$pieVersion = PieVersion::get();
+$application = new Application($pieAppName, $pieVersion);
+echo $pieAppName . ', ' . $pieVersion . ", from The PHP Foundation\n";
 
 $application->setCommandLoader(new ContainerCommandLoader(
     $container,
