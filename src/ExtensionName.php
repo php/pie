@@ -41,7 +41,7 @@ final class ExtensionName
     {
         if (! self::isValidExtensionName($normalisedExtensionName)) {
             throw new InvalidArgumentException(sprintf(
-                'The value %s is not a valid extension name. An extension must start with a letter, and only contain alphanumeric characters or underscores',
+                'The value "%s" is not a valid extension name. An extension must start with a letter, and only contain alphanumeric characters or underscores',
                 $normalisedExtensionName,
             ));
         }
@@ -52,7 +52,7 @@ final class ExtensionName
     /** @psalm-assert-if-true non-empty-string $extensionName */
     public static function isValidExtensionName(string $extensionName): bool
     {
-        return preg_match(self::VALID_PACKAGE_NAME_REGEX, $extensionName) !== false;
+        return preg_match(self::VALID_PACKAGE_NAME_REGEX, $extensionName) >= 1;
     }
 
     public static function determineFromComposerPackage(PackageInterface $package): self

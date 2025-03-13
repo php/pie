@@ -97,10 +97,9 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
     {
         $composer = $this->createMock(Composer::class);
 
-        $composerPackage = $this->createMock(CompletePackage::class);
-        $composerPackage->method('getPrettyName')->willReturn('myvendor/extension-with-replaces');
-        $composerPackage->method('getReplaces')->willReturn([
-            new Link('myvendor/extension-with-replaces', 'ext-replaced_extension', new Constraint('==', '*')),
+        $composerPackage = new CompletePackage('myvendor/replaced_extension', '1.2.3.0', '1.2.3');
+        $composerPackage->setReplaces([
+            'ext-replaced_extension' => new Link('myvendor/replaced_extension', 'ext-replaced_extension', new Constraint('==', '*')),
         ]);
         $installedPiePackages = $this->createMock(InstalledPiePackages::class);
         $installedPiePackages->method('allPiePackages')->willReturn([

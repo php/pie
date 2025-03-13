@@ -17,7 +17,9 @@ use UnexpectedValueException;
 use function in_array;
 use function str_replace;
 use function str_starts_with;
+use function strlen;
 use function strtolower;
+use function substr;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 class PhpBinaryPathBasedPlatformRepository extends PlatformRepository
@@ -40,7 +42,11 @@ class PhpBinaryPathBasedPlatformRepository extends PlatformRepository
         $extensionsBeingReplacedByPiePackages = [];
         foreach ($piePackages as $piePackage) {
             foreach ($piePackage->composerPackage()->getReplaces() as $replaceLink) {
-                if (! str_starts_with($replaceLink->getTarget(), 'ext-') || ! ExtensionName::isValidExtensionName($replaceLink->getTarget())) {
+                $target = $replaceLink->getTarget();
+                if (
+                    ! str_starts_with($target, 'ext-')
+                    || ! ExtensionName::isValidExtensionName(substr($target, strlen('ext-')))
+                ) {
                     continue;
                 }
 
