@@ -7,10 +7,13 @@ namespace Php\PieUnitTest\DependencyResolver;
 use Composer\Composer;
 use Composer\IO\NullIO;
 use Composer\Package\CompletePackage;
+use Composer\Package\Link;
 use Composer\Repository\ArrayRepository;
 use Composer\Repository\CompositeRepository;
+use Composer\Repository\InstalledRepositoryInterface;
 use Composer\Repository\RepositoryFactory;
 use Composer\Repository\RepositoryManager;
+use Composer\Semver\Constraint\Constraint;
 use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use Php\Pie\DependencyResolver\IncompatibleOperatingSystemFamily;
 use Php\Pie\DependencyResolver\IncompatibleThreadSafetyMode;
@@ -25,6 +28,7 @@ use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\ThreadSafetyMode;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(ResolveDependencyWithComposer::class)]
@@ -32,13 +36,26 @@ final class ResolveDependencyWithComposerTest extends TestCase
 {
     private Composer $composer;
 
+    private InstalledRepositoryInterface&MockObject $localRepo;
+
     public function setUp(): void
     {
         parent::setUp();
 
+        $packageWithReplaces = new CompletePackage('already/installed2', '1.2.3.0', '1.2.3');
+        $packageWithReplaces->setReplaces([
+            'ext-installed2' => new Link('root/package', 'ext-installed2', new Constraint('==', '*')),
+        ]);
+        $this->localRepo = $this->createMock(InstalledRepositoryInterface::class);
+        $this->localRepo->method('getPackages')->willReturn([
+            new CompletePackage('already/installed1', '1.2.3.0', '1.2.3'),
+            $packageWithReplaces,
+        ]);
+
         $repoManager = $this->createMock(RepositoryManager::class);
         $repoManager->method('getRepositories')
             ->willReturn([new CompositeRepository(RepositoryFactory::defaultReposWithDefaultManager(new NullIO()))]);
+        $repoManager->method('getLocalRepository')->willReturn($this->localRepo);
 
         $this->composer = $this->createMock(Composer::class);
         $this->composer->method('getRepositoryManager')
@@ -175,6 +192,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
         $repoManager = $this->createMock(RepositoryManager::class);
         $repoManager->method('getRepositories')
             ->willReturn([new ArrayRepository([$pkg])]);
+        $repoManager->method('getLocalRepository')->willReturn($this->localRepo);
 
         $this->composer = $this->createMock(Composer::class);
         $this->composer->method('getRepositoryManager')
@@ -222,6 +240,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
         $repoManager = $this->createMock(RepositoryManager::class);
         $repoManager->method('getRepositories')
             ->willReturn([new ArrayRepository([$pkg])]);
+        $repoManager->method('getLocalRepository')->willReturn($this->localRepo);
 
         $this->composer = $this->createMock(Composer::class);
         $this->composer->method('getRepositoryManager')
@@ -269,6 +288,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
         $repoManager = $this->createMock(RepositoryManager::class);
         $repoManager->method('getRepositories')
             ->willReturn([new ArrayRepository([$pkg])]);
+        $repoManager->method('getLocalRepository')->willReturn($this->localRepo);
 
         $this->composer = $this->createMock(Composer::class);
         $this->composer->method('getRepositoryManager')
@@ -316,6 +336,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
         $repoManager = $this->createMock(RepositoryManager::class);
         $repoManager->method('getRepositories')
             ->willReturn([new ArrayRepository([$pkg])]);
+        $repoManager->method('getLocalRepository')->willReturn($this->localRepo);
 
         $this->composer = $this->createMock(Composer::class);
         $this->composer->method('getRepositoryManager')
@@ -349,5 +370,36 @@ final class ResolveDependencyWithComposerTest extends TestCase
             ),
             false,
         );
+    }
+
+    public function testPackageThatCanBeResolvedWithReplaceConflict(): void
+    {
+        $phpBinaryPath = $this->createMock(PhpBinaryPath::class);
+        $phpBinaryPath->expects(self::any())
+            ->method('version')
+            ->willReturn('8.3.0');
+        $phpBinaryPath->expects(self::any())
+            ->method('extensions')
+            ->willReturn([
+                'installed1' => '1.2.3',
+                'installed2' => '1.2.3',
+            ]);
+
+        $targetPlatform = new TargetPlatform(
+            OperatingSystem::NonWindows,
+            OperatingSystemFamily::Linux,
+            $phpBinaryPath,
+            Architecture::x86_64,
+            ThreadSafetyMode::ThreadSafe,
+            1,
+            null,
+        );
+
+        $package = (new ResolveDependencyWithComposer(
+            $this->createMock(QuieterConsoleIO::class),
+        ))($this->composer, $targetPlatform, new RequestedPackageAndVersion('asgrim/example-pie-extension', '^1.0'), false);
+
+        self::assertSame('asgrim/example-pie-extension', $package->name());
+        self::assertStringStartsWith('1.', $package->version());
     }
 }

@@ -4,23 +4,29 @@ declare(strict_types=1);
 
 namespace Php\Pie\ComposerIntegration;
 
+use Composer\Composer;
 use Composer\Package\CompletePackage;
 use Composer\Pcre\Preg;
 use Composer\Repository\PlatformRepository;
 use Composer\Semver\VersionParser;
 use Php\Pie\ExtensionName;
+use Php\Pie\Platform\InstalledPiePackages;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use UnexpectedValueException;
 
+use function in_array;
 use function str_replace;
+use function str_starts_with;
+use function strlen;
 use function strtolower;
+use function substr;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 class PhpBinaryPathBasedPlatformRepository extends PlatformRepository
 {
     private VersionParser $versionParser;
 
-    public function __construct(PhpBinaryPath $phpBinaryPath, ExtensionName|null $extensionBeingInstalled)
+    public function __construct(PhpBinaryPath $phpBinaryPath, Composer $composer, InstalledPiePackages $installedPiePackages, ExtensionName|null $extensionBeingInstalled)
     {
         $this->versionParser = new VersionParser();
         $this->packages      = [];
@@ -32,6 +38,22 @@ class PhpBinaryPathBasedPlatformRepository extends PlatformRepository
 
         $extVersions = $phpBinaryPath->extensions();
 
+        $piePackages                          = $installedPiePackages->allPiePackages($composer);
+        $extensionsBeingReplacedByPiePackages = [];
+        foreach ($piePackages as $piePackage) {
+            foreach ($piePackage->composerPackage()->getReplaces() as $replaceLink) {
+                $target = $replaceLink->getTarget();
+                if (
+                    ! str_starts_with($target, 'ext-')
+                    || ! ExtensionName::isValidExtensionName(substr($target, strlen('ext-')))
+                ) {
+                    continue;
+                }
+
+                $extensionsBeingReplacedByPiePackages[] = ExtensionName::normaliseFromString($replaceLink->getTarget())->name();
+            }
+        }
+
         foreach ($extVersions as $extension => $extensionVersion) {
             /**
              * If the extension we're trying to exclude is not excluded from this list if it is already installed
@@ -40,6 +62,15 @@ class PhpBinaryPathBasedPlatformRepository extends PlatformRepository
              * @link https://github.com/php/pie/issues/150
              */
             if ($extensionBeingInstalled !== null && $extension === $extensionBeingInstalled->name()) {
+                continue;
+            }
+
+            /**
+             * If any extensions present have `replaces`, we need to remove them otherwise it conflicts too
+             *
+             * @link https://github.com/php/pie/issues/161
+             */
+            if (in_array($extension, $extensionsBeingReplacedByPiePackages)) {
                 continue;
             }
 

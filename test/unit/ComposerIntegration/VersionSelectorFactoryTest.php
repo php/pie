@@ -6,8 +6,11 @@ namespace Php\PieUnitTest\ComposerIntegration;
 
 use Composer\Composer;
 use Composer\Package\CompletePackage;
+use Composer\Package\Link;
 use Composer\Repository\ArrayRepository;
+use Composer\Repository\InstalledRepositoryInterface;
 use Composer\Repository\RepositoryManager;
+use Composer\Semver\Constraint\Constraint;
 use Php\Pie\ComposerIntegration\VersionSelectorFactory;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\Platform\Architecture;
@@ -30,15 +33,25 @@ final class VersionSelectorFactoryTest extends TestCase
             new CompletePackage('foo/bar', '2.0.0.0', '2.0.0'),
         ]);
 
+        $packageWithReplaces = new CompletePackage('already/installed2', '1.2.3.0', '1.2.3');
+        $packageWithReplaces->setReplaces([
+            'ext-installed2' => new Link('root/package', 'ext-installed2', new Constraint('==', '*')),
+        ]);
+        $localRepository = $this->createMock(InstalledRepositoryInterface::class);
+        $localRepository->method('getPackages')->willReturn([
+            new CompletePackage('already/installed1', '1.2.3.0', '1.2.3'),
+            $packageWithReplaces,
+        ]);
+
         $repoMananger = $this->createMock(RepositoryManager::class);
         $repoMananger
             ->expects(self::once())
             ->method('getRepositories')
             ->willReturn([$repository]);
+        $repoMananger->method('getLocalRepository')->willReturn($localRepository);
 
         $composer = $this->createMock(Composer::class);
         $composer
-            ->expects(self::once())
             ->method('getRepositoryManager')
             ->willReturn($repoMananger);
 
