@@ -55,6 +55,8 @@ final class SelfUpdateCommand extends Command
             ),
         );
 
+        // @todo check we're running in a PHAR
+
         $httpDownloader        = new HttpDownloader($this->io, $composer->getConfig());
         $authHelper            = new AuthHelper($this->io, $composer->getConfig());
         $fetchLatestPieRelease = new FetchPieReleaseFromGitHub($this->githubApiBaseUrl, $httpDownloader, $authHelper);
@@ -74,15 +76,15 @@ final class SelfUpdateCommand extends Command
 
         $output->writeln(sprintf('Newer version %s found, going to update you... ⏳', $latestRelease->tag));
 
-        $pharFilename = $fetchLatestPieRelease->downloadContent($latestRelease, $httpDownloader, $authHelper);
+        $pharFilename = $fetchLatestPieRelease->downloadContent($latestRelease);
 
         $output->writeln(sprintf('Verifying release with digest sha256:%s...', $pharFilename->checksum));
 
         try {
-            $verifyPiePhar->verify($latestRelease, $pharFilename, $httpDownloader, $authHelper);
+            $verifyPiePhar->verify($latestRelease, $pharFilename, $output);
         } catch (FailedToVerifyRelease $failedToVerifyRelease) {
             $output->writeln(sprintf(
-                '<error>Failed to verify the pie.phar release %s: %s</error>',
+                '<error>❌ Failed to verify the pie.phar release %s: %s</error>',
                 $latestRelease->tag,
                 $failedToVerifyRelease->getMessage(),
             ));
@@ -94,7 +96,7 @@ final class SelfUpdateCommand extends Command
         }
 
         // @todo move $pharFilename into place
-        $output->writeln('done...(ish)');
+        $output->writeln(sprintf('TODO: Move %s to %s', $pharFilename->filePath, $_SERVER['PHP_SELF']));
 
         return Command::SUCCESS;
     }
