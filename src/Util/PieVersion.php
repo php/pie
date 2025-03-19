@@ -18,6 +18,28 @@ final class PieVersion
     private const SYMFONY_MAGIC_CONST_UNKNOWN = 'UNKNOWN';
 
     /**
+     * This value is replaced dynamically by Box with the real version when
+     * we build the PHAR. It is based on the Git tag and/or version
+     *
+     * It will be replaced with `2.0.0` on an exact tag match, or something
+     * like `2.0.0@e558e33` on a commit following a tag.
+     *
+     * When running not in a PHAR, this will not be replaced, so this
+     * method needs additional logic to determine the version.
+     *
+     * @link https://box-project.github.io/box/configuration/#pretty-git-tag-placeholder-git
+     */
+    private const PIE_VERSION = '@pie_version@';
+
+    public static function isPharBuild(): bool
+    {
+        /** @psalm-suppress RedundantCondition */
+
+        // phpcs:ignore Generic.Strings.UnnecessaryStringConcat.Found
+        return self::PIE_VERSION !== '@pie_version' . '@';
+    }
+
+    /**
      * A static method to try to find the version of PIE you are currently
      * running. If running in the PHAR built with Box, this should return a
      * realistic-looking version; usually either a tag (e.g. `2.0.0`), or a tag
@@ -26,44 +48,24 @@ final class PieVersion
      */
     public static function get(): string
     {
-        /**
-         * This value is replaced dynamically by Box with the real version when
-         * we build the PHAR. It is based on the Git tag and/or version
-         *
-         * It will be replaced with `2.0.0` on an exact tag match, or something
-         * like `2.0.0@e558e33` on a commit following a tag.
-         *
-         * When running not in a PHAR, this will not be replaced, so this
-         * method needs additional logic to determine the version.
-         *
-         * @link https://box-project.github.io/box/configuration/#pretty-git-tag-placeholder-git
-         */
-        $pieVersion = '@pie_version@';
-
-        /**
-         * @psalm-suppress RedundantCondition
-         * @noinspection PhpConditionAlreadyCheckedInspection
-         */
-        // phpcs:ignore Generic.Strings.UnnecessaryStringConcat.Found
-        if ($pieVersion === '@pie_version' . '@') {
-            if (! class_exists(InstalledVersions::class)) {
-                return self::SYMFONY_MAGIC_CONST_UNKNOWN;
-            }
-
-            /**
-             * This tries to determine the version based on Composer; if we are
-             * the root package (i.e. you're developing on it), this will most
-             * likely be something like `dev-main` (branch name).
-             */
-            $installedVersion = InstalledVersions::getVersion(InstalledVersions::getRootPackage()['name']);
-            if ($installedVersion === null) {
-                return self::SYMFONY_MAGIC_CONST_UNKNOWN;
-            }
-
-            return $installedVersion;
+        if (self::isPharBuild()) {
+            return self::PIE_VERSION;
         }
 
-        /** @psalm-suppress NoValue */
-        return $pieVersion;
+        if (! class_exists(InstalledVersions::class)) {
+            return self::SYMFONY_MAGIC_CONST_UNKNOWN;
+        }
+
+        /**
+         * This tries to determine the version based on Composer; if we are
+         * the root package (i.e. you're developing on it), this will most
+         * likely be something like `dev-main` (branch name).
+         */
+        $installedVersion = InstalledVersions::getVersion(InstalledVersions::getRootPackage()['name']);
+        if ($installedVersion === null) {
+            return self::SYMFONY_MAGIC_CONST_UNKNOWN;
+        }
+
+        return $installedVersion;
     }
 }
