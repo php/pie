@@ -14,7 +14,7 @@ class FailedToVerifyRelease extends RuntimeException
 {
     public static function fromInvalidSubjectDefinition(): self
     {
-        return new self('Invalid subject definition in attestation payload');
+        return new self('Unable to extract subject digest from the dsseEnvelope in the attestation.');
     }
 
     public static function fromMissingAttestation(ReleaseMetadata $releaseMetadata, BinaryFile $file): self
