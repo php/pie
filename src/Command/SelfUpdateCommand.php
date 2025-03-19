@@ -13,6 +13,7 @@ use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use Php\Pie\SelfManage\Update\FetchPieReleaseFromGitHub;
 use Php\Pie\SelfManage\Verify\FailedToVerifyRelease;
 use Php\Pie\SelfManage\Verify\VerifyPieReleaseUsingAttestation;
+use Php\Pie\Util\PieVersion;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -45,6 +46,12 @@ final class SelfUpdateCommand extends Command
 
     public function execute(InputInterface $input, OutputInterface $output): int
     {
+        if (! PieVersion::isPharBuild()) {
+            $output->writeln('<comment>Aborting! You are not running a PHAR, cannot self-update.</comment>');
+
+            return 1;
+        }
+
         $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $output);
 
         $composer = PieComposerFactory::createPieComposer(
@@ -55,15 +62,13 @@ final class SelfUpdateCommand extends Command
             ),
         );
 
-        // @todo check we're running in a PHAR
-
         $httpDownloader        = new HttpDownloader($this->io, $composer->getConfig());
         $authHelper            = new AuthHelper($this->io, $composer->getConfig());
         $fetchLatestPieRelease = new FetchPieReleaseFromGitHub($this->githubApiBaseUrl, $httpDownloader, $authHelper);
         $verifyPiePhar         = new VerifyPieReleaseUsingAttestation($this->githubApiBaseUrl, $httpDownloader, $authHelper);
 
         $latestRelease = $fetchLatestPieRelease->latestReleaseMetadata($httpDownloader, $authHelper);
-        //$pieVersion = PieVersion::get();
+        $pieVersion = PieVersion::get();
         $pieVersion = '0.7.0'; // @todo for testing only
 
         $output->writeln(sprintf('You are currently running PIE version %s', $pieVersion));
