@@ -21,7 +21,6 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-use Webmozart\Assert\Assert;
 use function file_get_contents;
 use function getcwd;
 use function preg_match;
