@@ -10,6 +10,7 @@ use Composer\Util\HttpDownloader;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\QuieterConsoleIO;
+use Php\Pie\File\SudoFilePut;
 use Php\Pie\SelfManage\Update\FetchPieReleaseFromGitHub;
 use Php\Pie\SelfManage\Verify\FailedToVerifyRelease;
 use Php\Pie\SelfManage\Verify\VerifyPieReleaseUsingAttestation;
@@ -20,8 +21,15 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use Webmozart\Assert\Assert;
+use function file_get_contents;
+use function getcwd;
+use function preg_match;
+use function realpath;
 use function sprintf;
 use function unlink;
+
+use const DIRECTORY_SEPARATOR;
 
 #[AsCommand(
     name: 'self-update',
@@ -67,23 +75,29 @@ final class SelfUpdateCommand extends Command
         $fetchLatestPieRelease = new FetchPieReleaseFromGitHub($this->githubApiBaseUrl, $httpDownloader, $authHelper);
         $verifyPiePhar         = new VerifyPieReleaseUsingAttestation($this->githubApiBaseUrl, $httpDownloader, $authHelper);
 
-        $latestRelease = $fetchLatestPieRelease->latestReleaseMetadata($httpDownloader, $authHelper);
-        $pieVersion = PieVersion::get();
-        $pieVersion = '0.7.0'; // @todo for testing only
+        $latestRelease = $fetchLatestPieRelease->latestReleaseMetadata();
+        $pieVersion    = PieVersion::get();
+        $pieVersion    = '0.7.0'; // @todo for testing only
 
         $output->writeln(sprintf('You are currently running PIE version %s', $pieVersion));
 
         if (! Semver::satisfies($latestRelease->tag, '> ' . $pieVersion)) {
-            $output->writeln('You already have the latest version 😍');
+            $output->writeln('<info>You already have the latest version 😍</info>');
 
             return Command::SUCCESS;
         }
 
-        $output->writeln(sprintf('Newer version %s found, going to update you... ⏳', $latestRelease->tag));
+        $output->writeln(
+            sprintf('Newer version %s found, going to update you... ⏳', $latestRelease->tag),
+            OutputInterface::VERBOSITY_VERBOSE,
+        );
 
         $pharFilename = $fetchLatestPieRelease->downloadContent($latestRelease);
 
-        $output->writeln(sprintf('Verifying release with digest sha256:%s...', $pharFilename->checksum));
+        $output->writeln(
+            sprintf('Verifying release with digest sha256:%s...', $pharFilename->checksum),
+            OutputInterface::VERBOSITY_VERBOSE,
+        );
 
         try {
             $verifyPiePhar->verify($latestRelease, $pharFilename, $output);
@@ -100,9 +114,33 @@ final class SelfUpdateCommand extends Command
             return Command::FAILURE;
         }
 
-        // @todo move $pharFilename into place
-        $output->writeln(sprintf('TODO: Move %s to %s', $pharFilename->filePath, $_SERVER['PHP_SELF']));
+        $phpSelf        = $_SERVER['PHP_SELF'] ?? '';
+        $fullPathToSelf = $this->isAbsolutePath($phpSelf) ? $phpSelf : (getcwd() . DIRECTORY_SEPARATOR . $phpSelf);
+        $output->writeln(
+            sprintf('Writing new version to %s', $fullPathToSelf),
+            OutputInterface::VERBOSITY_VERBOSE,
+        );
+        SudoFilePut::contents($fullPathToSelf, file_get_contents($pharFilename->filePath));
+
+        $output->writeln('<info>✅ PIE has been upgraded to ' . $latestRelease->tag . '</info>');
 
         return Command::SUCCESS;
+    }
+
+    private function isAbsolutePath(string $path): bool
+    {
+        if (realpath($path) === $path) {
+            return true;
+        }
+
+        if ($path === '' || $path === '.') {
+            return false;
+        }
+
+        if (preg_match('#^[a-zA-Z]:\\\\#', $path)) {
+            return true;
+        }
+
+        return $path[0] === '/' || $path[0] === '\\';
     }
 }
