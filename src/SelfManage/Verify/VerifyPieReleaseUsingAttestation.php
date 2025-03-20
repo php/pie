@@ -15,7 +15,6 @@ use Webmozart\Assert\Assert;
 
 use function array_key_exists;
 use function array_map;
-use function base64_decode;
 use function count;
 use function extension_loaded;
 use function is_array;
@@ -25,7 +24,6 @@ use function openssl_pkey_get_public;
 use function openssl_verify;
 use function sprintf;
 use function strlen;
-use function wordwrap;
 
 use const OPENSSL_ALGO_SHA256;
 
@@ -43,6 +41,10 @@ final class VerifyPieReleaseUsingAttestation implements VerifyPiePhar
     {
         // @todo prefer this $this->verifyUsingGhCli();
 
+        if (! extension_loaded('openssl')) {
+            throw FailedToVerifyRelease::fromNoOpenssl();
+        }
+
         $this->verifyUsingOpenSSL($releaseMetadata, $pharFilename, $output);
     }
 
@@ -53,10 +55,6 @@ final class VerifyPieReleaseUsingAttestation implements VerifyPiePhar
 
     private function verifyUsingOpenSSL(ReleaseMetadata $releaseMetadata, BinaryFile $pharFilename, OutputInterface $output): void
     {
-        if (! extension_loaded('openssl')) {
-            throw FailedToVerifyRelease::fromNoOpenssl();
-        }
-
         $output->writeln(
             'Falling back to basic verification. To use full verification, install the `gh` CLI tool.',
             OutputInterface::VERBOSITY_VERBOSE,
@@ -76,31 +74,42 @@ final class VerifyPieReleaseUsingAttestation implements VerifyPiePhar
              *  - https://docs.sigstore.dev/logging/verify-release/
              *  - https://github.com/secure-systems-lab/dsse/blob/master/protocol.md#protocol
              */
-            $this->assertDigestFromAttestationMatchesActual($pharFilename, $attestation['dsseEnvelopePayload']);
+            $this->assertDigestFromAttestationMatchesActual($pharFilename, $attestation);
+            $output->writeln('#' . $attestationIndex . ': Payload digest matches downloaded file.', OutputInterface::VERBOSITY_VERBOSE);
 
-            $publicKey = openssl_pkey_get_public($attestation['certificate']);
-            Assert::isInstanceOf($publicKey, OpenSSLAsymmetricKey::class);
-
-            $preAuthenticationEncoding = sprintf(
-                'DSSEv1 %d %s %d %s',
-                strlen($attestation['dsseEnvelopePayloadType']),
-                $attestation['dsseEnvelopePayloadType'],
-                strlen($attestation['dsseEnvelopePayload']),
-                $attestation['dsseEnvelopePayload'],
-            );
-
-            if (openssl_verify($preAuthenticationEncoding, $attestation['dsseEnvelopeSignature'], $publicKey, OPENSSL_ALGO_SHA256) !== 1) {
-                throw FailedToVerifyRelease::fromSignatureVerificationFailed($attestationIndex, $releaseMetadata);
-            }
+            $this->verifyDsseEnvelopeSignature($releaseMetadata, $attestationIndex, $attestation);
+            $output->writeln('#' . $attestationIndex . ': DSSE payload signature verified with certificate.', OutputInterface::VERBOSITY_VERBOSE);
         }
 
         $output->writeln('<info>✅ Verified the new PIE (using fallback verification)</info>');
     }
 
-    private function assertDigestFromAttestationMatchesActual(BinaryFile $pharFilename, string $dsseEnvelopePayload): void
+    private function verifyDsseEnvelopeSignature(ReleaseMetadata $releaseMetadata, int $attestationIndex, Attestation $attestation): void
+    {
+        if (! extension_loaded('openssl')) {
+            throw FailedToVerifyRelease::fromNoOpenssl();
+        }
+
+        $publicKey = openssl_pkey_get_public($attestation->certificate);
+        Assert::isInstanceOf($publicKey, OpenSSLAsymmetricKey::class);
+
+        $preAuthenticationEncoding = sprintf(
+            'DSSEv1 %d %s %d %s',
+            strlen($attestation->dsseEnvelopePayloadType),
+            $attestation->dsseEnvelopePayloadType,
+            strlen($attestation->dsseEnvelopePayload),
+            $attestation->dsseEnvelopePayload,
+        );
+
+        if (openssl_verify($preAuthenticationEncoding, $attestation->dsseEnvelopeSignature, $publicKey, OPENSSL_ALGO_SHA256) !== 1) {
+            throw FailedToVerifyRelease::fromSignatureVerificationFailed($attestationIndex, $releaseMetadata);
+        }
+    }
+
+    private function assertDigestFromAttestationMatchesActual(BinaryFile $pharFilename, Attestation $attestation): void
     {
         /** @var mixed $decodedPayload */
-        $decodedPayload = json_decode($dsseEnvelopePayload, true);
+        $decodedPayload = json_decode($attestation->dsseEnvelopePayload, true);
 
         if (
             ! is_array($decodedPayload)
@@ -126,14 +135,7 @@ final class VerifyPieReleaseUsingAttestation implements VerifyPiePhar
         ));
     }
 
-    /**
-     * @return non-empty-list<array{
-     *     certificate: non-empty-string,
-     *     dsseEnvelopePayload: non-empty-string,
-     *     dsseEnvelopePayloadType: non-empty-string,
-     *     dsseEnvelopeSignature: non-empty-string,
-     * }>
-     */
+    /** @return non-empty-list<Attestation> */
     private function downloadAttestations(ReleaseMetadata $releaseMetadata, BinaryFile $pharFilename): array
     {
         $attestationUrl = $this->githubApiBaseUrl . '/orgs/php/attestations/sha256:' . $pharFilename->checksum;
@@ -155,48 +157,8 @@ final class VerifyPieReleaseUsingAttestation implements VerifyPiePhar
             Assert::isNonEmptyList($decodedJson['attestations']);
 
             return array_map(
-                static function (array $attestation): array {
-                    Assert::keyExists($attestation, 'bundle');
-                    Assert::isArray($attestation['bundle']);
-
-                    Assert::keyExists($attestation['bundle'], 'verificationMaterial');
-                    Assert::isArray($attestation['bundle']['verificationMaterial']);
-                    Assert::keyExists($attestation['bundle']['verificationMaterial'], 'certificate');
-                    Assert::isArray($attestation['bundle']['verificationMaterial']['certificate']);
-                    Assert::keyExists($attestation['bundle']['verificationMaterial']['certificate'], 'rawBytes');
-                    Assert::stringNotEmpty($attestation['bundle']['verificationMaterial']['certificate']['rawBytes']);
-
-                    Assert::keyExists($attestation['bundle'], 'dsseEnvelope');
-                    Assert::isArray($attestation['bundle']['dsseEnvelope']);
-                    Assert::keyExists($attestation['bundle']['dsseEnvelope'], 'payload');
-                    Assert::stringNotEmpty($attestation['bundle']['dsseEnvelope']['payload']);
-                    Assert::keyExists($attestation['bundle']['dsseEnvelope'], 'payloadType');
-                    Assert::stringNotEmpty($attestation['bundle']['dsseEnvelope']['payloadType']);
-                    Assert::keyExists($attestation['bundle']['dsseEnvelope'], 'signatures');
-                    Assert::isNonEmptyList($attestation['bundle']['dsseEnvelope']['signatures']);
-                    Assert::count($attestation['bundle']['dsseEnvelope']['signatures'], 1);
-                    Assert::keyExists($attestation['bundle']['dsseEnvelope']['signatures'], 0);
-                    Assert::isArray($attestation['bundle']['dsseEnvelope']['signatures'][0]);
-                    Assert::keyExists($attestation['bundle']['dsseEnvelope']['signatures'][0], 'sig');
-                    Assert::stringNotEmpty($attestation['bundle']['dsseEnvelope']['signatures'][0]['sig']);
-
-                    $decoratedCertificate = "-----BEGIN CERTIFICATE-----\n"
-                        . wordwrap($attestation['bundle']['verificationMaterial']['certificate']['rawBytes'], 67, "\n", true) . "\n"
-                        . "-----END CERTIFICATE-----\n";
-                    Assert::stringNotEmpty($decoratedCertificate);
-
-                    $decodedPayload = base64_decode($attestation['bundle']['dsseEnvelope']['payload']);
-                    Assert::stringNotEmpty($decodedPayload);
-
-                    $decodedSignature = base64_decode($attestation['bundle']['dsseEnvelope']['signatures'][0]['sig']);
-                    Assert::stringNotEmpty($decodedSignature);
-
-                    return [
-                        'certificate' => $decoratedCertificate,
-                        'dsseEnvelopePayload' => $decodedPayload,
-                        'dsseEnvelopePayloadType' => $attestation['bundle']['dsseEnvelope']['payloadType'],
-                        'dsseEnvelopeSignature' => $decodedSignature,
-                    ];
+                static function (array $attestation): Attestation {
+                    return Attestation::fromAttestationBundleWithDsseEnvelope($attestation);
                 },
                 $decodedJson['attestations'],
             );
