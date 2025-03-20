@@ -29,19 +29,23 @@ final class VerifyPieReleaseUsingAttestation implements VerifyPiePhar
         AuthHelper $authHelper,
     ): self {
         return new VerifyPieReleaseUsingAttestation(
-            new GithubCliAttestationVerification($githubApiBaseUrl, $httpDownloader, $authHelper, new ExecutableFinder()),
+            new GithubCliAttestationVerification(new ExecutableFinder()),
             new FallbackVerificationUsingOpenSsl($githubApiBaseUrl, $httpDownloader, $authHelper),
         );
     }
 
     public function verify(ReleaseMetadata $releaseMetadata, BinaryFile $pharFilename, OutputInterface $output): void
     {
-        $this->githubCliVerification->verify($releaseMetadata, $pharFilename, $output);
+        try {
+            $this->githubCliVerification->verify($releaseMetadata, $pharFilename, $output);
+        } catch (GithubCliNotAvailable $githubCliNotAvailable) {
+            $output->writeln($githubCliNotAvailable->getMessage(), OutputInterface::VERBOSITY_VERBOSE);
 
-        if (! extension_loaded('openssl')) {
-            throw FailedToVerifyRelease::fromNoOpenssl();
+            if (! extension_loaded('openssl')) {
+                throw FailedToVerifyRelease::fromNoOpenssl();
+            }
+
+            $this->fallbackVerification->verify($releaseMetadata, $pharFilename, $output);
         }
-
-        $this->fallbackVerification->verify($releaseMetadata, $pharFilename, $output);
     }
 }

@@ -65,7 +65,7 @@ final class FallbackVerificationUsingOpenSsl implements VerifyPiePhar
             $output->writeln('#' . $attestationIndex . ': DSSE payload signature verified with certificate.', OutputInterface::VERBOSITY_VERBOSE);
         }
 
-        $output->writeln('<info>✅ Verified the new PIE (using fallback verification)</info>');
+        $output->writeln('<info>✅ Verified the new PIE version (using fallback verification)</info>');
     }
 
     private function verifyDsseEnvelopeSignature(ReleaseMetadata $releaseMetadata, int $attestationIndex, Attestation $attestation): void
