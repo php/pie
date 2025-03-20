@@ -13,8 +13,6 @@ use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use Php\Pie\File\SudoFilePut;
 use Php\Pie\SelfManage\Update\FetchPieReleaseFromGitHub;
 use Php\Pie\SelfManage\Verify\FailedToVerifyRelease;
-use Php\Pie\SelfManage\Verify\FallbackVerificationUsingOpenSsl;
-use Php\Pie\SelfManage\Verify\GithubCliAttestationVerification;
 use Php\Pie\SelfManage\Verify\VerifyPieReleaseUsingAttestation;
 use Php\Pie\Util\PieVersion;
 use Psr\Container\ContainerInterface;
@@ -79,7 +77,6 @@ final class SelfUpdateCommand extends Command
 
         $latestRelease = $fetchLatestPieRelease->latestReleaseMetadata();
         $pieVersion    = PieVersion::get();
-        $pieVersion    = '0.7.0'; // @todo for testing only
 
         $output->writeln(sprintf('You are currently running PIE version %s', $pieVersion));
 
