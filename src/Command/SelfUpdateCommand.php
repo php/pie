@@ -38,6 +38,7 @@ use const DIRECTORY_SEPARATOR;
 )]
 final class SelfUpdateCommand extends Command
 {
+    /** @param non-empty-string $githubApiBaseUrl */
     public function __construct(
         private readonly string $githubApiBaseUrl,
         private readonly QuieterConsoleIO $io,
@@ -74,10 +75,7 @@ final class SelfUpdateCommand extends Command
         $httpDownloader        = new HttpDownloader($this->io, $composer->getConfig());
         $authHelper            = new AuthHelper($this->io, $composer->getConfig());
         $fetchLatestPieRelease = new FetchPieReleaseFromGitHub($this->githubApiBaseUrl, $httpDownloader, $authHelper);
-        $verifyPiePhar         = new VerifyPieReleaseUsingAttestation(
-            new GithubCliAttestationVerification($this->githubApiBaseUrl, $httpDownloader, $authHelper),
-            new FallbackVerificationUsingOpenSsl($this->githubApiBaseUrl, $httpDownloader, $authHelper),
-        );
+        $verifyPiePhar         = VerifyPieReleaseUsingAttestation::factory($this->githubApiBaseUrl, $httpDownloader, $authHelper);
 
         $latestRelease = $fetchLatestPieRelease->latestReleaseMetadata();
         $pieVersion    = PieVersion::get();
