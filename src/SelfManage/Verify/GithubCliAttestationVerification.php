@@ -9,14 +9,18 @@ use Composer\Util\HttpDownloader;
 use Php\Pie\File\BinaryFile;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\ExecutableFinder;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class GithubCliAttestationVerification implements VerifyPiePhar
 {
+    private const GH_CLI_NAME = 'gh';
+
     public function __construct(
         private readonly string $githubApiBaseUrl,
         private readonly HttpDownloader $httpDownloader,
         private readonly AuthHelper $authHelper,
+        private readonly ExecutableFinder $executableFinder,
     ) {
     }
 
