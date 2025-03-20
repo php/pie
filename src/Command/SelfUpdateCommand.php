@@ -13,6 +13,8 @@ use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use Php\Pie\File\SudoFilePut;
 use Php\Pie\SelfManage\Update\FetchPieReleaseFromGitHub;
 use Php\Pie\SelfManage\Verify\FailedToVerifyRelease;
+use Php\Pie\SelfManage\Verify\FallbackVerificationUsingOpenSsl;
+use Php\Pie\SelfManage\Verify\GithubCliAttestationVerification;
 use Php\Pie\SelfManage\Verify\VerifyPieReleaseUsingAttestation;
 use Php\Pie\Util\PieVersion;
 use Psr\Container\ContainerInterface;
@@ -72,7 +74,10 @@ final class SelfUpdateCommand extends Command
         $httpDownloader        = new HttpDownloader($this->io, $composer->getConfig());
         $authHelper            = new AuthHelper($this->io, $composer->getConfig());
         $fetchLatestPieRelease = new FetchPieReleaseFromGitHub($this->githubApiBaseUrl, $httpDownloader, $authHelper);
-        $verifyPiePhar         = new VerifyPieReleaseUsingAttestation($this->githubApiBaseUrl, $httpDownloader, $authHelper);
+        $verifyPiePhar         = new VerifyPieReleaseUsingAttestation(
+            new GithubCliAttestationVerification($this->githubApiBaseUrl, $httpDownloader, $authHelper),
+            new FallbackVerificationUsingOpenSsl($this->githubApiBaseUrl, $httpDownloader, $authHelper),
+        );
 
         $latestRelease = $fetchLatestPieRelease->latestReleaseMetadata();
         $pieVersion    = PieVersion::get();
