@@ -4,10 +4,42 @@ order: 3
 ---
 # PIE for Extension Maintainers
 
+## The PIE build & install steps
+
+### Non-Windows (e.g. Linux, OSX, etc.)
+
+PIE follows the usual [PHP extension build and install process](https://www.php.net/manual/en/install.pecl.phpize.php),
+namely:
+
+ * `phpize` to set up the PHP API parameters. The person installing the
+   extension may specify `--with-phpize-path` if `phpize` is not in the path.
+ * `./configure` to configure the build parameters and libraries for the
+   specific system. The person installing the extension may specify the
+   configure options that you have specified in `composer.json`. See the
+   [Configure Options](#configure-options) documentation for how to do this.
+ * `make` to actually build the extension. This will try to detect the number
+   of parallel processes to run automatically, but the person installing may
+   override this with `--make-parallel-jobs N` or `-jN` options.
+ * `make install` to install the extension to the configured PHP installation.
+   If PIE does not have permissions to write to the installation location, it
+   will attempt to elevate privileges with `sudo`.
+
+Note that this does mean the systems you are running PIE on need to have the
+appropriate build tools installed. A useful resource for building extensions
+and how PHP's internal works is the [PHP Internals Book](https://www.phpinternalsbook.com/).
+
+### Windows
+
+For Windows systems, extension maintainers must provide pre-built binaries. See
+the [Windows Support](#windows-support) section below for details on how to
+do this in the right way for PIE.
+
+## How to add PIE support for your extension
+
 Adding PIE support for your extension is relatively straightforward, and the
 flow is quite similar to adding a regular PHP package into Packagist.
 
-## Add a `composer.json` to your extension
+### Add a `composer.json` to your extension
 
 The first step to adding PIE support is adding a `composer.json` to your
 extension repository. Most of the typical fields are the same, with a few
@@ -22,9 +54,9 @@ notable exceptions:
    cannot share the same Composer package name as a regular PHP package, even
    if they have different `type` fields.
 
-### The `php-ext` definition
+#### The `php-ext` definition
 
-#### `extension-name`
+##### `extension-name`
 
 The `extension-name` SHOULD be specified, and must conform to the usual extension
 name regular expression, which is defined in
@@ -56,12 +88,12 @@ An example of `extension-name` being used:
 }
 ```
 
-#### `priority`
+##### `priority`
 
 `priority` is currently not used, but will form part of the `ini` filename to
 control ordering of extensions, if the target platform uses it.
 
-#### `support-zts` and `support-nts`
+##### `support-zts` and `support-nts`
 
 Indicates whether the extension supports Zend Thread-Safe (ZTS) and non-Thread-
 Safe (NTS) modes. Both these flags default to `true` if not specified, but if
@@ -72,7 +104,7 @@ Theoretically, it is possible to specify `false` for both `support-zts` and
 `support-nts`, but this will mean your package cannot be installed anywhere, so
 is not advisable.
 
-#### `configure-options`
+##### `configure-options`
 
 This is a list of parameters that may be passed to the `./configure` command.
 Each item of the list is a JSON object with:
@@ -132,7 +164,7 @@ If an end user does not specify a flag defined in the `configure-options`
 definition, it will simply not be passed to `./configure`. There is no way to
 specify a default value in the `configure-options` definition.
 
-#### `build-path`
+##### `build-path`
 
 The `build-path` setting may be used if your source code is not in the root
 of your repository. For example, if your repository structure is like:
@@ -166,7 +198,7 @@ The `build-path` may contain some templated values which are replaced:
    with version 1.2.3 with a `build-path` of `myext-{version}` the actual build
    path would become `myext-1.2.3`.
 
-#### `download-url-method`
+##### `download-url-method`
 
 The `download-url-method` directive allows extension maintainers to
 change the behaviour of downloading the source package.
@@ -180,7 +212,7 @@ change the behaviour of downloading the source package.
    * `php_{ExtensionName}-{Version}-src.tgz` (e.g. `php_myext-1.20.1-src.tgz`)
    * `php_{ExtensionName}-{Version}-src.zip` (e.g. `php_myext-1.20.1-src.zip`)
 
-### Extension dependencies
+#### Extension dependencies
 
 Extension authors may define some dependencies in `require`, but practically,
 most extensions would not need to define dependencies. Dependencies on other
@@ -193,7 +225,7 @@ dependency, this would prevent installation of the extension, and at the moment
 the messaging around this is
 [not particularly clear](https://github.com/php/pie/issues/15).
 
-## Submit the extension to Packagist
+### Submit the extension to Packagist
 
 Once you have committed your `composer.json` to your repository, you may then
 submit it to Packagist in the same way as any other package.
@@ -201,7 +233,7 @@ submit it to Packagist in the same way as any other package.
  * Head to [https://packagist.org/packages/submit](https://packagist.org/packages/submit)
  * Enter the URL of your repository, and follow the instructions.
 
-## Windows Support
+### Windows Support
 
 In order to support Windows users, you must publish pre-built DLLs, as PIE does
 not currently support building DLLs on the fly. The expected workflow for
@@ -228,7 +260,7 @@ The descriptions of these items:
    * Windows: `Architecture` from `php -i`
    * non-Windows: check `PHP_INT_SIZE` - 4 for 32-bit, 8 for 64-bit.
 
-### Contents of the Windows ZIP
+#### Contents of the Windows ZIP
 
 The pre-built ZIP should contain at minimum a DLL named in the same way as the
 ZIP itself, for example
@@ -243,7 +275,7 @@ additional resources, such as:
 * Any other file, which would be moved
   into `C:\path\to\php\extras\{extension-name}\.`
 
-### Automation of the Windows publishing
+#### Automation of the Windows publishing
 
 PHP provides a [set of GitHub Actions](https://github.com/php/php-windows-builder)
 that enable extension maintainers to build and release the Windows compatible
