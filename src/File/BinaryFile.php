@@ -7,6 +7,7 @@ namespace Php\Pie\File;
 use Php\Pie\Util;
 
 use function file_exists;
+use function hash_equals;
 use function hash_file;
 
 /**
@@ -53,7 +54,7 @@ final class BinaryFile
             throw BinaryFileFailedVerification::fromFilenameMismatch($this, $other);
         }
 
-        if ($other->checksum !== $this->checksum) {
+        if (! hash_equals($this->checksum, $other->checksum)) {
             throw BinaryFileFailedVerification::fromChecksumMismatch($this, $other);
         }
     }
