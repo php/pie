@@ -23,8 +23,6 @@ final class ConfigureOptionTest extends TestCase
      *         expectedDescription: string,
      *     }
      * >
-     *
-     * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
      */
     public static function composerJsonDefinitions(): array
     {
@@ -86,8 +84,6 @@ final class ConfigureOptionTest extends TestCase
      *         definition: array<array-key, mixed>
      *     }
      * >
-     *
-     * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
      */
     public static function invalidComposerJsonDefinitions(): array
     {

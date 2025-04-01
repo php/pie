@@ -41,8 +41,6 @@ class DownloadCommandTest extends TestCase
      * faster to execute!
      *
      * @return array<non-empty-string, array{0: non-empty-string, 1: non-empty-string}>
-     *
-     * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
      */
     public static function validVersionsList(): array
     {

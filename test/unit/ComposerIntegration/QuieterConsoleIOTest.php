@@ -70,11 +70,7 @@ final class QuieterConsoleIOTest extends TestCase
         self::assertSame(['Oh no'], $io->errors);
     }
 
-    /**
-     * @return array<string, array{0: OutputInterface::VERBOSITY_*, 1: list<non-empty-string>}>
-     *
-     * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
-     */
+    /** @return array<string, array{0: OutputInterface::VERBOSITY_*, 1: list<non-empty-string>}> */
     public static function verbosyExpectationsProvider(): array
     {
         return [

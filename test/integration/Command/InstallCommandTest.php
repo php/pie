@@ -40,11 +40,7 @@ class InstallCommandTest extends TestCase
         $this->commandTester = new CommandTester(Container::factory()->get(InstallCommand::class));
     }
 
-    /**
-     * @return array<string, array{0: string}>
-     *
-     * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
-     */
+    /** @return array<string, array{0: string}> */
     public static function phpPathProvider(): array
     {
         // data providers cannot return empty, even if the test is skipped

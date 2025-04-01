@@ -36,11 +36,7 @@ use function trim;
 #[CoversClass(CommandHelper::class)]
 final class CommandHelperTest extends TestCase
 {
-    /**
-     * @return array<string, array{0: string, 1: non-empty-string, 2: non-empty-string|null}>
-     *
-     * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
-     */
+    /** @return array<string, array{0: string, 1: non-empty-string, 2: non-empty-string|null}> */
     public static function validPackageAndVersions(): array
     {
         $packages = [

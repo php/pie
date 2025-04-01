@@ -15,11 +15,7 @@ use function array_map;
 #[CoversClass(DetermineMinimumStability::class)]
 final class DetermineMinimumStabilityTest extends TestCase
 {
-    /**
-     * @return array<string, array{0: non-empty-string|null, 1: non-empty-string}>
-     *
-     * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
-     */
+    /** @return array<string, array{0: non-empty-string|null, 1: non-empty-string}> */
     public static function requestedVersionToStabilityProvider(): array
     {
         $providerCases = [

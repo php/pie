@@ -12,11 +12,7 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(ComposerRunFailed::class)]
 final class ComposerRunFailedTest extends TestCase
 {
-    /**
-     * @return array<non-empty-string, array{0: int, 1: string, 2: int}>
-     *
-     * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
-     */
+    /** @return array<non-empty-string, array{0: int, 1: string, 2: int}> */
     public static function errorCodesProvider(): array
     {
         return [

@@ -22,11 +22,7 @@ use function is_executable;
 #[CoversClass(PhpizePath::class)]
 final class PhpizePathTest extends TestCase
 {
-    /**
-     * @return array<string, array{0: string}>
-     *
-     * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
-     */
+    /** @return array<string, array{0: string}> */
     public static function phpPathProvider(): array
     {
         $possiblePhpBinaries = array_filter(

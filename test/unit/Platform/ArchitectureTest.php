@@ -12,11 +12,7 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(Architecture::class)]
 final class ArchitectureTest extends TestCase
 {
-    /**
-     * @return array<non-empty-string, array{0: non-empty-string, 1: Architecture}>
-     *
-     * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
-     */
+    /** @return array<non-empty-string, array{0: non-empty-string, 1: Architecture}> */
     public static function architectureMapProvider(): array
     {
         return [
