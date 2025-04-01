@@ -6,6 +6,7 @@ namespace Php\Pie\SelfManage\Verify;
 
 use Composer\Util\AuthHelper;
 use Composer\Util\HttpDownloader;
+use DateTimeImmutable;
 use Php\Pie\File\BinaryFile;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -30,7 +31,7 @@ final class VerifyPieReleaseUsingAttestation implements VerifyPiePhar
     ): self {
         return new VerifyPieReleaseUsingAttestation(
             new GithubCliAttestationVerification(new ExecutableFinder()),
-            new FallbackVerificationUsingOpenSsl($githubApiBaseUrl, $httpDownloader, $authHelper),
+            new FallbackVerificationUsingOpenSsl(FallbackVerificationUsingOpenSsl::TRUSTED_ROOT_FILE_PATH, new DateTimeImmutable(), $githubApiBaseUrl, $httpDownloader, $authHelper),
         );
     }
 

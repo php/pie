@@ -9,6 +9,8 @@ use Php\Pie\SelfManage\Update\ReleaseMetadata;
 use RuntimeException;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 
+use function implode;
+use function is_array;
 use function sprintf;
 use function trim;
 
@@ -34,6 +36,34 @@ class FailedToVerifyRelease extends RuntimeException
             'Failed to verify DSSE Envelope payload signature for attestation %d for %s',
             $attestationIndex,
             $releaseMetadata->tag,
+        ));
+    }
+
+    /** @param array<string,string>|string $issuer */
+    public static function fromIssuerCertificateVerificationFailed(array|string $issuer): self
+    {
+        return new self(sprintf(
+            'Failed to verify the attestation certificate was issued by trusted root %s',
+            is_array($issuer) ? implode(',', $issuer) : $issuer,
+        ));
+    }
+
+    /** @param array<string,string>|string $issuer */
+    public static function fromNoIssuerCertificateInTrustedRoot(array|string $issuer): self
+    {
+        return new self(sprintf(
+            'Could not find a trusted root certificate for issuer %s',
+            is_array($issuer) ? implode(',', $issuer) : $issuer,
+        ));
+    }
+
+    public static function fromMismatchingExtensionValues(string $extension, string $expected, string $actual): self
+    {
+        return new self(sprintf(
+            'Attestation certificate extension %s mismatch; expected "%s", was "%s"',
+            $extension,
+            $expected,
+            $actual,
         ));
     }
 
