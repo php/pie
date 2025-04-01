@@ -107,11 +107,7 @@ final class PackageTest extends TestCase
         Package::fromComposerCompletePackage($composerCompletePackage);
     }
 
-    /**
-     * @return array<string, array{0: string, 1: string|null, 2: string}>
-     *
-     * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
-     */
+    /** @return array<string, array{0: string, 1: string|null, 2: string}> */
     public static function githubOrgAndRepoFromPackage(): array
     {
         return [

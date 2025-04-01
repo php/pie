@@ -36,11 +36,7 @@ final class UnixInstallTest extends TestCase
 {
     private const TEST_EXTENSION_PATH = __DIR__ . '/../../assets/pie_test_ext';
 
-    /**
-     * @return array<string, array{0: non-empty-string}>
-     *
-     * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
-     */
+    /** @return array<string, array{0: non-empty-string}> */
     public static function phpPathProvider(): array
     {
         // data providers cannot return empty, even if the test is skipped

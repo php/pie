@@ -31,11 +31,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
     private const DOWNLOAD_URL_1_0_1         = 'https://api.github.com/repos/asgrim/example-pie-extension/zipball/769f906413d6d1e12152f6d34134cbcd347ca253';
     private const DOWNLOAD_URL_1_1_0_BETA_1  = 'https://api.github.com/repos/asgrim/example-pie-extension/zipball/b8cec47269dc607b3111fbebd2c47f5b5112595e';
 
-    /**
-     * @return array<non-empty-string|'null', array{0: non-empty-string|null, 1: non-empty-string, 2: non-empty-string}>
-     *
-     * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
-     */
+    /** @return array<non-empty-string|'null', array{0: non-empty-string|null, 1: non-empty-string, 2: non-empty-string}> */
     public static function validVersionsList(): array
     {
         $versionsAndExpected = [

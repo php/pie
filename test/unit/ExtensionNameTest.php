@@ -17,11 +17,7 @@ use function array_map;
 #[CoversClass(ExtensionName::class)]
 final class ExtensionNameTest extends TestCase
 {
-    /**
-     * @return array<non-empty-string, array{0: non-empty-string, 1: non-empty-string}>
-     *
-     * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
-     */
+    /** @return array<non-empty-string, array{0: non-empty-string, 1: non-empty-string}> */
     public static function validExtensionNamesProvider(): array
     {
         return [
@@ -39,11 +35,7 @@ final class ExtensionNameTest extends TestCase
         self::assertSame('ext-' . $expectedNormalisedName, $extensionName->nameWithExtPrefix());
     }
 
-    /**
-     * @return array<string, array{0: string}>
-     *
-     * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
-     */
+    /** @return array<string, array{0: string}> */
     public static function invalidExtensionNamesProvider(): array
     {
         $invalidExtensionNames = ['', 'kebab-case', 'money$ext'];

@@ -61,11 +61,7 @@ final class RemoveIniEntryWithFileGetContentsTest extends TestCase
         (new Filesystem())->remove($this->iniFilePath);
     }
 
-    /**
-     * @return array<non-empty-string, array{0: ExtensionType, 1: non-empty-string}>
-     *
-     * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
-     */
+    /** @return array<non-empty-string, array{0: ExtensionType, 1: non-empty-string}> */
     public static function extensionTypeProvider(): array
     {
         return [

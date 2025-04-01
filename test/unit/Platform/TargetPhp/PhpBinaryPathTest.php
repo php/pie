@@ -94,11 +94,7 @@ final class PhpBinaryPathTest extends TestCase
         self::assertNull($phpBinary->phpConfigPath());
     }
 
-    /**
-     * @return array<string, array{0: non-empty-string, 1: non-empty-string}>
-     *
-     * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
-     */
+    /** @return array<string, array{0: non-empty-string, 1: non-empty-string}> */
     public static function phpConfigPathProvider(): array
     {
         // data providers cannot return empty, even if the test is skipped
@@ -230,11 +226,7 @@ final class PhpBinaryPathTest extends TestCase
         );
     }
 
-    /**
-     * @return array<string, array{0: string}>
-     *
-     * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
-     */
+    /** @return array<string, array{0: string}> */
     public static function phpPathProvider(): array
     {
         $possiblePhpBinaries = array_filter(

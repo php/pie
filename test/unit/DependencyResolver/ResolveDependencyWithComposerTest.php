@@ -87,11 +87,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
         self::assertStringStartsWith('1.', $package->version());
     }
 
-    /**
-     * @return array<string, array{0: array<string, string>, 1: non-empty-string, 2: non-empty-string}>
-     *
-     * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
-     */
+    /** @return array<string, array{0: array<string, string>, 1: non-empty-string, 2: non-empty-string}> */
     public static function unresolvableDependencies(): array
     {
         return [
