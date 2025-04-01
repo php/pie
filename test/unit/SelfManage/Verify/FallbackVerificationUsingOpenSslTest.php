@@ -8,8 +8,6 @@ use Composer\Downloader\TransportException;
 use Composer\Util\AuthHelper;
 use Composer\Util\Http\Response;
 use Composer\Util\HttpDownloader;
-use DateTimeImmutable;
-use DateTimeZone;
 use Php\Pie\File\BinaryFile;
 use Php\Pie\File\BinaryFileFailedVerification;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
@@ -63,11 +61,9 @@ final class FallbackVerificationUsingOpenSslTest extends TestCase
         $this->authHelper     = $this->createMock(AuthHelper::class);
         $this->output         = new BufferedOutput();
 
-        $now = new DateTimeImmutable('now', new DateTimeZone('UTC'));
-
         $this->trustedRootFilePath = tempnam(sys_get_temp_dir(), 'pie_test_trusted_root_file_path');
 
-        $this->verifier = new FallbackVerificationUsingOpenSsl($this->trustedRootFilePath, $now, self::TEST_GITHUB_URL, $this->httpDownloader, $this->authHelper);
+        $this->verifier = new FallbackVerificationUsingOpenSsl($this->trustedRootFilePath, self::TEST_GITHUB_URL, $this->httpDownloader, $this->authHelper);
     }
 
     /** @return array{0: string, 1: string} */

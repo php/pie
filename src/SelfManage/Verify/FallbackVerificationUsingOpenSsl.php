@@ -7,7 +7,6 @@ namespace Php\Pie\SelfManage\Verify;
 use Composer\Downloader\TransportException;
 use Composer\Util\AuthHelper;
 use Composer\Util\HttpDownloader;
-use DateTimeImmutable;
 use OpenSSLAsymmetricKey;
 use Php\Pie\File\BinaryFile;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
@@ -23,7 +22,6 @@ use function file_get_contents;
 use function is_array;
 use function is_string;
 use function json_decode;
-use function mb_substr;
 use function openssl_pkey_get_public;
 use function openssl_verify;
 use function openssl_x509_parse;
@@ -31,6 +29,7 @@ use function openssl_x509_verify;
 use function ord;
 use function sprintf;
 use function strlen;
+use function substr;
 use function trim;
 use function wordwrap;
 
@@ -50,7 +49,6 @@ final class FallbackVerificationUsingOpenSsl implements VerifyPiePhar
 
     public function __construct(
         private readonly string $trustedRootFilePath,
-        private readonly DateTimeImmutable $now,
         private readonly string $githubApiBaseUrl,
         private readonly HttpDownloader $httpDownloader,
         private readonly AuthHelper $authHelper,
@@ -109,12 +107,17 @@ final class FallbackVerificationUsingOpenSsl implements VerifyPiePhar
             $actualValue = $attestationCertificateInfo['extensions'][$extension];
 
             // First character (the ASN.1 tag) is expected to be UTF8String (0x0C)
-            if (ord($actualValue[0]) !== 12) {
+            if (ord($actualValue[0]) !== 0x0C) {
                 throw FailedToVerifyRelease::fromMismatchingExtensionValues($extension, $expectedValue, $actualValue);
             }
 
-            // Second character is expected to be the length of the actual value
-            $derDecodedValue = mb_substr($actualValue, 2, ord($actualValue[1]), '8bit');
+            /**
+             * Second character is expected to be the length of the actual value
+             * as long as they are less than 127 bytes (short form)
+             *
+             * @link https://www.oss.com/asn1/resources/asn1-made-simple/asn1-quick-reference/basic-encoding-rules.html#Lengths
+             */
+            $derDecodedValue = substr($actualValue, 2, ord($actualValue[1]));
             if ($derDecodedValue !== $expectedValue) {
                 throw FailedToVerifyRelease::fromMismatchingExtensionValues($extension, $expectedValue, $derDecodedValue);
             }
@@ -167,29 +170,21 @@ final class FallbackVerificationUsingOpenSsl implements VerifyPiePhar
                         continue;
                     }
 
-                    // Format the certificate, since OpenSSL doesn't accept the rawBytes directly
-                    $caCertificateString = "-----BEGIN CERTIFICATE-----\n"
-                        . wordwrap($caCertificateWrapper['rawBytes'], 67, "\n", true) . "\n"
-                        . "-----END CERTIFICATE-----\n";
+                    // Embed the base64-encoded DER into a PEM envelope for consumption by OpenSSL.
+                    $caCertificateString = sprintf(
+                        <<<'EOT'
+                        -----BEGIN CERTIFICATE-----
+                        %s
+                        -----END CERTIFICATE-----
+                        EOT,
+                        wordwrap($caCertificateWrapper['rawBytes'], 67, "\n", true),
+                    );
 
                     $caCertificateInfo = openssl_x509_parse($caCertificateString);
 
                     // If the CA certificate subject is not the issuer of the attestation certificate,
                     // this was not the cert we were looking for, skip it...
                     if ($caCertificateInfo['subject'] !== $attestationCertificateInfo['issuer']) {
-                        continue;
-                    }
-
-                    // Verify the CA cert has not expired
-                    Assert::keyExists($caCertificateInfo, 'validFrom_time_t');
-                    Assert::integer($caCertificateInfo['validFrom_time_t']);
-                    Assert::keyExists($caCertificateInfo, 'validTo_time_t');
-                    Assert::integer($caCertificateInfo['validTo_time_t']);
-
-                    $caValidFrom = new DateTimeImmutable('@' . $caCertificateInfo['validFrom_time_t']);
-                    $caValidTo   = new DateTimeImmutable('@' . $caCertificateInfo['validTo_time_t']);
-
-                    if ($this->now < $caValidFrom || $this->now > $caValidTo) {
                         continue;
                     }
 

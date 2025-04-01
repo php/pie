@@ -43,7 +43,7 @@ final class AttestationTest extends TestCase
     }
 
     /**
-     * @return array<array-key, mixed>
+     * @return list<array<array-key, array<array-key, mixed>>>
      *
      * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
      */
