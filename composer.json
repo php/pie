@@ -39,6 +39,7 @@
         "webmozart/assert": "^1.11"
     },
     "require-dev": {
+        "ext-openssl": "*",
         "behat/behat": "^3.19.0",
         "doctrine/coding-standard": "^13.0",
         "phpunit/phpunit": "^10.5.45",
