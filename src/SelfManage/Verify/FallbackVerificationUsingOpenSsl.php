@@ -76,8 +76,11 @@ final class FallbackVerificationUsingOpenSsl implements VerifyPiePhar
              *  - https://docs.sigstore.dev/logging/verify-release/
              *  - https://github.com/secure-systems-lab/dsse/blob/master/protocol.md#protocol
              */
-            $this->assertCertificateClaims($attestation);
-            $output->writeln('#' . $attestationIndex . ': Certificate facts verified.', OutputInterface::VERBOSITY_VERBOSE);
+            $this->assertCertificateSignedByTrustedRoot($attestation);
+            $output->writeln('#' . $attestationIndex . ': Certificate was signed by a trusted root.', OutputInterface::VERBOSITY_VERBOSE);
+
+            $this->assertCertificateExtensionClaims($attestation);
+            $output->writeln('#' . $attestationIndex . ': Certificate extension claims match.', OutputInterface::VERBOSITY_VERBOSE);
 
             $this->assertDigestFromAttestationMatchesActual($pharFilename, $attestation);
             $output->writeln('#' . $attestationIndex . ': Payload digest matches downloaded file.', OutputInterface::VERBOSITY_VERBOSE);
@@ -89,39 +92,9 @@ final class FallbackVerificationUsingOpenSsl implements VerifyPiePhar
         $output->writeln('<info>✅ Verified the new PIE version (using fallback verification)</info>');
     }
 
-    private function assertCertificateClaims(Attestation $attestation): void
+    private function assertCertificateSignedByTrustedRoot(Attestation $attestation): void
     {
         $attestationCertificateInfo = openssl_x509_parse($attestation->certificate);
-        Assert::isArray($attestationCertificateInfo['extensions']);
-
-        /**
-         * See {@link https://github.com/sigstore/fulcio/blob/main/docs/oid-info.md#136141572641--fulcio} for details
-         * on the Fulcio extension keys; note the values are DER-encoded strings; the ASN.1 tag is UTF8String (0x0C).
-         *
-         * First up, check the extension values are what we expect; these are hard-coded, as we don't expect them
-         * to change unless the namespace/repo name change, etc.
-         */
-        foreach (self::ATTESTATION_CERTIFICATE_EXPECTED_EXTENSION_VALUES as $extension => $expectedValue) {
-            Assert::keyExists($attestationCertificateInfo['extensions'], $extension);
-            Assert::stringNotEmpty($attestationCertificateInfo['extensions'][$extension]);
-            $actualValue = $attestationCertificateInfo['extensions'][$extension];
-
-            // First character (the ASN.1 tag) is expected to be UTF8String (0x0C)
-            if (ord($actualValue[0]) !== 0x0C) {
-                throw FailedToVerifyRelease::fromMismatchingExtensionValues($extension, $expectedValue, $actualValue);
-            }
-
-            /**
-             * Second character is expected to be the length of the actual value
-             * as long as they are less than 127 bytes (short form)
-             *
-             * @link https://www.oss.com/asn1/resources/asn1-made-simple/asn1-quick-reference/basic-encoding-rules.html#Lengths
-             */
-            $derDecodedValue = substr($actualValue, 2, ord($actualValue[1]));
-            if ($derDecodedValue !== $expectedValue) {
-                throw FailedToVerifyRelease::fromMismatchingExtensionValues($extension, $expectedValue, $derDecodedValue);
-            }
-        }
 
         // @todo process in place to make sure this gets updated frequently enough: gh attestation trusted-root > resources/trusted-root.jsonl
         $trustedRootJsonLines = explode("\n", trim(file_get_contents($this->trustedRootFilePath)));
@@ -141,7 +114,11 @@ final class FallbackVerificationUsingOpenSsl implements VerifyPiePhar
             $decoded = json_decode($jsonLine, true);
 
             // No certificate authorities defined in this JSON line, skip it...
-            if (! is_array($decoded) || ! array_key_exists('certificateAuthorities', $decoded)) {
+            if (
+                ! is_array($decoded)
+                || ! array_key_exists('certificateAuthorities', $decoded)
+                || ! is_array($decoded['certificateAuthorities'])
+            ) {
                 continue;
             }
 
@@ -206,6 +183,46 @@ final class FallbackVerificationUsingOpenSsl implements VerifyPiePhar
          * @psalm-suppress MixedArgument
          */
         throw FailedToVerifyRelease::fromNoIssuerCertificateInTrustedRoot($attestationCertificateInfo['issuer']);
+    }
+
+    private function assertCertificateExtensionClaims(Attestation $attestation): void
+    {
+        $attestationCertificateInfo = openssl_x509_parse($attestation->certificate);
+        Assert::isArray($attestationCertificateInfo['extensions']);
+
+        /**
+         * See {@link https://github.com/sigstore/fulcio/blob/main/docs/oid-info.md#136141572641--fulcio} for details
+         * on the Fulcio extension keys; note the values are DER-encoded strings; the ASN.1 tag is UTF8String (0x0C).
+         *
+         * Check the extension values are what we expect; these are hard-coded, as we don't expect them
+         * to change unless the namespace/repo name change, etc.
+         */
+        foreach (self::ATTESTATION_CERTIFICATE_EXPECTED_EXTENSION_VALUES as $extension => $expectedValue) {
+            Assert::keyExists($attestationCertificateInfo['extensions'], $extension);
+            Assert::stringNotEmpty($attestationCertificateInfo['extensions'][$extension]);
+            $actualValue = $attestationCertificateInfo['extensions'][$extension];
+
+            // First character (the ASN.1 tag) is expected to be UTF8String (0x0C)
+            if (ord($actualValue[0]) !== 0x0C) {
+                throw FailedToVerifyRelease::fromMismatchingExtensionValues($extension, $expectedValue, $actualValue);
+            }
+
+            /**
+             * Second character is expected to be the length of the actual value
+             * as long as they are less than 127 bytes (short form)
+             *
+             * @link https://www.oss.com/asn1/resources/asn1-made-simple/asn1-quick-reference/basic-encoding-rules.html#Lengths
+             */
+            $expectedValueLength = ord($actualValue[1]);
+            if (strlen($actualValue) !== 2 + $expectedValueLength) {
+                throw FailedToVerifyRelease::fromInvalidDerEncodedStringLength($actualValue, 2 + $expectedValueLength);
+            }
+
+            $derDecodedValue = substr($actualValue, 2, $expectedValueLength);
+            if ($derDecodedValue !== $expectedValue) {
+                throw FailedToVerifyRelease::fromMismatchingExtensionValues($extension, $expectedValue, $derDecodedValue);
+            }
+        }
     }
 
     private function verifyDsseEnvelopeSignature(ReleaseMetadata $releaseMetadata, int $attestationIndex, Attestation $attestation): void

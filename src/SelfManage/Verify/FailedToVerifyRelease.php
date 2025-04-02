@@ -12,6 +12,7 @@ use Symfony\Component\Process\Exception\ProcessFailedException;
 use function implode;
 use function is_array;
 use function sprintf;
+use function strlen;
 use function trim;
 
 class FailedToVerifyRelease extends RuntimeException
@@ -54,6 +55,16 @@ class FailedToVerifyRelease extends RuntimeException
         return new self(sprintf(
             'Could not find a trusted root certificate for issuer %s',
             is_array($issuer) ? implode(',', $issuer) : $issuer,
+        ));
+    }
+
+    public static function fromInvalidDerEncodedStringLength(string $derEncodedString, int $expectedLength): self
+    {
+        return new self(sprintf(
+            'DER encoded string length of "%s" was wrong; expected %d characters, was actually %d characters',
+            $derEncodedString,
+            $expectedLength,
+            strlen($derEncodedString),
         ));
     }
 
