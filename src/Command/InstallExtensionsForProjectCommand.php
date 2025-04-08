@@ -14,6 +14,7 @@ use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
 use Php\Pie\Installing\InstallForPhpProject\FindMatchingPackages;
+use Php\Pie\Installing\InstallForPhpProject\FindRootPackage;
 use Php\Pie\Installing\InstallForPhpProject\InstallSelectedPackage;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -51,6 +52,7 @@ use const PHP_EOL;
 final class InstallExtensionsForProjectCommand extends Command
 {
     public function __construct(
+        private readonly FindRootPackage $findRootPackage,
         private readonly FindMatchingPackages $findMatchingPackages,
         private readonly InstallSelectedPackage $installSelectedPackage,
         private readonly ContainerInterface $container,
@@ -65,23 +67,14 @@ final class InstallExtensionsForProjectCommand extends Command
         CommandHelper::configurePhpConfigOptions($this);
     }
 
-    private function rootPackageForCwd(InputInterface $input, OutputInterface $output): RootPackageInterface
-    {
-        $io = new ConsoleIO($input, $output, new HelperSet([]));
-
-        return ComposerFactory::create($io)->getPackage();
-    }
-
     public function execute(InputInterface $input, OutputInterface $output): int
     {
         $helper = $this->getHelper('question');
         assert($helper instanceof QuestionHelper);
 
-        Assert::isInstanceOf($output, ConsoleOutputInterface::class);
-
         $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $output);
 
-        $rootPackage = $this->rootPackageForCwd($input, $output);
+        $rootPackage = $this->findRootPackage->forCwd($input, $output);
 
         if (ExtensionType::isValid($rootPackage->getType())) {
             $output->writeln('<error>This composer.json is for an extension, installing missing packages is not supported.</error>');
