@@ -145,11 +145,18 @@ final class InstallExtensionsForProjectCommand extends Command
                 } catch (OutOfRangeException) {
                     $anyErrorsHappened = true;
 
-                    assert($output instanceof ConsoleOutputInterface);
-                    $output->getErrorOutput()->writeln(sprintf(
+                    $message = sprintf(
                         '<error>No packages were found for %s</error>',
                         $extension->nameWithExtPrefix(),
-                    ));
+                    );
+
+                    if ($output instanceof ConsoleOutputInterface) {
+                        $output->getErrorOutput()->writeln($message);
+
+                        return;
+                    }
+
+                    $output->writeln($message);
 
                     return;
                 }
@@ -185,10 +192,15 @@ final class InstallExtensionsForProjectCommand extends Command
                 } catch (Throwable $t) {
                     $anyErrorsHappened = true;
 
-                    assert($output instanceof ConsoleOutputInterface);
-                    $output->getErrorOutput()->writeln('<error>' . $t->getMessage() . '</error>');
+                    $message = '<error>' . $t->getMessage() . '</error>';
 
-                    return;
+                    if ($output instanceof ConsoleOutputInterface) {
+                        $output->getErrorOutput()->writeln($message);
+
+                        return;
+                    }
+
+                    $output->writeln($message);
                 }
             },
         );

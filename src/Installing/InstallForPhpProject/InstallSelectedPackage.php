@@ -14,7 +14,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 use function array_filter;
 use function array_key_exists;
 use function array_walk;
-use function assert;
 use function getcwd;
 use function in_array;
 use function is_string;
@@ -68,15 +67,13 @@ class InstallSelectedPackage
             getcwd(),
             null,
             static function (string $outOrErr, string $message) use ($output): void {
-                assert($output instanceof ConsoleOutputInterface);
-
-                if ($outOrErr === \Symfony\Component\Process\Process::OUT) {
-                    $output->write('   > ' . $message);
+                if ($output instanceof ConsoleOutputInterface && $outOrErr === \Symfony\Component\Process\Process::ERR) {
+                    $output->getErrorOutput()->write('   > ' . $message);
 
                     return;
                 }
 
-                $output->getErrorOutput()->write('   > ' . $message);
+                $output->write('   > ' . $message);
             },
         );
     }
