@@ -6,6 +6,7 @@ declare(strict_types=1);
 namespace Php\Pie;
 
 use Php\Pie\Command\BuildCommand;
+use Php\Pie\Command\InstallExtensionsForProjectCommand;
 use Php\Pie\Command\DownloadCommand;
 use Php\Pie\Command\InfoCommand;
 use Php\Pie\Command\InstallCommand;
@@ -44,6 +45,7 @@ $application->setCommandLoader(new ContainerCommandLoader(
         'repository:remove' => RepositoryRemoveCommand::class,
         'uninstall' => UninstallCommand::class,
         'self-update' => SelfUpdateCommand::class,
+        'install-extensions-for-project' => InstallExtensionsForProjectCommand::class,
     ]
 ));
 

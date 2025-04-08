@@ -39,9 +39,9 @@ use const PHP_VERSION;
 final class CommandHelper
 {
     private const ARG_REQUESTED_PACKAGE_AND_VERSION = 'requested-package-and-version';
-    private const OPTION_WITH_PHP_CONFIG            = 'with-php-config';
-    private const OPTION_WITH_PHP_PATH              = 'with-php-path';
-    private const OPTION_WITH_PHPIZE_PATH           = 'with-phpize-path';
+    public const OPTION_WITH_PHP_CONFIG             = 'with-php-config';
+    public const OPTION_WITH_PHP_PATH               = 'with-php-path';
+    public const OPTION_WITH_PHPIZE_PATH            = 'with-phpize-path';
     private const OPTION_MAKE_PARALLEL_JOBS         = 'make-parallel-jobs';
     private const OPTION_SKIP_ENABLE_EXTENSION      = 'skip-enable-extension';
     private const OPTION_FORCE                      = 'force';
