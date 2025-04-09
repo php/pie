@@ -8,7 +8,6 @@ use Composer\Package\Link;
 use Composer\Package\RootPackage;
 use Composer\Semver\Constraint\Constraint;
 use Php\Pie\Command\InstallExtensionsForProjectCommand;
-use Php\Pie\ComposerIntegration\InstallAndBuildProcess;
 use Php\Pie\ComposerIntegration\MinimalHelperSet;
 use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use Php\Pie\Installing\InstallForPhpProject\FindMatchingPackages;
@@ -76,8 +75,8 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
     {
         $rootPackage = new RootPackage('my/project', '1.2.3.0', '1.2.3');
         $rootPackage->setRequires([
-            new Link('my/project', 'ext-standard', new Constraint('=', '*'), Link::TYPE_REQUIRE),
-            new Link('my/project', 'ext-foobar', new Constraint('=', '*'), Link::TYPE_REQUIRE),
+            'ext-standard' => new Link('my/project', 'ext-standard', new Constraint('=', '*'), Link::TYPE_REQUIRE),
+            'ext-foobar' => new Link('my/project', 'ext-foobar', new Constraint('=', '*'), Link::TYPE_REQUIRE),
         ]);
         $this->findRootpackage->method('forCwd')->willReturn($rootPackage);
 

@@ -38,13 +38,13 @@ use const PHP_VERSION;
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class CommandHelper
 {
-    private const ARG_REQUESTED_PACKAGE_AND_VERSION = 'requested-package-and-version';
-    public const OPTION_WITH_PHP_CONFIG             = 'with-php-config';
-    public const OPTION_WITH_PHP_PATH               = 'with-php-path';
-    public const OPTION_WITH_PHPIZE_PATH            = 'with-phpize-path';
-    private const OPTION_MAKE_PARALLEL_JOBS         = 'make-parallel-jobs';
-    private const OPTION_SKIP_ENABLE_EXTENSION      = 'skip-enable-extension';
-    private const OPTION_FORCE                      = 'force';
+    public const ARG_REQUESTED_PACKAGE_AND_VERSION = 'requested-package-and-version';
+    public const OPTION_WITH_PHP_CONFIG            = 'with-php-config';
+    public const OPTION_WITH_PHP_PATH              = 'with-php-path';
+    public const OPTION_WITH_PHPIZE_PATH           = 'with-phpize-path';
+    private const OPTION_MAKE_PARALLEL_JOBS        = 'make-parallel-jobs';
+    private const OPTION_SKIP_ENABLE_EXTENSION     = 'skip-enable-extension';
+    private const OPTION_FORCE                     = 'force';
 
     /** @psalm-suppress UnusedConstructor */
     private function __construct()
@@ -77,7 +77,7 @@ final class CommandHelper
     {
         $command->addArgument(
             self::ARG_REQUESTED_PACKAGE_AND_VERSION,
-            InputArgument::REQUIRED,
+            InputArgument::OPTIONAL,
             'The PIE package name and version constraint to use, in the format {vendor/package}{?:{?version-constraint}{?@stability}}, for example `xdebug/xdebug:^3.4@alpha`, `xdebug/xdebug:@alpha`, `xdebug/xdebug:^3.4`, etc.',
         );
         $command->addOption(

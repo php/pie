@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace Php\Pie\Command;
 
-use Composer\Factory as ComposerFactory;
-use Composer\IO\ConsoleIO;
 use Composer\Package\Link;
-use Composer\Package\RootPackageInterface;
 use OutOfRangeException;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
@@ -19,7 +16,6 @@ use Php\Pie\Installing\InstallForPhpProject\InstallSelectedPackage;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\ConsoleOutputInterface;
@@ -27,7 +23,6 @@ use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Throwable;
-use Webmozart\Assert\Assert;
 
 use function array_filter;
 use function array_keys;

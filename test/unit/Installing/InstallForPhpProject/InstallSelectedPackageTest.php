@@ -26,9 +26,7 @@ final class InstallSelectedPackageTest extends TestCase
         $_SERVER['PHP_SELF'] = Platform::isWindows() ? self::FAKE_HAPPY_BAT : self::FAKE_HAPPY_SH;
 
         $input  = new ArrayInput(
-            [
-                '--with-php-config' => '/path/to/php/config',
-            ],
+            ['--with-php-config' => '/path/to/php/config'],
             new InputDefinition([
                 new InputOption('with-php-config', null, InputOption::VALUE_REQUIRED),
             ]),
