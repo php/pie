@@ -258,6 +258,39 @@ You can list the repositories for the target PHP installation with:
 
 * `pie repository:list [--with-php-config=...]`
 
+## Check and install missing extensions for your project
+
+You can use `pie install` when in a PHP project working directory to check the
+extensions the project requires are present. If an extension is missing, PIE
+will try to find an installation candidate and interactively ask if you would
+like to install one. For example:
+
+```
+$ pie install
+🥧 PHP Installer for Extensions (PIE), 0.9.0, from The PHP Foundation
+You are running PHP 8.3.19
+Target PHP installation: 8.3.19 nts, on Linux/OSX/etc x86_64 (from /usr/bin/php8.3)
+Checking extensions for your project your-vendor/your-project
+requires: curl ✅ Already installed
+requires: intl ✅ Already installed
+requires: json ✅ Already installed
+requires: example_pie_extension ⚠️  Missing
+
+The following packages may be suitable, which would you like to install:
+  [0] None
+  [1] asgrim/example-pie-extension: Example PIE extension
+ > 1
+   > 🥧 PHP Installer for Extensions (PIE), 0.9.0, from The PHP Foundation
+   > This command may need elevated privileges, and may prompt you for your password.
+   > You are running PHP 8.3.19
+   > Target PHP installation: 8.3.19 nts, on Linux/OSX/etc x86_64 (from /usr/bin/php8.3)
+   > Found package: asgrim/example-pie-extension:2.0.2 which provides ext-example_pie_extension
+   ... (snip) ...
+   > ✅ Extension is enabled and loaded in /usr/bin/php8.3
+
+Finished checking extensions.
+```
+
 ## Comparison with PECL
 
 Since PIE is a replacement for PECL, here is a comparison of the commands that

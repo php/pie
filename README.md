@@ -49,6 +49,36 @@ You must now add "extension=example_pie_extension" to your php.ini
 $
 ```
 
+## Installing all extensions for a project
+
+When in your PHP project, you can install any missing top-level extensions:
+
+```
+$ pie install
+🥧 PHP Installer for Extensions (PIE), 0.9.0, from The PHP Foundation
+You are running PHP 8.3.19
+Target PHP installation: 8.3.19 nts, on Linux/OSX/etc x86_64 (from /usr/bin/php8.3)
+Checking extensions for your project your-vendor/your-project
+requires: curl ✅ Already installed
+requires: intl ✅ Already installed
+requires: json ✅ Already installed
+requires: example_pie_extension ⚠️  Missing
+
+The following packages may be suitable, which would you like to install:
+  [0] None
+  [1] asgrim/example-pie-extension: Example PIE extension
+ > 1
+   > 🥧 PHP Installer for Extensions (PIE), 0.9.0, from The PHP Foundation
+   > This command may need elevated privileges, and may prompt you for your password.
+   > You are running PHP 8.3.19
+   > Target PHP installation: 8.3.19 nts, on Linux/OSX/etc x86_64 (from /usr/bin/php8.3)
+   > Found package: asgrim/example-pie-extension:2.0.2 which provides ext-example_pie_extension
+   ... (snip) ...
+   > ✅ Extension is enabled and loaded in /usr/bin/php8.3
+
+Finished checking extensions.
+```
+
 ## More documentation...
 
 The full documentation for PIE can be found in [usage](./docs/usage.md) docs.
