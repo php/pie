@@ -59,6 +59,9 @@ class RemoveIniEntryWithFileGetContents implements RemoveIniEntry
             );
         }
 
+        // Make sure all symlinks are resolved
+        $allIniFiles = array_filter(array_map('realpath', $allIniFiles));
+
         $regex = sprintf(
             '/^(%s\s*=\s*%s)/m',
             $package->extensionType() === ExtensionType::PhpModule ? 'extension' : 'zend_extension',
