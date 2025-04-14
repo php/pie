@@ -118,7 +118,7 @@ class PhpBinaryPath
 
     public function assertExtensionIsLoadedInRuntime(ExtensionName $extension, OutputInterface|null $output = null): void
     {
-        if (! in_array($extension->name(), array_keys($this->extensions()))) {
+        if (! in_array(strtolower($extension->name()), array_map('strtolower', array_keys($this->extensions())))) {
             throw Exception\ExtensionIsNotLoaded::fromExpectedExtension(
                 $this,
                 $extension,

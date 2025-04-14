@@ -287,6 +287,24 @@ final class PhpBinaryPathTest extends TestCase
         );
     }
 
+    public function testAssertDifferentCasedExtensionIsLoaded(): void
+    {
+        $php              = PhpBinaryPath::fromCurrentProcess();
+        $loadedExtensions = $php->extensions();
+
+        if (! count($loadedExtensions) || ! array_key_exists('Core', $loadedExtensions)) {
+            self::fail('Core extension is not loaded, this is quite unexpected...');
+        }
+
+        $output = new BufferedOutput(BufferedOutput::VERBOSITY_VERBOSE);
+        $php->assertExtensionIsLoadedInRuntime(ExtensionName::normaliseFromString('CORE'), $output);
+
+        self::assertStringContainsString(
+            'Successfully asserted that extension CORE is loaded in runtime.',
+            $output->fetch(),
+        );
+    }
+
     public function testAssertExtensionFailsWhenNotLoaded(): void
     {
         $php = PhpBinaryPath::fromCurrentProcess();
