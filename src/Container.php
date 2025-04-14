@@ -13,6 +13,7 @@ use Php\Pie\Command\BuildCommand;
 use Php\Pie\Command\DownloadCommand;
 use Php\Pie\Command\InfoCommand;
 use Php\Pie\Command\InstallCommand;
+use Php\Pie\Command\InstallExtensionsForProjectCommand;
 use Php\Pie\Command\RepositoryAddCommand;
 use Php\Pie\Command\RepositoryListCommand;
 use Php\Pie\Command\RepositoryRemoveCommand;
@@ -58,6 +59,7 @@ final class Container
         $container->singleton(RepositoryRemoveCommand::class);
         $container->singleton(UninstallCommand::class);
         $container->singleton(SelfUpdateCommand::class);
+        $container->singleton(InstallExtensionsForProjectCommand::class);
 
         $container->singleton(QuieterConsoleIO::class, static function (ContainerInterface $container): QuieterConsoleIO {
             return new QuieterConsoleIO(
