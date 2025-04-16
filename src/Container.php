@@ -33,11 +33,16 @@ use Php\Pie\Installing\UninstallUsingUnlink;
 use Php\Pie\Installing\UnixInstall;
 use Php\Pie\Installing\WindowsInstall;
 use Psr\Container\ContainerInterface;
+use Symfony\Component\Console\ConsoleEvents;
+use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+
+use function str_starts_with;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class Container
@@ -48,6 +53,24 @@ final class Container
         $container->instance(ContainerInterface::class, $container);
         $container->instance(InputInterface::class, new ArgvInput());
         $container->instance(OutputInterface::class, new ConsoleOutput());
+        $container->singleton(EventDispatcher::class, static function () {
+            $eventDispatcher = new EventDispatcher();
+            $eventDispatcher->addListener(
+                ConsoleEvents::COMMAND,
+                static function (ConsoleCommandEvent $event): void {
+                    $command     = $event->getCommand();
+                    $application = $command?->getApplication();
+
+                    if ($command === null || ! str_starts_with($command::class, 'Php\Pie\Command') || $application === null) {
+                        return;
+                    }
+
+                    $event->getOutput()->writeln($application->getLongVersion() . ', from The PHP Foundation');
+                },
+            );
+
+            return $eventDispatcher;
+        });
 
         $container->singleton(DownloadCommand::class);
         $container->singleton(BuildCommand::class);
