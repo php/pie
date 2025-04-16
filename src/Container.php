@@ -54,17 +54,19 @@ final class Container
         $container->instance(InputInterface::class, new ArgvInput());
         $container->instance(OutputInterface::class, new ConsoleOutput());
         $container->singleton(EventDispatcher::class, static function () {
+            $displayedBanner = false;
             $eventDispatcher = new EventDispatcher();
             $eventDispatcher->addListener(
                 ConsoleEvents::COMMAND,
-                static function (ConsoleCommandEvent $event): void {
+                static function (ConsoleCommandEvent $event) use (&$displayedBanner): void {
                     $command     = $event->getCommand();
                     $application = $command?->getApplication();
 
-                    if ($command === null || ! str_starts_with($command::class, 'Php\Pie\Command') || $application === null) {
+                    if ($displayedBanner || $command === null || ! str_starts_with($command::class, 'Php\Pie\Command') || $application === null) {
                         return;
                     }
 
+                    $displayedBanner = true;
                     $event->getOutput()->writeln($application->getLongVersion() . ', from The PHP Foundation');
                 },
             );
