@@ -29,6 +29,7 @@ final class InstallCommand extends Command
         private readonly ContainerInterface $container,
         private readonly DependencyResolver $dependencyResolver,
         private readonly ComposerIntegrationHandler $composerIntegrationHandler,
+        private readonly InvokeSubCommand $invokeSubCommand,
     ) {
         parent::__construct();
     }
@@ -43,7 +44,7 @@ final class InstallCommand extends Command
     public function execute(InputInterface $input, OutputInterface $output): int
     {
         if (! $input->getArgument(CommandHelper::ARG_REQUESTED_PACKAGE_AND_VERSION)) {
-            return CommandHelper::invokeSubCommand(
+            return ($this->invokeSubCommand)(
                 $this,
                 ['command' => 'install-extensions-for-project'],
                 $input,

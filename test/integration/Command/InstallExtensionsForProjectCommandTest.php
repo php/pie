@@ -9,19 +9,27 @@ use Composer\Package\RootPackage;
 use Composer\Semver\Constraint\Constraint;
 use Php\Pie\Command\InstallExtensionsForProjectCommand;
 use Php\Pie\ComposerIntegration\MinimalHelperSet;
+use Php\Pie\ComposerIntegration\PieJsonEditor;
 use Php\Pie\ComposerIntegration\QuieterConsoleIO;
+use Php\Pie\ExtensionType;
 use Php\Pie\Installing\InstallForPhpProject\FindMatchingPackages;
 use Php\Pie\Installing\InstallForPhpProject\FindRootPackage;
+use Php\Pie\Installing\InstallForPhpProject\InstallPiePackageFromPath;
 use Php\Pie\Installing\InstallForPhpProject\InstallSelectedPackage;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Tester\CommandTester;
+
+use function getcwd;
 
 #[CoversClass(InstallExtensionsForProjectCommand::class)]
 final class InstallExtensionsForProjectCommandTest extends TestCase
@@ -31,6 +39,7 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
     private FindMatchingPackages&MockObject $findMatchingPackages;
     private InstallSelectedPackage&MockObject $installSelectedPackage;
     private QuestionHelper&MockObject $questionHelper;
+    private InstallPiePackageFromPath&MockObject $installPiePackage;
 
     public function setUp(): void
     {
@@ -57,12 +66,14 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
         $this->findRootpackage        = $this->createMock(FindRootPackage::class);
         $this->findMatchingPackages   = $this->createMock(FindMatchingPackages::class);
         $this->installSelectedPackage = $this->createMock(InstallSelectedPackage::class);
+        $this->installPiePackage      = $this->createMock(InstallPiePackageFromPath::class);
         $this->questionHelper         = $this->createMock(QuestionHelper::class);
 
         $cmd = new InstallExtensionsForProjectCommand(
             $this->findRootpackage,
             $this->findMatchingPackages,
             $this->installSelectedPackage,
+            $this->installPiePackage,
             $container,
         );
         $cmd->setHelperSet(new HelperSet([
@@ -71,7 +82,7 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
         $this->commandTester = new CommandTester($cmd);
     }
 
-    public function testInstallingExtensionsForProject(): void
+    public function testInstallingExtensionsForPhpProject(): void
     {
         $rootPackage = new RootPackage('my/project', '1.2.3.0', '1.2.3');
         $rootPackage->setRequires([
@@ -102,5 +113,32 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
         self::assertStringContainsString('Checking extensions for your project my/project', $outputString);
         self::assertStringContainsString('requires: standard ✅ Already installed', $outputString);
         self::assertStringContainsString('requires: foobar ⚠️  Missing', $outputString);
+    }
+
+    public function testInstallingExtensionsForPieProject(): void
+    {
+        $rootPackage = new RootPackage('my/project', '1.2.3.0', '1.2.3');
+        $rootPackage->setType(ExtensionType::PhpModule->value);
+        $this->findRootpackage->method('forCwd')->willReturn($rootPackage);
+
+        $this->installPiePackage
+            ->expects(self::once())
+            ->method('__invoke')
+            ->with(
+                self::isInstanceOf(InstallExtensionsForProjectCommand::class),
+                getcwd(),
+                $rootPackage,
+                self::isInstanceOf(PieJsonEditor::class),
+                self::isInstanceOf(InputInterface::class),
+                self::isInstanceOf(OutputInterface::class),
+            )
+            ->willReturn(Command::SUCCESS);
+
+        $this->commandTester->execute(
+            [],
+            ['verbosity' => BufferedOutput::VERBOSITY_VERY_VERBOSE],
+        );
+
+        $this->commandTester->assertCommandIsSuccessful();
     }
 }

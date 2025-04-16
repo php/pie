@@ -13,6 +13,7 @@ use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
 use Php\Pie\Installing\InstallForPhpProject\FindMatchingPackages;
 use Php\Pie\Installing\InstallForPhpProject\FindRootPackage;
+use Php\Pie\Installing\InstallForPhpProject\InstallPiePackageFromPath;
 use Php\Pie\Installing\InstallForPhpProject\InstallSelectedPackage;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -53,6 +54,7 @@ final class InstallExtensionsForProjectCommand extends Command
         private readonly FindRootPackage $findRootPackage,
         private readonly FindMatchingPackages $findMatchingPackages,
         private readonly InstallSelectedPackage $installSelectedPackage,
+        private readonly InstallPiePackageFromPath $installPiePackageFromPath,
         private readonly ContainerInterface $container,
     ) {
         parent::__construct();
@@ -80,34 +82,14 @@ final class InstallExtensionsForProjectCommand extends Command
                 return Command::FAILURE;
             }
 
-            $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, new NullOutput());
-            $pieJsonEditor  = PieJsonEditor::fromTargetPlatform($targetPlatform);
-
-            $output->writeln(sprintf('Installing PIE extension from <info>%s</info>', $cwd));
-            $pieJsonEditor
-                ->ensureExists()
-                ->addRepository('path', $cwd);
-
-            try {
-                return CommandHelper::invokeSubCommand(
-                    $this,
-                    [
-                        'command' => 'install',
-                        'requested-package-and-version' => $rootPackage->getName() . ':*@dev',
-                    ],
-                    $input,
-                    $output,
-                );
-            } finally {
-                $output->writeln(
-                    sprintf(
-                        'Removing temporary path repository: %s',
-                        $cwd,
-                    ),
-                    OutputInterface::VERBOSITY_VERBOSE,
-                );
-                $pieJsonEditor->removeRepository($cwd);
-            }
+            return ($this->installPiePackageFromPath)(
+                $this,
+                $cwd,
+                $rootPackage,
+                PieJsonEditor::fromTargetPlatform(CommandHelper::determineTargetPlatformFromInputs($input, new NullOutput())),
+                $input,
+                $output,
+            );
         }
 
         $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $output);

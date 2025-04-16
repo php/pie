@@ -19,20 +19,13 @@ use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPhp\PhpizePath;
 use Php\Pie\Platform\TargetPlatform;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Webmozart\Assert\Assert;
 
-use function array_combine;
-use function array_filter;
 use function array_key_exists;
-use function array_keys;
-use function array_map;
-use function array_merge;
-use function array_values;
 use function is_array;
 use function is_string;
 use function reset;
@@ -321,27 +314,5 @@ final class CommandHelper
                 array_key_exists('url', $repoConfig) && is_string($repoConfig['url']) && $repoConfig['url'] !== '' ? $repoConfig['url'] : 'no path?',
             ));
         }
-    }
-
-    /** @param array<array-key, mixed> $subCommandInput */
-    public static function invokeSubCommand(
-        Command $command,
-        array $subCommandInput,
-        InputInterface $originalCommandInput,
-        OutputInterface $output,
-    ): int {
-        $originalSuppliedOptions = array_filter($originalCommandInput->getOptions());
-        $installForProjectInput  = new ArrayInput(array_merge(
-            $subCommandInput,
-            array_combine(
-                array_map(static fn ($key) => '--' . $key, array_keys($originalSuppliedOptions)),
-                array_values($originalSuppliedOptions),
-            ),
-        ));
-
-        $application = $command->getApplication();
-        Assert::notNull($application);
-
-        return $application->doRun($installForProjectInput, $output);
     }
 }
