@@ -10,6 +10,7 @@ use Composer\Util\HttpDownloader;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\QuieterConsoleIO;
+use Php\Pie\File\FullPathToSelf;
 use Php\Pie\File\SudoFilePut;
 use Php\Pie\SelfManage\Update\FetchPieReleaseFromGitHub;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
@@ -24,13 +25,9 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use function file_get_contents;
-use function getcwd;
 use function preg_match;
-use function realpath;
 use function sprintf;
 use function unlink;
-
-use const DIRECTORY_SEPARATOR;
 
 #[AsCommand(
     name: 'self-update',
@@ -141,8 +138,7 @@ final class SelfUpdateCommand extends Command
             return Command::FAILURE;
         }
 
-        $phpSelf        = $_SERVER['PHP_SELF'] ?? '';
-        $fullPathToSelf = $this->isAbsolutePath($phpSelf) ? $phpSelf : (getcwd() . DIRECTORY_SEPARATOR . $phpSelf);
+        $fullPathToSelf = (new FullPathToSelf())();
         $output->writeln(
             sprintf('Writing new version to %s', $fullPathToSelf),
             OutputInterface::VERBOSITY_VERBOSE,
@@ -152,22 +148,5 @@ final class SelfUpdateCommand extends Command
         $output->writeln('<info>✅ PIE has been upgraded to ' . $latestRelease->tag . '</info>');
 
         return Command::SUCCESS;
-    }
-
-    private function isAbsolutePath(string $path): bool
-    {
-        if (realpath($path) === $path) {
-            return true;
-        }
-
-        if ($path === '' || $path === '.') {
-            return false;
-        }
-
-        if (preg_match('#^[a-zA-Z]:\\\\#', $path)) {
-            return true;
-        }
-
-        return $path[0] === '/' || $path[0] === '\\';
     }
 }
