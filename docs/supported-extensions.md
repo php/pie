@@ -48,7 +48,7 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | Bitset               | ?                                                                                                                                                  |
 | BLENC                | ❌ Abandoned                                                                                                                                        |
 | bloomy               | ?                                                                                                                                                  |
-| brotli               | ?                                                                                                                                                  |
+| brotli               | ✅ Supported: [kjdev/brotli](https://packagist.org/packages/kjdev/brotli)                                                                           |
 | bsdiff               | ?                                                                                                                                                  |
 | bz2                  | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                                                                  |
 | bz2_filter           | ?                                                                                                                                                  |
@@ -422,4 +422,4 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | zlib_filter          | ?                                                                                                                                                  |
 | zmq                  | ❌ Abandoned                                                                                                                                        |
 | zookeeper            | ?                                                                                                                                                  |
-| zstd                 | ?                                                                                                                                                  |
+| zstd                 | ✅ Supported: [kjdev/zstd](https://packagist.org/packages/kjdev/zstd)                                                                               |
