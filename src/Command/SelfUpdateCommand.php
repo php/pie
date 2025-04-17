@@ -64,7 +64,7 @@ final class SelfUpdateCommand extends Command
         if (! PieVersion::isPharBuild()) {
             $output->writeln('<comment>Aborting! You are not running a PHAR, cannot self-update.</comment>');
 
-            return 1;
+            return Command::FAILURE;
         }
 
         $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $output);
