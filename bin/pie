@@ -14,6 +14,7 @@ use Php\Pie\Command\RepositoryAddCommand;
 use Php\Pie\Command\RepositoryListCommand;
 use Php\Pie\Command\RepositoryRemoveCommand;
 use Php\Pie\Command\SelfUpdateCommand;
+use Php\Pie\Command\SelfVerifyCommand;
 use Php\Pie\Command\ShowCommand;
 use Php\Pie\Command\UninstallCommand;
 use Php\Pie\Util\PieVersion;
@@ -45,6 +46,7 @@ $application->setCommandLoader(new ContainerCommandLoader(
         'repository:remove' => RepositoryRemoveCommand::class,
         'uninstall' => UninstallCommand::class,
         'self-update' => SelfUpdateCommand::class,
+        'self-verify' => SelfVerifyCommand::class,
         'install-extensions-for-project' => InstallExtensionsForProjectCommand::class,
     ]
 ));
