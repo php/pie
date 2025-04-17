@@ -45,6 +45,8 @@ final class PieVersion
      * realistic-looking version; usually either a tag (e.g. `2.0.0`), or a tag
      * and following commit short hash (e.g. `2.0.0@e558e33`). If not this will
      * fall back to some other techniques to try to determine a version.
+     *
+     * @return non-empty-string
      */
     public static function get(): string
     {
@@ -62,7 +64,7 @@ final class PieVersion
          * likely be something like `dev-main` (branch name).
          */
         $installedVersion = InstalledVersions::getVersion(InstalledVersions::getRootPackage()['name']);
-        if ($installedVersion === null) {
+        if ($installedVersion === null || $installedVersion === '') {
             return self::SYMFONY_MAGIC_CONST_UNKNOWN;
         }
 

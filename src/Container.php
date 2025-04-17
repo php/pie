@@ -18,6 +18,7 @@ use Php\Pie\Command\RepositoryAddCommand;
 use Php\Pie\Command\RepositoryListCommand;
 use Php\Pie\Command\RepositoryRemoveCommand;
 use Php\Pie\Command\SelfUpdateCommand;
+use Php\Pie\Command\SelfVerifyCommand;
 use Php\Pie\Command\ShowCommand;
 use Php\Pie\Command\UninstallCommand;
 use Php\Pie\ComposerIntegration\MinimalHelperSet;
@@ -84,6 +85,7 @@ final class Container
         $container->singleton(RepositoryRemoveCommand::class);
         $container->singleton(UninstallCommand::class);
         $container->singleton(SelfUpdateCommand::class);
+        $container->singleton(SelfVerifyCommand::class);
         $container->singleton(InstallExtensionsForProjectCommand::class);
 
         $container->singleton(QuieterConsoleIO::class, static function (ContainerInterface $container): QuieterConsoleIO {
@@ -106,6 +108,10 @@ final class Container
             ->give('https://api.github.com');
 
         $container->when(SelfUpdateCommand::class)
+            ->needs('$githubApiBaseUrl')
+            ->give('https://api.github.com');
+
+        $container->when(SelfVerifyCommand::class)
             ->needs('$githubApiBaseUrl')
             ->give('https://api.github.com');
 

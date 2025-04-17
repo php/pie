@@ -5,18 +5,16 @@ declare(strict_types=1);
 namespace Php\Pie\Installing\InstallForPhpProject;
 
 use Php\Pie\Command\CommandHelper;
+use Php\Pie\File\FullPathToSelf;
 use Php\Pie\Util\Process;
-use RuntimeException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use function array_filter;
-use function array_key_exists;
 use function array_walk;
 use function getcwd;
 use function in_array;
-use function is_string;
 
 use const ARRAY_FILTER_USE_BOTH;
 
@@ -25,14 +23,8 @@ class InstallSelectedPackage
 {
     public function withPieCli(string $selectedPackage, InputInterface $input, OutputInterface $output): void
     {
-        /** @psalm-suppress TypeDoesNotContainType */
-        $self = array_key_exists('PHP_SELF', $_SERVER) && is_string($_SERVER['PHP_SELF']) ? $_SERVER['PHP_SELF'] : '';
-        if ($self === '') {
-            throw new RuntimeException('Could not find PHP_SELF');
-        }
-
         $process = [
-            $self,
+            (new FullPathToSelf())(),
             'install',
             $selectedPackage,
         ];
