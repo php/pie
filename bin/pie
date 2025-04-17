@@ -21,16 +21,16 @@ use Symfony\Component\Console\Application;
 use Symfony\Component\Console\CommandLoader\ContainerCommandLoader;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /** @psalm-suppress UnresolvableInclude */
 include $_composer_autoload_path ?? __DIR__ . '/../vendor/autoload.php';
 
 $container = Container::factory();
 
-$pieAppName = '🥧 PHP Installer for Extensions (PIE)';
-$pieVersion = PieVersion::get();
-$application = new Application($pieAppName, $pieVersion);
-echo $pieAppName . ', ' . $pieVersion . ", from The PHP Foundation\n";
+$application = new Application('🥧 PHP Installer for Extensions (PIE)', PieVersion::get());
+
+$application->setDispatcher($container->get(EventDispatcher::class));
 
 $application->setCommandLoader(new ContainerCommandLoader(
     $container,

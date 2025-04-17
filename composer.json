@@ -35,6 +35,7 @@
         "illuminate/container": "^10.48.28",
         "psr/container": "^2.0.2",
         "symfony/console": "^6.4.20",
+        "symfony/event-dispatcher": "^6.4.13",
         "symfony/process": "^6.4.20",
         "webmozart/assert": "^1.11"
     },
