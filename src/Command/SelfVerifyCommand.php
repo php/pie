@@ -80,7 +80,7 @@ final class SelfVerifyCommand extends Command
         }
 
         $output->writeln(sprintf(
-            '<error>✅ You are running an authentic PIE version %s.</error>',
+            '<info>✅ You are running an authentic PIE version %s.</info>',
             $latestRelease->tag,
         ));
 
