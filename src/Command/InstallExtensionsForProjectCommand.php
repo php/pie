@@ -8,10 +8,12 @@ use Composer\Package\Link;
 use OutOfRangeException;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
+use Php\Pie\ComposerIntegration\PieJsonEditor;
 use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
 use Php\Pie\Installing\InstallForPhpProject\FindMatchingPackages;
 use Php\Pie\Installing\InstallForPhpProject\FindRootPackage;
+use Php\Pie\Installing\InstallForPhpProject\InstallPiePackageFromPath;
 use Php\Pie\Installing\InstallForPhpProject\InstallSelectedPackage;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -32,6 +34,8 @@ use function array_walk;
 use function assert;
 use function getcwd;
 use function in_array;
+use function is_string;
+use function realpath;
 use function sprintf;
 use function str_starts_with;
 use function strlen;
@@ -50,6 +54,7 @@ final class InstallExtensionsForProjectCommand extends Command
         private readonly FindRootPackage $findRootPackage,
         private readonly FindMatchingPackages $findMatchingPackages,
         private readonly InstallSelectedPackage $installSelectedPackage,
+        private readonly InstallPiePackageFromPath $installPiePackageFromPath,
         private readonly ContainerInterface $container,
     ) {
         parent::__construct();
@@ -67,15 +72,27 @@ final class InstallExtensionsForProjectCommand extends Command
         $helper = $this->getHelper('question');
         assert($helper instanceof QuestionHelper);
 
-        $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $output);
-
         $rootPackage = $this->findRootPackage->forCwd($input, $output);
 
         if (ExtensionType::isValid($rootPackage->getType())) {
-            $output->writeln('<error>This composer.json is for an extension, installing missing packages is not supported.</error>');
+            $cwd = realpath(getcwd());
+            if (! is_string($cwd) || $cwd === '') {
+                $output->writeln('<error>Failed to determine current working directory.</error>');
 
-            return Command::INVALID;
+                return Command::FAILURE;
+            }
+
+            return ($this->installPiePackageFromPath)(
+                $this,
+                $cwd,
+                $rootPackage,
+                PieJsonEditor::fromTargetPlatform(CommandHelper::determineTargetPlatformFromInputs($input, new NullOutput())),
+                $input,
+                $output,
+            );
         }
+
+        $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $output);
 
         $output->writeln(sprintf(
             'Checking extensions for your project <info>%s</info> (path: %s)',

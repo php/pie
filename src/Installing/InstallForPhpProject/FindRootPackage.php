@@ -11,6 +11,7 @@ use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 class FindRootPackage
 {
     public function forCwd(InputInterface $input, OutputInterface $output): RootPackageInterface

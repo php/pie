@@ -14,17 +14,9 @@ use Php\Pie\Platform\TargetPlatform;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Webmozart\Assert\Assert;
 
-use function array_combine;
-use function array_filter;
-use function array_keys;
-use function array_map;
-use function array_merge;
-use function array_values;
 use function sprintf;
 
 #[AsCommand(
@@ -37,6 +29,7 @@ final class InstallCommand extends Command
         private readonly ContainerInterface $container,
         private readonly DependencyResolver $dependencyResolver,
         private readonly ComposerIntegrationHandler $composerIntegrationHandler,
+        private readonly InvokeSubCommand $invokeSubCommand,
     ) {
         parent::__construct();
     }
@@ -48,27 +41,15 @@ final class InstallCommand extends Command
         CommandHelper::configureDownloadBuildInstallOptions($this);
     }
 
-    private function invokeInstallForProject(InputInterface $input, OutputInterface $output): int
-    {
-        $originalSuppliedOptions = array_filter($input->getOptions());
-        $installForProjectInput  = new ArrayInput(array_merge(
-            ['command' => 'install-extensions-for-project'],
-            array_combine(
-                array_map(static fn ($key) => '--' . $key, array_keys($originalSuppliedOptions)),
-                array_values($originalSuppliedOptions),
-            ),
-        ));
-
-        $application = $this->getApplication();
-        Assert::notNull($application);
-
-        return $application->doRun($installForProjectInput, $output);
-    }
-
     public function execute(InputInterface $input, OutputInterface $output): int
     {
         if (! $input->getArgument(CommandHelper::ARG_REQUESTED_PACKAGE_AND_VERSION)) {
-            return $this->invokeInstallForProject($input, $output);
+            return ($this->invokeSubCommand)(
+                $this,
+                ['command' => 'install-extensions-for-project'],
+                $input,
+                $output,
+            );
         }
 
         if (! TargetPlatform::isRunningAsRoot()) {
