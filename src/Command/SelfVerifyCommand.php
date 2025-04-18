@@ -48,7 +48,7 @@ final class SelfVerifyCommand extends Command
     public function execute(InputInterface $input, OutputInterface $output): int
     {
         if (! PieVersion::isPharBuild()) {
-            $output->writeln('<comment>Aborting! You are not running a PHAR, cannot self-update.</comment>');
+            $output->writeln('<comment>Aborting! You are not running a PHAR, cannot self-verify.</comment>');
 
             return Command::FAILURE;
         }
