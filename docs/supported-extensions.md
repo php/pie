@@ -120,6 +120,7 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | geospatial           | ?                                                                                                                                                  |
 | gmagick              | ?                                                                                                                                                  |
 | gnupg                | ?                                                                                                                                                  |
+| gpio                 | ✅ Supported: [embedded-php/gpio](https://packagist.org/packages/embedded-php/gpio)                                                             |
 | graphdat             | ?                                                                                                                                                  |
 | gRPC                 | ?                                                                                                                                                  |
 | gupnp                | ❌ Abandoned                                                                                                                                        |
@@ -134,6 +135,7 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | htscanner            | ❌ Abandoned                                                                                                                                        |
 | http_message         | ?                                                                                                                                                  |
 | huffman              | ❌ Abandoned                                                                                                                                        |
+| i2c                  | ✅ Supported: [embedded-php/i2c](https://packagist.org/packages/embedded-php/i2c)                                                               |
 | ibm_db2              | ?                                                                                                                                                  |
 | ice                  | ?                                                                                                                                                  |
 | id3                  | ❌ Abandoned                                                                                                                                        |
@@ -322,6 +324,7 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | smbclient            | ?                                                                                                                                                  |
 | solr                 | ?                                                                                                                                                  |
 | sphinx               | ❌ Abandoned                                                                                                                                        |
+| spi                  | ✅ Supported: [embedded-php/spi](https://packagist.org/packages/embedded-php/spi)                                                                   |
 | spidermonkey         | ❌ Abandoned                                                                                                                                        |
 | SPL_Types            | ❌ Abandoned                                                                                                                                        |
 | spplus               | ?                                                                                                                                                  |
@@ -364,6 +367,7 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | translit             | ?                                                                                                                                                  |
 | tvision              | ?                                                                                                                                                  |
 | txforward            | ❌ Abandoned                                                                                                                                        |
+| uart                 | ✅ Supported: [embedded-php/uart](https://packagist.org/packages/embedded-php/uart)                                                                 |
 | udis86               | ❌ Abandoned                                                                                                                                        |
 | ui                   | ?                                                                                                                                                  |
 | uopz                 | ?                                                                                                                                                  |
