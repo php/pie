@@ -13,6 +13,7 @@ use Php\Pie\ComposerIntegration\PieJsonEditor;
 use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use Php\Pie\ExtensionType;
 use Php\Pie\Installing\InstallForPhpProject\ComposerFactoryForProject;
+use Php\Pie\Installing\InstallForPhpProject\DetermineExtensionsRequired;
 use Php\Pie\Installing\InstallForPhpProject\FindMatchingPackages;
 use Php\Pie\Installing\InstallForPhpProject\InstallPiePackageFromPath;
 use Php\Pie\Installing\InstallForPhpProject\InstallSelectedPackage;
@@ -71,6 +72,7 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
 
         $cmd = new InstallExtensionsForProjectCommand(
             $this->composerFactoryForProject,
+            new DetermineExtensionsRequired(),
             $this->findMatchingPackages,
             $this->installSelectedPackage,
             $this->installPiePackage,

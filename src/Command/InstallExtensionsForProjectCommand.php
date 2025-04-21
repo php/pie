@@ -12,6 +12,7 @@ use Php\Pie\ComposerIntegration\PieJsonEditor;
 use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
 use Php\Pie\Installing\InstallForPhpProject\ComposerFactoryForProject;
+use Php\Pie\Installing\InstallForPhpProject\DetermineExtensionsRequired;
 use Php\Pie\Installing\InstallForPhpProject\FindMatchingPackages;
 use Php\Pie\Installing\InstallForPhpProject\InstallPiePackageFromPath;
 use Php\Pie\Installing\InstallForPhpProject\InstallSelectedPackage;
@@ -26,7 +27,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Throwable;
 
-use function array_filter;
 use function array_keys;
 use function array_map;
 use function array_merge;
@@ -37,8 +37,6 @@ use function in_array;
 use function is_string;
 use function realpath;
 use function sprintf;
-use function str_starts_with;
-use function strlen;
 use function strpos;
 use function substr;
 
@@ -52,6 +50,7 @@ final class InstallExtensionsForProjectCommand extends Command
 {
     public function __construct(
         private readonly ComposerFactoryForProject $composerFactoryForProject,
+        private readonly DetermineExtensionsRequired $determineExtensionsRequired,
         private readonly FindMatchingPackages $findMatchingPackages,
         private readonly InstallSelectedPackage $installSelectedPackage,
         private readonly InstallPiePackageFromPath $installPiePackageFromPath,
@@ -100,17 +99,7 @@ final class InstallExtensionsForProjectCommand extends Command
             getcwd(),
         ));
 
-        $rootPackageExtensionsRequired = array_filter(
-            array_merge($rootPackage->getRequires(), $rootPackage->getDevRequires()),
-            static function (Link $link) {
-                $linkTarget = $link->getTarget();
-                if (! str_starts_with($linkTarget, 'ext-')) {
-                    return false;
-                }
-
-                return ExtensionName::isValidExtensionName(substr($linkTarget, strlen('ext-')));
-            },
-        );
+        $extensionsRequired = $this->determineExtensionsRequired->forProject($rootPackage);
 
         $pieComposer = PieComposerFactory::createPieComposer(
             $this->container,
@@ -125,7 +114,7 @@ final class InstallExtensionsForProjectCommand extends Command
         $anyErrorsHappened = false;
 
         array_walk(
-            $rootPackageExtensionsRequired,
+            $extensionsRequired,
             function (Link $link) use ($pieComposer, $phpEnabledExtensions, $input, $output, $helper, &$anyErrorsHappened): void {
                 $extension = ExtensionName::normaliseFromString($link->getTarget());
 
