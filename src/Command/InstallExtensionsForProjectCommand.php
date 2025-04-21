@@ -11,8 +11,8 @@ use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieJsonEditor;
 use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
+use Php\Pie\Installing\InstallForPhpProject\ComposerFactoryForProject;
 use Php\Pie\Installing\InstallForPhpProject\FindMatchingPackages;
-use Php\Pie\Installing\InstallForPhpProject\FindRootPackage;
 use Php\Pie\Installing\InstallForPhpProject\InstallPiePackageFromPath;
 use Php\Pie\Installing\InstallForPhpProject\InstallSelectedPackage;
 use Psr\Container\ContainerInterface;
@@ -51,7 +51,7 @@ use const PHP_EOL;
 final class InstallExtensionsForProjectCommand extends Command
 {
     public function __construct(
-        private readonly FindRootPackage $findRootPackage,
+        private readonly ComposerFactoryForProject $composerFactoryForProject,
         private readonly FindMatchingPackages $findMatchingPackages,
         private readonly InstallSelectedPackage $installSelectedPackage,
         private readonly InstallPiePackageFromPath $installPiePackageFromPath,
@@ -72,7 +72,7 @@ final class InstallExtensionsForProjectCommand extends Command
         $helper = $this->getHelper('question');
         assert($helper instanceof QuestionHelper);
 
-        $rootPackage = $this->findRootPackage->forCwd($input, $output);
+        $rootPackage = $this->composerFactoryForProject->rootPackage($input, $output);
 
         if (ExtensionType::isValid($rootPackage->getType())) {
             $cwd = realpath(getcwd());

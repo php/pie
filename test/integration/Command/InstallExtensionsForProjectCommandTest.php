@@ -12,8 +12,8 @@ use Php\Pie\ComposerIntegration\MinimalHelperSet;
 use Php\Pie\ComposerIntegration\PieJsonEditor;
 use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use Php\Pie\ExtensionType;
+use Php\Pie\Installing\InstallForPhpProject\ComposerFactoryForProject;
 use Php\Pie\Installing\InstallForPhpProject\FindMatchingPackages;
-use Php\Pie\Installing\InstallForPhpProject\FindRootPackage;
 use Php\Pie\Installing\InstallForPhpProject\InstallPiePackageFromPath;
 use Php\Pie\Installing\InstallForPhpProject\InstallSelectedPackage;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -35,7 +35,7 @@ use function getcwd;
 final class InstallExtensionsForProjectCommandTest extends TestCase
 {
     private CommandTester $commandTester;
-    private FindRootPackage&MockObject $findRootpackage;
+    private ComposerFactoryForProject&MockObject $composerFactoryForProject;
     private FindMatchingPackages&MockObject $findMatchingPackages;
     private InstallSelectedPackage&MockObject $installSelectedPackage;
     private QuestionHelper&MockObject $questionHelper;
@@ -63,14 +63,14 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
             },
         );
 
-        $this->findRootpackage        = $this->createMock(FindRootPackage::class);
-        $this->findMatchingPackages   = $this->createMock(FindMatchingPackages::class);
-        $this->installSelectedPackage = $this->createMock(InstallSelectedPackage::class);
-        $this->installPiePackage      = $this->createMock(InstallPiePackageFromPath::class);
-        $this->questionHelper         = $this->createMock(QuestionHelper::class);
+        $this->composerFactoryForProject = $this->createMock(ComposerFactoryForProject::class);
+        $this->findMatchingPackages      = $this->createMock(FindMatchingPackages::class);
+        $this->installSelectedPackage    = $this->createMock(InstallSelectedPackage::class);
+        $this->installPiePackage         = $this->createMock(InstallPiePackageFromPath::class);
+        $this->questionHelper            = $this->createMock(QuestionHelper::class);
 
         $cmd = new InstallExtensionsForProjectCommand(
-            $this->findRootpackage,
+            $this->composerFactoryForProject,
             $this->findMatchingPackages,
             $this->installSelectedPackage,
             $this->installPiePackage,
@@ -89,7 +89,7 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
             'ext-standard' => new Link('my/project', 'ext-standard', new Constraint('=', '*'), Link::TYPE_REQUIRE),
             'ext-foobar' => new Link('my/project', 'ext-foobar', new Constraint('=', '*'), Link::TYPE_REQUIRE),
         ]);
-        $this->findRootpackage->method('forCwd')->willReturn($rootPackage);
+        $this->composerFactoryForProject->method('rootPackage')->willReturn($rootPackage);
 
         $this->findMatchingPackages->method('for')->willReturn([
             ['name' => 'vendor1/foobar', 'description' => 'The official foobar implementation'],
@@ -119,7 +119,7 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
     {
         $rootPackage = new RootPackage('my/project', '1.2.3.0', '1.2.3');
         $rootPackage->setType(ExtensionType::PhpModule->value);
-        $this->findRootpackage->method('forCwd')->willReturn($rootPackage);
+        $this->composerFactoryForProject->method('rootPackage')->willReturn($rootPackage);
 
         $this->installPiePackage
             ->expects(self::once())
