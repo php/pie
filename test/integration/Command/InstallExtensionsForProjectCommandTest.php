@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Php\PieIntegrationTest\Command;
 
+use Composer\Composer;
 use Composer\Package\Link;
 use Composer\Package\RootPackage;
+use Composer\Repository\InstalledArrayRepository;
+use Composer\Repository\RepositoryManager;
 use Composer\Semver\Constraint\Constraint;
 use Php\Pie\Command\InstallExtensionsForProjectCommand;
 use Php\Pie\ComposerIntegration\MinimalHelperSet;
@@ -93,6 +96,17 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
         ]);
         $this->composerFactoryForProject->method('rootPackage')->willReturn($rootPackage);
 
+        $installedRepository = new InstalledArrayRepository([$rootPackage]);
+
+        $repositoryManager = $this->createMock(RepositoryManager::class);
+        $repositoryManager->method('getLocalRepository')->willReturn($installedRepository);
+
+        $composer = $this->createMock(Composer::class);
+        $composer->method('getPackage')->willReturn($rootPackage);
+        $composer->method('getRepositoryManager')->willReturn($repositoryManager);
+
+        $this->composerFactoryForProject->method('composer')->willReturn($composer);
+
         $this->findMatchingPackages->method('for')->willReturn([
             ['name' => 'vendor1/foobar', 'description' => 'The official foobar implementation'],
             ['name' => 'vendor2/afoobar', 'description' => 'An improved async foobar extension'],
@@ -113,8 +127,8 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
 
         $this->commandTester->assertCommandIsSuccessful();
         self::assertStringContainsString('Checking extensions for your project my/project', $outputString);
-        self::assertStringContainsString('requires: standard ✅ Already installed', $outputString);
-        self::assertStringContainsString('requires: foobar ⚠️  Missing', $outputString);
+        self::assertStringContainsString('requires: my/project requires ext-standard (== *) ✅ Already installed', $outputString);
+        self::assertStringContainsString('requires: my/project requires ext-foobar (== *) ⚠️  Missing', $outputString);
     }
 
     public function testInstallingExtensionsForPieProject(): void

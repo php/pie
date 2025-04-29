@@ -99,7 +99,7 @@ final class InstallExtensionsForProjectCommand extends Command
             getcwd(),
         ));
 
-        $extensionsRequired = $this->determineExtensionsRequired->forProject($rootPackage);
+        $extensionsRequired = $this->determineExtensionsRequired->forProject($this->composerFactoryForProject->composer($input, $output));
 
         $pieComposer = PieComposerFactory::createPieComposer(
             $this->container,
@@ -122,7 +122,7 @@ final class InstallExtensionsForProjectCommand extends Command
                     $output->writeln(sprintf(
                         '%s: <info>%s</info> ✅ Already installed',
                         $link->getDescription(),
-                        $extension->name(),
+                        $link,
                     ));
 
                     return;
@@ -131,7 +131,7 @@ final class InstallExtensionsForProjectCommand extends Command
                 $output->writeln(sprintf(
                     '%s: <comment>%s</comment> ⚠️  Missing',
                     $link->getDescription(),
-                    $extension->name(),
+                    $link,
                 ));
 
                 try {
