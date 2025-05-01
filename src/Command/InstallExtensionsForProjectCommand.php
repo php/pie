@@ -11,8 +11,9 @@ use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieJsonEditor;
 use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
+use Php\Pie\Installing\InstallForPhpProject\ComposerFactoryForProject;
+use Php\Pie\Installing\InstallForPhpProject\DetermineExtensionsRequired;
 use Php\Pie\Installing\InstallForPhpProject\FindMatchingPackages;
-use Php\Pie\Installing\InstallForPhpProject\FindRootPackage;
 use Php\Pie\Installing\InstallForPhpProject\InstallPiePackageFromPath;
 use Php\Pie\Installing\InstallForPhpProject\InstallSelectedPackage;
 use Psr\Container\ContainerInterface;
@@ -26,7 +27,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Throwable;
 
-use function array_filter;
 use function array_keys;
 use function array_map;
 use function array_merge;
@@ -37,8 +37,6 @@ use function in_array;
 use function is_string;
 use function realpath;
 use function sprintf;
-use function str_starts_with;
-use function strlen;
 use function strpos;
 use function substr;
 
@@ -51,7 +49,8 @@ use const PHP_EOL;
 final class InstallExtensionsForProjectCommand extends Command
 {
     public function __construct(
-        private readonly FindRootPackage $findRootPackage,
+        private readonly ComposerFactoryForProject $composerFactoryForProject,
+        private readonly DetermineExtensionsRequired $determineExtensionsRequired,
         private readonly FindMatchingPackages $findMatchingPackages,
         private readonly InstallSelectedPackage $installSelectedPackage,
         private readonly InstallPiePackageFromPath $installPiePackageFromPath,
@@ -72,7 +71,7 @@ final class InstallExtensionsForProjectCommand extends Command
         $helper = $this->getHelper('question');
         assert($helper instanceof QuestionHelper);
 
-        $rootPackage = $this->findRootPackage->forCwd($input, $output);
+        $rootPackage = $this->composerFactoryForProject->rootPackage($input, $output);
 
         if (ExtensionType::isValid($rootPackage->getType())) {
             $cwd = realpath(getcwd());
@@ -100,17 +99,7 @@ final class InstallExtensionsForProjectCommand extends Command
             getcwd(),
         ));
 
-        $rootPackageExtensionsRequired = array_filter(
-            array_merge($rootPackage->getRequires(), $rootPackage->getDevRequires()),
-            static function (Link $link) {
-                $linkTarget = $link->getTarget();
-                if (! str_starts_with($linkTarget, 'ext-')) {
-                    return false;
-                }
-
-                return ExtensionName::isValidExtensionName(substr($linkTarget, strlen('ext-')));
-            },
-        );
+        $extensionsRequired = $this->determineExtensionsRequired->forProject($this->composerFactoryForProject->composer($input, $output));
 
         $pieComposer = PieComposerFactory::createPieComposer(
             $this->container,
@@ -125,7 +114,7 @@ final class InstallExtensionsForProjectCommand extends Command
         $anyErrorsHappened = false;
 
         array_walk(
-            $rootPackageExtensionsRequired,
+            $extensionsRequired,
             function (Link $link) use ($pieComposer, $phpEnabledExtensions, $input, $output, $helper, &$anyErrorsHappened): void {
                 $extension = ExtensionName::normaliseFromString($link->getTarget());
 
@@ -133,7 +122,7 @@ final class InstallExtensionsForProjectCommand extends Command
                     $output->writeln(sprintf(
                         '%s: <info>%s</info> ✅ Already installed',
                         $link->getDescription(),
-                        $extension->name(),
+                        $link,
                     ));
 
                     return;
@@ -142,7 +131,7 @@ final class InstallExtensionsForProjectCommand extends Command
                 $output->writeln(sprintf(
                     '%s: <comment>%s</comment> ⚠️  Missing',
                     $link->getDescription(),
-                    $extension->name(),
+                    $link,
                 ));
 
                 try {
