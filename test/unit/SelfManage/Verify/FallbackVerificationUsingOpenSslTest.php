@@ -142,7 +142,7 @@ EOF);
             ->with(
                 $url,
                 [
-                    'retry-auth-failure' => false,
+                    'retry-auth-failure' => true,
                     'http' => [
                         'method' => 'GET',
                         'header' => ['Authorization: Bearer fake-token'],

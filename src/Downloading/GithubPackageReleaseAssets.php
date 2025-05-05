@@ -80,7 +80,7 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
             $decodedRepsonse = $httpDownloader->get(
                 $this->githubApiBaseUrl . '/repos/' . $package->githubOrgAndRepository() . '/releases/tags/' . $package->version(),
                 [
-                    'retry-auth-failure' => false,
+                    'retry-auth-failure' => true,
                     'http' => [
                         'method' => 'GET',
                         'header' => $authHelper->addAuthenticationHeader([], $this->githubApiBaseUrl, $package->downloadUrl()),
