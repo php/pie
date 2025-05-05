@@ -144,6 +144,7 @@ final class SelfUpdateCommand extends Command
             OutputInterface::VERBOSITY_VERBOSE,
         );
         SudoFilePut::contents($fullPathToSelf, file_get_contents($pharFilename->filePath));
+        unlink($pharFilename->filePath);
 
         $output->writeln('<info>✅ PIE has been upgraded to ' . $latestRelease->tag . '</info>');
 
