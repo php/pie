@@ -4,12 +4,15 @@ on:
   schedule:
     - cron: "0 0 * * *"
 
+permissions:
+  contents: read
+
 jobs:
   check:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      issues: write
+      issues: write # This permission is needed to create the issue
     steps:
       - uses: actions/checkout@v4
       - name: Pull new trusted root
