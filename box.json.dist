@@ -1,5 +1,9 @@
 {
     "alias": "pie.phar",
     "output": "pie.phar",
-    "git": "pie_version"
+    "git": "pie_version",
+    "force-autodiscovery": true,
+    "directories": [
+        "resources"
+    ]
 }

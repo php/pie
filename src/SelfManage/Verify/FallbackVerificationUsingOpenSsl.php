@@ -285,7 +285,7 @@ final class FallbackVerificationUsingOpenSsl implements VerifyPiePhar
             $decodedJson = $this->httpDownloader->get(
                 $attestationUrl,
                 [
-                    'retry-auth-failure' => false,
+                    'retry-auth-failure' => true,
                     'http' => [
                         'method' => 'GET',
                         'header' => $this->authHelper->addAuthenticationHeader([], $this->githubApiBaseUrl, $attestationUrl),

@@ -36,7 +36,7 @@ final class FetchPieReleaseFromGitHubTest extends TestCase
             ->with(
                 $url,
                 [
-                    'retry-auth-failure' => false,
+                    'retry-auth-failure' => true,
                     'http' => [
                         'method' => 'GET',
                         'header' => ['Authorization: Bearer fake-token'],
@@ -91,7 +91,7 @@ final class FetchPieReleaseFromGitHubTest extends TestCase
             ->with(
                 $url,
                 [
-                    'retry-auth-failure' => false,
+                    'retry-auth-failure' => true,
                     'http' => [
                         'method' => 'GET',
                         'header' => ['Authorization: Bearer fake-token'],

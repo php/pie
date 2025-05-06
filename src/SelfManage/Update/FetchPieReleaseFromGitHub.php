@@ -37,7 +37,7 @@ final class FetchPieReleaseFromGitHub implements FetchPieRelease
         $decodedRepsonse = $this->httpDownloader->get(
             $url,
             [
-                'retry-auth-failure' => false,
+                'retry-auth-failure' => true,
                 'http' => [
                     'method' => 'GET',
                     'header' => $this->authHelper->addAuthenticationHeader([], $this->githubApiBaseUrl, $url),
@@ -81,7 +81,7 @@ final class FetchPieReleaseFromGitHub implements FetchPieRelease
         $pharContent = $this->httpDownloader->get(
             $releaseMetadata->downloadUrl,
             [
-                'retry-auth-failure' => false,
+                'retry-auth-failure' => true,
                 'http' => [
                     'method' => 'GET',
                     'header' => $this->authHelper->addAuthenticationHeader([], $this->githubApiBaseUrl, $releaseMetadata->downloadUrl),
