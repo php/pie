@@ -4,9 +4,15 @@ on:
   schedule:
     - cron: "0 0 * * *"
 
+permissions:
+  contents: read
+
 jobs:
   check:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write # This permission is needed to create the issue
     steps:
       - uses: actions/checkout@v4
       - name: Pull new trusted root
@@ -18,7 +24,7 @@ jobs:
           diff resources/trusted-root.jsonl resources/new-trusted-root.jsonl \
             && echo "Trusted root cert has not changed, no action required." \
             || ( \
-              (gh issue list | grep -i "Trusted root needs updating") \
+              (gh issue list --label "trusted-root-update" | grep -i "Trusted root needs updating") \
               && echo "Issue to update trusted root already exists, no action required." \
-              || gh issue create --title "Trusted root needs updating" --body "The trusted root certificate file needs updating. Use the \`gh attestation trusted-root > resources/trusted-root.jsonl\` command to update it." --assignee "asgrim" \
+              || gh issue create --title "Trusted root needs updating" --body "The trusted root certificate file needs updating. Use the \`gh attestation trusted-root > resources/trusted-root.jsonl\` command to update it." --assignee "asgrim" --label "trusted-root-update" \
             )
