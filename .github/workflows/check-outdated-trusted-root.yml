@@ -2,7 +2,7 @@ name: "Check for outdated trusted root certificates"
 
 on:
   schedule:
-    - cron: "0 0 * * 2"
+    - cron: "0 0 * * *"
 
 jobs:
   check:
