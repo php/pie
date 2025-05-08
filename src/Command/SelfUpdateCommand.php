@@ -148,6 +148,20 @@ final class SelfUpdateCommand extends Command
 
         $output->writeln('<info>✅ PIE has been upgraded to ' . $latestRelease->tag . '</info>');
 
-        return Command::SUCCESS;
+        $this->exitSuccessfully();
+    }
+
+    /**
+     * Exit is needed at the moment, as we have an EventDispatcher set on
+     * the application, which means classes try to get loaded (such as
+     * {@see \Symfony\Component\Console\Event\ConsoleTerminateEvent}), but
+     * AFTER we've over-written the PHAR. This results in weird behaviour when
+     * the class tries to get loaded, as the PHAR content changed. Not an
+     * ideal approach, need to look into better ways of handling it, maybe
+     * adding an event listener to overwrite the PHAR *after* the command runs.
+     */
+    private function exitSuccessfully(): never
+    {
+        exit(0);
     }
 }
