@@ -78,13 +78,18 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
         Assert::notNull($package->downloadUrl());
 
         try {
+            $authOptions = $authHelper->addAuthenticationOptions([], $this->githubApiBaseUrl, $package->downloadUrl());
+            Assert::keyExists($authOptions, 'http');
+            Assert::isArray($authOptions['http']);
+            Assert::keyExists($authOptions['http'], 'header');
+
             $decodedResponse = $httpDownloader->get(
                 $this->githubApiBaseUrl . '/repos/' . $package->githubOrgAndRepository() . '/releases/tags/' . $package->version(),
                 [
                     'retry-auth-failure' => true,
                     'http' => [
                         'method' => 'GET',
-                        'header' => $authHelper->addAuthenticationHeader([], $this->githubApiBaseUrl, $package->downloadUrl()),
+                        'header' => $authOptions['http']['header'],
                     ],
                 ],
             )->decodeJson();

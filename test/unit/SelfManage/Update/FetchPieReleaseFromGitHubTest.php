@@ -59,8 +59,8 @@ final class FetchPieReleaseFromGitHubTest extends TestCase
 
         $url = self::TEST_GITHUB_URL . '/repos/php/pie/releases';
         $authHelper
-            ->method('addAuthenticationHeader')
-            ->willReturn(['Authorization: Bearer fake-token']);
+            ->method('addAuthenticationOptions')
+            ->willReturn(['http' => ['header' => ['Authorization: Bearer fake-token']]]);
         $httpDownloader->expects(self::once())
             ->method('get')
             ->with(
@@ -97,8 +97,8 @@ final class FetchPieReleaseFromGitHubTest extends TestCase
 
         $url = self::TEST_GITHUB_URL . '/repos/php/pie/releases';
         $authHelper
-            ->method('addAuthenticationHeader')
-            ->willReturn(['Authorization: Bearer fake-token']);
+            ->method('addAuthenticationOptions')
+            ->willReturn(['http' => ['header' => ['Authorization: Bearer fake-token']]]);
         $httpDownloader->expects(self::once())
             ->method('get')
             ->with(
@@ -135,8 +135,8 @@ final class FetchPieReleaseFromGitHubTest extends TestCase
 
         $url = self::TEST_GITHUB_URL . '/repos/php/pie/releases';
         $authHelper
-            ->method('addAuthenticationHeader')
-            ->willReturn(['Authorization: Bearer fake-token']);
+            ->method('addAuthenticationOptions')
+            ->willReturn(['http' => ['header' => ['Authorization: Bearer fake-token']]]);
         $httpDownloader->expects(self::once())
             ->method('get')
             ->with(
@@ -195,8 +195,8 @@ final class FetchPieReleaseFromGitHubTest extends TestCase
         $authHelper     = $this->createMock(AuthHelper::class);
 
         $authHelper
-            ->method('addAuthenticationHeader')
-            ->willReturn(['Authorization: Bearer fake-token']);
+            ->method('addAuthenticationOptions')
+            ->willReturn(['http' => ['header' => ['Authorization: Bearer fake-token']]]);
         $httpDownloader->expects(self::once())
             ->method('get')
             ->with(
