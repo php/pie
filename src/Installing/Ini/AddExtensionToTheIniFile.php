@@ -42,7 +42,7 @@ class AddExtensionToTheIniFile
             return false;
         }
 
-        $originalIniContent = file_get_contents($ini);
+        $originalIniContent = @file_get_contents($ini);
 
         if (! is_string($originalIniContent)) {
             $output->writeln(
