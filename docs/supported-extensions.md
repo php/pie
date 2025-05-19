@@ -175,7 +175,7 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | lua                  | ?                                                                                                                                                  |
 | LuaSandbox           | ?                                                                                                                                                  |
 | lzf                  | ?                                                                                                                                                  |
-| mailparse            | ?                                                                                                                                                  |
+| mailparse            | ✅ Supported: [pecl/mailparse](https://packagist.org/packages/pecl/mailparse)                                                                      |
 | markdown             | ?                                                                                                                                                  |
 | maxdb                | ❌ Abandoned                                                                                                                                        |
 | maxminddb            | ?                                                                                                                                                  |
