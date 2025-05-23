@@ -185,6 +185,23 @@ Composer, along with the minimum stability.
   `07f454ad797c30651be8356466685b15331f72ff` would be installed. This would
   not work with Windows, as there is no release with Windows binaries.
 
+When a `version-constraint` is given, it is checked, and added directly to the
+`pie.json` for the target PHP version, e.g.:
+
+```shell
+$ pie install "xdebug/xdebug:^3.4.3 || 3.4.1"
+```
+
+will set the following in `pie.json`:
+
+```json
+{
+    "require": {
+        "xdebug/xdebug": "^3.4.3 || 3.4.1"
+    }
+}
+```
+
 If no `version-constraint` is given, try to install any compatible latest and
 stable version. PIE will always prefer stable versions.
 
