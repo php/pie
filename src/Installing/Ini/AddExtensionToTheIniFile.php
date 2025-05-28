@@ -13,6 +13,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 
 use function file_get_contents;
+use function is_readable;
 use function is_string;
 use function is_writable;
 use function sprintf;
@@ -42,7 +43,19 @@ class AddExtensionToTheIniFile
             return false;
         }
 
-        $originalIniContent = @file_get_contents($ini);
+        if (! is_readable($ini)) {
+            $output->writeln(
+                sprintf(
+                    'Could not read %s to make a backup of it, aborting enablement of extension',
+                    $ini,
+                ),
+                OutputInterface::VERBOSITY_VERBOSE,
+            );
+
+            return false;
+        }
+
+        $originalIniContent = file_get_contents($ini);
 
         if (! is_string($originalIniContent)) {
             $output->writeln(
