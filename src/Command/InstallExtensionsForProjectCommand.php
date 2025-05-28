@@ -73,16 +73,25 @@ final class InstallExtensionsForProjectCommand extends Command
         $helper = $this->getHelper('question');
         assert($helper instanceof QuestionHelper);
 
-        $workingDirOption = (string) $input->getOption(CommandHelper::OPTION_WORKING_DIRECTORY);
+        $workingDirOption  = (string) $input->getOption(CommandHelper::OPTION_WORKING_DIRECTORY);
+        $restoreWorkingDir = static function (): void {
+        };
         if ($workingDirOption !== '' && is_dir($workingDirOption)) {
+            $currentWorkingDir = getcwd();
+            $restoreWorkingDir = static function () use ($currentWorkingDir, $output): void {
+                chdir($currentWorkingDir);
+                $output->writeln(
+                    sprintf('Restored working directory to: %s', $currentWorkingDir),
+                    OutputInterface::VERBOSITY_VERBOSE,
+                );
+            };
+
             chdir($workingDirOption);
             $output->writeln(
                 sprintf('Changed working directory to: %s', $workingDirOption),
                 OutputInterface::VERBOSITY_VERBOSE,
             );
         }
-
-        // @todo check if we need to revert the cwd on exit (would need to check all exit branches)
 
         $rootPackage = $this->composerFactoryForProject->rootPackage($input, $output);
 
@@ -91,10 +100,12 @@ final class InstallExtensionsForProjectCommand extends Command
             if (! is_string($cwd) || $cwd === '') {
                 $output->writeln('<error>Failed to determine current working directory.</error>');
 
+                $restoreWorkingDir();
+
                 return Command::FAILURE;
             }
 
-            return ($this->installPiePackageFromPath)(
+            $exit = ($this->installPiePackageFromPath)(
                 $this,
                 $cwd,
                 $rootPackage,
@@ -102,6 +113,10 @@ final class InstallExtensionsForProjectCommand extends Command
                 $input,
                 $output,
             );
+
+            $restoreWorkingDir();
+
+            return $exit;
         }
 
         $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $output);
@@ -213,6 +228,8 @@ final class InstallExtensionsForProjectCommand extends Command
         );
 
         $output->writeln(PHP_EOL . 'Finished checking extensions.');
+
+        $restoreWorkingDir();
 
         /**
          * @psalm-suppress TypeDoesNotContainType
