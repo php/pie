@@ -42,6 +42,7 @@ final class CommandHelper
     public const OPTION_WITH_PHP_CONFIG            = 'with-php-config';
     public const OPTION_WITH_PHP_PATH              = 'with-php-path';
     public const OPTION_WITH_PHPIZE_PATH           = 'with-phpize-path';
+    public const OPTION_WORKING_DIRECTORY          = 'working-dir';
     private const OPTION_MAKE_PARALLEL_JOBS        = 'make-parallel-jobs';
     private const OPTION_SKIP_ENABLE_EXTENSION     = 'skip-enable-extension';
     private const OPTION_FORCE                     = 'force';
@@ -73,13 +74,16 @@ final class CommandHelper
         );
     }
 
-    public static function configureDownloadBuildInstallOptions(Command $command): void
+    public static function configureDownloadBuildInstallOptions(Command $command, bool $withRequestedPackageAndVersion = true): void
     {
-        $command->addArgument(
-            self::ARG_REQUESTED_PACKAGE_AND_VERSION,
-            InputArgument::OPTIONAL,
-            'The PIE package name and version constraint to use, in the format {vendor/package}{?:{?version-constraint}{?@stability}}, for example `xdebug/xdebug:^3.4@alpha`, `xdebug/xdebug:@alpha`, `xdebug/xdebug:^3.4`, etc.',
-        );
+        if ($withRequestedPackageAndVersion) {
+            $command->addArgument(
+                self::ARG_REQUESTED_PACKAGE_AND_VERSION,
+                InputArgument::OPTIONAL,
+                'The PIE package name and version constraint to use, in the format {vendor/package}{?:{?version-constraint}{?@stability}}, for example `xdebug/xdebug:^3.4@alpha`, `xdebug/xdebug:@alpha`, `xdebug/xdebug:^3.4`, etc.',
+            );
+        }
+
         $command->addOption(
             self::OPTION_MAKE_PARALLEL_JOBS,
             'j',
@@ -97,6 +101,13 @@ final class CommandHelper
             null,
             InputOption::VALUE_NONE,
             'To attempt to install a version that doesn\'t match the version constraints from the meta-data, for instance to install an older version than recommended, or when the signature is not available.',
+        );
+
+        $command->addOption(
+            self::OPTION_WORKING_DIRECTORY,
+            'd',
+            InputOption::VALUE_REQUIRED,
+            'The working directory to use, where applicable. If not specified, the current working directory is used. Only used in certain contexts.',
         );
 
         self::configurePhpConfigOptions($command);

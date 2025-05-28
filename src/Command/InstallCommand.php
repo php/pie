@@ -15,7 +15,6 @@ use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use function sprintf;
@@ -40,14 +39,6 @@ final class InstallCommand extends Command
         parent::configure();
 
         CommandHelper::configureDownloadBuildInstallOptions($this);
-
-        // @todo this doesn't make sense to be here, but is needed to pass the option down
-        $this->addOption(
-            'working-dir',
-            'd',
-            InputOption::VALUE_REQUIRED,
-            'The working directory to use; if not specified, the current working directory is used',
-        );
     }
 
     public function execute(InputInterface $input, OutputInterface $output): int

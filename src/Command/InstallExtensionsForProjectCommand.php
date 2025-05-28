@@ -21,7 +21,6 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -33,8 +32,10 @@ use function array_map;
 use function array_merge;
 use function array_walk;
 use function assert;
+use function chdir;
 use function getcwd;
 use function in_array;
+use function is_dir;
 use function is_string;
 use function realpath;
 use function sprintf;
@@ -49,8 +50,6 @@ use const PHP_EOL;
 )]
 final class InstallExtensionsForProjectCommand extends Command
 {
-    private const OPTION_WORKING_DIRECTORY = 'working-dir';
-
     public function __construct(
         private readonly ComposerFactoryForProject $composerFactoryForProject,
         private readonly DetermineExtensionsRequired $determineExtensionsRequired,
@@ -66,15 +65,7 @@ final class InstallExtensionsForProjectCommand extends Command
     {
         parent::configure();
 
-        // @todo remove ARG_REQUESTED_PACKAGE_AND_VERSION as it doesn't make sense here
-        CommandHelper::configureDownloadBuildInstallOptions($this);
-
-        $this->addOption(
-            self::OPTION_WORKING_DIRECTORY,
-            'd',
-            InputOption::VALUE_REQUIRED,
-            'The working directory to use; if not specified, the current working directory is used',
-        );
+        CommandHelper::configureDownloadBuildInstallOptions($this, false);
     }
 
     public function execute(InputInterface $input, OutputInterface $output): int
@@ -82,7 +73,7 @@ final class InstallExtensionsForProjectCommand extends Command
         $helper = $this->getHelper('question');
         assert($helper instanceof QuestionHelper);
 
-        $workingDirOption = (string) $input->getOption(self::OPTION_WORKING_DIRECTORY);
+        $workingDirOption = (string) $input->getOption(CommandHelper::OPTION_WORKING_DIRECTORY);
         if ($workingDirOption !== '' && is_dir($workingDirOption)) {
             chdir($workingDirOption);
             $output->writeln(
@@ -90,6 +81,7 @@ final class InstallExtensionsForProjectCommand extends Command
                 OutputInterface::VERBOSITY_VERBOSE,
             );
         }
+
         // @todo check if we need to revert the cwd on exit (would need to check all exit branches)
 
         $rootPackage = $this->composerFactoryForProject->rootPackage($input, $output);
