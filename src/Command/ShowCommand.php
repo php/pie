@@ -20,8 +20,11 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use function array_diff;
 use function array_key_exists;
+use function array_keys;
 use function array_walk;
+use function count;
 use function file_exists;
 use function sprintf;
 use function substr;
@@ -88,6 +91,7 @@ final class ShowCommand extends Command
         $phpEnabledExtensions = $targetPlatform->phpBinaryPath->extensions();
         $extensionPath        = $targetPlatform->phpBinaryPath->extensionPath();
         $extensionEnding      = $targetPlatform->operatingSystem === OperatingSystem::Windows ? '.dll' : '.so';
+        $piePackagesMatched   = [];
 
         $output->writeln(sprintf(
             "\n" . '<options=bold,underscore>%s:</>',
@@ -95,7 +99,7 @@ final class ShowCommand extends Command
         ));
         array_walk(
             $phpEnabledExtensions,
-            static function (string $version, string $phpExtensionName) use ($showAll, $output, $piePackages, $extensionPath, $extensionEnding): void {
+            static function (string $version, string $phpExtensionName) use ($showAll, $output, $piePackages, $extensionPath, $extensionEnding, &$piePackagesMatched): void {
                 if (! array_key_exists($phpExtensionName, $piePackages)) {
                     if ($showAll) {
                         $output->writeln(sprintf('  <comment>%s:%s</comment>', $phpExtensionName, $version));
@@ -104,7 +108,8 @@ final class ShowCommand extends Command
                     return;
                 }
 
-                $piePackage = $piePackages[$phpExtensionName];
+                $piePackage           = $piePackages[$phpExtensionName];
+                $piePackagesMatched[] = $phpExtensionName;
 
                 $output->writeln(sprintf(
                     '  <info>%s:%s</info> (from 🥧 <info>%s</info>%s)',
@@ -120,6 +125,21 @@ final class ShowCommand extends Command
                 ));
             },
         );
+
+        if (! $showAll && ! count($piePackagesMatched)) {
+            $output->writeln('(none)');
+        }
+
+        $unmatchedPiePackages = array_diff(array_keys($piePackages), $piePackagesMatched);
+
+        if (count($unmatchedPiePackages)) {
+            $output->writeln("\n" . ' ⚠️ <options=bold,underscore>PIE packages not loaded:</>');
+            $output->writeln('These extensions were installed with PIE but are not currently enabled.' . "\n");
+
+            foreach ($unmatchedPiePackages as $unmatchedPiePackage) {
+                $output->writeln(sprintf(' - %s', $piePackages[$unmatchedPiePackage]->prettyNameAndVersion()));
+            }
+        }
 
         return Command::SUCCESS;
     }
