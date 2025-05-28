@@ -13,6 +13,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 
 use function file_get_contents;
+use function is_readable;
 use function is_string;
 use function is_writable;
 use function sprintf;
@@ -34,6 +35,18 @@ class AddExtensionToTheIniFile
             $output->writeln(
                 sprintf(
                     'PHP is configured to use %s, but it is not writable by PIE.',
+                    $ini,
+                ),
+                OutputInterface::VERBOSITY_VERBOSE,
+            );
+
+            return false;
+        }
+
+        if (! is_readable($ini)) {
+            $output->writeln(
+                sprintf(
+                    'Could not read %s to make a backup of it, aborting enablement of extension',
                     $ini,
                 ),
                 OutputInterface::VERBOSITY_VERBOSE,
