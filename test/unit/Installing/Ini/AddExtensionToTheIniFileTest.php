@@ -139,7 +139,7 @@ final class AddExtensionToTheIniFileTest extends TestCase
             ));
 
             self::assertStringContainsString(
-                sprintf('Tried making a backup of %s but could not read it, aborting enablement of extension', $unreadableIniFile),
+                sprintf('Could not read %s to make a backup of it, aborting enablement of extension', $unreadableIniFile),
                 $this->output->fetch(),
             );
         } finally {
