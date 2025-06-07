@@ -135,8 +135,8 @@ EOF);
     {
         $url = self::TEST_GITHUB_URL . '/orgs/php/attestations/sha256:' . $digestInUrl;
         $this->authHelper
-            ->method('addAuthenticationHeader')
-            ->willReturn(['Authorization: Bearer fake-token']);
+            ->method('addAuthenticationOptions')
+            ->willReturn(['http' => ['header' => ['Authorization: Bearer fake-token']]]);
         $this->httpDownloader->expects(self::once())
             ->method('get')
             ->with(
@@ -267,8 +267,8 @@ EOF);
         $transportException->setStatusCode(404);
 
         $this->authHelper
-            ->method('addAuthenticationHeader')
-            ->willReturn(['Authorization: Bearer fake-token']);
+            ->method('addAuthenticationOptions')
+            ->willReturn(['http' => ['header' => ['Authorization: Bearer fake-token']]]);
         $this->httpDownloader->expects(self::once())
             ->method('get')
             ->willThrowException($transportException);

@@ -34,13 +34,14 @@ final class FetchPieReleaseFromGitHub implements FetchPieRelease
     {
         $url = $this->githubApiBaseUrl . self::PIE_LATEST_RELEASE_URL;
 
-        $decodedRepsonse = $this->httpDownloader->get(
+        $authOptions = $this->authHelper->addAuthenticationOptions([], $this->githubApiBaseUrl, $url);
+        $decodedRepsonse         = $this->httpDownloader->get(
             $url,
             [
                 'retry-auth-failure' => true,
                 'http' => [
                     'method' => 'GET',
-                    'header' => $this->authHelper->addAuthenticationHeader([], $this->githubApiBaseUrl, $url),
+                    'header' => $authOptions['http']['header'],
                 ],
             ],
         )->decodeJson();
@@ -78,13 +79,14 @@ final class FetchPieReleaseFromGitHub implements FetchPieRelease
 
     public function downloadContent(ReleaseMetadata $releaseMetadata): BinaryFile
     {
+        $authOptions = $this->authHelper->addAuthenticationOptions([], $this->githubApiBaseUrl, $releaseMetadata->downloadUrl);
         $pharContent = $this->httpDownloader->get(
             $releaseMetadata->downloadUrl,
             [
                 'retry-auth-failure' => true,
                 'http' => [
                     'method' => 'GET',
-                    'header' => $this->authHelper->addAuthenticationHeader([], $this->githubApiBaseUrl, $releaseMetadata->downloadUrl),
+                    'header' => $authOptions['http']['header'],
                 ],
             ],
         )->getBody();
