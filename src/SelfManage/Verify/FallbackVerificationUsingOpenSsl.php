@@ -282,13 +282,14 @@ final class FallbackVerificationUsingOpenSsl implements VerifyPiePhar
         $attestationUrl = $this->githubApiBaseUrl . '/orgs/php/attestations/sha256:' . $pharFilename->checksum;
 
         try {
-            $decodedJson = $this->httpDownloader->get(
+            $authOptions             = $this->authHelper->addAuthenticationOptions([], $this->githubApiBaseUrl, $attestationUrl);
+            $decodedJson             = $this->httpDownloader->get(
                 $attestationUrl,
                 [
                     'retry-auth-failure' => true,
                     'http' => [
                         'method' => 'GET',
-                        'header' => $this->authHelper->addAuthenticationHeader([], $this->githubApiBaseUrl, $attestationUrl),
+                        'header' => $authOptions['http']['header'],
                     ],
                 ],
             )->decodeJson();
