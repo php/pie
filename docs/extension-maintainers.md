@@ -42,23 +42,24 @@ flow is quite similar to adding a regular PHP package into Packagist.
 ### Add a `composer.json` to your extension
 
 The first step to adding PIE support is adding a `composer.json` to your
-extension repository. Most of the typical fields are the same, with a few
-notable exceptions:
+extension repository. Most of the typical fields are the same as a regular
+Composer package, with a few notable exceptions:
 
  * The `type` MUST be either `php-ext` for a PHP Module (this will be most
    extensions), or `php-ext-zend` for a Zend Extension.
- * An additional `php-ext` section MAY exist.
- * The Composer package name (i.e. the top level `name` field) should follow
+ * An additional `php-ext` section MAY exist (see below for the directives
+   that can be within `php-ext`)
+ * The Composer package name (i.e. the top level `name` field) MUST follow
    the usual Composer package name format, i.e. `<vendor>/<package>`.
  * However, please note that the Composer package name for a PIE extension
-   cannot share the same Composer package name as a regular PHP package, even
+   MUST NOT share the same Composer package name as a regular PHP package, even
    if they have different `type` fields.
 
 #### The `php-ext` definition
 
 ##### `extension-name`
 
-The `extension-name` SHOULD be specified, and must conform to the usual extension
+The `extension-name` MAY be specified, and MUST conform to the usual extension
 name regular expression, which is defined in
 [\Php\Pie\ExtensionName::VALID_PACKAGE_NAME_REGEX](../src/ExtensionName.php).
 If the `extension-name` is not specified, the `extension-name` will be derived
@@ -73,6 +74,13 @@ given a `composer.json` with:
 
 The extension name would be derived as `myextension`. The `myvendor/` vendor
 prefix is removed.
+
+> [!WARNING]
+> If your Composer package name would result in an invalid PHP extension name,
+> you MUST specify the `extension-name` directive. For example a Composer
+> package name `myvendor/my-extension` would result in an invalid PHP extension
+> name, since hypens are not allowed, so you MUST specify a valid
+> `extension-name` for this Composer package name.
 
 The `extension-name` SHOULD NOT be prefixed with `ext-` as is a convention in
 Composer when using `require`.
@@ -90,14 +98,14 @@ An example of `extension-name` being used:
 
 ##### `priority`
 
-`priority` is currently not used, but will form part of the `ini` filename to
-control ordering of extensions, if the target platform uses it.
+`priority` forms part of the `ini` filename to control ordering of extensions,
+if the target platform uses the multiple INI files in a directory.
 
 ##### `support-zts` and `support-nts`
 
 Indicates whether the extension supports Zend Thread-Safe (ZTS) and non-Thread-
 Safe (NTS) modes. Both these flags default to `true` if not specified, but if
-your extension does not support either mode, it should be specified, and will
+your extension does not support either mode, it MUST be specified, and will
 mean the extension will not be installable on the target platform.
 
 Theoretically, it is possible to specify `false` for both `support-zts` and
@@ -161,8 +169,9 @@ an invalid option, such as `pie install myvendor/myext --something-else` will
 result in an error `The "--something-else" option does not exist.`.
 
 If an end user does not specify a flag defined in the `configure-options`
-definition, it will simply not be passed to `./configure`. There is no way to
-specify a default value in the `configure-options` definition.
+definition, it will not be passed to `./configure`. There is no way to specify
+a default value in the `configure-options` definition. Your `config.m4` should
+handle this accordingly.
 
 ##### `build-path`
 
@@ -211,19 +220,25 @@ change the behaviour of downloading the source package.
    assets list based matching one of the following naming conventions:
    * `php_{ExtensionName}-{Version}-src.tgz` (e.g. `php_myext-1.20.1-src.tgz`)
    * `php_{ExtensionName}-{Version}-src.zip` (e.g. `php_myext-1.20.1-src.zip`)
+   * `{ExtensionName}-{Version}.tgz` (this is intended for backwards
+     compatibility with PECL packages)
 
 #### Extension dependencies
 
 Extension authors may define some dependencies in `require`, but practically,
-most extensions would not need to define dependencies. Dependencies on other
-extensions may be defined, for example `ext-json`. However, dependencies on
-a regular PHP package (such as `monolog/monolog`) are ignored when requesting
-an installation of an extension with PIE.
+most extensions would not need to define dependencies, except for the PHP
+versions supported by the extension. Dependencies on other extensions may be
+defined, for example `ext-json`. However, dependencies on a regular PHP package
+(such as `monolog/monolog`) should NOT be specified in your `require` section.
 
 It is worth noting that if your extension does define a dependency on another
-dependency, this would prevent installation of the extension, and at the moment
-the messaging around this is
-[not particularly clear](https://github.com/php/pie/issues/15).
+dependency, and this is not available, someone installing your extension would
+receive a message such as:
+
+```
+Cannot use myvendor/myextension's latest version 1.2.3 as it requires
+ext-something * which is missing from your platform.
+```
 
 ### Submit the extension to Packagist
 
@@ -231,7 +246,7 @@ Once you have committed your `composer.json` to your repository, you may then
 submit it to Packagist in the same way as any other package.
 
  * Head to [https://packagist.org/packages/submit](https://packagist.org/packages/submit)
- * Enter the URL of your repository, and follow the instructions.
+ * Enter the URL of your repository and follow the instructions.
 
 ### Windows Support
 
