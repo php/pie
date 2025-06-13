@@ -9,7 +9,8 @@ order: 2
 ### Manual installation
 
 - Download `pie.phar` from the [latest releases](https://github.com/php/pie/releases)
-- Verify the PHAR's source with `gh attestation verify pie.phar --repo php/pie`
+- Verify the PHAR's source with `gh attestation verify --owner php pie.phar`
+    - Note that this step requires the [`gh` CLI command](https://github.com/cli/cli/).
 - You may then invoke PIE with `php pie.phar <command>`
 - Optionally, copy `pie.phar` into your `$PATH`, e.g. `cp pie.phar /usr/local/bin/pie`
     - If you copy PIE into your `$PATH`, you may then invoke PIE with `pie <command>`
@@ -24,7 +25,10 @@ running this, but this will put PIE into `/usr/local/bin/pie` on a non-Windows
 system:
 
 ```shell
-sudo curl -L --output /usr/local/bin/pie https://github.com/php/pie/releases/latest/download/pie.phar && sudo chmod +x /usr/local/bin/pie
+curl -fL --output /tmp/pie.phar https://github.com/php/pie/releases/latest/download/pie.phar \
+  && gh attestation verify --owner php /tmp/pie.phar \
+  && sudo mv /tmp/pie.phar /usr/local/bin/pie \
+  && sudo chmod +x /usr/local/bin/pie
 ```
 
 ### Docker installation

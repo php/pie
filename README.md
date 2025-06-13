@@ -1,10 +1,5 @@
 # 🥧 PIE (PHP Installer for Extensions)
 
-> [!WARNING]
-> PIE is still in early development. We welcome you to try this out, but please
-> exercise caution when using PIE, as things may go wrong! If you do encounter
-> issues, please do report an issue!
-
 You will need PHP 8.1 or newer to run PIE, but PIE can install an extension to
 any installed PHP version.
 
@@ -18,7 +13,7 @@ please read [extension-maintainers](./docs/extension-maintainers.md).
 - Download `pie.phar` either:
   - [latest stable release](https://github.com/php/pie/releases)
   - [latest unstable nightly](https://php.github.io/pie/pie-nightly.phar)
-- Verify the PHAR's source with `gh attestation verify pie.phar --repo php/pie`
+- Verify the PHAR's source with `gh attestation verify --owner php pie.phar`
 - You may then invoke PIE with `php pie.phar <command>`
 
 Further installation details can be found in the [usage](./docs/usage.md) docs.
