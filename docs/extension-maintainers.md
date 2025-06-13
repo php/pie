@@ -229,7 +229,7 @@ Extension authors may define some dependencies in `require`, but practically,
 most extensions would not need to define dependencies, except for the PHP
 versions supported by the extension. Dependencies on other extensions may be
 defined, for example `ext-json`. However, dependencies on a regular PHP package
-(such as `monolog/monolog`) should NOT be specified in your `require` section.
+(such as `monolog/monolog`) SHOULD NOT be specified in your `require` section.
 
 It is worth noting that if your extension does define a dependency on another
 dependency, and this is not available, someone installing your extension would
