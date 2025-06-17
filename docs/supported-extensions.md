@@ -30,22 +30,22 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | APCu                 | ✅ Supported: [apcu/apcu](https://packagist.org/packages/apcu/apcu)                                                                                 |
 | apcu_bc              | ?                                                                                                                                                  |
 | apd                  | ❌ Abandoned                                                                                                                                        |
-| apfd                 | ?                                                                                                                                                  |
+| apfd                 | ✅ Supported: [m6w6/ext-apfd](https://packagist.org/packages/m6w6/ext-apfd)                                                                         |
 | APM                  | ?                                                                                                                                                  |
 | apn                  | ❌ Abandoned                                                                                                                                        |
 | archive              | ❌ Abandoned                                                                                                                                        |
 | ares                 | ❌ Abandoned                                                                                                                                        |
-| ast                  | ?                                                                                                                                                  |
+| ast                  | ✅ Supported: [nikic/php-ast](https://packagist.org/packages/nikic/php-ast)                                                                         |
 | augeas               | ?                                                                                                                                                  |
 | automap              | ❌ Abandoned                                                                                                                                        |
 | awscrt               | ?                                                                                                                                                  |
 | axis2                | ❌ Abandoned                                                                                                                                        |
-| base58               | ?                                                                                                                                                  |
+| base58               | ⏰ PR: [jasny/base58-php-ext#14](https://github.com/jasny/base58-php-ext/pull/14)                                                                   |
 | bbcode               | ❌ Abandoned                                                                                                                                        |
 | bcompiler            | ❌ Abandoned                                                                                                                                        |
 | big_int              | ❌ Abandoned                                                                                                                                        |
 | binpack              | ❌ Abandoned                                                                                                                                        |
-| Bitset               | ?                                                                                                                                                  |
+| Bitset               | ⏰ PR: [php/pecl-numbers-bitset#16](https://github.com/php/pecl-numbers-bitset/pull/16)                                                             |
 | BLENC                | ❌ Abandoned                                                                                                                                        |
 | bloomy               | ?                                                                                                                                                  |
 | brotli               | ✅ Supported: [kjdev/brotli](https://packagist.org/packages/kjdev/brotli)                                                                           |
@@ -68,8 +68,8 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | courierauth          | ?                                                                                                                                                  |
 | crack                | ❌ Abandoned                                                                                                                                        |
 | crack_dll            | ?                                                                                                                                                  |
-| crypto               | ?                                                                                                                                                  |
-| CSV                  | ?                                                                                                                                                  |
+| crypto               | ⏰ PR: [bukka/php-crypto#43](https://github.com/bukka/php-crypto/pull/43)                                                                           |
+| CSV                  | ✅ Supported: [girgias/csv](https://packagist.org/packages/girgias/csv)                                                                             |
 | CUBRID               | ?                                                                                                                                                  |
 | cvsclient            | ?                                                                                                                                                  |
 | cybercash            | ❌ Abandoned                                                                                                                                        |
@@ -78,19 +78,19 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | datadog_trace        | ?                                                                                                                                                  |
 | date_time            | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                                                                  |
 | dazuko               | ?                                                                                                                                                  |
-| dbase                | ?                                                                                                                                                  |
+| dbase                | ⏰ PR: [php/pecl-database-dbase#6](https://github.com/php/pecl-database-dbase/pull/6)                                                               |
 | DBDO                 | ❌ Abandoned                                                                                                                                        |
 | dbplus               | ❌ Abandoned                                                                                                                                        |
 | DBus                 | ❌ Abandoned                                                                                                                                        |
 | dbx                  | ❌ Abandoned                                                                                                                                        |
-| decimal              | ?                                                                                                                                                  |
-| dio                  | ✅ Supported: [pecl/dio](https://packagist.org/packages/pecl/dio)                                                                                  |
+| decimal              | ⏰ PR: [php-decimal/ext-decimal#87](https://github.com/php-decimal/ext-decimal/pull/87)                                                             |
+| dio                  | ✅ Supported: [pecl/dio](https://packagist.org/packages/pecl/dio)                                                                                   |
 | docblock             | ?                                                                                                                                                  |
 | dom_varimport        | ❌ Abandoned                                                                                                                                        |
 | doublemetaphone      | ?                                                                                                                                                  |
 | drizzle              | ❌ Abandoned                                                                                                                                        |
 | Druid                | ?                                                                                                                                                  |
-| ds                   | ?                                                                                                                                                  |
+| ds                   | ⏰ PR: [php-ds/ext-ds#214](https://github.com/php-ds/ext-ds/pull/214)                                                                               |
 | dtrace               | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                                                                  |
 | ecasound             | ?                                                                                                                                                  |
 | ecma_intl            | ?                                                                                                                                                  |
@@ -98,8 +98,8 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | enchant              | ❌ Abandoned                                                                                                                                        |
 | env                  | ?                                                                                                                                                  |
 | esmtp                | ?                                                                                                                                                  |
-| ev                   | ?                                                                                                                                                  |
-| event                | ?                                                                                                                                                  |
+| ev                   | ⏰ PR: [osmanov/pecl-ev#9](https://bitbucket.org/osmanov/pecl-ev/pull-requests/9)                                                                   |
+| event                | ⏰ PR: [osmanov/pecl-event#19](https://bitbucket.org/osmanov/pecl-event/pull-requests/19)                                                           |
 | excimer              | ?                                                                                                                                                  |
 | expect               | ?                                                                                                                                                  |
 | fam                  | ❌ Abandoned                                                                                                                                        |
@@ -117,10 +117,10 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | gearman              | ?                                                                                                                                                  |
 | gender               | ?                                                                                                                                                  |
 | geoip                | ?                                                                                                                                                  |
-| geospatial           | ?                                                                                                                                                  |
+| geospatial           | ⏰ PR: [php-geospatial/geospatial#32](https://github.com/php-geospatial/geospatial/pull/32)                                                         |
 | gmagick              | ?                                                                                                                                                  |
 | gnupg                | ?                                                                                                                                                  |
-| gpio                 | ✅ Supported: [embedded-php/gpio](https://packagist.org/packages/embedded-php/gpio)                                                             |
+| gpio                 | ✅ Supported: [embedded-php/gpio](https://packagist.org/packages/embedded-php/gpio)                                                                 |
 | graphdat             | ?                                                                                                                                                  |
 | gRPC                 | ?                                                                                                                                                  |
 | gupnp                | ❌ Abandoned                                                                                                                                        |
@@ -135,7 +135,7 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | htscanner            | ❌ Abandoned                                                                                                                                        |
 | http_message         | ?                                                                                                                                                  |
 | huffman              | ❌ Abandoned                                                                                                                                        |
-| i2c                  | ✅ Supported: [embedded-php/i2c](https://packagist.org/packages/embedded-php/i2c)                                                               |
+| i2c                  | ✅ Supported: [embedded-php/i2c](https://packagist.org/packages/embedded-php/i2c)                                                                   |
 | ibm_db2              | ?                                                                                                                                                  |
 | ice                  | ?                                                                                                                                                  |
 | id3                  | ❌ Abandoned                                                                                                                                        |
@@ -175,7 +175,7 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | lua                  | ?                                                                                                                                                  |
 | LuaSandbox           | ?                                                                                                                                                  |
 | lzf                  | ?                                                                                                                                                  |
-| mailparse            | ✅ Supported: [pecl/mailparse](https://packagist.org/packages/pecl/mailparse)                                                                      |
+| mailparse            | ✅ Supported: [pecl/mailparse](https://packagist.org/packages/pecl/mailparse)                                                                       |
 | markdown             | ?                                                                                                                                                  |
 | maxdb                | ❌ Abandoned                                                                                                                                        |
 | maxminddb            | ?                                                                                                                                                  |
@@ -294,7 +294,7 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | request              | ?                                                                                                                                                  |
 | riak                 | ❌ Abandoned                                                                                                                                        |
 | rnp                  | ?                                                                                                                                                  |
-| rpminfo              | ✅ Supported: [remi/rpminfo](https://packagist.org/packages/remi/rpminfo)                                                                          |
+| rpminfo              | ✅ Supported: [remi/rpminfo](https://packagist.org/packages/remi/rpminfo)                                                                           |
 | rpmreader            | ❌ Abandoned                                                                                                                                        |
 | rrd                  | ?                                                                                                                                                  |
 | rsvg                 | ❌ Abandoned                                                                                                                                        |
@@ -315,7 +315,7 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | SeasClick            | ?                                                                                                                                                  |
 | SeasLog              | ?                                                                                                                                                  |
 | SeasSnowflake        | ?                                                                                                                                                  |
-| selinux              | ✅ Supported: [pecl/selinux](https://packagist.org/packages/pecl/selinux)                                                                          |
+| selinux              | ✅ Supported: [pecl/selinux](https://packagist.org/packages/pecl/selinux)                                                                           |
 | shape                | ?                                                                                                                                                  |
 | simdjson             | ?                                                                                                                                                  |
 | simple_kafka_client  | ?                                                                                                                                                  |
@@ -373,7 +373,7 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | uopz                 | ?                                                                                                                                                  |
 | uploadprogress       | ?                                                                                                                                                  |
 | uri_template         | ❌ Abandoned                                                                                                                                        |
-| uuid                 | ✅ Supported: [pecl/uuid](https://packagist.org/packages/pecl/uuid)                                                                                |
+| uuid                 | ✅ Supported: [pecl/uuid](https://packagist.org/packages/pecl/uuid)                                                                                 |
 | uv                   | ?                                                                                                                                                  |
 | v8                   | ?                                                                                                                                                  |
 | v8js                 | ?                                                                                                                                                  |
@@ -396,7 +396,7 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | wxwidgets            | ❌ Abandoned                                                                                                                                        |
 | xattr                | ?                                                                                                                                                  |
 | xcommerce            | ❌ Abandoned                                                                                                                                        |
-| Xdebug               | ✅ Supported: [xdebug/xdebug](https://packagist.org/packages/xdebug/xdebug)                                                              |
+| Xdebug               | ✅ Supported: [xdebug/xdebug](https://packagist.org/packages/xdebug/xdebug)                                                                         |
 | xdiff                | ?                                                                                                                                                  |
 | xhprof               | ?                                                                                                                                                  |
 | xlswriter            | ?                                                                                                                                                  |
@@ -407,7 +407,7 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | xmlwriter            | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                                                                  |
 | xmms                 | ❌ Abandoned                                                                                                                                        |
 | xmp                  | ❌ Abandoned                                                                                                                                        |
-| xpass                | ✅ Supported: [remi/xpass](https://packagist.org/packages/remi/xpass)                                                                              |
+| xpass                | ✅ Supported: [remi/xpass](https://packagist.org/packages/remi/xpass)                                                                               |
 | xrange               | ❌ Abandoned                                                                                                                                        |
 | xslcache             | ❌ Abandoned                                                                                                                                        |
 | xxtea                | ?                                                                                                                                                  |
