@@ -240,6 +240,65 @@ Cannot use myvendor/myextension's latest version 1.2.3 as it requires
 ext-something * which is missing from your platform.
 ```
 
+#### Checking the extension will work
+
+First up, you can use `composer validate` to check your `composer.json` is
+formatted correctly, e.g.:
+
+```shelle
+$ composer validate
+./composer.json is valid
+```
+
+You may then use `pie install` to install your extension while in its directory:
+
+```shell
+$ cd /path/to/my/extension
+$ pie install
+🥧 PHP Installer for Extensions (PIE) 1.0.0, from The PHP Foundation
+Installing PIE extension from /home/james/workspace/phpf/example-pie-extension
+This command may need elevated privileges, and may prompt you for your password.
+You are running PHP 8.4.8
+Target PHP installation: 8.4.8 nts, on Linux/OSX/etc x86_64 (from /usr/bin/php8.4)
+Found package: asgrim/example-pie-extension:dev-main which provides ext-example_pie_extension
+Extracted asgrim/example-pie-extension:dev-main source to: /home/james/.config/pie/php8.4_572ee73609adb95bf0b8539fecdc5c0e/vendor/asgrim/example-pie-extension
+Build files cleaned up.
+phpize complete.
+Configure complete.
+Build complete: /home/james/.config/pie/php8.4_572ee73609adb95bf0b8539fecdc5c0e/vendor/asgrim/example-pie-extension/modules/example_pie_extension.so
+Cannot write to /usr/lib/php/20240924, so using sudo to elevate privileges.
+Install complete: /usr/lib/php/20240924/example_pie_extension.so
+✅ Extension is enabled and loaded in /usr/bin/php8.4
+```
+
+##### Building without installing
+
+If you want to just test the build of your application, without installling it
+to your target PHP version, you will first need to your extension directory as
+a "path" type repository:
+
+```shell
+$ cd /path/to/my/extension
+$ pie repository:add path .
+🥧 PHP Installer for Extensions (PIE) 1.0.0, from The PHP Foundation
+You are running PHP 8.4.8
+Target PHP installation: 8.4.8 nts, on Linux/OSX/etc x86_64 (from /usr/bin/php8.4)
+The following repositories are in use for this Target PHP:
+  - Path Repository (/home/james/workspace/phpf/example-pie-extension)
+  - Packagist
+```
+
+Then you may test that it builds with:
+
+```shell
+$ pie build asgrim/example-pie-extension:*@dev
+```
+
+> [!TIP]
+> Since your extension is not yet published to Packagist, you should specify
+> `*@dev` as the version constraint, otherwise PIE will not find your extension
+> as the default stability is `stable`.
+
 ### Submit the extension to Packagist
 
 Once you have committed your `composer.json` to your repository, you may then
