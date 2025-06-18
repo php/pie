@@ -17,7 +17,7 @@ On Linux, you will need a build toolchain installed. On Debian/Ubuntu type
 systems, you could run something like:
 
 ```shell
-sudo apt install build-essential autoconf libtool bison re2c pkg-config
+sudo apt install gcc make autoconf libtool bison re2c pkg-config
 ```
 
 On Windows, you do not need any build toolchain installed, since PHP extensions
