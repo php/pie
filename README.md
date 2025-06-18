@@ -1,7 +1,30 @@
 # 🥧 PIE (PHP Installer for Extensions)
 
+## What is PIE?
+
+PIE is a new installer for PHP extensions, intended to eventually replace PECL.
+It is distributed as a [PHAR](https://www.php.net/manual/en/intro.phar.php),
+just like Composer, and works in a similar way to Composer, but it installs PHP
+extensions (PHP Modules or Zend Extensions) to your PHP installation, rather
+than pulling PHP packages into your project or library.
+
+## What do I need to get started?
+
 You will need PHP 8.1 or newer to run PIE, but PIE can install an extension to
 any installed PHP version.
+
+On Linux, you will need a build toolchain installed. On Debian/Ubuntu type
+systems, you could run something like:
+
+```shell
+sudo apt install build-essential autoconf libtool bison re2c pkg-config
+```
+
+On Windows, you do not need any build toolchain installed, since PHP extensions
+for Windows are distributed as pre-compiled packages containing the extension
+DLL.
+
+## I'm an extension maintainer
 
 If you are an extension maintainer wanting to add PIE support to your extension,
 please read [extension-maintainers](./docs/extension-maintainers.md).
