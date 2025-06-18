@@ -130,7 +130,7 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | hdr_histogram        | ⏰ Coming soon: [beberlei/hdrhistogram](https://packagist.org/packages/beberlei/hdrhistogram)                                                       |
 | hidef                | ❌ Abandoned                                                                                                                                        |
 | hprose               | ?                                                                                                                                                  |
-| hrtime               | ?                                                                                                                                                  |
+| hrtime               | ⏰ PR: [php/pecl-datetime-hrtime#1](https://github.com/php/pecl-datetime-hrtime/pull/1)                                                             |
 | html_parse           | ❌ Abandoned                                                                                                                                        |
 | htscanner            | ❌ Abandoned                                                                                                                                        |
 | http_message         | ?                                                                                                                                                  |
