@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\Pie\Command;
 
 use Composer\Package\Link;
+use Composer\Package\Version\VersionParser;
 use OutOfRangeException;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
@@ -16,6 +17,7 @@ use Php\Pie\Installing\InstallForPhpProject\DetermineExtensionsRequired;
 use Php\Pie\Installing\InstallForPhpProject\FindMatchingPackages;
 use Php\Pie\Installing\InstallForPhpProject\InstallPiePackageFromPath;
 use Php\Pie\Installing\InstallForPhpProject\InstallSelectedPackage;
+use Php\Pie\Platform\InstalledPiePackages;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -53,6 +55,7 @@ final class InstallExtensionsForProjectCommand extends Command
     public function __construct(
         private readonly ComposerFactoryForProject $composerFactoryForProject,
         private readonly DetermineExtensionsRequired $determineExtensionsRequired,
+        private readonly InstalledPiePackages $installedPiePackages,
         private readonly FindMatchingPackages $findMatchingPackages,
         private readonly InstallSelectedPackage $installSelectedPackage,
         private readonly InstallPiePackageFromPath $installPiePackageFromPath,
@@ -138,28 +141,58 @@ final class InstallExtensionsForProjectCommand extends Command
         );
 
         $phpEnabledExtensions = array_keys($targetPlatform->phpBinaryPath->extensions());
+        $installedPiePackages = $this->installedPiePackages->allPiePackages($pieComposer);
 
         $anyErrorsHappened = false;
 
         array_walk(
             $extensionsRequired,
-            function (Link $link) use ($pieComposer, $phpEnabledExtensions, $input, $output, $helper, &$anyErrorsHappened): void {
+            function (Link $link) use ($pieComposer, $phpEnabledExtensions, $installedPiePackages, $input, $output, $helper, &$anyErrorsHappened): void {
                 $extension = ExtensionName::normaliseFromString($link->getTarget());
 
+                $piePackageVersion = null;
+                if (in_array($extension->name(), array_keys($installedPiePackages))) {
+                    $piePackageVersion = $installedPiePackages[$extension->name()]->version();
+                }
+
+                $piePackageVersionMatchesLinkConstraint = null;
+                if ($piePackageVersion !== null) {
+                    $piePackageVersionMatchesLinkConstraint = $link
+                        ->getConstraint()
+                        ->matches(
+                            (new VersionParser())->parseConstraints($piePackageVersion),
+                        );
+                }
+
                 if (in_array($extension->name(), $phpEnabledExtensions)) {
+                    if ($piePackageVersion !== null && $piePackageVersionMatchesLinkConstraint === false) {
+                        $output->writeln(sprintf(
+                            '%s: <comment>%s:%s</comment> ⚠️  Version %s is installed, but does not meet the version requirement %s',
+                            $link->getDescription(),
+                            $link->getTarget(),
+                            $link->getPrettyConstraint(),
+                            $piePackageVersion,
+                            $link->getConstraint()->getPrettyString(),
+                        ));
+
+                        return;
+                    }
+
                     $output->writeln(sprintf(
-                        '%s: <info>%s</info> ✅ Already installed',
+                        '%s: <info>%s:%s</info> ✅ Already installed',
                         $link->getDescription(),
-                        $link,
+                        $link->getTarget(),
+                        $link->getPrettyConstraint(),
                     ));
 
                     return;
                 }
 
                 $output->writeln(sprintf(
-                    '%s: <comment>%s</comment> ⚠️  Missing',
+                    '%s: <comment>%s:%s</comment> 🚫 Missing',
                     $link->getDescription(),
-                    $link,
+                    $link->getTarget(),
+                    $link->getPrettyConstraint(),
                 ));
 
                 try {
