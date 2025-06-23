@@ -117,7 +117,7 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | gearman              | ?                                                                                                                                                  |
 | gender               | ?                                                                                                                                                  |
 | geoip                | ?                                                                                                                                                  |
-| geospatial           | ⏰ PR: [php-geospatial/geospatial#32](https://github.com/php-geospatial/geospatial/pull/32)                                                         |
+| geospatial           | ✅ Supported: [php-geospatial/geospatial](https://packagist.org/packages/php-geospatial/geospatial)                                                 |
 | gmagick              | ?                                                                                                                                                  |
 | gnupg                | ?                                                                                                                                                  |
 | gpio                 | ✅ Supported: [embedded-php/gpio](https://packagist.org/packages/embedded-php/gpio)                                                                 |
