@@ -10,6 +10,7 @@ use Composer\Util\HttpDownloader;
 use OpenSSLAsymmetricKey;
 use Php\Pie\File\BinaryFile;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
+use Php\Pie\Util\Emoji;
 use Symfony\Component\Console\Output\OutputInterface;
 use Webmozart\Assert\Assert;
 
@@ -89,7 +90,10 @@ final class FallbackVerificationUsingOpenSsl implements VerifyPiePhar
             $output->writeln('#' . $attestationIndex . ': DSSE payload signature verified with certificate.', OutputInterface::VERBOSITY_VERBOSE);
         }
 
-        $output->writeln('<info>✅ Verified the new PIE version (using fallback verification)</info>');
+        $output->writeln(sprintf(
+            '<info>%s Verified the new PIE version (using fallback verification)</info>',
+            Emoji::GREEN_CHECKMARK,
+        ));
     }
 
     private function assertCertificateSignedByTrustedRoot(Attestation $attestation): void

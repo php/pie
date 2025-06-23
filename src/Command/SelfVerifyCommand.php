@@ -14,6 +14,7 @@ use Php\Pie\File\FullPathToSelf;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
 use Php\Pie\SelfManage\Verify\FailedToVerifyRelease;
 use Php\Pie\SelfManage\Verify\VerifyPieReleaseUsingAttestation;
+use Php\Pie\Util\Emoji;
 use Php\Pie\Util\PieVersion;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -80,7 +81,8 @@ final class SelfVerifyCommand extends Command
         }
 
         $output->writeln(sprintf(
-            '<info>✅ You are running an authentic PIE version %s.</info>',
+            '<info>%s You are running an authentic PIE version %s.</info>',
+            Emoji::GREEN_CHECKMARK,
             $latestRelease->tag,
         ));
 

@@ -128,7 +128,7 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
         $this->commandTester->assertCommandIsSuccessful();
         self::assertStringContainsString('Checking extensions for your project my/project', $outputString);
         self::assertStringContainsString('requires: my/project requires ext-standard (== *) ✅ Already installed', $outputString);
-        self::assertStringContainsString('requires: my/project requires ext-foobar (== *) ⚠️  Missing', $outputString);
+        self::assertStringContainsString('requires: my/project requires ext-foobar (== *) 🚫 Missing', $outputString);
     }
 
     public function testInstallingExtensionsForPieProject(): void

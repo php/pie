@@ -16,6 +16,7 @@ use Php\Pie\SelfManage\Update\FetchPieReleaseFromGitHub;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
 use Php\Pie\SelfManage\Verify\FailedToVerifyRelease;
 use Php\Pie\SelfManage\Verify\VerifyPieReleaseUsingAttestation;
+use Php\Pie\Util\Emoji;
 use Php\Pie\Util\PieVersion;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -146,7 +147,11 @@ final class SelfUpdateCommand extends Command
         SudoFilePut::contents($fullPathToSelf, file_get_contents($pharFilename->filePath));
         unlink($pharFilename->filePath);
 
-        $output->writeln('<info>✅ PIE has been upgraded to ' . $latestRelease->tag . '</info>');
+        $output->writeln(sprintf(
+            '<info>%s PIE has been upgraded to %s</info>',
+            Emoji::GREEN_CHECKMARK,
+            $latestRelease->tag,
+        ));
 
         $this->exitSuccessfully();
     }

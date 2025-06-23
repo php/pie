@@ -9,6 +9,7 @@ use Php\Pie\ExtensionType;
 use Php\Pie\File\BinaryFile;
 use Php\Pie\Installing\Ini\SetupIniApproach;
 use Php\Pie\Platform\TargetPlatform;
+use Php\Pie\Util\Emoji;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use function sprintf;
@@ -34,7 +35,8 @@ class SetupIniFile
             && $this->setupIniApproach->setup($targetPlatform, $downloadedPackage, $binaryFile, $output)
         ) {
             $output->writeln(sprintf(
-                '<info>✅ Extension is enabled and loaded in</info> %s',
+                '<info>%s Extension is enabled and loaded in</info> %s',
+                Emoji::GREEN_CHECKMARK,
                 $targetPlatform->phpBinaryPath->phpBinaryPath,
             ));
         } else {
@@ -42,7 +44,7 @@ class SetupIniFile
                 $output->writeln('Automatic extension enabling was skipped.', OutputInterface::VERBOSITY_VERBOSE);
             }
 
-            $output->writeln('<comment>⚠️  Extension has NOT been automatically enabled.</comment>');
+            $output->writeln(sprintf('<comment>%s Extension has NOT been automatically enabled.</comment>', Emoji::WARNING));
             $output->writeln(sprintf(
                 '<comment>You must now add "%s=%s" to your php.ini</comment>',
                 $downloadedPackage->package->extensionType() === ExtensionType::PhpModule ? 'extension' : 'zend_extension',

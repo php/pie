@@ -18,6 +18,7 @@ use Php\Pie\Installing\InstallForPhpProject\FindMatchingPackages;
 use Php\Pie\Installing\InstallForPhpProject\InstallPiePackageFromPath;
 use Php\Pie\Installing\InstallForPhpProject\InstallSelectedPackage;
 use Php\Pie\Platform\InstalledPiePackages;
+use Php\Pie\Util\Emoji;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -167,10 +168,11 @@ final class InstallExtensionsForProjectCommand extends Command
                 if (in_array($extension->name(), $phpEnabledExtensions)) {
                     if ($piePackageVersion !== null && $piePackageVersionMatchesLinkConstraint === false) {
                         $output->writeln(sprintf(
-                            '%s: <comment>%s:%s</comment> ⚠️  Version %s is installed, but does not meet the version requirement %s',
+                            '%s: <comment>%s:%s</comment> %s Version %s is installed, but does not meet the version requirement %s',
                             $link->getDescription(),
                             $link->getTarget(),
                             $link->getPrettyConstraint(),
+                            Emoji::WARNING,
                             $piePackageVersion,
                             $link->getConstraint()->getPrettyString(),
                         ));
@@ -179,20 +181,22 @@ final class InstallExtensionsForProjectCommand extends Command
                     }
 
                     $output->writeln(sprintf(
-                        '%s: <info>%s:%s</info> ✅ Already installed',
+                        '%s: <info>%s:%s</info> %s Already installed',
                         $link->getDescription(),
                         $link->getTarget(),
                         $link->getPrettyConstraint(),
+                        Emoji::GREEN_CHECKMARK,
                     ));
 
                     return;
                 }
 
                 $output->writeln(sprintf(
-                    '%s: <comment>%s:%s</comment> 🚫 Missing',
+                    '%s: <comment>%s:%s</comment> %s Missing',
                     $link->getDescription(),
                     $link->getTarget(),
                     $link->getPrettyConstraint(),
+                    Emoji::PROHIBITED,
                 ));
 
                 try {
