@@ -149,7 +149,8 @@ final class InstallExtensionsForProjectCommand extends Command
         array_walk(
             $extensionsRequired,
             function (Link $link) use ($pieComposer, $phpEnabledExtensions, $installedPiePackages, $input, $output, $helper, &$anyErrorsHappened): void {
-                $extension = ExtensionName::normaliseFromString($link->getTarget());
+                $extension              = ExtensionName::normaliseFromString($link->getTarget());
+                $linkRequiresConstraint = $link->getPrettyConstraint();
 
                 $piePackageVersion = null;
                 if (in_array($extension->name(), array_keys($installedPiePackages))) {
@@ -171,7 +172,7 @@ final class InstallExtensionsForProjectCommand extends Command
                             '%s: <comment>%s:%s</comment> %s Version %s is installed, but does not meet the version requirement %s',
                             $link->getDescription(),
                             $link->getTarget(),
-                            $link->getPrettyConstraint(),
+                            $linkRequiresConstraint,
                             Emoji::WARNING,
                             $piePackageVersion,
                             $link->getConstraint()->getPrettyString(),
@@ -184,7 +185,7 @@ final class InstallExtensionsForProjectCommand extends Command
                         '%s: <info>%s:%s</info> %s Already installed',
                         $link->getDescription(),
                         $link->getTarget(),
-                        $link->getPrettyConstraint(),
+                        $linkRequiresConstraint,
                         Emoji::GREEN_CHECKMARK,
                     ));
 
@@ -195,7 +196,7 @@ final class InstallExtensionsForProjectCommand extends Command
                     '%s: <comment>%s:%s</comment> %s Missing',
                     $link->getDescription(),
                     $link->getTarget(),
-                    $link->getPrettyConstraint(),
+                    $linkRequiresConstraint,
                     Emoji::PROHIBITED,
                 ));
 
@@ -242,9 +243,14 @@ final class InstallExtensionsForProjectCommand extends Command
                     return;
                 }
 
+                $requestInstallConstraint = '';
+                if ($linkRequiresConstraint !== '*') {
+                    $requestInstallConstraint = ':' . $linkRequiresConstraint;
+                }
+
                 try {
                     $this->installSelectedPackage->withPieCli(
-                        substr($selectedPackageAnswer, 0, (int) strpos($selectedPackageAnswer, ':')),
+                        substr($selectedPackageAnswer, 0, (int) strpos($selectedPackageAnswer, ':')) . $requestInstallConstraint,
                         $input,
                         $output,
                     );

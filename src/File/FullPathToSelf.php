@@ -7,7 +7,6 @@ namespace Php\Pie\File;
 use RuntimeException;
 
 use function array_key_exists;
-use function getcwd;
 use function is_string;
 use function preg_match;
 use function realpath;
@@ -17,6 +16,11 @@ use const DIRECTORY_SEPARATOR;
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 class FullPathToSelf
 {
+    /** @psalm-suppress PossiblyUnusedMethod no direct reference; used in service locator */
+    public function __construct(private readonly string $originalCwd)
+    {
+    }
+
     /** @return non-empty-string */
     public function __invoke(): string
     {
@@ -28,7 +32,7 @@ class FullPathToSelf
 
         return $this->isAbsolutePath($phpSelf)
             ? $phpSelf
-            : (getcwd() . DIRECTORY_SEPARATOR . $phpSelf);
+            : ($this->originalCwd . DIRECTORY_SEPARATOR . $phpSelf);
     }
 
     private function isAbsolutePath(string $path): bool

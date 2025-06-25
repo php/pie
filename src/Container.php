@@ -27,6 +27,7 @@ use Php\Pie\DependencyResolver\DependencyResolver;
 use Php\Pie\DependencyResolver\ResolveDependencyWithComposer;
 use Php\Pie\Downloading\GithubPackageReleaseAssets;
 use Php\Pie\Downloading\PackageReleaseAssets;
+use Php\Pie\File\FullPathToSelf;
 use Php\Pie\Installing\Ini;
 use Php\Pie\Installing\Install;
 use Php\Pie\Installing\Uninstall;
@@ -43,6 +44,7 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
+use function getcwd;
 use function str_starts_with;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
@@ -114,6 +116,10 @@ final class Container
         $container->when(SelfVerifyCommand::class)
             ->needs('$githubApiBaseUrl')
             ->give('https://api.github.com');
+
+        $container->when(FullPathToSelf::class)
+            ->needs('$originalCwd')
+            ->give(getcwd());
 
         $container->singleton(
             Build::class,

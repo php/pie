@@ -43,6 +43,7 @@ final class SelfUpdateCommand extends Command
         private readonly string $githubApiBaseUrl,
         private readonly QuieterConsoleIO $io,
         private readonly ContainerInterface $container,
+        private readonly FullPathToSelf $fullPathToSelf,
     ) {
         parent::__construct();
     }
@@ -139,7 +140,7 @@ final class SelfUpdateCommand extends Command
             return Command::FAILURE;
         }
 
-        $fullPathToSelf = (new FullPathToSelf())();
+        $fullPathToSelf = ($this->fullPathToSelf)();
         $output->writeln(
             sprintf('Writing new version to %s', $fullPathToSelf),
             OutputInterface::VERBOSITY_VERBOSE,

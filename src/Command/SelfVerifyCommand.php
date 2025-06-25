@@ -35,6 +35,7 @@ final class SelfVerifyCommand extends Command
         private readonly string $githubApiBaseUrl,
         private readonly QuieterConsoleIO $io,
         private readonly ContainerInterface $container,
+        private readonly FullPathToSelf $fullPathToSelf,
     ) {
         parent::__construct();
     }
@@ -65,7 +66,7 @@ final class SelfVerifyCommand extends Command
         $httpDownloader = new HttpDownloader($this->io, $composer->getConfig());
         $authHelper     = new AuthHelper($this->io, $composer->getConfig());
         $latestRelease  = new ReleaseMetadata(PieVersion::get(), 'blah');
-        $pharFilename   = BinaryFile::fromFileWithSha256Checksum((new FullPathToSelf())());
+        $pharFilename   = BinaryFile::fromFileWithSha256Checksum(($this->fullPathToSelf)());
         $verifyPiePhar  = VerifyPieReleaseUsingAttestation::factory($this->githubApiBaseUrl, $httpDownloader, $authHelper);
 
         try {

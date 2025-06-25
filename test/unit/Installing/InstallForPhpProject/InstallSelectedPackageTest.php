@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\PieUnitTest\Installing\InstallForPhpProject;
 
 use Composer\Util\Platform;
+use Php\Pie\File\FullPathToSelf;
 use Php\Pie\Installing\InstallForPhpProject\InstallSelectedPackage;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
@@ -13,6 +14,7 @@ use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\BufferedOutput;
 
+use function getcwd;
 use function trim;
 
 #[CoversClass(InstallSelectedPackage::class)]
@@ -33,7 +35,7 @@ final class InstallSelectedPackageTest extends TestCase
         );
         $output = new BufferedOutput();
 
-        (new InstallSelectedPackage())->withPieCli(
+        (new InstallSelectedPackage(new FullPathToSelf(getcwd())))->withPieCli(
             'foo/bar',
             $input,
             $output,
