@@ -10,6 +10,7 @@ use Composer\Package\RootPackage;
 use Composer\Repository\InstalledArrayRepository;
 use Composer\Repository\RepositoryManager;
 use Composer\Semver\Constraint\Constraint;
+use Composer\Semver\Constraint\MultiConstraint;
 use Php\Pie\Command\InstallExtensionsForProjectCommand;
 use Php\Pie\ComposerIntegration\MinimalHelperSet;
 use Php\Pie\ComposerIntegration\PieJsonEditor;
@@ -96,7 +97,10 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
         $rootPackage = new RootPackage('my/project', '1.2.3.0', '1.2.3');
         $rootPackage->setRequires([
             'ext-standard' => new Link('my/project', 'ext-standard', new Constraint('=', '*'), Link::TYPE_REQUIRE, '*'),
-            'ext-foobar' => new Link('my/project', 'ext-foobar', new Constraint('=', '*'), Link::TYPE_REQUIRE, '*'),
+            'ext-foobar' => new Link('my/project', 'ext-foobar', new MultiConstraint([
+                new Constraint('>=', '1.2.0.0-dev'),
+                new Constraint('<', '2.0.0.0-dev'),
+            ]), Link::TYPE_REQUIRE, '^1.2'),
 //            'ext-mismatching' => new Link('my/project', 'ext-mismatching', new MultiConstraint([
 //                new Constraint('>=', '2.0.0.0-dev'),
 //                new Constraint('<', '3.0.0.0-dev'),
@@ -135,7 +139,7 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
 
         $this->installSelectedPackage->expects(self::once())
             ->method('withPieCli')
-            ->with('vendor1/foobar');
+            ->with('vendor1/foobar:^1.2');
 
         $this->commandTester->execute(
             [],
@@ -147,7 +151,7 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
         $this->commandTester->assertCommandIsSuccessful();
         self::assertStringContainsString('Checking extensions for your project my/project', $outputString);
         self::assertStringContainsString('requires: ext-standard:* ✅ Already installed', $outputString);
-        self::assertStringContainsString('requires: ext-foobar:* 🚫 Missing', $outputString);
+        self::assertStringContainsString('requires: ext-foobar:^1.2 🚫 Missing', $outputString);
     }
 
     public function testInstallingExtensionsForPieProject(): void
