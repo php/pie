@@ -2,12 +2,13 @@
 title: Supported Extensions
 order: 4
 ---
+
 # Supported Extensions
 
 Since Packagist is the new home for PIE packages, the full list of supported,
 PIE-compatible extensions can be found on:
 
- * **[https://packagist.org/extensions](https://packagist.org/extensions)**
+* **[https://packagist.org/extensions](https://packagist.org/extensions)**
 
 The process for adding support for PIE is documented in the
 [Extension Maintainers](extension-maintainers.md) documentation.
@@ -23,7 +24,7 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 |----------------------|--------------------------------------------------------------------------------------------------------|
 | ahocorasick          | ?                                                                                                      |
 | amfext               | ❌ Abandoned                                                                                            |
-| amqp                 | ⏰ PR: [php-amqp/php-amqp#584](https://github.com/php-amqp/php-amqp/pull/584)                           |
+| amqp                 | ✅ Supported: [php-amqp/php-amqp](https://packagist.org/packages/php-amqp/php-amqp)                     |
 | AOP                  | ?                                                                                                      |
 | ApacheAccessor       | ?                                                                                                      |
 | APC                  | ❌ Abandoned                                                                                            |
@@ -83,14 +84,14 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | dbplus               | ❌ Abandoned                                                                                            |
 | DBus                 | ❌ Abandoned                                                                                            |
 | dbx                  | ❌ Abandoned                                                                                            |
-| decimal              | ⏰ PR: [php-decimal/ext-decimal#87](https://github.com/php-decimal/ext-decimal/pull/87)                 |
+| decimal              | ✅ Supported: [php-decimal/ext-decimal](https://packagist.org/packages/php-decimal/ext-decimal)         |
 | dio                  | ✅ Supported: [pecl/dio](https://packagist.org/packages/pecl/dio)                                       |
 | docblock             | ?                                                                                                      |
 | dom_varimport        | ❌ Abandoned                                                                                            |
 | doublemetaphone      | ?                                                                                                      |
 | drizzle              | ❌ Abandoned                                                                                            |
 | Druid                | ?                                                                                                      |
-| ds                   | ⏰ PR: [php-ds/ext-ds#214](https://github.com/php-ds/ext-ds/pull/214)                                   |
+| ds                   | ✅ Supported: [php-ds/ext-ds](https://packagist.org/packages/php-ds/ext-ds)                             |
 | dtrace               | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                      |
 | ecasound             | ?                                                                                                      |
 | ecma_intl            | ?                                                                                                      |
@@ -98,8 +99,8 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | enchant              | ❌ Abandoned                                                                                            |
 | env                  | ?                                                                                                      |
 | esmtp                | ?                                                                                                      |
-| ev                   | ⏰ PR: [osmanov/pecl-ev#9](https://bitbucket.org/osmanov/pecl-ev/pull-requests/9)                       |
-| event                | ⏰ PR: [osmanov/pecl-event#19](https://bitbucket.org/osmanov/pecl-event/pull-requests/19)               |
+| ev                   | ✅ Supported: [osmanov/pecl-ev](https://packagist.org/packages/osmanov/pecl-ev)                         |
+| event                | ✅ Supported: [osmanov/pecl-event](https://packagist.org/packages/osmanov/pecl-event)                   |
 | excimer              | ?                                                                                                      |
 | expect               | ?                                                                                                      |
 | fam                  | ❌ Abandoned                                                                                            |
@@ -141,7 +142,7 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | id3                  | ❌ Abandoned                                                                                            |
 | idn                  | ?                                                                                                      |
 | igbinary             | ?                                                                                                      |
-| imagick              | ⏰ PR: [Imagick/imagick#688](https://github.com/Imagick/imagick/pull/688)                               |
+| imagick              | ✅ Supported: [imagick/imagick](https://packagist.org/packages/imagick/imagick)                         |
 | imap                 | ?                                                                                                      |
 | imlib2               | ❌ Abandoned                                                                                            |
 | immutable_cache      | ?                                                                                                      |
@@ -359,7 +360,7 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | TextCat              | ?                                                                                                      |
 | tidy                 | ❌ Abandoned                                                                                            |
 | timecop              | ?                                                                                                      |
-| timezonedb           | ⏰ PR: [php/pecl-datetime-timezonedb#12](https://github.com/php/pecl-datetime-timezonedb/pull/12)       |
+| timezonedb           | ✅ Supported: [pecl/timezonedb](https://packagist.org/packages/pecl/timezonedb)                         |
 | tk                   | ❌ Abandoned                                                                                            |
 | tokyo_tyrant         | ❌ Abandoned                                                                                            |
 | trace                | ?                                                                                                      |
