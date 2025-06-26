@@ -12,6 +12,7 @@ use Php\Pie\File\BinaryFileFailedVerification;
 use Php\Pie\Platform as PiePlatform;
 use Php\Pie\Platform\InstalledPiePackages;
 use Php\Pie\Platform\OperatingSystem;
+use Php\Pie\Util\Emoji;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -133,7 +134,11 @@ final class ShowCommand extends Command
         $unmatchedPiePackages = array_diff(array_keys($piePackages), $piePackagesMatched);
 
         if (count($unmatchedPiePackages)) {
-            $output->writeln("\n" . ' ⚠️ <options=bold,underscore>PIE packages not loaded:</>');
+            $output->writeln(sprintf(
+                '%s %s <options=bold,underscore>PIE packages not loaded:</>',
+                "\n",
+                Emoji::WARNING,
+            ));
             $output->writeln('These extensions were installed with PIE but are not currently enabled.' . "\n");
 
             foreach ($unmatchedPiePackages as $unmatchedPiePackage) {
@@ -179,9 +184,14 @@ final class ShowCommand extends Command
         try {
             $expectedBinaryFileFromMetadata->verifyAgainstOther($actualBinaryFile);
         } catch (BinaryFileFailedVerification) {
-            return ' ⚠️ was ' . substr($actualBinaryFile->checksum, 0, 8) . '..., expected ' . substr($expectedBinaryFileFromMetadata->checksum, 0, 8) . '...';
+            return sprintf(
+                ' %s was %s..., expected %s...',
+                Emoji::WARNING,
+                substr($actualBinaryFile->checksum, 0, 8),
+                substr($expectedBinaryFileFromMetadata->checksum, 0, 8),
+            );
         }
 
-        return ' ✅';
+        return ' ' . Emoji::GREEN_CHECKMARK;
     }
 }

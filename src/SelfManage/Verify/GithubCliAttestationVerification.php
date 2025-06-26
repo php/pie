@@ -6,12 +6,14 @@ namespace Php\Pie\SelfManage\Verify;
 
 use Php\Pie\File\BinaryFile;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
+use Php\Pie\Util\Emoji;
 use Php\Pie\Util\Process;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\ExecutableFinder;
 
 use function implode;
+use function sprintf;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class GithubCliAttestationVerification implements VerifyPiePhar
@@ -47,6 +49,6 @@ final class GithubCliAttestationVerification implements VerifyPiePhar
             throw FailedToVerifyRelease::fromGhCliFailure($releaseMetadata, $processFailedException);
         }
 
-        $output->writeln('<info>✅ Verified the new PIE version</info>');
+        $output->writeln(sprintf('<info>%s Verified the new PIE version</info>', Emoji::GREEN_CHECKMARK));
     }
 }

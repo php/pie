@@ -21,10 +21,14 @@ use const ARRAY_FILTER_USE_BOTH;
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 class InstallSelectedPackage
 {
+    public function __construct(private readonly FullPathToSelf $fullPathToSelf)
+    {
+    }
+
     public function withPieCli(string $selectedPackage, InputInterface $input, OutputInterface $output): void
     {
         $process = [
-            (new FullPathToSelf())(),
+            ($this->fullPathToSelf)(),
             'install',
             $selectedPackage,
         ];
