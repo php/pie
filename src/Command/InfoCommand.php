@@ -8,6 +8,9 @@ use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieOperation;
 use Php\Pie\DependencyResolver\DependencyResolver;
+use Php\Pie\DependencyResolver\InvalidPackageName;
+use Php\Pie\DependencyResolver\UnableToResolveRequirement;
+use Php\Pie\Installing\InstallForPhpProject\FindMatchingPackages;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -26,6 +29,7 @@ final class InfoCommand extends Command
     public function __construct(
         private readonly ContainerInterface $container,
         private readonly DependencyResolver $dependencyResolver,
+        private readonly FindMatchingPackages $findMatchingPackages,
     ) {
         parent::__construct();
     }
@@ -43,7 +47,17 @@ final class InfoCommand extends Command
 
         $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $output);
 
-        $requestedNameAndVersion = CommandHelper::requestedNameAndVersionPair($input);
+        try {
+            $requestedNameAndVersion = CommandHelper::requestedNameAndVersionPair($input);
+        } catch (InvalidPackageName $invalidPackageName) {
+            return CommandHelper::handlePackageNotFound(
+                $invalidPackageName,
+                $this->findMatchingPackages,
+                $output,
+                $targetPlatform,
+                $this->container,
+            );
+        }
 
         $composer = PieComposerFactory::createPieComposer(
             $this->container,
@@ -58,12 +72,23 @@ final class InfoCommand extends Command
             ),
         );
 
-        $package = ($this->dependencyResolver)(
-            $composer,
-            $targetPlatform,
-            $requestedNameAndVersion,
-            CommandHelper::determineForceInstallingPackageVersion($input),
-        );
+        try {
+            $package = ($this->dependencyResolver)(
+                $composer,
+                $targetPlatform,
+                $requestedNameAndVersion,
+                CommandHelper::determineForceInstallingPackageVersion($input),
+            );
+        } catch (UnableToResolveRequirement $unableToResolveRequirement) {
+            return CommandHelper::handlePackageNotFound(
+                $unableToResolveRequirement,
+                $this->findMatchingPackages,
+                $output,
+                $targetPlatform,
+                $this->container,
+            );
+        }
+
         $output->writeln(sprintf('<info>Found package:</info> %s which provides <info>%s</info>', $package->prettyNameAndVersion(), $package->extensionName()->nameWithExtPrefix()));
 
         $output->writeln(sprintf('Extension name: %s', $package->extensionName()->name()));

@@ -10,6 +10,9 @@ use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieOperation;
 use Php\Pie\DependencyResolver\DependencyResolver;
+use Php\Pie\DependencyResolver\InvalidPackageName;
+use Php\Pie\DependencyResolver\UnableToResolveRequirement;
+use Php\Pie\Installing\InstallForPhpProject\FindMatchingPackages;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -28,6 +31,7 @@ final class BuildCommand extends Command
         private readonly ContainerInterface $container,
         private readonly DependencyResolver $dependencyResolver,
         private readonly ComposerIntegrationHandler $composerIntegrationHandler,
+        private readonly FindMatchingPackages $findMatchingPackages,
     ) {
         parent::__construct();
     }
@@ -41,8 +45,19 @@ final class BuildCommand extends Command
 
     public function execute(InputInterface $input, OutputInterface $output): int
     {
-        $targetPlatform             = CommandHelper::determineTargetPlatformFromInputs($input, $output);
-        $requestedNameAndVersion    = CommandHelper::requestedNameAndVersionPair($input);
+        $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $output);
+        try {
+            $requestedNameAndVersion = CommandHelper::requestedNameAndVersionPair($input);
+        } catch (InvalidPackageName $invalidPackageName) {
+            return CommandHelper::handlePackageNotFound(
+                $invalidPackageName,
+                $this->findMatchingPackages,
+                $output,
+                $targetPlatform,
+                $this->container,
+            );
+        }
+
         $forceInstallPackageVersion = CommandHelper::determineForceInstallingPackageVersion($input);
 
         $composer = PieComposerFactory::createPieComposer(
@@ -58,12 +73,23 @@ final class BuildCommand extends Command
             ),
         );
 
-        $package = ($this->dependencyResolver)(
-            $composer,
-            $targetPlatform,
-            $requestedNameAndVersion,
-            $forceInstallPackageVersion,
-        );
+        try {
+            $package = ($this->dependencyResolver)(
+                $composer,
+                $targetPlatform,
+                $requestedNameAndVersion,
+                $forceInstallPackageVersion,
+            );
+        } catch (UnableToResolveRequirement $unableToResolveRequirement) {
+            return CommandHelper::handlePackageNotFound(
+                $unableToResolveRequirement,
+                $this->findMatchingPackages,
+                $output,
+                $targetPlatform,
+                $this->container,
+            );
+        }
+
         $output->writeln(sprintf('<info>Found package:</info> %s which provides <info>%s</info>', $package->prettyNameAndVersion(), $package->extensionName()->nameWithExtPrefix()));
 
         // Now we know what package we have, we can validate the configure options for the command and re-create the
