@@ -106,6 +106,7 @@ final class InstallCommand extends Command
                 $targetPlatform,
                 $requestedNameAndVersion,
                 $forceInstallPackageVersion,
+                true,
             );
         } catch (ComposerRunFailed $composerRunFailed) {
             $output->writeln('<error>' . $composerRunFailed->getMessage() . '</error>');
