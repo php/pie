@@ -32,6 +32,7 @@ class ComposerIntegrationHandler
         TargetPlatform $targetPlatform,
         RequestedPackageAndVersion $requestedPackageAndVersion,
         bool $forceInstallPackageVersion,
+        bool $runCleanup,
     ): void {
         $versionSelector = VersionSelectorFactory::make($composer, $requestedPackageAndVersion, $targetPlatform);
 
@@ -84,6 +85,10 @@ class ComposerIntegrationHandler
             $pieJsonEditor->revert($originalPieJsonContent);
 
             throw ComposerRunFailed::fromExitCode($resultCode);
+        }
+
+        if (! $runCleanup) {
+            return;
         }
 
         ($this->vendorCleanup)($composer);
