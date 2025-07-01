@@ -63,6 +63,12 @@ class PieComposerFactory extends Factory
             true,
         );
 
+        $composer
+            ->getRepositoryManager()
+            ->addRepository(BundledPhpExtensionsRepository::forTargetPlatform(
+                $composerRequest->targetPlatform,
+            ));
+
         OverrideDownloadUrlInstallListener::selfRegister($composer, $io, $container, $composerRequest);
         RemoveUnrelatedInstallOperations::selfRegister($composer, $composerRequest);
 
