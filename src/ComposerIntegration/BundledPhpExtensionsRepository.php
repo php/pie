@@ -23,6 +23,7 @@ class BundledPhpExtensionsRepository extends ArrayRepository
      *     name: non-empty-string,
      *     os-families?: non-empty-list<OperatingSystemFamily>,
      *     type?: ExtensionType,
+     *     priority?: int,
      * }>
      */
     private static array $bundledPhpExtensions = [
@@ -49,7 +50,10 @@ class BundledPhpExtensionsRepository extends ArrayRepository
         ['name' => 'ldap'],
         // ['name' => 'lexbor'], // recent split it seems
         ['name' => 'mbstring'],
-        // ['name' => 'mysqli'], // build failure
+        [
+            'name' => 'mysqli',
+            'priority' => 90, // must load after mysqlnd
+        ],
         ['name' => 'mysqlnd'],
         // ['name' => 'odbc'], // build failure
         [
@@ -81,13 +85,13 @@ class BundledPhpExtensionsRepository extends ArrayRepository
         ['name' => 'sysvsem'],
         ['name' => 'sysvshm'],
         ['name' => 'tidy'],
-        // ['name' => 'tokenizer'], // build failure
+        // ['name' => 'tokenizer'], // build failure - make: *** No rule to make target '/home/james/workspace/oss/php-src/ext/tokenizer/Zend/zend_language_parser.y', needed by '/home/james/workspace/oss/php-src/ext/tokenizer/Zend/zend_language_parser.c'. Stop.
         // ['name' => 'uri'], // new ext, need to apply version constraint
         ['name' => 'xml'],
         ['name' => 'xmlreader'],
         ['name' => 'xmlwriter'],
         ['name' => 'xsl'],
-        // ['name' => 'zend_test'], // build failure
+        // ['name' => 'zend_test'], // build failure - ext/zend_test/test.c:48:11: fatal error: libxml/globals.h: No such file or directory
         ['name' => 'zip'],
         ['name' => 'zlib'],
     ];
@@ -113,6 +117,10 @@ class BundledPhpExtensionsRepository extends ArrayRepository
                         static fn (OperatingSystemFamily $osFamily) => $osFamily->value,
                         $extension['os-families'],
                     );
+                }
+
+                if (array_key_exists('priority', $extension)) {
+                    $phpExt['priority'] = $extension['priority'];
                 }
 
                 $package->setPhpExt($phpExt);
