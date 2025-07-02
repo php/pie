@@ -41,7 +41,7 @@ class BundledPhpExtensionsRepository extends ArrayRepository
         ['name' => 'dom'],
         ['name' => 'enchant'],
         ['name' => 'exif'],
-        ['name' => 'ffi'], // @todo ext name mismatch
+        ['name' => 'ffi'],
         ['name' => 'gd'],
         ['name' => 'gettext'],
         ['name' => 'gmp'],
@@ -57,7 +57,7 @@ class BundledPhpExtensionsRepository extends ArrayRepository
         ['name' => 'mysqlnd'],
         // ['name' => 'odbc'], // build failure
         [
-            'name' => 'opcache', // @todo ext name mismatch
+            'name' => 'opcache',
             'type' => ExtensionType::ZendExtension,
         ],
         ['name' => 'openssl'],
@@ -75,7 +75,7 @@ class BundledPhpExtensionsRepository extends ArrayRepository
         ['name' => 'readline'],
         ['name' => 'session'],
         ['name' => 'shmop'],
-        ['name' => 'simplexml'], // @todo ext name mismatch
+        ['name' => 'simplexml'],
         ['name' => 'snmp'],
         ['name' => 'soap'],
         ['name' => 'sockets'],
