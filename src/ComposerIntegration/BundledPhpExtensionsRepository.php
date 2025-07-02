@@ -35,7 +35,6 @@ class BundledPhpExtensionsRepository extends ArrayRepository
         ],
         ['name' => 'ctype'],
         ['name' => 'curl'],
-        // ['name' => 'date'], // config0.m4
         ['name' => 'dba'],
         ['name' => 'dl_test'],
         ['name' => 'dom'],
@@ -45,24 +44,20 @@ class BundledPhpExtensionsRepository extends ArrayRepository
         ['name' => 'gd'],
         ['name' => 'gettext'],
         ['name' => 'gmp'],
-        // ['name' => 'hash'], // make runs but no .so?
         ['name' => 'iconv'],
         ['name' => 'intl'],
-        // ['name' => 'json'], // make runs but no .so?
         ['name' => 'ldap'],
         // ['name' => 'lexbor'], // recent split it seems
-        // ['name' => 'libxml'], // config0.m4
         ['name' => 'mbstring'],
         // ['name' => 'mysqli'], // build failure
-        // ['name' => 'mysqlnd'], // config9.m4
+        ['name' => 'mysqlnd'],
         // ['name' => 'odbc'], // build failure
         [
             'name' => 'opcache', // @todo ext name mismatch
             'type' => ExtensionType::ZendExtension,
         ],
-        // ['name' => 'openssl'], // config0.m4
+        ['name' => 'openssl'],
         ['name' => 'pcntl'],
-        // ['name' => 'pcre'], // config0.m4
         // ['name' => 'pdo'], // build failure
         // ['name' => 'pdo_dblib'], // build failure
         // ['name' => 'pdo_firebird'], // build failure
@@ -73,20 +68,15 @@ class BundledPhpExtensionsRepository extends ArrayRepository
         // ['name' => 'pgsql'], // build failure
         // ['name' => 'phar'], // build failure
         ['name' => 'posix'],
-        // ['name' => 'random'], // make runs but no .so?
         ['name' => 'readline'],
-        // ['name' => 'reflection'], // make runs but no .so?
         ['name' => 'session'],
         ['name' => 'shmop'],
         ['name' => 'simplexml'], // @todo ext name mismatch
-        // ['name' => 'skeleton'], // config.m4.in
         ['name' => 'snmp'],
         ['name' => 'soap'],
         ['name' => 'sockets'],
         ['name' => 'sodium'],
-        // ['name' => 'spl'], // make runs but no .so?
-        // ['name' => 'sqlite3'], // config0.m4
-        // ['name' => 'standard'], // make runs but no .so?
+        ['name' => 'sqlite3'],
         ['name' => 'sysvmsg'],
         ['name' => 'sysvsem'],
         ['name' => 'sysvshm'],
@@ -99,7 +89,7 @@ class BundledPhpExtensionsRepository extends ArrayRepository
         ['name' => 'xsl'],
         // ['name' => 'zend_test'], // build failure
         ['name' => 'zip'],
-        // ['name' => 'zlib'], // config0.m4
+        ['name' => 'zlib'],
     ];
 
     public static function forTargetPlatform(TargetPlatform $targetPlatform): self
