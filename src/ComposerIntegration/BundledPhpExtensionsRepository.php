@@ -57,7 +57,7 @@ class BundledPhpExtensionsRepository extends ArrayRepository
             'priority' => 90, // must load after mysqlnd
         ],
         ['name' => 'mysqlnd', 'version' => '>= 5.3.0'],
-        // ['name' => 'odbc'], // build failure
+        ['name' => 'odbc'], // build failure - cp: cannot stat '/usr/local/lib/odbclib.a': No such file or directory configure: error: ODBC header file '/usr/local/incl/sqlext.h' not found!
         [
             'name' => 'opcache',
             'type' => ExtensionType::ZendExtension,
@@ -65,15 +65,15 @@ class BundledPhpExtensionsRepository extends ArrayRepository
         ],
         ['name' => 'openssl'],
         ['name' => 'pcntl'],
-        // ['name' => 'pdo', 'version' => '>= 5.1.0'], // build failure
-        // ['name' => 'pdo_dblib', 'version' => '>= 5.1.0'], // build failure
-        // ['name' => 'pdo_firebird', 'version' => '>= 5.1.0'], // build failure
-        // ['name' => 'pdo_mysql', 'version' => '>= 5.1.0'], // build failure
-        // ['name' => 'pdo_odbc', 'version' => '>= 5.1.0'], // build failure
-        // ['name' => 'pdo_pgsql', 'version' => '>= 5.1.0'], // build failure
-        // ['name' => 'pdo_sqlite', 'version' => '>= 5.1.0'], // build failure
-        // ['name' => 'pgsql'], // build failure
-        // ['name' => 'phar', 'version' => '>= 5.3.0'], // build failure
+        // ['name' => 'pdo', 'version' => '>= 5.1.0'], // build failure - make: *** [Makefile:206: /home/james/.config/pie/php8.4_64f029c38a947437b5385bfed58650fb/vendor/php/pdo/ext/pdo/pdo_sql_parser.c] Error 127
+        // ['name' => 'pdo_dblib', 'version' => '>= 5.1.0'], // build failure - configure: error: Cannot find FreeTDS in known installation directories.
+        // ['name' => 'pdo_firebird', 'version' => '>= 5.1.0'], // build failure - configure: error: libfbclient not found.
+        ['name' => 'pdo_mysql', 'version' => '>= 5.1.0'], // build failure - make: *** [Makefile:207: /home/james/.config/pie/php8.4_64f029c38a947437b5385bfed58650fb/vendor/php/pdo_mysql/ext/pdo_mysql/mysql_sql_parser.c] Error 127
+        // ['name' => 'pdo_odbc', 'version' => '>= 5.1.0'], // build failure - configure: error: Unknown ODBC flavour yes
+        // ['name' => 'pdo_pgsql', 'version' => '>= 5.1.0'], // build failure - make: *** [Makefile:207: /home/james/.config/pie/php8.4_64f029c38a947437b5385bfed58650fb/vendor/php/pdo_pgsql/ext/pdo_pgsql/pgsql_sql_parser.c] Error 127
+        // ['name' => 'pdo_sqlite', 'version' => '>= 5.1.0'], // build failure - make: *** [Makefile:207: /home/james/.config/pie/php8.4_64f029c38a947437b5385bfed58650fb/vendor/php/pdo_sqlite/ext/pdo_sqlite/sqlite_sql_parser.c] Error 127
+        ['name' => 'pgsql'],
+        // ['name' => 'phar', 'version' => '>= 5.3.0'], // build failure - config.status: error: cannot find input file: '/phar.1.in'
         ['name' => 'posix'],
         ['name' => 'readline'],
         ['name' => 'session'],
