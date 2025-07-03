@@ -47,7 +47,12 @@ class InstalledPiePackages
             array_map(
             /** @return non-empty-string */
                 static function (Package $package): string {
-                    return $package->extensionName()->name();
+                    return match ($package->extensionName()->name()) {
+                        'ffi' => 'FFI',
+                        'opcache' => 'Zend OPcache',
+                        'simplexml' => 'SimpleXML',
+                        default => $package->extensionName()->name(),
+                    };
                 },
                 $composerInstalledPackages,
             ),

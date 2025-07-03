@@ -15,7 +15,10 @@ use Symfony\Component\Process\Process as SymfonyProcess;
 use function count;
 use function file_exists;
 use function implode;
+use function rename;
 use function sprintf;
+
+use const DIRECTORY_SEPARATOR;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class UnixBuild implements Build
@@ -90,6 +93,25 @@ final class UnixBuild implements Build
         return BinaryFile::fromFileWithSha256Checksum($expectedSoFile);
     }
 
+    private function renamesToConfigM4(DownloadedPackage $downloadedPackage, OutputInterface $output): void
+    {
+        $configM4 = $downloadedPackage->extractedSourcePath . DIRECTORY_SEPARATOR . 'config.m4';
+        if (file_exists($configM4)) {
+            return;
+        }
+
+        $output->writeln('config.m4 does not exist; checking alternatives', OutputInterface::VERBOSITY_VERY_VERBOSE);
+        foreach (['config0.m4', 'config9.m4'] as $alternateConfigM4) {
+            $fullPathToAlternate = $downloadedPackage->extractedSourcePath . DIRECTORY_SEPARATOR . $alternateConfigM4;
+            if (file_exists($fullPathToAlternate)) {
+                $output->writeln(sprintf('Renaming %s to config.m4', $alternateConfigM4), OutputInterface::VERBOSITY_VERY_VERBOSE);
+                rename($fullPathToAlternate, $configM4);
+
+                return;
+            }
+        }
+    }
+
     /** @param callable(SymfonyProcess::ERR|SymfonyProcess::OUT, string): void|null $outputCallback */
     private function phpize(
         PhpizePath $phpize,
@@ -102,6 +124,8 @@ final class UnixBuild implements Build
         if ($output->isVerbose()) {
             $output->writeln('<comment>Running phpize step using: ' . implode(' ', $phpizeCommand) . '</comment>');
         }
+
+        $this->renamesToConfigM4($downloadedPackage, $output);
 
         Process::run(
             $phpizeCommand,
