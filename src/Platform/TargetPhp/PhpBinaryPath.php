@@ -17,6 +17,7 @@ use Symfony\Component\Process\PhpExecutableFinder;
 use Webmozart\Assert\Assert;
 
 use function array_combine;
+use function array_filter;
 use function array_key_exists;
 use function array_keys;
 use function array_map;
@@ -349,16 +350,12 @@ PHP,
 
     private static function cleanWarningAndDeprecationsFromOutput(string $testOutput): string
     {
-        $testOutput = explode("\n", $testOutput);
-
-        foreach ($testOutput as $key => $line) {
-            if (! preg_match('/^(Deprecated|Warning):/', $line)) {
-                continue;
-            }
-
-            unset($testOutput[$key]);
-        }
-
-        return implode("\n", $testOutput);
+        return implode(
+            "\n",
+            array_filter(
+                explode("\n", $testOutput),
+                static fn (string $line) => ! preg_match('/^(Deprecated|Warning|PHP Warning):/', $line),
+            ),
+        );
     }
 }
