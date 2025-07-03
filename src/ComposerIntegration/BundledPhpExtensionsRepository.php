@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Php\Pie\ComposerIntegration;
 
 use Composer\Package\CompletePackage;
+use Composer\Package\Link;
 use Composer\Package\Package;
+use Composer\Package\Version\VersionParser;
 use Composer\Repository\ArrayRepository;
 use Php\Pie\ExtensionType;
 use Php\Pie\Platform\OperatingSystemFamily;
@@ -18,9 +20,9 @@ use function sprintf;
 class BundledPhpExtensionsRepository extends ArrayRepository
 {
     /**
-     * @todo add version constraints
      * @var list<array{
      *     name: non-empty-string,
+     *     version?: non-empty-string,
      *     os-families?: non-empty-list<OperatingSystemFamily>,
      *     type?: ExtensionType,
      *     priority?: int,
@@ -37,40 +39,41 @@ class BundledPhpExtensionsRepository extends ArrayRepository
         ['name' => 'ctype'],
         ['name' => 'curl'],
         ['name' => 'dba'],
-        ['name' => 'dl_test'],
+        ['name' => 'dl_test', 'version' => '>= 8.2.0'],
         ['name' => 'dom'],
-        ['name' => 'enchant'],
+        ['name' => 'enchant', 'version' => '>= 5.2.0'],
         ['name' => 'exif'],
-        ['name' => 'ffi'],
+        ['name' => 'ffi', 'version' => '>= 7.4.0'],
         ['name' => 'gd'],
         ['name' => 'gettext'],
         ['name' => 'gmp'],
         ['name' => 'iconv'],
-        ['name' => 'intl'],
+        ['name' => 'intl', 'version' => '>= 5.3.0'],
         ['name' => 'ldap'],
-        // ['name' => 'lexbor'], // recent split it seems
+        ['name' => 'lexbor', 'version' => '>= 8.5.0'],
         ['name' => 'mbstring'],
         [
             'name' => 'mysqli',
             'priority' => 90, // must load after mysqlnd
         ],
-        ['name' => 'mysqlnd'],
+        ['name' => 'mysqlnd', 'version' => '>= 5.3.0'],
         // ['name' => 'odbc'], // build failure
         [
             'name' => 'opcache',
             'type' => ExtensionType::ZendExtension,
+            'version' => '>= 5.5.0',
         ],
         ['name' => 'openssl'],
         ['name' => 'pcntl'],
-        // ['name' => 'pdo'], // build failure
-        // ['name' => 'pdo_dblib'], // build failure
-        // ['name' => 'pdo_firebird'], // build failure
-        // ['name' => 'pdo_mysql'], // build failure
-        // ['name' => 'pdo_odbc'], // build failure
-        // ['name' => 'pdo_pgsql'], // build failure
-        // ['name' => 'pdo_sqlite'], // build failure
+        // ['name' => 'pdo', 'version' => '>= 5.1.0'], // build failure
+        // ['name' => 'pdo_dblib', 'version' => '>= 5.1.0'], // build failure
+        // ['name' => 'pdo_firebird', 'version' => '>= 5.1.0'], // build failure
+        // ['name' => 'pdo_mysql', 'version' => '>= 5.1.0'], // build failure
+        // ['name' => 'pdo_odbc', 'version' => '>= 5.1.0'], // build failure
+        // ['name' => 'pdo_pgsql', 'version' => '>= 5.1.0'], // build failure
+        // ['name' => 'pdo_sqlite', 'version' => '>= 5.1.0'], // build failure
         // ['name' => 'pgsql'], // build failure
-        // ['name' => 'phar'], // build failure
+        // ['name' => 'phar', 'version' => '>= 5.3.0'], // build failure
         ['name' => 'posix'],
         ['name' => 'readline'],
         ['name' => 'session'],
@@ -79,32 +82,46 @@ class BundledPhpExtensionsRepository extends ArrayRepository
         ['name' => 'snmp'],
         ['name' => 'soap'],
         ['name' => 'sockets'],
-        ['name' => 'sodium'],
-        ['name' => 'sqlite3'],
+        ['name' => 'sodium', 'version' => '>= 7.2.0'],
+        ['name' => 'sqlite3', 'version' => '>= 5.3.0'],
         ['name' => 'sysvmsg'],
         ['name' => 'sysvsem'],
         ['name' => 'sysvshm'],
         ['name' => 'tidy'],
         // ['name' => 'tokenizer'], // build failure - make: *** No rule to make target '/home/james/workspace/oss/php-src/ext/tokenizer/Zend/zend_language_parser.y', needed by '/home/james/workspace/oss/php-src/ext/tokenizer/Zend/zend_language_parser.c'. Stop.
-        // ['name' => 'uri'], // new ext, need to apply version constraint
+        ['name' => 'uri', 'version' => '>= 8.5.0'],
         ['name' => 'xml'],
-        ['name' => 'xmlreader'],
-        ['name' => 'xmlwriter'],
+        ['name' => 'xmlreader', 'version' => '>= 5.1.0'],
+        ['name' => 'xmlwriter', 'version' => '>= 5.2.0'],
         ['name' => 'xsl'],
-        // ['name' => 'zend_test'], // build failure - ext/zend_test/test.c:48:11: fatal error: libxml/globals.h: No such file or directory
-        ['name' => 'zip'],
+        // ['name' => 'zend_test', 'version' => '>= 7.2.0'], // build failure - ext/zend_test/test.c:48:11: fatal error: libxml/globals.h: No such file or directory
+        ['name' => 'zip', 'version' => '>= 5.2.0'],
         ['name' => 'zlib'],
     ];
 
     public static function forTargetPlatform(TargetPlatform $targetPlatform): self
     {
-        $phpVersion = $targetPlatform->phpBinaryPath->version();
+        $versionParser = new VersionParser();
+        $phpVersion    = $targetPlatform->phpBinaryPath->version();
 
         return new self(array_map(
-            static function (array $extension) use ($phpVersion): Package {
+            static function (array $extension) use ($versionParser, $phpVersion): Package {
+                if (! array_key_exists('version', $extension)) {
+                    $extension['version'] = $phpVersion;
+                }
+
                 $package = new CompletePackage('php/' . $extension['name'], $phpVersion . '.0', $phpVersion);
                 $package->setType(($extension['type'] ?? ExtensionType::PhpModule)->value);
                 $package->setDistType('zip');
+                $package->setRequires([
+                    'php' => new Link(
+                        'php/' . $extension['name'],
+                        'php',
+                        $versionParser->parseConstraints($extension['version']),
+                        'requires',
+                        $extension['version'],
+                    ),
+                ]);
                 $package->setDistUrl(sprintf('https://github.com/php/php-src/archive/refs/tags/php-%s.zip', $phpVersion));
                 $package->setDistReference(sprintf('php-%s', $phpVersion));
                 $phpExt = [
