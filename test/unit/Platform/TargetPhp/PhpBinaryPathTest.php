@@ -48,7 +48,8 @@ use const PHP_RELEASE_VERSION;
 #[CoversClass(PhpBinaryPath::class)]
 final class PhpBinaryPathTest extends TestCase
 {
-    private const FAKE_PHP_EXECUTABLE = __DIR__ . '/../../../assets/fake-php.sh';
+    private const FAKE_PHP_EXECUTABLE     = __DIR__ . '/../../../assets/fake-php.sh';
+    private const VALID_PHP_WITH_WARNINGS = __DIR__ . '/../../../assets/valid-php-with-warnings.sh';
 
     public function testNonExistentPhpBinaryIsRejected(): void
     {
@@ -81,6 +82,16 @@ final class PhpBinaryPathTest extends TestCase
         $this->expectException(InvalidPhpBinaryPath::class);
         $this->expectExceptionMessage('does not appear to be a PHP binary');
         PhpBinaryPath::fromPhpBinaryPath(self::FAKE_PHP_EXECUTABLE);
+    }
+
+    public function testWarningsAndDeprecationsAreFiltered(): void
+    {
+        if (Platform::isWindows()) {
+            self::markTestSkipped('Bash script does not run on Windows.');
+        }
+
+        $phpBinary = PhpBinaryPath::fromPhpBinaryPath(self::VALID_PHP_WITH_WARNINGS);
+        self::assertSame(self::VALID_PHP_WITH_WARNINGS, $phpBinary->phpBinaryPath);
     }
 
     public function testVersionFromCurrentProcess(): void
