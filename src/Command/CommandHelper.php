@@ -5,32 +5,45 @@ declare(strict_types=1);
 namespace Php\Pie\Command;
 
 use Composer\Composer;
+use Composer\Package\CompletePackageInterface;
 use Composer\Package\Version\VersionParser;
 use Composer\Repository\ComposerRepository;
 use Composer\Repository\PathRepository;
 use Composer\Repository\VcsRepository;
 use Composer\Util\Platform;
 use InvalidArgumentException;
+use OutOfRangeException;
+use Php\Pie\ComposerIntegration\PieComposerFactory;
+use Php\Pie\ComposerIntegration\PieComposerRequest;
+use Php\Pie\DependencyResolver\InvalidPackageName;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
+use Php\Pie\DependencyResolver\UnableToResolveRequirement;
+use Php\Pie\Installing\InstallForPhpProject\FindMatchingPackages;
 use Php\Pie\Platform as PiePlatform;
 use Php\Pie\Platform\OperatingSystem;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPhp\PhpizePath;
 use Php\Pie\Platform\TargetPlatform;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Throwable;
 use Webmozart\Assert\Assert;
 
 use function array_key_exists;
+use function array_map;
+use function count;
 use function is_array;
 use function is_string;
 use function reset;
 use function sprintf;
+use function str_starts_with;
 use function strtolower;
+use function substr;
 use function trim;
 
 use const PHP_VERSION;
@@ -325,5 +338,93 @@ final class CommandHelper
                 array_key_exists('url', $repoConfig) && is_string($repoConfig['url']) && $repoConfig['url'] !== '' ? $repoConfig['url'] : 'no path?',
             ));
         }
+    }
+
+    public static function handlePackageNotFound(
+        InvalidPackageName|UnableToResolveRequirement $exception,
+        FindMatchingPackages $findMatchingPackages,
+        OutputInterface $output,
+        TargetPlatform $targetPlatform,
+        ContainerInterface $container,
+    ): int {
+        $pieComposer = PieComposerFactory::createPieComposer(
+            $container,
+            PieComposerRequest::noOperation(
+                $output,
+                $targetPlatform,
+            ),
+        );
+
+        $requestedPackageName = $exception->requestedPackageAndVersion->package;
+        if (str_starts_with($requestedPackageName, 'ext-')) {
+            $requestedPackageName = substr($requestedPackageName, 4);
+        }
+
+        $output->writeln('');
+        $output->writeln(sprintf('<error>Could not install package: %s</error>', $requestedPackageName));
+        $output->writeln($exception->getMessage());
+
+        try {
+            $matches = array_map(
+                static function (array $match) use ($output, $pieComposer): array {
+                    $composerMatchingPackage = $pieComposer->getRepositoryManager()->findPackage($match['name'], '*');
+
+                    // Attempts to augment the Composer packages found with the PIE extension name
+                    if ($composerMatchingPackage instanceof CompletePackageInterface) {
+                        try {
+                            $match['extension-name'] = Package
+                                ::fromComposerCompletePackage($composerMatchingPackage)
+                                ->extensionName()
+                                ->name();
+                        } catch (Throwable $t) {
+                            $output->writeln(
+                                sprintf(
+                                    'Tried looking up extension name for %s, but failed: %s',
+                                    $match['name'],
+                                    $t->getMessage(),
+                                ),
+                                OutputInterface::VERBOSITY_VERY_VERBOSE,
+                            );
+                        }
+                    }
+
+                    return $match;
+                },
+                $findMatchingPackages->for($pieComposer, $requestedPackageName),
+            );
+
+            if (count($matches)) {
+                $output->writeln('');
+                if (count($matches) === 1) {
+                    $output->writeln('<info>Did you mean this?</info>');
+                } else {
+                    $output->writeln('<info>Did you mean one of these?</info>');
+                }
+
+                array_map(
+                    static function (array $match) use ($output): void {
+                        $output->writeln(sprintf(
+                            ' - %s%s: %s',
+                            $match['name'],
+                            array_key_exists('extension-name', $match) && is_string($match['extension-name'])
+                                ? ' (provides extension: ' . $match['extension-name'] . ')'
+                                : '',
+                            $match['description'] ?? 'no description available',
+                        ));
+                    },
+                    $matches,
+                );
+            }
+        } catch (OutOfRangeException) {
+            $output->writeln(
+                sprintf(
+                    'Tried searching for "%s", but nothing was found.',
+                    $requestedPackageName,
+                ),
+                OutputInterface::VERBOSITY_VERBOSE,
+            );
+        }
+
+        return 1;
     }
 }
