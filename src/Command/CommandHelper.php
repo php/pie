@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\Pie\Command;
 
 use Composer\Composer;
+use Composer\Package\CompletePackageInterface;
 use Composer\Package\Version\VersionParser;
 use Composer\Repository\ComposerRepository;
 use Composer\Repository\PathRepository;
@@ -30,6 +31,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Throwable;
 use Webmozart\Assert\Assert;
 
 use function array_key_exists;
@@ -353,17 +355,43 @@ final class CommandHelper
             ),
         );
 
-        $package = $exception->requestedPackageAndVersion->package;
-        if (str_starts_with($package, 'ext-')) {
-            $package = substr($package, 4);
+        $requestedPackageName = $exception->requestedPackageAndVersion->package;
+        if (str_starts_with($requestedPackageName, 'ext-')) {
+            $requestedPackageName = substr($requestedPackageName, 4);
         }
 
         $output->writeln('');
-        $output->writeln(sprintf('<error>Could not install package: %s</error>', $package));
+        $output->writeln(sprintf('<error>Could not install package: %s</error>', $requestedPackageName));
         $output->writeln($exception->getMessage());
 
         try {
-            $matches = $findMatchingPackages->for($pieComposer, $package);
+            $matches = array_map(
+                static function (array $match) use ($output, $pieComposer): array {
+                    $composerMatchingPackage = $pieComposer->getRepositoryManager()->findPackage($match['name'], '*');
+
+                    // Attempts to augment the Composer packages found with the PIE extension name
+                    if ($composerMatchingPackage instanceof CompletePackageInterface) {
+                        try {
+                            $match['extension-name'] = Package
+                                ::fromComposerCompletePackage($composerMatchingPackage)
+                                ->extensionName()
+                                ->name();
+                        } catch (Throwable $t) {
+                            $output->writeln(
+                                sprintf(
+                                    'Tried looking up extension name for %s, but failed: %s',
+                                    $match['name'],
+                                    $t->getMessage(),
+                                ),
+                                OutputInterface::VERBOSITY_VERY_VERBOSE,
+                            );
+                        }
+                    }
+
+                    return $match;
+                },
+                $findMatchingPackages->for($pieComposer, $requestedPackageName),
+            );
 
             if (count($matches)) {
                 $output->writeln('');
@@ -375,7 +403,14 @@ final class CommandHelper
 
                 array_map(
                     static function (array $match) use ($output): void {
-                        $output->writeln(sprintf(' - %s: %s', $match['name'], $match['description'] ?? 'no description available'));
+                        $output->writeln(sprintf(
+                            ' - %s%s: %s',
+                            $match['name'],
+                            array_key_exists('extension-name', $match) && is_string($match['extension-name'])
+                                ? ' (provides extension: ' . $match['extension-name'] . ')'
+                                : '',
+                            $match['description'] ?? 'no description available',
+                        ));
                     },
                     $matches,
                 );
@@ -384,7 +419,7 @@ final class CommandHelper
             $output->writeln(
                 sprintf(
                     'Tried searching for "%s", but nothing was found.',
-                    $package,
+                    $requestedPackageName,
                 ),
                 OutputInterface::VERBOSITY_VERBOSE,
             );
