@@ -32,14 +32,9 @@ class BundledPhpExtensionsRepository extends ArrayRepository
         ['name' => 'bcmath'],
         ['name' => 'bz2'],
         ['name' => 'calendar'],
-        [
-            'name' => 'com_dotnet',
-            'os-families' => [OperatingSystemFamily::Windows],
-        ],
         ['name' => 'ctype'],
         ['name' => 'curl'],
         ['name' => 'dba'],
-        ['name' => 'dl_test', 'version' => '>= 8.2.0'],
         ['name' => 'dom'],
         ['name' => 'enchant', 'version' => '>= 5.2.0'],
         ['name' => 'exif'],
@@ -50,7 +45,6 @@ class BundledPhpExtensionsRepository extends ArrayRepository
         ['name' => 'iconv'],
         ['name' => 'intl', 'version' => '>= 5.3.0'],
         ['name' => 'ldap'],
-        ['name' => 'lexbor', 'version' => '>= 8.5.0'],
         ['name' => 'mbstring'],
         [
             'name' => 'mysqli',
@@ -89,12 +83,10 @@ class BundledPhpExtensionsRepository extends ArrayRepository
         ['name' => 'sysvshm'],
         ['name' => 'tidy'],
         // ['name' => 'tokenizer'], // build failure - make: *** No rule to make target '/home/james/workspace/oss/php-src/ext/tokenizer/Zend/zend_language_parser.y', needed by '/home/james/workspace/oss/php-src/ext/tokenizer/Zend/zend_language_parser.c'. Stop.
-        ['name' => 'uri', 'version' => '>= 8.5.0'],
         ['name' => 'xml'],
         ['name' => 'xmlreader', 'version' => '>= 5.1.0'],
         ['name' => 'xmlwriter', 'version' => '>= 5.2.0'],
         ['name' => 'xsl'],
-        // ['name' => 'zend_test', 'version' => '>= 7.2.0'], // build failure - ext/zend_test/test.c:48:11: fatal error: libxml/globals.h: No such file or directory
         ['name' => 'zip', 'version' => '>= 5.2.0'],
         ['name' => 'zlib'],
     ];
