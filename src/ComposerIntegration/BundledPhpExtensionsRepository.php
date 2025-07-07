@@ -46,11 +46,11 @@ class BundledPhpExtensionsRepository extends ArrayRepository
         ['name' => 'intl', 'version' => '>= 5.3.0'],
         ['name' => 'ldap'],
         ['name' => 'mbstring'],
+        ['name' => 'mysqlnd', 'version' => '>= 5.3.0'],
         [
             'name' => 'mysqli',
             'priority' => 90, // must load after mysqlnd
         ],
-        ['name' => 'mysqlnd', 'version' => '>= 5.3.0'],
         // ['name' => 'odbc'], // build failure - cp: cannot stat '/usr/local/lib/odbclib.a': No such file or directory configure: error: ODBC header file '/usr/local/incl/sqlext.h' not found!
         [
             'name' => 'opcache',

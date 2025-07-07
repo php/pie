@@ -45,6 +45,62 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  bundled-php-extension-tests:
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      matrix:
+        operating-system:
+          - ubuntu-latest
+        php-versions:
+          - '8.1'
+          - '8.2'
+          - '8.3'
+          - '8.4'
+          #- '8.5' # @todo enable
+    steps:
+      - name: Install platform dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libcurl4-openssl-dev \
+            liblmdb-dev \
+            libdb-dev \
+            libqdbm-dev \
+            libenchant-2-dev \
+            libexif-dev \
+            libgd-dev \
+            libpng-dev \
+            libtiff-dev \
+            libfreetype-dev \
+            libfreetype6 \
+            libfontconfig1-dev \
+            libgmp-dev \
+            libssl-dev \
+            libsodium-dev \
+            libxml2-dev \
+            libonig-dev \
+            libldap-dev \
+            libedit-dev \
+            libsnmp-dev \
+            libtidy-dev \
+            libxslt1-dev \
+            libsasl2-dev \
+            libzip-dev
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          extensions: none, mbstring
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v4
+      - name: Composer Install
+        run: composer install --ignore-platform-reqs
+      - name: Run bundled PHP install test
+        run: sudo php test/install-bundled-php-exts.php
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   behaviour-tests:
     runs-on: ${{ matrix.operating-system }}
     strategy:
