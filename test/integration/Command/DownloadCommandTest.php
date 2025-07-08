@@ -45,9 +45,9 @@ class DownloadCommandTest extends TestCase
     public static function validVersionsList(): array
     {
         $versionsAndExpected = [
-            [self::TEST_PACKAGE, self::TEST_PACKAGE . ':2.0.2'],
-            [self::TEST_PACKAGE . ':*', self::TEST_PACKAGE . ':2.0.2'],
-            [self::TEST_PACKAGE . ':^2.0', self::TEST_PACKAGE . ':2.0.2'],
+            [self::TEST_PACKAGE, self::TEST_PACKAGE . ':2.0.3'],
+            [self::TEST_PACKAGE . ':*', self::TEST_PACKAGE . ':2.0.3'],
+            [self::TEST_PACKAGE . ':^2.0', self::TEST_PACKAGE . ':2.0.3'],
         ];
 
         if (PHP_VERSION_ID >= 80300 && PHP_VERSION_ID < 80400) {
