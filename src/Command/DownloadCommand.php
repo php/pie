@@ -101,6 +101,7 @@ final class DownloadCommand extends Command
                 $targetPlatform,
                 $requestedNameAndVersion,
                 $forceInstallPackageVersion,
+                false,
             );
         } catch (ComposerRunFailed $composerRunFailed) {
             $output->writeln('<error>' . $composerRunFailed->getMessage() . '</error>');
