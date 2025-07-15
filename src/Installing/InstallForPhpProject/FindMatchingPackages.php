@@ -7,7 +7,6 @@ namespace Php\Pie\Installing\InstallForPhpProject;
 use Composer\Composer;
 use Composer\Repository\RepositoryInterface;
 use OutOfRangeException;
-use Php\Pie\ExtensionName;
 
 use function array_merge;
 use function count;
@@ -21,16 +20,16 @@ use function usort;
 class FindMatchingPackages
 {
     /** @return MatchingPackages */
-    public function for(Composer $pieComposer, ExtensionName $extension): array
+    public function for(Composer $pieComposer, string $searchTerm): array
     {
         $matches = [];
         foreach ($pieComposer->getRepositoryManager()->getRepositories() as $repo) {
-            $matches = array_merge($matches, $repo->search($extension->name(), RepositoryInterface::SEARCH_FULLTEXT, 'php-ext'));
-            $matches = array_merge($matches, $repo->search($extension->name(), RepositoryInterface::SEARCH_FULLTEXT, 'php-ext-zend'));
+            $matches = array_merge($matches, $repo->search($searchTerm, RepositoryInterface::SEARCH_FULLTEXT, 'php-ext'));
+            $matches = array_merge($matches, $repo->search($searchTerm, RepositoryInterface::SEARCH_FULLTEXT, 'php-ext-zend'));
         }
 
         if (! count($matches)) {
-            throw new OutOfRangeException('No matches found for ' . $extension->name());
+            throw new OutOfRangeException('No matches found for ' . $searchTerm);
         }
 
         usort($matches, static function (array $a, array $b): int {

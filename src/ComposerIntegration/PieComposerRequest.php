@@ -39,7 +39,7 @@ final class PieComposerRequest
         return new PieComposerRequest(
             $pieOutput,
             $targetPlatform,
-            new RequestedPackageAndVersion('null', null),
+            new RequestedPackageAndVersion('null/null', null),
             PieOperation::Resolve,
             [],
             null,

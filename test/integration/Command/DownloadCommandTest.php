@@ -7,7 +7,6 @@ namespace Php\PieIntegrationTest\Command;
 use Composer\Util\Platform;
 use Php\Pie\Command\DownloadCommand;
 use Php\Pie\Container;
-use Php\Pie\DependencyResolver\UnableToResolveRequirement;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\RequiresOperatingSystemFamily;
@@ -146,9 +145,14 @@ class DownloadCommandTest extends TestCase
     #[RequiresPhp('<8.2')]
     public function testDownloadCommandFailsWhenUsingIncompatiblePhpVersion(): void
     {
-        $this->expectException(UnableToResolveRequirement::class);
         // 1.0.0 is only compatible with PHP 8.3.0
-        $this->commandTester->execute(['requested-package-and-version' => self::TEST_PACKAGE . ':1.0.0']);
+        self::assertSame(1, $this->commandTester->execute(['requested-package-and-version' => self::TEST_PACKAGE . ':1.0.0']));
+
+        $output = $this->commandTester->getDisplay();
+        self::assertStringContainsString(
+            'Unable to find an installable package asgrim/example-pie-extension for version 1.0.0, with minimum stability stable.',
+            $output,
+        );
     }
 
     #[RequiresOperatingSystemFamily('Linux')]
