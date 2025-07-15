@@ -10,7 +10,7 @@ Feature: Extensions can be installed with PIE
 
     Examples:
       | constraint | version  |
-      | 2.0.2      | 2.0.2    |
+      | 2.0.3      | 2.0.3    |
       | ^2.0       | 2.0.3    |
 
   @non-windows

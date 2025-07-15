@@ -46,7 +46,7 @@ class DownloadCommandTest extends TestCase
     public static function validVersionsList(): array
     {
         $versionsAndExpected = [
-            [self::TEST_PACKAGE, self::TEST_PACKAGE . ':' . self::TEST_PACKAGE_LATEST],,
+            [self::TEST_PACKAGE, self::TEST_PACKAGE . ':' . self::TEST_PACKAGE_LATEST],
             [self::TEST_PACKAGE . ':*', self::TEST_PACKAGE . ':' . self::TEST_PACKAGE_LATEST],
             [self::TEST_PACKAGE . ':^2.0', self::TEST_PACKAGE . ':' . self::TEST_PACKAGE_LATEST],
         ];
