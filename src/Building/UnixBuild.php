@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\Pie\Building;
 
+use Php\Pie\ComposerIntegration\BundledPhpExtensionsRepository;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\File\BinaryFile;
 use Php\Pie\Platform\TargetPhp\PhpizePath;
@@ -173,6 +174,11 @@ final class UnixBuild implements Build
         } else {
             $makeCommand[] = sprintf('-j%d', $targetPlatform->makeParallelJobs);
         }
+
+        $makeCommand = BundledPhpExtensionsRepository::augmentMakeCommandForPhpBundledExtensions(
+            $makeCommand,
+            $downloadedPackage,
+        );
 
         if ($output->isVerbose()) {
             $output->writeln('<comment>Running make step with: ' . implode(' ', $makeCommand) . '</comment>');
