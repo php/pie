@@ -62,6 +62,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
+            g++ gcc make autoconf libtool bison re2c pkg-config unzip \
             libcurl4-openssl-dev \
             liblmdb-dev \
             libdb-dev \
@@ -85,12 +86,14 @@ jobs:
             libtidy-dev \
             libxslt1-dev \
             libsasl2-dev \
+            libpq-dev \
+            libsqlite3-dev \
             libzip-dev
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
-          extensions: none, mbstring
+          extensions: none, mbstring, libxml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/checkout@v4

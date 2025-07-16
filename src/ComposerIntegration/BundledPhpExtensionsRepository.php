@@ -9,14 +9,20 @@ use Composer\Package\Link;
 use Composer\Package\Package;
 use Composer\Package\Version\VersionParser;
 use Composer\Repository\ArrayRepository;
+use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\ExtensionType;
 use Php\Pie\Platform\OperatingSystemFamily;
 use Php\Pie\Platform\TargetPlatform;
+use Php\Pie\Util\Process;
+use RuntimeException;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 
 use function array_combine;
 use function array_key_exists;
 use function array_keys;
 use function array_map;
+use function in_array;
+use function realpath;
 use function sprintf;
 
 class BundledPhpExtensionsRepository extends ArrayRepository
@@ -37,7 +43,13 @@ class BundledPhpExtensionsRepository extends ArrayRepository
         ['name' => 'ctype'],
         ['name' => 'curl'],
         ['name' => 'dba'],
-        ['name' => 'dom'],
+        [
+            'name' => 'dom',
+            'require' => [
+                'php' => '>= 5.2.0',
+                'ext-libxml' => '*',
+            ],
+        ],
         [
             'name' => 'enchant',
             'require' => ['php' => '>= 5.2.0'],
@@ -67,8 +79,18 @@ class BundledPhpExtensionsRepository extends ArrayRepository
         [
             'name' => 'mysqli',
             'priority' => 90, // must load after mysqlnd
+            'require' => [
+                'php' => '>= 5.3.0',
+                /**
+                 * Note: Whilst mysqli can be built without mysqlnd (you could
+                 * specify `--with-mysqli=...`, we have to make installation
+                 * with PIE practical at least to start with. We can look at
+                 * improving this later, but for now something is better than
+                 * nothing :)
+                 */
+                'ext-mysqlnd' => '*',
+            ],
         ],
-        // ['name' => 'odbc'], // build failure - cp: cannot stat '/usr/local/lib/odbclib.a': No such file or directory configure: error: ODBC header file '/usr/local/incl/sqlext.h' not found!
         [
             'name' => 'opcache',
             'type' => ExtensionType::ZendExtension,
@@ -76,31 +98,51 @@ class BundledPhpExtensionsRepository extends ArrayRepository
         ],
 //        ['name' => 'openssl'], // Not building in CI
         ['name' => 'pcntl'],
-        // ['name' => 'pdo', 'require' => ['php' => '>= 5.1.0']], // build failure - make: *** [Makefile:206: /home/james/.config/pie/php8.4_64f029c38a947437b5385bfed58650fb/vendor/php/pdo/ext/pdo/pdo_sql_parser.c] Error 127
-        // ['name' => 'pdo_dblib', 'require' => ['php' => '>= 5.1.0']], // build failure - configure: error: Cannot find FreeTDS in known installation directories.
-        // ['name' => 'pdo_firebird', 'require' => ['php' => '>= 5.1.0']], // build failure - configure: error: libfbclient not found.
-//        [
-//            'name' => 'pdo_mysql',
-//            'require' => ['php' => '>= 5.1.0'],
-//        ], // Not building in CI
-        // ['name' => 'pdo_odbc', 'require' => ['php' => '>= 5.1.0']], // build failure - configure: error: Unknown ODBC flavour yes
-//        [
-//            'name' => 'pdo_pgsql',
-//            'require' => ['php' => '>= 5.1.0'],
-//        ], // Not building in CI
-//        [
-//            'name' => 'pdo_sqlite',
-//            'require' => ['php' => '>= 5.1.0'],
-//        ], // Not building in CI
+        [
+            'name' => 'pdo',
+            'require' => ['php' => '>= 5.1.0'],
+        ],
+        [
+            'name' => 'pdo_mysql',
+            'require' => [
+                'php' => '>= 5.1.0',
+                'ext-pdo' => '*',
+            ],
+        ],
+        [
+            'name' => 'pdo_pgsql',
+            'require' => [
+                'php' => '>= 5.1.0',
+                'ext-pdo' => '*',
+            ],
+        ],
+        [
+            'name' => 'pdo_sqlite',
+            'require' => [
+                'php' => '>= 5.1.0',
+                'ext-pdo' => '*',
+            ],
+        ],
         ['name' => 'pgsql'],
-        // ['name' => 'phar', 'require' => ['php' => '>= 5.3.0']], // build failure - config.status: error: cannot find input file: '/phar.1.in'
         ['name' => 'posix'],
         ['name' => 'readline'],
         ['name' => 'session'],
         ['name' => 'shmop'],
-        ['name' => 'simplexml'],
+        [
+            'name' => 'simplexml',
+            'require' => [
+                'php' => '>= 5.2.0',
+                'ext-libxml' => '*',
+            ],
+        ],
         ['name' => 'snmp'],
-        ['name' => 'soap'],
+        [
+            'name' => 'soap',
+            'require' => [
+                'php' => '>= 5.2.0',
+                'ext-libxml' => '*',
+            ],
+        ],
         ['name' => 'sockets'],
         [
             'name' => 'sodium',
@@ -114,24 +156,35 @@ class BundledPhpExtensionsRepository extends ArrayRepository
         ['name' => 'sysvsem'],
         ['name' => 'sysvshm'],
         ['name' => 'tidy'],
-        // ['name' => 'tokenizer'], // build failure - make: *** No rule to make target '/home/james/workspace/oss/php-src/ext/tokenizer/Zend/zend_language_parser.y', needed by '/home/james/workspace/oss/php-src/ext/tokenizer/Zend/zend_language_parser.c'. Stop.
-        ['name' => 'xml'],
-//        [
-//            'name' => 'xmlreader',
-//            'require' => [
-//                'php' => '>= 5.1.0',
-//                'ext-xml' => '*',
-//                'ext-dom' => '*',
-//            ],
-//        ], // Not building in CI
+        [
+            'name' => 'xml',
+            'require' => [
+                'php' => '>= 5.2.0',
+                'ext-libxml' => '*',
+            ],
+        ],
+        [
+            'name' => 'xmlreader',
+            'require' => [
+                'php' => '>= 5.1.0',
+                'ext-libxml' => '*',
+                'ext-dom' => '*',
+            ],
+        ],
         [
             'name' => 'xmlwriter',
             'require' => [
                 'php' => '>= 5.2.0',
-                'ext-xml' => '*',
+                'ext-libxml' => '*',
             ],
         ],
-        ['name' => 'xsl'],
+        [
+            'name' => 'xsl',
+            'require' => [
+                'php' => '>= 5.2.0',
+                'ext-libxml' => '*',
+            ],
+        ],
         [
             'name' => 'zip',
             'require' => ['php' => '>= 5.2.0'],
@@ -195,5 +248,39 @@ class BundledPhpExtensionsRepository extends ArrayRepository
             },
             self::$bundledPhpExtensions,
         ));
+    }
+
+    private static function findRe2c(): string
+    {
+        try {
+            return Process::run(['which', 're2c']);
+        } catch (ProcessFailedException $processFailed) {
+            throw new RuntimeException('Unable to find re2c on the system', previous: $processFailed);
+        }
+    }
+
+    /**
+     * @param list<string> $makeCommand
+     *
+     * @return list<string>
+     */
+    public static function augmentMakeCommandForPhpBundledExtensions(array $makeCommand, DownloadedPackage $downloadedPackage): array
+    {
+        if ($downloadedPackage->package->name() === 'php/xmlreader') {
+            $makeCommand[] = 'EXTRA_CFLAGS=-I' . realpath($downloadedPackage->extractedSourcePath . '/../..');
+        }
+
+        if (
+            in_array($downloadedPackage->package->name(), [
+                'php/pdo',
+                'php/pdo_mysql',
+                'php/pdo_pgsql',
+                'php/pdo_sqlite',
+            ])
+        ) {
+            $makeCommand[] = 'RE2C=' . self::findRe2c();
+        }
+
+        return $makeCommand;
     }
 }
