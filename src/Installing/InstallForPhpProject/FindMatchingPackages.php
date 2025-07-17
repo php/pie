@@ -8,6 +8,7 @@ use Composer\Composer;
 use Composer\Repository\RepositoryInterface;
 use OutOfRangeException;
 
+use function array_key_exists;
 use function array_merge;
 use function count;
 use function usort;
@@ -33,7 +34,8 @@ class FindMatchingPackages
         }
 
         usort($matches, static function (array $a, array $b): int {
-            return $b['downloads'] <=> $a['downloads'];
+            return (array_key_exists('downloads', $b) ? $b['downloads'] : 0)
+                <=> (array_key_exists('downloads', $a) ? $a['downloads'] : 0);
         });
 
         return $matches;
