@@ -42,7 +42,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
             ['dev-main#769f906413d6d1e12152f6d34134cbcd347ca253', 'dev-main', self::DOWNLOAD_URL_1_0_1],
         ];
 
-        if (PHP_VERSION_ID >= 80300 && PHP_VERSION_ID <= 80300) {
+        if (PHP_VERSION_ID >= 80300 && PHP_VERSION_ID <= 80399) {
             $versionsAndExpected[] = ['1.0.1-alpha.3@alpha', '1.0.1-alpha.3', self::DOWNLOAD_URL_1_0_1_ALPHA_3];
             $versionsAndExpected[] = ['^1.0', '1.0.1', self::DOWNLOAD_URL_1_0_1];
             $versionsAndExpected[] = ['^1.1.0@alpha', '1.1.0-beta.1', self::DOWNLOAD_URL_1_1_0_BETA_1];
