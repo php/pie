@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Php\Pie;
 
-use Composer\Util\Platform;
+use Composer\Util\Platform as ComposerPlatform;
 use Illuminate\Container\Container as IlluminateContainer;
 use Php\Pie\Building\Build;
 use Php\Pie\Building\UnixBuild;
@@ -44,8 +44,12 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
+use function defined;
+use function fopen;
 use function getcwd;
 use function str_starts_with;
+
+use const STDIN;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class Container
@@ -54,7 +58,25 @@ final class Container
     {
         $container = new IlluminateContainer();
         $container->instance(ContainerInterface::class, $container);
-        $container->instance(InputInterface::class, new ArgvInput());
+        $container->singleton(
+            InputInterface::class,
+            static function () {
+                $input = new ArgvInput();
+
+                $stdin            = defined('STDIN') ? STDIN : fopen('php://stdin', 'r');
+                $noInteractionEnv = ComposerPlatform::getEnv('COMPOSER_NO_INTERACTION');
+                if (
+                    $noInteractionEnv === false
+                    || $noInteractionEnv === '1'
+                    || $stdin === false
+                    || ! ComposerPlatform::isTty($stdin)
+                ) {
+                    $input->setInteractive(false);
+                }
+
+                return $input;
+            },
+        );
         $container->instance(OutputInterface::class, new ConsoleOutput());
         $container->singleton(EventDispatcher::class, static function () {
             $displayedBanner = false;
@@ -124,7 +146,7 @@ final class Container
         $container->singleton(
             Build::class,
             static function (ContainerInterface $container): Build {
-                if (Platform::isWindows()) {
+                if (ComposerPlatform::isWindows()) {
                     return $container->get(WindowsBuild::class);
                 }
 
@@ -148,7 +170,7 @@ final class Container
         $container->singleton(
             Install::class,
             static function (ContainerInterface $container): Install {
-                if (Platform::isWindows()) {
+                if (ComposerPlatform::isWindows()) {
                     return $container->get(WindowsInstall::class);
                 }
 
