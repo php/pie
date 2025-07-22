@@ -99,6 +99,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/checkout@v4
       - uses: ramsey/composer-install@v3
+      - name: Validate the composer configuration
+        run: composer validate --strict
       - name: Run Psalm
         run: vendor/bin/psalm
 
