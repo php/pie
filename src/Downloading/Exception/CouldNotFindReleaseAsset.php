@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\Pie\Downloading\Exception;
 
 use Php\Pie\DependencyResolver\Package;
+use Php\Pie\Downloading\DownloadUrlMethod;
 use Php\Pie\Platform\TargetPlatform;
 use RuntimeException;
 
@@ -14,8 +15,19 @@ use function sprintf;
 class CouldNotFindReleaseAsset extends RuntimeException
 {
     /** @param non-empty-list<non-empty-string> $expectedAssetNames */
-    public static function forPackage(Package $package, array $expectedAssetNames): self
+    public static function forPackage(TargetPlatform $targetPlatform, Package $package, array $expectedAssetNames): self
     {
+        $downloadUrlMethod = DownloadUrlMethod::fromPackage($package, $targetPlatform);
+
+        if ($downloadUrlMethod === DownloadUrlMethod::WindowsBinaryDownload) {
+            return new self(sprintf(
+                'Windows archive with prebuilt extension for %s was not attached on release %s - looked for one of "%s"',
+                $package->name(),
+                $package->version(),
+                implode(', ', $expectedAssetNames),
+            ));
+        }
+
         return new self(sprintf(
             'Could not find release asset for %s named one of "%s"',
             $package->prettyNameAndVersion(),
