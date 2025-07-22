@@ -342,4 +342,26 @@ final class PhpBinaryPathTest extends TestCase
             'hopefully_this_extension_name_is_not_real_otherwise_this_test_will_fail',
         ));
     }
+
+    public function testBuildProviderWhenConfigured(): void
+    {
+        $phpBinary = $this->createPartialMock(PhpBinaryPath::class, ['phpinfo']);
+
+        $phpBinary->expects(self::once())
+            ->method('phpinfo')
+            ->willReturn('Build Provider => My build provider');
+
+        self::assertSame('My build provider', $phpBinary->buildProvider());
+    }
+
+    public function testBuildProviderNullWhenNotConfigured(): void
+    {
+        $phpBinary = $this->createPartialMock(PhpBinaryPath::class, ['phpinfo']);
+
+        $phpBinary->expects(self::once())
+            ->method('phpinfo')
+            ->willReturn('');
+
+        self::assertNull($phpBinary->buildProvider());
+    }
 }
