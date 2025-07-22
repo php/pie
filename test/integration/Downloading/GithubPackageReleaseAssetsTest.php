@@ -22,6 +22,7 @@ use Php\Pie\Platform\ThreadSafetyMode;
 use Php\Pie\Platform\WindowsCompiler;
 use Php\Pie\Platform\WindowsExtensionAssetName;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\RequiresOperatingSystemFamily;
 use PHPUnit\Framework\TestCase;
 
 use function getenv;
@@ -30,6 +31,7 @@ use function is_string;
 #[CoversClass(GithubPackageReleaseAssets::class)]
 final class GithubPackageReleaseAssetsTest extends TestCase
 {
+    #[RequiresOperatingSystemFamily('Windows')]
     public function testDeterminingReleaseAssetUrlForWindows(): void
     {
         $phpBinaryPath = $this->createMock(PhpBinaryPath::class);
