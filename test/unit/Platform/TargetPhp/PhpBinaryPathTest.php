@@ -37,6 +37,8 @@ use function php_uname;
 use function phpversion;
 use function sprintf;
 use function strtolower;
+use function sys_get_temp_dir;
+use function uniqid;
 
 use const DIRECTORY_SEPARATOR;
 use const PHP_INT_SIZE;
@@ -235,6 +237,21 @@ final class PhpBinaryPathTest extends TestCase
             $expectedExtensionDir,
             $phpBinary->extensionPath(),
         );
+    }
+
+    public function testExtensionPathIsImplicitlyCreated(): void
+    {
+        $phpBinary = $this->createPartialMock(PhpBinaryPath::class, ['phpinfo']);
+
+        $configuredExtensionPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('PIE_non_existent_extension_path', true);
+        self::assertDirectoryDoesNotExist($configuredExtensionPath);
+
+        $phpBinary->expects(self::once())
+            ->method('phpinfo')
+            ->willReturn(sprintf('extension_dir => %s => %s', $configuredExtensionPath, $configuredExtensionPath));
+
+        self::assertSame($configuredExtensionPath, $phpBinary->extensionPath());
+        self::assertDirectoryExists($configuredExtensionPath);
     }
 
     /** @return array<string, array{0: string}> */
