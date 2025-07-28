@@ -86,6 +86,16 @@ system in order to download, build and install extensions:
 
 Also, each extension may have its own requirements, such as additional libraries.
 
+> [!TIP]
+> If you run PIE without the correct prerequisites installed, you may receive
+> an error from the *Box Requirements Checker*. If you want to try running
+> anyway, specify the environment variable `BOX_REQUIREMENT_CHECKER=0`.
+>
+> Example on Linux:
+> ```shell
+> $ BOX_REQUIREMENT_CHECKER=0 pie install foo/bar
+> ```
+
 ### Using Linux
 
 On a Debian-based system, you may install the required tools with:
