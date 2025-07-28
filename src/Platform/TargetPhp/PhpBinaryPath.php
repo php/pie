@@ -269,7 +269,7 @@ PHP,
         $phpVersion = self::cleanWarningAndDeprecationsFromOutput(Process::run([
             $this->phpBinaryPath,
             '-r',
-            'echo PHP_MAJOR_VERSION . "." . PHP_MINOR_VERSION . "." . PHP_RELEASE_VERSION;',
+            'echo PHP_VERSION;',
         ]));
         Assert::stringNotEmpty($phpVersion, 'Could not determine PHP version');
 
