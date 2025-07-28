@@ -15,13 +15,14 @@ use Php\Pie\Platform\OperatingSystemFamily;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\ThreadSafetyMode;
+use Php\Pie\Platform\WindowsCompiler;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(CouldNotFindReleaseAsset::class)]
 final class CouldNotFindReleaseAssetTest extends TestCase
 {
-    public function testForPackage(): void
+    public function testForPackageWithRegularPackage(): void
     {
         $package = new Package(
             $this->createMock(CompletePackage::class),
@@ -32,9 +33,49 @@ final class CouldNotFindReleaseAssetTest extends TestCase
             null,
         );
 
-        $exception = CouldNotFindReleaseAsset::forPackage($package, ['something.zip', 'something2.zip']);
+        $exception = CouldNotFindReleaseAsset::forPackage(
+            new TargetPlatform(
+                OperatingSystem::NonWindows,
+                OperatingSystemFamily::Linux,
+                PhpBinaryPath::fromCurrentProcess(),
+                Architecture::x86_64,
+                ThreadSafetyMode::NonThreadSafe,
+                1,
+                null,
+            ),
+            $package,
+            ['something.zip', 'something2.zip'],
+        );
 
         self::assertSame('Could not find release asset for foo/bar:1.2.3 named one of "something.zip, something2.zip"', $exception->getMessage());
+    }
+
+    public function testForPackageWithWindowsPackage(): void
+    {
+        $package = new Package(
+            $this->createMock(CompletePackage::class),
+            ExtensionType::PhpModule,
+            ExtensionName::normaliseFromString('foo'),
+            'foo/bar',
+            '1.2.3',
+            null,
+        );
+
+        $exception = CouldNotFindReleaseAsset::forPackage(
+            new TargetPlatform(
+                OperatingSystem::Windows,
+                OperatingSystemFamily::Windows,
+                PhpBinaryPath::fromCurrentProcess(),
+                Architecture::x86_64,
+                ThreadSafetyMode::NonThreadSafe,
+                1,
+                WindowsCompiler::VS17,
+            ),
+            $package,
+            ['something.zip', 'something2.zip'],
+        );
+
+        self::assertSame('Windows archive with prebuilt extension for foo/bar was not attached on release 1.2.3 - looked for one of "something.zip, something2.zip"', $exception->getMessage());
     }
 
     public function testForPackageWithMissingTag(): void

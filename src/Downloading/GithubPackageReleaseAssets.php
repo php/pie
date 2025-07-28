@@ -37,6 +37,7 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
         array $possibleReleaseAssetNames,
     ): string {
         $releaseAsset = $this->selectMatchingReleaseAsset(
+            $targetPlatform,
             $package,
             $this->getReleaseAssetsForPackage($package, $authHelper, $httpDownloader),
             $possibleReleaseAssetNames,
@@ -55,6 +56,7 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
      */
     // phpcs:enable
     private function selectMatchingReleaseAsset(
+        TargetPlatform $targetPlatform,
         Package $package,
         array $releaseAssets,
         array $possibleReleaseAssetNames,
@@ -65,7 +67,7 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
             }
         }
 
-        throw Exception\CouldNotFindReleaseAsset::forPackage($package, $possibleReleaseAssetNames);
+        throw Exception\CouldNotFindReleaseAsset::forPackage($targetPlatform, $package, $possibleReleaseAssetNames);
     }
 
     /** @return list<array{name: non-empty-string, browser_download_url: non-empty-string, ...}> */
