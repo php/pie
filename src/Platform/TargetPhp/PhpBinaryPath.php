@@ -29,6 +29,7 @@ use function implode;
 use function in_array;
 use function is_dir;
 use function is_executable;
+use function mkdir;
 use function preg_match;
 use function sprintf;
 use function strtolower;
@@ -102,6 +103,11 @@ class PhpBinaryPath
             assert($extensionPath !== '');
 
             if (file_exists($extensionPath) && is_dir($extensionPath)) {
+                return $extensionPath;
+            }
+
+            // if the path is absolute, try to create it
+            if (mkdir($extensionPath, 0777, true) && file_exists($extensionPath) && is_dir($extensionPath)) {
                 return $extensionPath;
             }
 
