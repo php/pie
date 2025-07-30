@@ -30,7 +30,7 @@ foreach ($packageNames as $packageName) {
         'sudo',
         'bin/pie',
         'install',
-        $packageName,
+        $packageName . ':@dev',
         '--with-php-config=' . $phpBinaryPath->phpConfigPath(),
     ];
 
