@@ -21,6 +21,8 @@ use function array_combine;
 use function array_key_exists;
 use function array_keys;
 use function array_map;
+use function count;
+use function implode;
 use function in_array;
 use function realpath;
 use function sprintf;
@@ -266,8 +268,28 @@ class BundledPhpExtensionsRepository extends ArrayRepository
      */
     public static function augmentMakeCommandForPhpBundledExtensions(array $makeCommand, DownloadedPackage $downloadedPackage): array
     {
-        if ($downloadedPackage->package->name() === 'php/xmlreader') {
-            $makeCommand[] = 'EXTRA_CFLAGS=-I' . realpath($downloadedPackage->extractedSourcePath . '/../..');
+        $extraCflags = [];
+        if (
+            in_array($downloadedPackage->package->name(), [
+                'php/xmlreader',
+                'php/dom',
+            ])
+        ) {
+            $path = (string) realpath($downloadedPackage->extractedSourcePath . '/../..');
+            if ($path !== '') {
+                $extraCflags[] = '-I' . $path;
+            }
+        }
+
+        if ($downloadedPackage->package->name() === 'php/dom') {
+            $path = (string) realpath($downloadedPackage->extractedSourcePath . '/../../ext/lexbor');
+            if ($path !== '') {
+                $extraCflags[] = '-I' . $path;
+            }
+        }
+
+        if (count($extraCflags)) {
+            $makeCommand[] = 'EXTRA_CFLAGS=' . implode(' ', $extraCflags);
         }
 
         if (

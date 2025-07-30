@@ -10,7 +10,14 @@ use Php\Pie\Util\Process;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$phpBinaryPath = PhpBinaryPath::fromCurrentProcess();
+$phpConfigPath = $argv[1] ?? '';
+
+if ($phpConfigPath === '') {
+    echo 'Usage: ' . __FILE__ . ' <php-config-path>' . PHP_EOL;
+    exit(1);
+}
+
+$phpBinaryPath = PhpBinaryPath::fromPhpConfigExecutable($phpConfigPath);
 
 $packageNames = array_map(
     static fn (PackageInterface $package): string => $package->getName(),

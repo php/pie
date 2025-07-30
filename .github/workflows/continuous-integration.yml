@@ -52,12 +52,16 @@ jobs:
         operating-system:
           - ubuntu-latest
         php-versions:
-          - '8.1'
-          - '8.2'
-          - '8.3'
-          - '8.4'
-          - '8.5.0alpha3'
+          - '8.1.33'
+          - '8.2.29'
+          - '8.3.23'
+          - '8.4.10'
+          - '8.5.0alpha2'
     steps:
+      - name: "Purge built-in PHP version"
+        run: |
+          echo "libmemcached11 php* hhvm libhashkit2" | xargs -n 1 sudo apt-get purge --assume-yes || true
+          sudo apt-add-repository --remove ppa:ondrej/php -y
       - name: Install platform dependencies
         run: |
           sudo apt-get update
@@ -89,18 +93,33 @@ jobs:
             libpq-dev \
             libsqlite3-dev \
             libzip-dev
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php-versions }}
-          extensions: none, mbstring, libxml
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: "Set php-src download URL"
+        run: echo "php_src_download_url=https://www.php.net/distributions/php-${{ matrix.php-versions }}.tar.gz" >> $GITHUB_ENV
+      - name: "Set php-src download URL (8.5 pre-release)"
+        if: ${{ startsWith(matrix.php-versions, '8.5.') }}
+        run: echo "php_src_download_url=https://downloads.php.net/~edorian/php-${{ matrix.php-versions }}.tar.gz" >> $GITHUB_ENV
+      - name: "Install PHP ${{ matrix.php-versions }}"
+        run: |
+          mkdir -p /tmp/php
+          mkdir -p /tmp/php.ini.d
+          cd /tmp/php
+          echo "Downloading release from ${{ env.php_src_download_url }} ..."
+          wget -O php.tgz ${{ env.php_src_download_url }}
+          tar zxf php.tgz
+          rm php.tgz
+          ls -l
+          cd *
+          ls -l
+          ./buildconf --force
+          ./configure --disable-dom --disable-xml --disable-xmlreader --disable-xmlwriter --disable-json --with-openssl --with-config-file-scan-dir=/tmp/php.ini.d
+          make -j$(nproc)
+          sudo make install
+          cd $GITHUB_WORKSPACE
       - uses: actions/checkout@v4
       - name: Composer Install
         run: composer install --ignore-platform-reqs
       - name: Run bundled PHP install test
-        run: sudo php test/install-bundled-php-exts.php
+        run: sudo php test/install-bundled-php-exts.php php-config
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

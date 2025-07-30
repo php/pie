@@ -45,7 +45,7 @@ use const PHP_INT_SIZE;
 use const PHP_MAJOR_VERSION;
 use const PHP_MINOR_VERSION;
 use const PHP_OS_FAMILY;
-use const PHP_RELEASE_VERSION;
+use const PHP_VERSION;
 
 #[CoversClass(PhpBinaryPath::class)]
 final class PhpBinaryPathTest extends TestCase
@@ -101,7 +101,7 @@ final class PhpBinaryPathTest extends TestCase
         $phpBinary = PhpBinaryPath::fromCurrentProcess();
 
         self::assertSame(
-            sprintf('%s.%s.%s', PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION),
+            PHP_VERSION,
             $phpBinary->version(),
         );
         self::assertNull($phpBinary->phpConfigPath());
