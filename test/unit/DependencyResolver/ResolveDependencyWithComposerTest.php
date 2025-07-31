@@ -30,6 +30,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Console\Output\OutputInterface;
 
 #[CoversClass(ResolveDependencyWithComposer::class)]
 final class ResolveDependencyWithComposerTest extends TestCase
@@ -80,6 +81,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
         );
 
         $package = (new ResolveDependencyWithComposer(
+            $this->createMock(OutputInterface::class),
             $this->createMock(QuieterConsoleIO::class),
         ))($this->composer, $targetPlatform, new RequestedPackageAndVersion('asgrim/example-pie-extension', '^1.0'), false);
 
@@ -123,6 +125,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
         $this->expectException(UnableToResolveRequirement::class);
 
         (new ResolveDependencyWithComposer(
+            $this->createMock(OutputInterface::class),
             $this->createMock(QuieterConsoleIO::class),
         ))(
             $this->composer,
@@ -161,6 +164,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
         $this->expectException(UnableToResolveRequirement::class);
 
         $package = (new ResolveDependencyWithComposer(
+            $this->createMock(OutputInterface::class),
             $this->createMock(QuieterConsoleIO::class),
         ))(
             $this->composer,
@@ -212,6 +216,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
         $this->expectException(IncompatibleThreadSafetyMode::class);
         $this->expectExceptionMessage('This extension does not support being installed on a non-Thread Safe PHP installation');
         (new ResolveDependencyWithComposer(
+            $this->createMock(OutputInterface::class),
             $this->createMock(QuieterConsoleIO::class),
         ))(
             $this->composer,
@@ -260,6 +265,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
         $this->expectException(IncompatibleThreadSafetyMode::class);
         $this->expectExceptionMessage('This extension does not support being installed on a Thread Safe PHP installation');
         (new ResolveDependencyWithComposer(
+            $this->createMock(OutputInterface::class),
             $this->createMock(QuieterConsoleIO::class),
         ))(
             $this->composer,
@@ -308,6 +314,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
         $this->expectException(IncompatibleOperatingSystemFamily::class);
         $this->expectExceptionMessage('This extension does not support the "linux" operating system family. It is compatible with the following families: "solaris", "darwin"');
         (new ResolveDependencyWithComposer(
+            $this->createMock(OutputInterface::class),
             $this->createMock(QuieterConsoleIO::class),
         ))(
             $this->composer,
@@ -356,6 +363,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
         $this->expectException(IncompatibleOperatingSystemFamily::class);
         $this->expectExceptionMessage('This extension does not support the "darwin" operating system family. It is incompatible with the following families: "darwin", "solaris".');
         (new ResolveDependencyWithComposer(
+            $this->createMock(OutputInterface::class),
             $this->createMock(QuieterConsoleIO::class),
         ))(
             $this->composer,
@@ -392,6 +400,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
         );
 
         $package = (new ResolveDependencyWithComposer(
+            $this->createMock(OutputInterface::class),
             $this->createMock(QuieterConsoleIO::class),
         ))($this->composer, $targetPlatform, new RequestedPackageAndVersion('asgrim/example-pie-extension', '^1.0'), false);
 

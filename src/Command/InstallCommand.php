@@ -9,6 +9,7 @@ use Php\Pie\ComposerIntegration\ComposerRunFailed;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieOperation;
+use Php\Pie\DependencyResolver\BundledPhpExtensionRefusal;
 use Php\Pie\DependencyResolver\DependencyResolver;
 use Php\Pie\DependencyResolver\InvalidPackageName;
 use Php\Pie\DependencyResolver\UnableToResolveRequirement;
@@ -103,6 +104,11 @@ final class InstallCommand extends Command
                 $targetPlatform,
                 $this->container,
             );
+        } catch (BundledPhpExtensionRefusal $bundledPhpExtensionRefusal) {
+            $output->writeln('');
+            $output->writeln('<comment>' . $bundledPhpExtensionRefusal->getMessage() . '</comment>');
+
+            return self::INVALID;
         }
 
         $output->writeln(sprintf('<info>Found package:</info> %s which provides <info>%s</info>', $package->prettyNameAndVersion(), $package->extensionName()->nameWithExtPrefix()));
