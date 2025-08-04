@@ -175,6 +175,25 @@ class PhpBinaryPath
         return null;
     }
 
+    /** @return non-empty-string|null */
+    public function buildProvider(): string|null
+    {
+        /**
+         * Newer versions of PHP will have a `PHP_BUILD_PROVIDER` constant
+         * defined - {@link https://github.com/php/php-src/pull/19157}
+         */
+        if (
+            preg_match('/Build Provider([ =>\t]*)(.*)/', $this->phpinfo(), $m)
+            && array_key_exists(2, $m)
+            && $m[2] !== ''
+            && $m[2] !== '(none)'
+        ) {
+            return $m[2];
+        }
+
+        return null;
+    }
+
     /**
      * Returns a map where the key is the name of the extension and the value is the version ('0' if not defined)
      *
@@ -250,7 +269,7 @@ PHP,
         $phpVersion = self::cleanWarningAndDeprecationsFromOutput(Process::run([
             $this->phpBinaryPath,
             '-r',
-            'echo PHP_MAJOR_VERSION . "." . PHP_MINOR_VERSION . "." . PHP_RELEASE_VERSION;',
+            'echo PHP_VERSION;',
         ]));
         Assert::stringNotEmpty($phpVersion, 'Could not determine PHP version');
 

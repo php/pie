@@ -12,14 +12,17 @@ use Php\Pie\ComposerIntegration\VersionSelectorFactory;
 use Php\Pie\ExtensionType;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\ThreadSafetyMode;
+use Symfony\Component\Console\Output\OutputInterface;
 
 use function in_array;
 use function preg_match;
+use function sprintf;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class ResolveDependencyWithComposer implements DependencyResolver
 {
     public function __construct(
+        private readonly OutputInterface $output,
         private readonly QuieterConsoleIO $arrayCollectionIo,
     ) {
     }
@@ -62,6 +65,7 @@ final class ResolveDependencyWithComposer implements DependencyResolver
 
         $piePackage = Package::fromComposerCompletePackage($package);
 
+        $this->assertBuildProviderProvidersBundledExtensions($targetPlatform, $piePackage, $forceInstallPackageVersion);
         $this->assertCompatibleOsFamily($targetPlatform, $piePackage);
         $this->assertCompatibleThreadSafetyMode($targetPlatform->threadSafety, $piePackage);
 
@@ -93,6 +97,50 @@ final class ResolveDependencyWithComposer implements DependencyResolver
                 $resolvedPackage->incompatibleOsFamilies(),
                 $targetPlatform->operatingSystemFamily,
             );
+        }
+    }
+
+    private function assertBuildProviderProvidersBundledExtensions(TargetPlatform $targetPlatform, Package $piePackage, bool $forceInstallPackageVersion): void
+    {
+        if (! $piePackage->isBundledPhpExtension()) {
+            return;
+        }
+
+        $buildProvider           = $targetPlatform->phpBinaryPath->buildProvider();
+        $identifiedBuildProvider = false;
+        $note                    = '<options=bold,underscore;fg=red>Note:</> ';
+
+        if ($buildProvider === 'https://github.com/docker-library/php') {
+            $identifiedBuildProvider = true;
+            $this->output->writeln(sprintf(
+                '<comment>%sYou should probably use "docker-php-ext-install %s" instead</comment>',
+                $note,
+                $piePackage->extensionName()->name(),
+            ));
+        }
+
+        if ($buildProvider === 'Debian') {
+            $identifiedBuildProvider = true;
+            $this->output->writeln(sprintf(
+                '<comment>%sYou should probably use "apt install php%s-%s" or "apt install php-%s" (or similar) instead</comment>',
+                $note,
+                $targetPlatform->phpBinaryPath->majorMinorVersion(),
+                $piePackage->extensionName()->name(),
+                $piePackage->extensionName()->name(),
+            ));
+        }
+
+        if ($buildProvider === 'Remi\'s RPM repository <https://rpms.remirepo.net/> #StandWithUkraine') {
+            $identifiedBuildProvider = true;
+            $this->output->writeln(sprintf(
+                '<comment>%sYou should probably use "dnf install php-%s" instead</comment>',
+                $note,
+                $piePackage->extensionName()->name(),
+            ));
+        }
+
+        if ($identifiedBuildProvider && ! $forceInstallPackageVersion) {
+            throw BundledPhpExtensionRefusal::forPackage($piePackage);
         }
     }
 }

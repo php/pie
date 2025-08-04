@@ -163,6 +163,11 @@ final class Package
         return $this->extensionName;
     }
 
+    public function isBundledPhpExtension(): bool
+    {
+        return str_starts_with($this->name(), 'php/');
+    }
+
     public function name(): string
     {
         return $this->name;

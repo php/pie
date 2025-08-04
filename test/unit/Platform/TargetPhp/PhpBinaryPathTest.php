@@ -45,7 +45,7 @@ use const PHP_INT_SIZE;
 use const PHP_MAJOR_VERSION;
 use const PHP_MINOR_VERSION;
 use const PHP_OS_FAMILY;
-use const PHP_RELEASE_VERSION;
+use const PHP_VERSION;
 
 #[CoversClass(PhpBinaryPath::class)]
 final class PhpBinaryPathTest extends TestCase
@@ -101,7 +101,7 @@ final class PhpBinaryPathTest extends TestCase
         $phpBinary = PhpBinaryPath::fromCurrentProcess();
 
         self::assertSame(
-            sprintf('%s.%s.%s', PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION),
+            PHP_VERSION,
             $phpBinary->version(),
         );
         self::assertNull($phpBinary->phpConfigPath());
@@ -341,5 +341,27 @@ final class PhpBinaryPathTest extends TestCase
         $php->assertExtensionIsLoadedInRuntime(ExtensionName::normaliseFromString(
             'hopefully_this_extension_name_is_not_real_otherwise_this_test_will_fail',
         ));
+    }
+
+    public function testBuildProviderWhenConfigured(): void
+    {
+        $phpBinary = $this->createPartialMock(PhpBinaryPath::class, ['phpinfo']);
+
+        $phpBinary->expects(self::once())
+            ->method('phpinfo')
+            ->willReturn('Build Provider => My build provider');
+
+        self::assertSame('My build provider', $phpBinary->buildProvider());
+    }
+
+    public function testBuildProviderNullWhenNotConfigured(): void
+    {
+        $phpBinary = $this->createPartialMock(PhpBinaryPath::class, ['phpinfo']);
+
+        $phpBinary->expects(self::once())
+            ->method('phpinfo')
+            ->willReturn('');
+
+        self::assertNull($phpBinary->buildProvider());
     }
 }

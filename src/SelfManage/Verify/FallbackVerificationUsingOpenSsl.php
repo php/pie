@@ -100,7 +100,6 @@ final class FallbackVerificationUsingOpenSsl implements VerifyPiePhar
     {
         $attestationCertificateInfo = openssl_x509_parse($attestation->certificate);
 
-        // @todo process in place to make sure this gets updated frequently enough: gh attestation trusted-root > resources/trusted-root.jsonl
         $trustedRootJsonLines = explode("\n", trim(file_get_contents($this->trustedRootFilePath)));
 
         /**
