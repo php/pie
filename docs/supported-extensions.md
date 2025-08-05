@@ -180,7 +180,7 @@ please do submit a [Pull Request](https://github.com/php/pie/pulls).
 | markdown             | ?                                                                                                      |
 | maxdb                | ❌ Abandoned                                                                                            |
 | maxminddb            | ?                                                                                                      |
-| mcrypt               | ⏰ PR: [php/pecl-encryption-mcrypt#20](https://github.com/php/pecl-encryption-mcrypt/pull/20)           |
+| mcrypt               | ✅ Supported: [pecl/mcrypt](https://packagist.org/packages/pecl/mcrypt)                                 |
 | mcrypt_filter        | ?                                                                                                      |
 | mcve                 | ❌ Abandoned                                                                                            |
 | mdbtools             | ❌ Abandoned                                                                                            |
