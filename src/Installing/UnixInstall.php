@@ -20,7 +20,7 @@ use function sprintf;
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class UnixInstall implements Install
 {
-    private const MAKE_INSTALL_TIMEOUT_SECS = 60; // 1 minute
+    private const MAKE_INSTALL_TIMEOUT_SECS = 300; // 5 minutes
 
     public function __construct(private readonly SetupIniFile $setupIniFile)
     {
