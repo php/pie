@@ -45,11 +45,11 @@ final class UnixInstall implements Install
 
         // If the target directory isn't writable, or a .so file already exists and isn't writable, try to use sudo
         if (
-            Sudo::exists()
-            && (
+            (
                 ! is_writable($targetExtensionPath)
                 || (file_exists($expectedSharedObjectLocation) && ! is_writable($expectedSharedObjectLocation))
             )
+            && Sudo::exists()
         ) {
             $output->writeln(sprintf(
                 '<comment>Cannot write to %s, so using sudo to elevate privileges.</comment>',

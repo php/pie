@@ -10,6 +10,8 @@ use Php\Pie\Platform\TargetPlatform;
 use RuntimeException;
 
 use function array_keys;
+use function defined;
+use function fopen;
 use function implode;
 use function md5;
 use function rtrim;
@@ -17,10 +19,22 @@ use function strpos;
 use function strtr;
 
 use const DIRECTORY_SEPARATOR;
+use const STDIN;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 class Platform
 {
+    public static function isInteractive(): bool
+    {
+        $stdin            = defined('STDIN') ? STDIN : fopen('php://stdin', 'r');
+        $noInteractionEnv = ComposerPlatform::getEnv('COMPOSER_NO_INTERACTION');
+
+        return $noInteractionEnv !== false
+            && $noInteractionEnv !== '1'
+            && $stdin !== false
+            && ComposerPlatform::isTty($stdin);
+    }
+
     private static function useXdg(): bool
     {
         foreach (array_keys($_SERVER) as $key) {
