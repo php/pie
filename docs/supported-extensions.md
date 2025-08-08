@@ -20,411 +20,454 @@ added support for PIE. This is a list of extensions hosted on PECL, and their
 status for adding PIE support. If you spot some out of date information here,
 please do submit a [Pull Request](https://github.com/php/pie/pulls).
 
-| PECL Extension       | Status                                                                                                 |
-|----------------------|--------------------------------------------------------------------------------------------------------|
-| ahocorasick          | ?                                                                                                      |
-| amfext               | ❌ Abandoned                                                                                            |
-| amqp                 | ✅ Supported: [php-amqp/php-amqp](https://packagist.org/packages/php-amqp/php-amqp)                     |
-| AOP                  | ?                                                                                                      |
-| ApacheAccessor       | ?                                                                                                      |
-| APC                  | ❌ Abandoned                                                                                            |
-| APCu                 | ✅ Supported: [apcu/apcu](https://packagist.org/packages/apcu/apcu)                                     |
-| apcu_bc              | ?                                                                                                      |
-| apd                  | ❌ Abandoned                                                                                            |
-| apfd                 | ✅ Supported: [m6w6/ext-apfd](https://packagist.org/packages/m6w6/ext-apfd)                             |
-| APM                  | ?                                                                                                      |
-| apn                  | ❌ Abandoned                                                                                            |
-| archive              | ❌ Abandoned                                                                                            |
-| ares                 | ❌ Abandoned                                                                                            |
-| ast                  | ✅ Supported: [nikic/php-ast](https://packagist.org/packages/nikic/php-ast)                             |
-| augeas               | ?                                                                                                      |
-| automap              | ❌ Abandoned                                                                                            |
-| awscrt               | ?                                                                                                      |
-| axis2                | ❌ Abandoned                                                                                            |
-| base58               | ⏰ PR: [jasny/base58-php-ext#14](https://github.com/jasny/base58-php-ext/pull/14)                       |
-| bbcode               | ❌ Abandoned                                                                                            |
-| bcompiler            | ❌ Abandoned                                                                                            |
-| big_int              | ❌ Abandoned                                                                                            |
-| binpack              | ❌ Abandoned                                                                                            |
-| Bitset               | ⏰ PR: [php/pecl-numbers-bitset#16](https://github.com/php/pecl-numbers-bitset/pull/16)                 |
-| BLENC                | ❌ Abandoned                                                                                            |
-| bloomy               | ?                                                                                                      |
-| brotli               | ✅ Supported: [kjdev/brotli](https://packagist.org/packages/kjdev/brotli)                               |
-| bsdiff               | ?                                                                                                      |
-| bz2                  | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                      |
-| bz2_filter           | ?                                                                                                      |
-| cairo                | ❌ Abandoned                                                                                            |
-| cairo_wrapper        | ?                                                                                                      |
-| cassandra            | ?                                                                                                      |
-| chdb                 | ❌ Abandoned                                                                                            |
-| classkit             | ❌ Abandoned                                                                                            |
-| cld                  | ?                                                                                                      |
-| clips                | ?                                                                                                      |
-| clucene              | ?                                                                                                      |
-| cmark                | ?                                                                                                      |
-| coin_acceptor        | ❌ Abandoned                                                                                            |
-| colorer              | ❌ Abandoned                                                                                            |
-| componere            | ?                                                                                                      |
-| couchbase            | ?                                                                                                      |
-| courierauth          | ?                                                                                                      |
-| crack                | ❌ Abandoned                                                                                            |
-| crack_dll            | ?                                                                                                      |
-| crypto               | ⏰ PR: [bukka/php-crypto#43](https://github.com/bukka/php-crypto/pull/43)                               |
-| CSV                  | ✅ Supported: [girgias/csv](https://packagist.org/packages/girgias/csv)                                 |
-| CUBRID               | ?                                                                                                      |
-| cvsclient            | ?                                                                                                      |
-| cybercash            | ❌ Abandoned                                                                                            |
-| cybermut             | ?                                                                                                      |
-| cyrus                | ❌ Abandoned                                                                                            |
-| datadog_trace        | ?                                                                                                      |
-| date_time            | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                      |
-| dazuko               | ?                                                                                                      |
-| dbase                | ⏰ PR: [php/pecl-database-dbase#6](https://github.com/php/pecl-database-dbase/pull/6)                   |
-| DBDO                 | ❌ Abandoned                                                                                            |
-| dbplus               | ❌ Abandoned                                                                                            |
-| DBus                 | ❌ Abandoned                                                                                            |
-| dbx                  | ❌ Abandoned                                                                                            |
-| decimal              | ✅ Supported: [php-decimal/ext-decimal](https://packagist.org/packages/php-decimal/ext-decimal)         |
-| dio                  | ✅ Supported: [pecl/dio](https://packagist.org/packages/pecl/dio)                                       |
-| docblock             | ?                                                                                                      |
-| dom_varimport        | ❌ Abandoned                                                                                            |
-| doublemetaphone      | ?                                                                                                      |
-| drizzle              | ❌ Abandoned                                                                                            |
-| Druid                | ?                                                                                                      |
-| ds                   | ✅ Supported: [php-ds/ext-ds](https://packagist.org/packages/php-ds/ext-ds)                             |
-| dtrace               | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                      |
-| ecasound             | ?                                                                                                      |
-| ecma_intl            | ?                                                                                                      |
-| eio                  | ?                                                                                                      |
-| enchant              | ❌ Abandoned                                                                                            |
-| env                  | ?                                                                                                      |
-| esmtp                | ?                                                                                                      |
-| ev                   | ✅ Supported: [osmanov/pecl-ev](https://packagist.org/packages/osmanov/pecl-ev)                         |
-| event                | ✅ Supported: [osmanov/pecl-event](https://packagist.org/packages/osmanov/pecl-event)                   |
-| excimer              | ?                                                                                                      |
-| expect               | ?                                                                                                      |
-| fam                  | ❌ Abandoned                                                                                            |
-| fann                 | ?                                                                                                      |
-| ffi                  | ❌ Abandoned                                                                                            |
-| Fileinfo             | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                      |
-| filter               | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                      |
-| framegrab            | ?                                                                                                      |
-| FreeImage            | ❌ Abandoned                                                                                            |
-| fribidi              | ❌ Abandoned                                                                                            |
-| funcall              | ❌ Abandoned                                                                                            |
-| functional           | ?                                                                                                      |
-| fuse                 | ❌ Abandoned                                                                                            |
-| GDChart              | ❌ Abandoned                                                                                            |
-| gearman              | ?                                                                                                      |
-| gender               | ?                                                                                                      |
-| geoip                | ?                                                                                                      |
-| geospatial           | ✅ Supported: [php-geospatial/geospatial](https://packagist.org/packages/php-geospatial/geospatial)     |
-| gmagick              | ?                                                                                                      |
-| gnupg                | ?                                                                                                      |
-| gpio                 | ✅ Supported: [embedded-php/gpio](https://packagist.org/packages/embedded-php/gpio)                     |
-| graphdat             | ?                                                                                                      |
-| gRPC                 | ?                                                                                                      |
-| gupnp                | ❌ Abandoned                                                                                            |
-| handlebars           | ?                                                                                                      |
-| haru                 | ❌ Abandoned                                                                                            |
-| hash                 | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                      |
-| hdr_histogram        | ⏰ Coming soon: [beberlei/hdrhistogram](https://packagist.org/packages/beberlei/hdrhistogram)           |
-| hidef                | ❌ Abandoned                                                                                            |
-| hprose               | ?                                                                                                      |
-| hrtime               | ⏰ PR: [php/pecl-datetime-hrtime#1](https://github.com/php/pecl-datetime-hrtime/pull/1)                 |
-| html_parse           | ❌ Abandoned                                                                                            |
-| htscanner            | ❌ Abandoned                                                                                            |
-| http_message         | ?                                                                                                      |
-| huffman              | ❌ Abandoned                                                                                            |
-| i2c                  | ✅ Supported: [embedded-php/i2c](https://packagist.org/packages/embedded-php/i2c)                       |
-| ibm_db2              | ?                                                                                                      |
-| ice                  | ?                                                                                                      |
-| id3                  | ❌ Abandoned                                                                                            |
-| idn                  | ?                                                                                                      |
-| igbinary             | ?                                                                                                      |
-| imagick              | ✅ Supported: [imagick/imagick](https://packagist.org/packages/imagick/imagick)                         |
-| imap                 | ?                                                                                                      |
-| imlib2               | ❌ Abandoned                                                                                            |
-| immutable_cache      | ?                                                                                                      |
-| IMS                  | ?                                                                                                      |
-| inclued              | ❌ Abandoned                                                                                            |
-| ingres               | ❌ Abandoned                                                                                            |
-| inotify              | ✅ Supported: [arnaud-lb/inotify](https://packagist.org/packages/arnaud-lb/inotify)                     |
-| intercept            | ?                                                                                                      |
-| intl                 | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                      |
-| ion                  | ?                                                                                                      |
-| ip2location          | ?                                                                                                      |
-| ip2proxy             | ?                                                                                                      |
-| ircclient            | ❌ Abandoned                                                                                            |
-| isis                 | ?                                                                                                      |
-| jsmin                | ?                                                                                                      |
-| json                 | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                      |
-| json_post            | ?                                                                                                      |
-| jsonc                | ?                                                                                                      |
-| jsond                | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                      |
-| jsonnet              | ?                                                                                                      |
-| jsonpath             | ?                                                                                                      |
-| Judy                 | ❌ Abandoned                                                                                            |
-| kadm5                | ❌ Abandoned                                                                                            |
-| krb5                 | ?                                                                                                      |
-| KTaglib              | ❌ Abandoned                                                                                            |
-| lapack               | ❌ Abandoned                                                                                            |
-| lchash               | ❌ Abandoned                                                                                            |
-| leveldb              | ?                                                                                                      |
-| libevent             | ❌ Abandoned                                                                                            |
-| libsodium            | ?                                                                                                      |
-| lua                  | ?                                                                                                      |
-| LuaSandbox           | ?                                                                                                      |
-| lzf                  | ?                                                                                                      |
-| mailparse            | ✅ Supported: [pecl/mailparse](https://packagist.org/packages/pecl/mailparse)                           |
-| markdown             | ?                                                                                                      |
-| maxdb                | ❌ Abandoned                                                                                            |
-| maxminddb            | ?                                                                                                      |
-| mcrypt               | ⏰ PR: [php/pecl-encryption-mcrypt#20](https://github.com/php/pecl-encryption-mcrypt/pull/20)           |
-| mcrypt_filter        | ?                                                                                                      |
-| mcve                 | ❌ Abandoned                                                                                            |
-| mdbtools             | ❌ Abandoned                                                                                            |
-| memcache             | ⏰ PR: [websupport-sk/pecl-memcache#116](https://github.com/websupport-sk/pecl-memcache/pull/116)       |
-| memcached            | ✅ Supported: [php-memcached/php-memcached](https://packagist.org/packages/php-memcached/php-memcached) |
-| memoize              | ?                                                                                                      |
-| memprof              | ✅ Supported: [arnaud-lb/memprof](https://packagist.org/packages/arnaud-lb/memprof)                     |
-| memsession           | ❌ Abandoned                                                                                            |
-| memtrack             | ❌ Abandoned                                                                                            |
-| meta                 | ?                                                                                                      |
-| mnogosearch          | ❌ Abandoned                                                                                            |
-| mogilefs             | ?                                                                                                      |
-| Molten               | ?                                                                                                      |
-| mongo                | ❌ Abandoned                                                                                            |
-| mongodb              | ✅ Supported: [mongodb/mongodb-extension](https://packagist.org/packages/mongodb/mongodb-extension)     |
-| mono                 | ❌ Abandoned                                                                                            |
-| Mosquitto            | ?                                                                                                      |
-| mqseries             | ?                                                                                                      |
-| msgpack              | ?                                                                                                      |
-| mustache             | ?                                                                                                      |
-| mysql                | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                      |
-| mysql_xdevapi        | ?                                                                                                      |
-| mysqlnd_azure        | ?                                                                                                      |
-| mysqlnd_krb          | ?                                                                                                      |
-| mysqlnd_memcache     | ❌ Abandoned                                                                                            |
-| mysqlnd_ms           | ❌ Abandoned                                                                                            |
-| mysqlnd_ngen         | ❌ Abandoned                                                                                            |
-| mysqlnd_qc           | ❌ Abandoned                                                                                            |
-| mysqlnd_uh           | ❌ Abandoned                                                                                            |
-| namazu               | ?                                                                                                      |
-| ncurses              | ❌ Abandoned                                                                                            |
-| Net_Gopher           | ❌ Abandoned                                                                                            |
-| netools              | ❌ Abandoned                                                                                            |
-| newt                 | ❌ Abandoned                                                                                            |
-| nsq                  | ?                                                                                                      |
-| oauth                | ?                                                                                                      |
-| ocal                 | ?                                                                                                      |
-| oci8                 | ?                                                                                                      |
-| odbtp                | ❌ Abandoned                                                                                            |
-| oggvorbis            | ❌ Abandoned                                                                                            |
-| openal               | ?                                                                                                      |
-| opencensus           | ?                                                                                                      |
-| opendirectory        | ❌ Abandoned                                                                                            |
-| opengl               | ?                                                                                                      |
-| openswoole           | ?                                                                                                      |
-| opentelemetry        | ?                                                                                                      |
-| operator             | ❌ Abandoned                                                                                            |
-| optimizer            | ❌ Abandoned                                                                                            |
-| orng                 | ❌ Abandoned                                                                                            |
-| PAM                  | ?                                                                                                      |
-| panda                | ❌ Abandoned                                                                                            |
-| Paradox              | ❌ Abandoned                                                                                            |
-| parallel             | ?                                                                                                      |
-| params               | ?                                                                                                      |
-| parle                | ?                                                                                                      |
-| Parse_Tree           | ❌ Abandoned                                                                                            |
-| parsekit             | ❌ Abandoned                                                                                            |
-| pcov                 | ✅ Supported: [pecl/pcov](https://packagist.org/packages/pecl/pcov)                                     |
-| pcs                  | ?                                                                                                      |
-| pcsc                 | ?                                                                                                      |
-| pdflib               | ❌ Abandoned                                                                                            |
-| PDO                  | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                      |
-| PDO_4D               | ❌ Abandoned                                                                                            |
-| PDO_CUBRID           | ?                                                                                                      |
-| PDO_DBLIB            | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                      |
-| PDO_FIREBIRD         | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                      |
-| PDO_IBM              | ?                                                                                                      |
-| PDO_IDS              | ❌ Possibly abandoned - [gives a 404 on PECL](https://pecl.php.net/package/PDO_IDS)                     |
-| PDO_MYSQL            | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                      |
-| PDO_OCI              | ?                                                                                                      |
-| PDO_ODBC             | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                      |
-| PDO_PGSQL            | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                      |
-| PDO_SQLANYWHERE      | ?                                                                                                      |
-| PDO_SQLITE           | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                      |
-| pdo_sqlsrv           | ?                                                                                                      |
-| PDO_TAOS             | ?                                                                                                      |
-| pdo_user             | ❌ Abandoned                                                                                            |
-| PECL_Gen             | ❌ Abandoned                                                                                            |
-| pecl_http            | ?                                                                                                      |
-| perforce             | ?                                                                                                      |
-| perl                 | ❌ Abandoned                                                                                            |
-| Phalcon              | ?                                                                                                      |
-| phar                 | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                      |
-| phdfs                | ❌ Abandoned                                                                                            |
-| PHK                  | ❌ Abandoned                                                                                            |
-| php_trie             | ?                                                                                                      |
-| phpy                 | ?                                                                                                      |
-| pinpoint_php         | ?                                                                                                      |
-| PKCS11               | ?                                                                                                      |
-| pledge               | ?                                                                                                      |
-| POP3                 | ❌ Abandoned                                                                                            |
-| pq                   | ?                                                                                                      |
-| proctitle            | ❌ Abandoned                                                                                            |
-| propro               | ?                                                                                                      |
-| protobuf             | ?                                                                                                      |
-| protocolbuffers      | ❌ Abandoned                                                                                            |
-| ps                   | ?                                                                                                      |
-| pspell               | ?                                                                                                      |
-| psr                  | ?                                                                                                      |
-| pthreads             | ❌ Abandoned                                                                                            |
-| python               | ❌ Abandoned                                                                                            |
-| qb                   | ❌ Abandoned                                                                                            |
-| qqwry                | ?                                                                                                      |
-| quickhash            | ?                                                                                                      |
-| radius               | ?                                                                                                      |
-| raphf                | ?                                                                                                      |
-| rar                  | ?                                                                                                      |
-| rdkafka              | ✅ Supported: [rdkafka/rdkafka](https://packagist.org/packages/rdkafka/rdkafka)                         |
-| re2                  | ❌ Abandoned                                                                                            |
-| redis                | ✅ Supported: [phpredis/phpredis](https://packagist.org/packages/phpredis/phpredis)                     |
-| ref                  | ?                                                                                                      |
-| request              | ?                                                                                                      |
-| riak                 | ❌ Abandoned                                                                                            |
-| rnp                  | ?                                                                                                      |
-| rpminfo              | ✅ Supported: [remi/rpminfo](https://packagist.org/packages/remi/rpminfo)                               |
-| rpmreader            | ❌ Abandoned                                                                                            |
-| rrd                  | ?                                                                                                      |
-| rsvg                 | ❌ Abandoned                                                                                            |
-| rsync                | ❌ Abandoned                                                                                            |
-| runkit               | ❌ Abandoned                                                                                            |
-| runkit7              | ?                                                                                                      |
-| sam                  | ❌ Abandoned                                                                                            |
-| sandbox              | ?                                                                                                      |
-| sasl                 | ?                                                                                                      |
-| scoutapm             | ?                                                                                                      |
-| scream               | ❌ Abandoned                                                                                            |
-| scrypt               | ?                                                                                                      |
-| sdl                  | ?                                                                                                      |
-| sdl_image            | ?                                                                                                      |
-| sdl_mixer            | ?                                                                                                      |
-| sdl_ttf              | ?                                                                                                      |
-| sdo                  | ❌ Possibly abandoned - [gives a 404 on PECL](https://pecl.php.net/package/sdo)                         |
-| SeasClick            | ?                                                                                                      |
-| SeasLog              | ?                                                                                                      |
-| SeasSnowflake        | ?                                                                                                      |
-| selinux              | ✅ Supported: [pecl/selinux](https://packagist.org/packages/pecl/selinux)                               |
-| shape                | ?                                                                                                      |
-| simdjson             | ?                                                                                                      |
-| simple_kafka_client  | ?                                                                                                      |
-| skywalking           | ?                                                                                                      |
-| skywalking_agent     | ?                                                                                                      |
-| smbclient            | ?                                                                                                      |
-| solr                 | ?                                                                                                      |
-| sphinx               | ❌ Abandoned                                                                                            |
-| spi                  | ✅ Supported: [embedded-php/spi](https://packagist.org/packages/embedded-php/spi)                       |
-| spidermonkey         | ❌ Abandoned                                                                                            |
-| SPL_Types            | ❌ Abandoned                                                                                            |
-| spplus               | ?                                                                                                      |
-| spread               | ?                                                                                                      |
-| SQLite               | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                      |
-| sqlite3              | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                      |
-| sqlsrv               | ?                                                                                                      |
-| ssdeep               | ?                                                                                                      |
-| ssh2                 | ?                                                                                                      |
-| stackdriver_debugger | ?                                                                                                      |
-| statgrab             | ?                                                                                                      |
-| stats                | ❌ Abandoned                                                                                            |
-| stem                 | ?                                                                                                      |
-| stomp                | ?                                                                                                      |
-| strict               | ❌ Abandoned                                                                                            |
-| sundown              | ❌ Abandoned                                                                                            |
-| svm                  | ?                                                                                                      |
-| svn                  | ?                                                                                                      |
-| swish                | ❌ Abandoned                                                                                            |
-| swoole               | ?                                                                                                      |
-| swoole_serialize     | ?                                                                                                      |
-| syck                 | ?                                                                                                      |
-| sync                 | ?                                                                                                      |
-| taint                | ?                                                                                                      |
-| tcc                  | ?                                                                                                      |
-| TCLink               | ?                                                                                                      |
-| tcpwrap              | ?                                                                                                      |
-| tdb                  | ?                                                                                                      |
-| teds                 | ?                                                                                                      |
-| Tensor               | ?                                                                                                      |
-| termbox              | ?                                                                                                      |
-| TextCat              | ?                                                                                                      |
-| tidy                 | ❌ Abandoned                                                                                            |
-| timecop              | ?                                                                                                      |
-| timezonedb           | ✅ Supported: [pecl/timezonedb](https://packagist.org/packages/pecl/timezonedb)                         |
-| tk                   | ❌ Abandoned                                                                                            |
-| tokyo_tyrant         | ❌ Abandoned                                                                                            |
-| trace                | ?                                                                                                      |
-| trader               | ?                                                                                                      |
-| translit             | ?                                                                                                      |
-| tvision              | ?                                                                                                      |
-| txforward            | ❌ Abandoned                                                                                            |
-| uart                 | ✅ Supported: [embedded-php/uart](https://packagist.org/packages/embedded-php/uart)                     |
-| udis86               | ❌ Abandoned                                                                                            |
-| ui                   | ?                                                                                                      |
-| uopz                 | ?                                                                                                      |
-| uploadprogress       | ?                                                                                                      |
-| uri_template         | ❌ Abandoned                                                                                            |
-| uuid                 | ✅ Supported: [pecl/uuid](https://packagist.org/packages/pecl/uuid)                                     |
-| uv                   | ?                                                                                                      |
-| v8                   | ?                                                                                                      |
-| v8js                 | ?                                                                                                      |
-| Valkyrie             | ❌ Abandoned                                                                                            |
-| var_representation   | ?                                                                                                      |
-| varnish              | ?                                                                                                      |
-| vips                 | ?                                                                                                      |
-| vld                  | ?                                                                                                      |
-| vpopmail             | ❌ Abandoned                                                                                            |
-| wasm                 | ?                                                                                                      |
-| wbxml                | ❌ Abandoned                                                                                            |
-| Weakref              | ❌ Abandoned                                                                                            |
-| weakreference_bc     | ?                                                                                                      |
-| win32ps              | ❌ Abandoned                                                                                            |
-| win32ps_dll          | ❌ Abandoned                                                                                            |
-| win32service         | ?                                                                                                      |
-| win32std             | ❌ Abandoned                                                                                            |
-| WinBinder            | ?                                                                                                      |
-| WinCache             | ?                                                                                                      |
-| wxwidgets            | ❌ Abandoned                                                                                            |
-| xattr                | ?                                                                                                      |
-| xcommerce            | ❌ Abandoned                                                                                            |
-| Xdebug               | ✅ Supported: [xdebug/xdebug](https://packagist.org/packages/xdebug/xdebug)                             |
-| xdiff                | ?                                                                                                      |
-| xhprof               | ?                                                                                                      |
-| xlswriter            | ?                                                                                                      |
-| xmldiff              | ?                                                                                                      |
-| xmlReader            | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                      |
-| xmlrpc               | ❌ Abandoned                                                                                            |
-| XMLRPCi              | ?                                                                                                      |
-| xmlwriter            | ❌ Core - see [php/pie#133](https://github.com/php/pie/issues/133)                                      |
-| xmms                 | ❌ Abandoned                                                                                            |
-| xmp                  | ❌ Abandoned                                                                                            |
-| xpass                | ✅ Supported: [remi/xpass](https://packagist.org/packages/remi/xpass)                                   |
-| xrange               | ❌ Abandoned                                                                                            |
-| xslcache             | ❌ Abandoned                                                                                            |
-| xxtea                | ?                                                                                                      |
-| yac                  | ?                                                                                                      |
-| yaconf               | ?                                                                                                      |
-| Yaf                  | ?                                                                                                      |
-| yami                 | ❌ Abandoned                                                                                            |
-| yaml                 | ⏰ PR: [php/pecl-file_formats-yaml#88](https://github.com/php/pecl-file_formats-yaml/pull/88)           |
-| yar                  | ?                                                                                                      |
-| yaz                  | ?                                                                                                      |
-| yp                   | ?                                                                                                      |
-| ZendOptimizerPlus    | ❌ Possibly abandoned - [gives a 404 on PECL](https://pecl.php.net/package/ZendOptimizerPlus)           |
-| zephir_parser        | ?                                                                                                      |
-| zeroconf             | ?                                                                                                      |
-| zip                  | ?                                                                                                      |
-| zlib_filter          | ?                                                                                                      |
-| zmq                  | ❌ Abandoned                                                                                            |
-| zookeeper            | ?                                                                                                      |
-| zstd                 | ✅ Supported: [kjdev/zstd](https://packagist.org/packages/kjdev/zstd)                                   |
+### Supported
+
+The following extensions have already added support for PIE:
+
+| PECL Extension | PIE extension                                                                                       |
+|----------------|-----------------------------------------------------------------------------------------------------|
+| amqp           | [php-amqp/php-amqp](https://packagist.org/packages/php-amqp/php-amqp)                               |
+| APCu           | [apcu/apcu](https://packagist.org/packages/apcu/apcu)                                               |
+| apfd           | [m6w6/ext-apfd](https://packagist.org/packages/m6w6/ext-apfd)                                       |
+| ast            | [nikic/php-ast](https://packagist.org/packages/nikic/php-ast)                                       |
+| bcmath         | php/bcmath                                                                                          |
+| brotli         | [kjdev/brotli](https://packagist.org/packages/kjdev/brotli)                                         |
+| bz2            | php/bz2                                                                                             |
+| calendar       | php/calendar                                                                                        |
+| CSV            | [girgias/csv](https://packagist.org/packages/girgias/csv)                                           |
+| ctype          | php/ctype                                                                                           |
+| curl           | php/curl                                                                                            |
+| dba            | php/dba                                                                                             |
+| decimal        | [php-decimal/ext-decimal](https://packagist.org/packages/php-decimal/ext-decimal)                   |
+| dio            | [pecl/dio](https://packagist.org/packages/pecl/dio)                                                 |
+| dom            | php/dom                                                                                             |
+| ds             | [php-ds/ext-ds](https://packagist.org/packages/php-ds/ext-ds)                                       |
+| enchant        | php/enchant                                                                                         |
+| exif           | php/exif                                                                                            |
+| ev             | [osmanov/pecl-ev](https://packagist.org/packages/osmanov/pecl-ev)                                   |
+| event          | [osmanov/pecl-event](https://packagist.org/packages/osmanov/pecl-event)                             |
+| ffi            | php/ffi                                                                                             |
+| geospatial     | [php-geospatial/geospatial](https://packagist.org/packages/php-geospatial/geospatial)               |
+| gettext        | php/gettext                                                                                         |
+| gmp            | php/gmp                                                                                             |
+| gpio           | [embedded-php/gpio](https://packagist.org/packages/embedded-php/gpio)                               |
+| i2c            | [embedded-php/i2c](https://packagist.org/packages/embedded-php/i2c)                                 |
+| iconv          | php/iconv                                                                                           |
+| imagick        | [imagick/imagick](https://packagist.org/packages/imagick/imagick)                                   |
+| inotify        | [arnaud-lb/inotify](https://packagist.org/packages/arnaud-lb/inotify)                               |
+| intl           | php/intl                                                                                            |
+| jsonpath       | [supermetrics/jsonpath](https://packagist.org/packages/supermetrics/jsonpath)                       |
+| ldap           | php/ldap                                                                                            |
+| mailparse      | [pecl/mailparse](https://packagist.org/packages/pecl/mailparse)                                     |
+| mbstring       | php/mbstring                                                                                        |
+| mcrypt         | [pecl/mcrypt](https://packagist.org/packages/pecl/mcrypt)                                           |
+| memcached      | [php-memcached/php-memcached](https://packagist.org/packages/php-memcached/php-memcached)           |
+| memprof        | [arnaud-lb/memprof](https://packagist.org/packages/arnaud-lb/memprof)                               |
+| mongodb        | [mongodb/mongodb-extension](https://packagist.org/packages/mongodb/mongodb-extension)               |
+| mysqlnd        | php/mysqlnd                                                                                         |
+| mysqli         | php/mysqli                                                                                          |
+| opcache        | php/opcache                                                                                         |
+| opentelemetry  | [open-telemetry/ext-opentelemetry](https://packagist.org/packages/open-telemetry/ext-opentelemetry) |
+| parallel       | [pecl/parallel](https://packagist.org/packages/pecl/parallel)                                       |
+| pcov           | [pecl/pcov](https://packagist.org/packages/pecl/pcov)                                               |
+| pcntl          | php/pcntl                                                                                           |
+| pdo            | php/pdo                                                                                             |
+| pdo_mysql      | php/pdo_mysql                                                                                       |
+| pdo_pgsql      | php/pdo_pgsql                                                                                       |
+| pdo_sqlite     | php/pdo_sqlite                                                                                      |
+| pgsql          | php/pgsql                                                                                           |
+| posix          | php/posix                                                                                           |
+| rdkafka        | [rdkafka/rdkafka](https://packagist.org/packages/rdkafka/rdkafka)                                   |
+| readline       | php/readline                                                                                        |
+| redis          | [phpredis/phpredis](https://packagist.org/packages/phpredis/phpredis)                               |
+| rpminfo        | [remi/rpminfo](https://packagist.org/packages/remi/rpminfo)                                         |
+| selinux        | [pecl/selinux](https://packagist.org/packages/pecl/selinux)                                         |
+| session        | php/session                                                                                         |
+| shmop          | php/shmop                                                                                           |
+| simdjson       | [awesome/simdjson_plus](https://packagist.org/packages/awesome/simdjson_plus)                       |
+| simplexml      | php/simplexml                                                                                       |
+| snmp           | php/snmp                                                                                            |
+| soap           | php/soap                                                                                            |
+| sockets        | php/sockets                                                                                         |
+| sodium         | php/sodium                                                                                          |                                                                              
+| spi            | [embedded-php/spi](https://packagist.org/packages/embedded-php/spi)                                 |
+| sqlite3        | php/sqlite3                                                                                         |
+| sysvmsg        | php/sysvmsg                                                                                         |
+| sysvsem        | php/sysvsem                                                                                         |
+| sysvshm        | php/sysvshm                                                                                         |
+| tidy           | php/tidy                                                                                            |
+| timezonedb     | [pecl/timezonedb](https://packagist.org/packages/pecl/timezonedb)                                   |
+| translit       | [derickr/translit](https://packagist.org/packages/derickr/translit)                                 |
+| uart           | [embedded-php/uart](https://packagist.org/packages/embedded-php/uart)                               |
+| uuid           | [pecl/uuid](https://packagist.org/packages/pecl/uuid)                                               |
+| vld            | [derickr/vld](https://packagist.org/packages/derickr/vld)                                           |
+| win32service   | [win32service/win32service](https://packagist.org/packages/win32service/win32service)               |
+| Xdebug         | [xdebug/xdebug](https://packagist.org/packages/xdebug/xdebug)                                       |
+| xlswriter      | [viest/xlswriter](https://packagist.org/packages/viest/xlswriter)                                   |
+| xml            | php/xml                                                                                             |
+| xmlreader      | php/xmlreader                                                                                       |
+| xmlwriter      | php/xmlwriter                                                                                       |
+| xsl            | php/xsl                                                                                             |
+| xpass          | [remi/xpass](https://packagist.org/packages/remi/xpass)                                             |
+| zip            | php/zip, [pecl/zip](https://packagist.org/packages/pecl/zip)                                        |
+| zlib           | php/zlib                                                                                            |
+| zstd           | [kjdev/zstd](https://packagist.org/packages/kjdev/zstd)                                             |
+
+### Work in progress
+
+The following extensions have had efforts started to add support for PIE:
+
+| PECL Extension | Status                                                                                           |
+|----------------|--------------------------------------------------------------------------------------------------|
+| base58         | ⏰ PR: [jasny/base58-php-ext#14](https://github.com/jasny/base58-php-ext/pull/14)                 |
+| Bitset         | ⏰ PR: [php/pecl-numbers-bitset#16](https://github.com/php/pecl-numbers-bitset/pull/16)           |
+| crypto         | ⏰ PR: [bukka/php-crypto#43](https://github.com/bukka/php-crypto/pull/43)                         |
+| dbase          | ⏰ PR: [php/pecl-database-dbase#6](https://github.com/php/pecl-database-dbase/pull/6)             |
+| hdr_histogram  | ⏰ Coming soon: [beberlei/hdrhistogram](https://packagist.org/packages/beberlei/hdrhistogram)     |
+| hrtime         | ⏰ PR: [php/pecl-datetime-hrtime#1](https://github.com/php/pecl-datetime-hrtime/pull/1)           |
+| memcache       | ⏰ PR: [websupport-sk/pecl-memcache#116](https://github.com/websupport-sk/pecl-memcache/pull/116) |
+| yaml           | ⏰ PR: [php/pecl-file_formats-yaml#88](https://github.com/php/pecl-file_formats-yaml/pull/88)     |
+
+### Not started / Unknown
+
+The following extensions exist on PECL, but either have not added support for PIE yet, or their status is unknown.
+
+* ahocorasick
+* AOP
+* ApacheAccessor
+* apcu_bc
+* APM
+* augeas
+* awscrt
+* bloomy
+* bsdiff
+* bz2_filter
+* cairo_wrapper
+* cassandra
+* cld
+* clips
+* clucene
+* cmark
+* componere
+* couchbase
+* courierauth
+* crack_dll
+* CUBRID
+* cvsclient
+* cybermut
+* datadog_trace
+* dazuko
+* docblock
+* doublemetaphone
+* Druid
+* ecasound
+* ecma_intl
+* eio
+* env
+* esmtp
+* excimer
+* expect
+* fann
+* framegrab
+* functional
+* gearman
+* gender
+* geoip
+* gmagick
+* gnupg
+* graphdat
+* gRPC
+* handlebars
+* hprose
+* http_message
+* ibm_db2
+* ice
+* idn
+* igbinary
+* imap
+* immutable_cache
+* IMS
+* intercept
+* ion
+* ip2location
+* ip2proxy
+* isis
+* jsmin
+* json_post
+* jsonc
+* jsonnet
+* krb5
+* leveldb
+* libsodium
+* lua
+* LuaSandbox
+* lzf
+* markdown
+* maxminddb
+* mcrypt_filter
+* memoize
+* meta
+* mogilefs
+* Molten
+* Mosquitto
+* mqseries
+* msgpack
+* mustache
+* mysql_xdevapi
+* mysqlnd_azure
+* mysqlnd_krb
+* namazu
+* nsq
+* oauth
+* ocal
+* oci8
+* openal
+* opencensus
+* opengl
+* openswoole
+* PAM
+* params
+* parle
+* pcs
+* pcsc
+* PDO_CUBRID
+* PDO_IBM
+* PDO_OCI
+* PDO_SQLANYWHERE
+* pdo_sqlsrv
+* PDO_TAOS
+* pecl_http
+* perforce
+* Phalcon
+* php_trie
+* phpy
+* pinpoint_php
+* PKCS11
+* pledge
+* pq
+* propro
+* protobuf
+* ps
+* pspell
+* psr
+* qqwry
+* quickhash
+* radius
+* raphf
+* rar
+* ref
+* request
+* rnp
+* rrd
+* runkit7
+* sandbox
+* sasl
+* scoutapm
+* scrypt
+* sdl
+* sdl_image
+* sdl_mixer
+* sdl_ttf
+* SeasClick
+* SeasLog
+* SeasSnowflake
+* shape
+* simple_kafka_client
+* skywalking
+* skywalking_agent
+* smbclient
+* solr
+* spplus
+* spread
+* sqlsrv
+* ssdeep
+* ssh2
+* stackdriver_debugger
+* statgrab
+* stem
+* stomp
+* svm
+* svn
+* swoole
+* swoole_serialize
+* syck
+* sync
+* taint
+* tcc
+* TCLink
+* tcpwrap
+* tdb
+* teds
+* Tensor
+* termbox
+* TextCat
+* timecop
+* trace
+* trader
+* tvision
+* ui
+* uopz
+* uploadprogress
+* uv
+* v8
+* v8js
+* var_representation
+* varnish
+* vips
+* wasm
+* weakreference_bc
+* WinBinder
+* WinCache
+* xattr
+* xdiff
+* xhprof
+* xmldiff
+* XMLRPCi
+* xxtea
+* yac
+* yaconf
+* Yaf
+* yar
+* yaz
+* yp
+* zephir_parser
+* zeroconf
+* zlib_filter
+* zookeeper
+
+### Abandoned
+
+The following extensions are believed to be abandoned:
+
+* amfext
+* APC
+* apd
+* apn
+* archive
+* ares
+* automap
+* axis2
+* bbcode
+* bcompiler
+* big_int
+* binpack
+* BLENC
+* cairo
+* chdb
+* classkit
+* coin_acceptor
+* colorer
+* crack
+* cybercash
+* cyrus
+* DBDO
+* dbplus
+* DBus
+* dbx
+* dom_varimport
+* drizzle
+* enchant
+* fam
+* ffi
+* FreeImage
+* fribidi
+* funcall
+* fuse
+* GDChart
+* gupnp
+* haru
+* hidef
+* html_parse
+* htscanner
+* huffman
+* id3
+* imlib2
+* inclued
+* ingres
+* ircclient
+* Judy
+* kadm5
+* KTaglib
+* lapack
+* lchash
+* libevent
+* maxdb
+* mcve
+* mdbtools
+* memsession
+* memtrack
+* mnogosearch
+* mongo
+* mono
+* mysqlnd_memcache
+* mysqlnd_ms
+* mysqlnd_ngen
+* mysqlnd_qc
+* mysqlnd_uh
+* ncurses
+* Net_Gopher
+* netools
+* newt
+* odbtp
+* oggvorbis
+* opendirectory
+* operator
+* optimizer
+* orng
+* panda
+* Paradox
+* Parse_Tree
+* parsekit
+* pdflib
+* PDO_4D
+* PDO_IDS
+* pdo_user
+* PECL_Gen
+* perl
+* phdfs
+* PHK
+* POP3
+* proctitle
+* protocolbuffers
+* pthreads
+* python
+* qb
+* re2
+* riak
+* rpmreader
+* rsvg
+* rsync
+* runkit
+* sam
+* scream
+* sdo
+* sphinx
+* spidermonkey
+* SPL_Types
+* stats
+* strict
+* sundown
+* swish
+* tidy
+* tk
+* tokyo_tyrant
+* txforward
+* udis86
+* uri_template
+* Valkyrie
+* vpopmail
+* wbxml
+* Weakref
+* win32ps
+* win32ps_dll
+* win32std
+* wxwidgets
+* xcommerce
+* xmlrpc
+* xmms
+* xmp
+* xrange
+* xslcache
+* yami
+* ZendOptimizerPlus
+* zmq
