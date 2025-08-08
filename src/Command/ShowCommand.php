@@ -7,6 +7,9 @@ namespace Php\Pie\Command;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieInstalledJsonMetadataKeys;
+use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
+use Php\Pie\DependencyResolver\ResolveDependencyWithComposer;
+use Php\Pie\DependencyResolver\UnableToResolveRequirement;
 use Php\Pie\File\BinaryFile;
 use Php\Pie\File\BinaryFileFailedVerification;
 use Php\Pie\Platform as PiePlatform;
@@ -20,6 +23,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
+use Webmozart\Assert\Assert;
 
 use function array_diff;
 use function array_key_exists;
@@ -44,6 +48,7 @@ final class ShowCommand extends Command
     public function __construct(
         private readonly InstalledPiePackages $installedPiePackages,
         private readonly ContainerInterface $container,
+        private readonly ResolveDependencyWithComposer $resolveDependencyWithComposer,
     ) {
         parent::__construct();
     }
@@ -93,6 +98,7 @@ final class ShowCommand extends Command
         $extensionPath        = $targetPlatform->phpBinaryPath->extensionPath();
         $extensionEnding      = $targetPlatform->operatingSystem === OperatingSystem::Windows ? '.dll' : '.so';
         $piePackagesMatched   = [];
+        $rootPackageRequires  = $composer->getPackage()->getRequires();
 
         $output->writeln(sprintf(
             "\n" . '<options=bold,underscore>%s:</>',
@@ -100,7 +106,7 @@ final class ShowCommand extends Command
         ));
         array_walk(
             $phpEnabledExtensions,
-            static function (string $version, string $phpExtensionName) use ($showAll, $output, $piePackages, $extensionPath, $extensionEnding, &$piePackagesMatched): void {
+            function (string $version, string $phpExtensionName) use ($composer, $rootPackageRequires, $targetPlatform, $showAll, $output, $piePackages, $extensionPath, $extensionEnding, &$piePackagesMatched): void {
                 if (! array_key_exists($phpExtensionName, $piePackages)) {
                     if ($showAll) {
                         $output->writeln(sprintf('  <comment>%s:%s</comment>', $phpExtensionName, $version));
@@ -111,9 +117,33 @@ final class ShowCommand extends Command
 
                 $piePackage           = $piePackages[$phpExtensionName];
                 $piePackagesMatched[] = $phpExtensionName;
+                $packageName          = $piePackage->name();
+                $packageRequirement   = $rootPackageRequires[$piePackage->name()]->getPrettyConstraint();
+
+                try {
+                    Assert::stringNotEmpty($packageName);
+                    Assert::stringNotEmpty($packageRequirement);
+
+                    $latestPackage = ($this->resolveDependencyWithComposer)(
+                        $composer,
+                        $targetPlatform,
+                        new RequestedPackageAndVersion($packageName, $packageRequirement),
+                        false,
+                    );
+                } catch (UnableToResolveRequirement) {
+                    $latestPackage = null;
+                }
+
+                $updateNotice = '';
+                if ($latestPackage !== null && $latestPackage->version() !== $piePackage->version()) {
+                    $updateNotice = sprintf(
+                        ' — new version %s available',
+                        $latestPackage->version(),
+                    );
+                }
 
                 $output->writeln(sprintf(
-                    '  <info>%s:%s</info> (from 🥧 <info>%s</info>%s)',
+                    '  <info>%s:%s</info> (from 🥧 <info>%s</info>%s)%s',
                     $phpExtensionName,
                     $version,
                     $piePackage->prettyNameAndVersion(),
@@ -123,6 +153,7 @@ final class ShowCommand extends Command
                         $extensionEnding,
                         PieInstalledJsonMetadataKeys::pieMetadataFromComposerPackage($piePackage->composerPackage()),
                     ),
+                    $updateNotice,
                 ));
             },
         );

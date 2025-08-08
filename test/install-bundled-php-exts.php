@@ -51,7 +51,7 @@ foreach ($packageNames as $packageName) {
     }
 }
 
-echo Process::run(['bin/pie', 'show', '--with-php-config=' . $phpBinaryPath->phpConfigPath()]);
+echo Process::run(['bin/pie', 'show', '--with-php-config=' . $phpBinaryPath->phpConfigPath()], timeout: 60);
 
 if ($anyFailures) {
     exit(1);
