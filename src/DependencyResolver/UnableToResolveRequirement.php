@@ -8,11 +8,9 @@ use Composer\Package\PackageInterface;
 use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use RuntimeException;
 
-use function array_map;
 use function count;
 use function implode;
 use function sprintf;
-use function strip_tags;
 
 class UnableToResolveRequirement extends RuntimeException
 {
@@ -33,7 +31,7 @@ class UnableToResolveRequirement extends RuntimeException
                 $requestedPackageAndVersion->package,
                 $requestedPackageAndVersion->version !== null ? sprintf('version %s', $requestedPackageAndVersion->version) : 'the latest compatible version',
                 DetermineMinimumStability::fromRequestedVersion($requestedPackageAndVersion->version),
-                count($errors) ? "\n\n" . implode("\n\n", array_map(static fn ($e) => strip_tags($e), $errors)) : '',
+                count($errors) ? "\n\n" . implode("\n\n", $errors) : '',
             ),
             $requestedPackageAndVersion,
         );
