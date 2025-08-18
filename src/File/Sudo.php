@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\Pie\File;
 
 use Php\Pie\Platform;
+use Php\Pie\Platform\TargetPlatform;
 use Symfony\Component\Process\ExecutableFinder;
 
 use function is_string;
@@ -29,7 +30,7 @@ final class Sudo
                 throw SudoNotFoundOnSystem::new();
             }
 
-            if (! Platform::isInteractive()) {
+            if (! TargetPlatform::isRunningAsRoot() && ! Platform::isInteractive()) {
                 throw SudoRequiresInteractiveTerminal::fromSudo($sudo);
             }
 

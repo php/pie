@@ -151,7 +151,7 @@ jobs:
         run: vendor/bin/behat --tags="~@non-windows"
       - name: Run Behat on non-Windows
         if: matrix.operating-system != 'windows-latest'
-        run: vendor/bin/behat
+        run: sudo vendor/bin/behat
 
   coding-standards:
     runs-on: ubuntu-latest
