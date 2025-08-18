@@ -331,8 +331,19 @@ The descriptions of these items:
   'PHP Extension Build' flags in `php -i`
 * `ts|nts` - Thread-safe or non-thread safe.
 * `arch` - for example `x86_64`.
-   * Windows: `Architecture` from `php -i`
+   * Windows: use a hint from `Architecture` from `php -i` (see below)
    * non-Windows: check `PHP_INT_SIZE` - 4 for 32-bit, 8 for 64-bit.
+
+Note the architecture name will likely need normalising, since different
+platforms name architectures differently. PIE expects the following normalised
+architectures:
+
+ * `x86_64` (normalised from `x64`, `x86_64`, `AMD64`)
+ * `arm64` (normalised from `arm64`)
+ * `x86` (any other value)
+
+For the latest map (in case documentation is not up to date), check out
+`\Php\Pie\Platform\Architecture::parseArchitecture`.
 
 #### Contents of the Windows ZIP
 
