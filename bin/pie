@@ -27,6 +27,8 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 /** @psalm-suppress UnresolvableInclude */
 include $_composer_autoload_path ?? __DIR__ . '/../vendor/autoload.php';
 
+error_reporting(error_reporting() & ~E_DEPRECATED);
+
 $container = Container::factory();
 
 $application = new Application('🥧 PHP Installer for Extensions (PIE)', PieVersion::get());
