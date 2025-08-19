@@ -40,6 +40,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      # Fixes `git describe` picking the wrong tag - see https://github.com/php/pie/issues/307
+      - run: git fetch --tags --force
       # Ensure some kind of previous tag exists, otherwise box fails
       - run: git describe --tags HEAD || git tag 0.0.0
       - uses: ramsey/composer-install@v3
