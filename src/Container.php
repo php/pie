@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\Pie;
 
+use Composer\Factory;
 use Composer\Util\Platform as ComposerPlatform;
 use Illuminate\Container\Container as IlluminateContainer;
 use Php\Pie\Building\Build;
@@ -37,6 +38,7 @@ use Php\Pie\Installing\WindowsInstall;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
+use Symfony\Component\Console\Formatter\OutputFormatter;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
@@ -77,7 +79,16 @@ final class Container
                 return $input;
             },
         );
-        $container->instance(OutputInterface::class, new ConsoleOutput());
+        $container->singleton(
+            OutputInterface::class,
+            static function (): OutputInterface {
+                return new ConsoleOutput(
+                    ConsoleOutput::VERBOSITY_NORMAL,
+                    null,
+                    new OutputFormatter(false, Factory::createAdditionalStyles()),
+                );
+            },
+        );
         $container->singleton(EventDispatcher::class, static function () {
             $displayedBanner = false;
             $eventDispatcher = new EventDispatcher();
