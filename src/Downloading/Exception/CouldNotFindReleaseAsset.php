@@ -12,6 +12,8 @@ use RuntimeException;
 use function implode;
 use function sprintf;
 
+use const PHP_EOL;
+
 class CouldNotFindReleaseAsset extends RuntimeException
 {
     /** @param non-empty-list<non-empty-string> $expectedAssetNames */
@@ -37,6 +39,19 @@ class CouldNotFindReleaseAsset extends RuntimeException
 
     public static function forPackageWithMissingTag(Package $package): self
     {
+        if (
+            $package->downloadUrlMethod() === DownloadUrlMethod::PrePackagedSourceDownload
+            && $package->composerPackage()->isDev()
+        ) {
+            return new self(sprintf(
+                'The package %s uses pre-packaged source archives, which are not available for branch aliases such as %s. You should either omit the version constraint to use the latest compatible version, or use a tagged version instead. You can find a list of tagged versions on:%shttps://packagist.org/packages/%s',
+                $package->name(),
+                $package->version(),
+                PHP_EOL . PHP_EOL,
+                $package->name(),
+            ));
+        }
+
         return new self(sprintf(
             'Could not find release by tag name for %s',
             $package->prettyNameAndVersion(),
