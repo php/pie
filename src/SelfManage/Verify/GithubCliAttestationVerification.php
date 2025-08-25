@@ -14,11 +14,13 @@ use Symfony\Component\Process\ExecutableFinder;
 
 use function implode;
 use function sprintf;
+use function str_starts_with;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class GithubCliAttestationVerification implements VerifyPiePhar
 {
     private const GH_CLI_NAME             = 'gh';
+    private const GH_ATTESTATION_COMMAND  = 'attestation';
     private const GH_VERIFICATION_TIMEOUT = 30;
 
     public function __construct(private readonly ExecutableFinder $executableFinder)
@@ -33,9 +35,20 @@ final class GithubCliAttestationVerification implements VerifyPiePhar
             throw GithubCliNotAvailable::fromExpectedGhToolName(self::GH_CLI_NAME);
         }
 
+        // Try to use `gh attestation --help` to ensure it is not an old `gh` cli version
+        try {
+            Process::run([$gh, self::GH_ATTESTATION_COMMAND, '--help'], null, self::GH_VERIFICATION_TIMEOUT);
+        } catch (ProcessFailedException $attestationCommandCheck) {
+            if (str_starts_with($attestationCommandCheck->getProcess()->getErrorOutput(), sprintf('unknown command "%s" for "%s"', self::GH_ATTESTATION_COMMAND, self::GH_CLI_NAME))) {
+                throw GithubCliNotAvailable::withMissingAttestationCommand(self::GH_CLI_NAME);
+            }
+
+            throw $attestationCommandCheck;
+        }
+
         $verificationCommand = [
             $gh,
-            'attestation',
+            self::GH_ATTESTATION_COMMAND,
             'verify',
             '--owner=php',
             $pharFilename->filePath,
