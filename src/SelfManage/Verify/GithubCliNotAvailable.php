@@ -14,4 +14,9 @@ class GithubCliNotAvailable extends RuntimeException
     {
         return new self(sprintf('The GitHub "%s" CLI tool was not available.', $expectedGhToolName));
     }
+
+    public static function withMissingAttestationCommand(string $expectedGhToolName): self
+    {
+        return new self(sprintf('The GitHub "%s" CLI tool was available, but the `gh attestation` command failed; perhaps this version is out of date.', $expectedGhToolName));
+    }
 }
