@@ -46,12 +46,8 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
-use function defined;
-use function fopen;
 use function getcwd;
 use function str_starts_with;
-
-use const STDIN;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class Container
@@ -65,14 +61,7 @@ final class Container
             static function () {
                 $input = new ArgvInput();
 
-                $stdin            = defined('STDIN') ? STDIN : fopen('php://stdin', 'r');
-                $noInteractionEnv = ComposerPlatform::getEnv('COMPOSER_NO_INTERACTION');
-                if (
-                    $noInteractionEnv === false
-                    || $noInteractionEnv === '1'
-                    || $stdin === false
-                    || ! ComposerPlatform::isTty($stdin)
-                ) {
+                if (! Platform::isInteractive()) {
                     $input->setInteractive(false);
                 }
 
