@@ -6,11 +6,13 @@ namespace Php\Pie\File;
 
 use Php\Pie\Util\CaptureErrors;
 use Php\Pie\Util\Process;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 
 use function dirname;
 use function file_exists;
 use function file_put_contents;
 use function is_writable;
+use function preg_match;
 use function sys_get_temp_dir;
 use function tempnam;
 
@@ -61,10 +63,42 @@ final class SudoFilePut
         }
 
         if (file_exists($filename)) {
-            Process::run([Sudo::find(), 'chmod', '--reference=' . $filename, $tempFilename]);
-            Process::run([Sudo::find(), 'chown', '--reference=' . $filename, $tempFilename]);
+            self::copyOwnership($filename, $tempFilename);
         }
 
         Process::run([Sudo::find(), 'mv', $tempFilename, $filename]);
+    }
+
+    /**
+     * Attempt to copy the ownership details (uid/gid) from the source to the
+     * given target file.
+     */
+    private static function copyOwnership(string $sourceFile, string $targetFile): void
+    {
+        try {
+            // GNU chmod supports `--reference`, so try this first
+            Process::run([Sudo::find(), 'chmod', '--reference=' . $sourceFile, $targetFile]);
+
+            return;
+        } catch (ProcessFailedException) {
+            // Fall back to using `stat` to determine uid/gid
+            try {
+                // Try using GNU stat (-c) first
+                $userAndGroup = Process::run(['stat', '-c', '%u:%g', $sourceFile], timeout: 2);
+            } catch (ProcessFailedException) {
+                try {
+                    // Fall back to using OSX stat (-f)
+                    $userAndGroup = Process::run(['stat', '-f', '%u:%g', $sourceFile], timeout: 2);
+                } catch (ProcessFailedException) {
+                    return;
+                }
+            }
+
+            if (empty($userAndGroup) || ! preg_match('/^\d+:\d+$/', $userAndGroup)) {
+                return;
+            }
+
+            Process::run([Sudo::find(), 'chown', $userAndGroup, $targetFile]);
+        }
     }
 }
