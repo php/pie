@@ -20,7 +20,7 @@ use function sprintf;
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class UnixInstall implements Install
 {
-    private const MAKE_INSTALL_TIMEOUT_SECS = 60; // 1 minute
+    private const MAKE_INSTALL_TIMEOUT_SECS = 300; // 5 minutes
 
     public function __construct(private readonly SetupIniFile $setupIniFile)
     {
@@ -45,11 +45,11 @@ final class UnixInstall implements Install
 
         // If the target directory isn't writable, or a .so file already exists and isn't writable, try to use sudo
         if (
-            Sudo::exists()
-            && (
+            (
                 ! is_writable($targetExtensionPath)
                 || (file_exists($expectedSharedObjectLocation) && ! is_writable($expectedSharedObjectLocation))
             )
+            && Sudo::exists()
         ) {
             $output->writeln(sprintf(
                 '<comment>Cannot write to %s, so using sudo to elevate privileges.</comment>',

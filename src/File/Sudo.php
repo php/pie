@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Php\Pie\File;
 
+use Php\Pie\Platform;
+use Php\Pie\Platform\TargetPlatform;
 use Symfony\Component\Process\ExecutableFinder;
-use Throwable;
 
 use function is_string;
 
@@ -29,6 +30,10 @@ final class Sudo
                 throw SudoNotFoundOnSystem::new();
             }
 
+            if (! TargetPlatform::isRunningAsRoot() && ! Platform::isInteractive()) {
+                throw SudoRequiresInteractiveTerminal::fromSudo($sudo);
+            }
+
             self::$memoizedSudo = $sudo;
         }
 
@@ -41,7 +46,7 @@ final class Sudo
             self::find();
 
             return true;
-        } catch (Throwable) {
+        } catch (SudoNotFoundOnSystem) {
             return false;
         }
     }
