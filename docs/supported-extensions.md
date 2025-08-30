@@ -92,6 +92,7 @@ The following extensions have already added support for PIE:
 | sodium         | php/sodium                                                                                          |                                                                              
 | spi            | [embedded-php/spi](https://packagist.org/packages/embedded-php/spi)                                 |
 | sqlite3        | php/sqlite3                                                                                         |
+| swoole         | [swoole/swoole](https://packagist.org/packages/swoole/swoole)                                       |
 | sysvmsg        | php/sysvmsg                                                                                         |
 | sysvsem        | php/sysvsem                                                                                         |
 | sysvshm        | php/sysvshm                                                                                         |
@@ -288,7 +289,6 @@ The following extensions exist on PECL, but either have not added support for PI
 * stomp
 * svm
 * svn
-* swoole
 * swoole_serialize
 * syck
 * sync
