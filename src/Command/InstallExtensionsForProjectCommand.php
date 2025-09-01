@@ -201,7 +201,7 @@ final class InstallExtensionsForProjectCommand extends Command
                 ));
 
                 try {
-                    $matches = $this->findMatchingPackages->for($pieComposer, $extension->name());
+                    $matches = $this->findMatchingPackages->for($pieComposer, $extension->name(), $linkRequiresConstraint);
                 } catch (OutOfRangeException) {
                     $anyErrorsHappened = true;
 

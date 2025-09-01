@@ -390,7 +390,7 @@ final class CommandHelper
 
                     return $match;
                 },
-                $findMatchingPackages->for($pieComposer, $requestedPackageName),
+                $findMatchingPackages->for($pieComposer, $requestedPackageName, $exception->requestedPackageAndVersion->version ?? '*'),
             );
 
             if (count($matches)) {
