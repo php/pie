@@ -25,7 +25,7 @@ use function usort;
 class FindMatchingPackages
 {
     /** @return MatchingPackages */
-    public function for(Composer $pieComposer, string $searchTerm, string $stringConstraint): array
+    public function for(Composer $pieComposer, string $searchTerm): array
     {
         $matches = [];
         foreach ($pieComposer->getRepositoryManager()->getRepositories() as $repo) {
@@ -38,8 +38,8 @@ class FindMatchingPackages
 
             $matches = array_filter(
                 $matches,
-                static function (array $match) use ($pieComposer, $extensionName, $stringConstraint): bool {
-                    $package = $pieComposer->getRepositoryManager()->findPackage($match['name'], $stringConstraint);
+                static function (array $match) use ($pieComposer, $extensionName): bool {
+                    $package = $pieComposer->getRepositoryManager()->findPackage($match['name'], '*');
 
                     if (! $package instanceof CompletePackage) {
                         return false;
