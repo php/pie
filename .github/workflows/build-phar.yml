@@ -56,7 +56,7 @@ jobs:
         # code, which would store attestation that `php/pie` built the PHAR, and
         # it would look genuine. So this should NOT run for PR builds.
         if: github.event_name != 'pull_request'
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v3
         with:
           subject-path: '${{ github.workspace }}/pie.phar'
       - uses: actions/upload-artifact@v4
