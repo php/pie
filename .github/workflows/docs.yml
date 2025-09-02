@@ -46,7 +46,7 @@ jobs:
       - name: Copy PHAR into docs
         run: cp pie.phar docs-package/pie-nightly.phar
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: docs-package
 
