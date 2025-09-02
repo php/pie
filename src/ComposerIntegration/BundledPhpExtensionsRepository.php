@@ -96,7 +96,7 @@ class BundledPhpExtensionsRepository extends ArrayRepository
         [
             'name' => 'opcache',
             'type' => ExtensionType::ZendExtension,
-            'require' => ['php' => '>= 5.5.0'],
+            'require' => ['php' => '>= 5.5.0, < 8.5.0'],
         ],
 //        ['name' => 'openssl'], // Not building in CI
         ['name' => 'pcntl'],
