@@ -32,7 +32,7 @@ jobs:
       - build-phar
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Build documentation
         run: .github/docs/build-docs.sh
       - name: Fetch built PHAR from artifacts
