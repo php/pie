@@ -29,7 +29,7 @@ jobs:
           extensions: intl, sodium, zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ramsey/composer-install@v3
       - name: GH token
         if: matrix.operating-system != 'windows-latest'
@@ -115,7 +115,7 @@ jobs:
           make -j$(nproc)
           sudo make install
           cd $GITHUB_WORKSPACE
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Composer Install
         run: composer install --ignore-platform-reqs
       - name: Run bundled PHP install test
@@ -144,7 +144,7 @@ jobs:
           extensions: intl, sodium, zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ramsey/composer-install@v3
       - name: Run Behat on Windows
         if: matrix.operating-system == 'windows-latest'
@@ -163,7 +163,7 @@ jobs:
           extensions: intl, sodium, zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ramsey/composer-install@v3
       - name: Run PHPCS
         run: vendor/bin/phpcs
@@ -178,7 +178,7 @@ jobs:
           extensions: intl, sodium, zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ramsey/composer-install@v3
       - name: Validate the composer configuration
         run: composer validate --strict

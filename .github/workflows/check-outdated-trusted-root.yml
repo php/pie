@@ -14,7 +14,7 @@ jobs:
       contents: read
       issues: write # This permission is needed to create the issue
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Pull new trusted root
         run: gh attestation trusted-root > resources/new-trusted-root.jsonl
       - name: Create an issue if different
