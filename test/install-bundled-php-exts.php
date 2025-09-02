@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Composer\Package\PackageInterface;
+use Composer\Package\Version\VersionParser;
 use Php\Pie\ComposerIntegration\BundledPhpExtensionsRepository;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
@@ -17,17 +18,26 @@ if ($phpConfigPath === '') {
     exit(1);
 }
 
-$phpBinaryPath = PhpBinaryPath::fromPhpConfigExecutable($phpConfigPath);
+$phpBinaryPath        = PhpBinaryPath::fromPhpConfigExecutable($phpConfigPath);
+$phpVersionConstraint = (new VersionParser())->parseConstraints($phpBinaryPath->version());
 
 $packageNames = array_map(
     static fn (PackageInterface $package): string => $package->getName(),
-    BundledPhpExtensionsRepository::forTargetPlatform(
-        TargetPlatform::fromPhpBinaryPath(
-            $phpBinaryPath,
-            null,
-        ),
-    )
-        ->getPackages(),
+    array_filter(
+        BundledPhpExtensionsRepository::forTargetPlatform(
+            TargetPlatform::fromPhpBinaryPath(
+                $phpBinaryPath,
+                null,
+            ),
+        )
+            ->getPackages(),
+        static function (PackageInterface $package) use ($phpVersionConstraint): bool {
+            $requires = $package->getRequires();
+
+            return ! array_key_exists('php', $requires)
+                || $requires['php']->getConstraint()->matches($phpVersionConstraint);
+        },
+    ),
 );
 
 $anyFailures = false;
