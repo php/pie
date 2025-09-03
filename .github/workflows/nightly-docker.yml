@@ -1,0 +1,87 @@
+name: "Nightly Docker Image Build"
+
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch: # Allow manual triggering
+
+permissions:
+  contents: read
+
+jobs:
+  build-phar:
+    # See build-phar.yml for a list of the permissions and why they are needed
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    uses: ./.github/workflows/build-phar.yml
+
+  docker-nightly-image:
+    needs: build-phar
+    name: Docker nightly image
+    runs-on: ubuntu-latest
+
+    permissions:
+      # attestations:write is required for build provenance attestation.
+      attestations: write
+      # id-token:write is required for build provenance attestation.
+      id-token: write
+      # packages:write is required to publish Docker images to GitHub's registry.
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Fetch built PHAR from artifacts
+        uses: actions/download-artifact@v5
+        with:
+          name: pie-${{ github.sha }}.phar
+
+      - name: Verify the PHAR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh attestation verify pie.phar --repo ${{ github.repository }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          flavor: |
+            latest=false
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=raw,value=nightly-bin
+
+      - name: Build and push Docker image
+        id: build-and-push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          file: Dockerfile
+          target: standalone-binary
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-name: ghcr.io/${{ github.repository }}
+          subject-digest: ${{ steps.build-and-push.outputs.digest }}
+          push-to-registry: true
