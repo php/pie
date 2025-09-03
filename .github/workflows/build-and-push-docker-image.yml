@@ -1,13 +1,18 @@
 # Invoking this pipeline requires additional permissions, so must be invoked
 # in a way to pass those permissions on, e.g.:
 #
-#  build-phar:
+#  build-and-push-docker-image:
+#    needs: build-phar
 #    permissions:
 #      contents: read
 #      id-token: write
 #      attestations: write
 #      packages: write
 #    uses: ./.github/workflows/build-and-push-docker-image.yml
+#    with:
+#      tags: |
+#        type=raw,value=bin
+#        type=semver,pattern={{version}}-bin
 
 name: "Build and push the PIE Docker Image"
 
