@@ -10,7 +10,9 @@ use Php\Pie\File\BinaryFile;
 use Php\Pie\Platform\TargetPhp\PhpizePath;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Util\Process;
+use Php\Pie\Util\ProcessFailedWithLimitedOutput;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process as SymfonyProcess;
 
 use function count;
@@ -78,7 +80,11 @@ final class UnixBuild implements Build
         $optionsOutput = count($configureOptions) ? ' with options: ' . implode(' ', $configureOptions) : '.';
         $output->writeln('<info>Configure complete</info>' . $optionsOutput);
 
-        $this->make($targetPlatform, $downloadedPackage, $output, $outputCallback);
+        try {
+            $this->make($targetPlatform, $downloadedPackage, $output, $outputCallback);
+        } catch (ProcessFailedException $p) {
+            throw ProcessFailedWithLimitedOutput::fromProcessFailedException($p);
+        }
 
         $expectedSoFile = $downloadedPackage->extractedSourcePath . '/modules/' . $downloadedPackage->package->extensionName()->name() . '.so';
 
