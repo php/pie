@@ -12,6 +12,7 @@ use Php\Pie\Platform\OperatingSystemFamily;
 use Php\Pie\Platform\TargetPhp\Exception\ExtensionIsNotLoaded;
 use Php\Pie\Platform\TargetPhp\Exception\InvalidPhpBinaryPath;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
+use Php\Pie\Util\Process;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
@@ -104,7 +105,13 @@ final class PhpBinaryPathTest extends TestCase
             PHP_VERSION,
             $phpBinary->version(),
         );
-        self::assertNull($phpBinary->phpConfigPath());
+
+        $phpConfig = $phpBinary->phpConfigPath();
+        if ($phpConfig === null) {
+            return;
+        }
+
+        self::assertSame($phpBinary->phpBinaryPath, Process::run([$phpConfig, '--php-binary']));
     }
 
     /** @return array<string, array{0: non-empty-string, 1: non-empty-string}> */
