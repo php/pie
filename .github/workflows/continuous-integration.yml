@@ -31,9 +31,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/checkout@v5
       - uses: ramsey/composer-install@v3
-      - name: GH token
+      - name: GH token (non-Windows)
         if: matrix.operating-system != 'windows-latest'
         run: sudo composer config --global --auth github-oauth.github.com ${{ secrets.GITHUB_TOKEN }}
+      - name: GH token (Windows)
+        if: matrix.operating-system == 'windows-latest'
+        run: composer config --global --auth github-oauth.github.com ${{ secrets.GITHUB_TOKEN }}
       - name: Run PHPUnit on Windows
         if: matrix.operating-system == 'windows-latest'
         run: vendor/bin/phpunit
