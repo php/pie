@@ -239,6 +239,7 @@ final class InstallExtensionsForProjectCommand extends Command
 
                 if ($selectedPackageAnswer === 'None') {
                     $output->writeln('Okay I won\'t install anything for ' . $extension->name());
+                    $anyErrorsHappened = true;
 
                     return;
                 }
