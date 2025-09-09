@@ -26,11 +26,9 @@ class Platform
 {
     public static function isInteractive(): bool
     {
-        $stdin            = defined('STDIN') ? STDIN : fopen('php://stdin', 'r');
-        $noInteractionEnv = ComposerPlatform::getEnv('COMPOSER_NO_INTERACTION');
+        $stdin = defined('STDIN') ? STDIN : fopen('php://stdin', 'r');
 
-        return $noInteractionEnv !== false
-            && $noInteractionEnv !== '1'
+        return ComposerPlatform::getEnv('COMPOSER_NO_INTERACTION') !== '1'
             && $stdin !== false
             && ComposerPlatform::isTty($stdin);
     }
