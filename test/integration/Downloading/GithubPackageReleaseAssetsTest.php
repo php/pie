@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Php\PieIntegrationTest\Downloading;
 
-use Composer\Config;
-use Composer\IO\IOInterface;
+use Composer\Factory;
+use Composer\IO\NullIO;
 use Composer\Package\CompletePackage;
 use Composer\Util\AuthHelper;
 use Composer\Util\HttpDownloader;
@@ -24,9 +24,6 @@ use Php\Pie\Platform\WindowsExtensionAssetName;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\RequiresOperatingSystemFamily;
 use PHPUnit\Framework\TestCase;
-
-use function getenv;
-use function is_string;
 
 #[CoversClass(GithubPackageReleaseAssets::class)]
 final class GithubPackageReleaseAssetsTest extends TestCase
@@ -58,17 +55,9 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             'https://api.github.com/repos/asgrim/example-pie-extension/zipball/f9ed13ea95dada34c6cc5a052da258dbda059d27',
         );
 
-        $io = $this->createMock(IOInterface::class);
-
-        $githubToken = getenv('GITHUB_TOKEN');
-        if (is_string($githubToken) && $githubToken !== '') {
-            $io->method('hasAuthentication')
-                ->willReturn(true);
-            $io->method('getAuthentication')
-                ->willReturn(['username' => $githubToken, 'password' => 'x-oauth-basic']);
-        }
-
-        $config = new Config();
+        $io     = new NullIO();
+        $config = Factory::createConfig();
+        $io->loadConfiguration($config);
 
         self::assertSame(
             'https://github.com/asgrim/example-pie-extension/releases/download/2.0.2/php_example_pie_extension-2.0.2-8.3-ts-vs16-x86_64.zip',

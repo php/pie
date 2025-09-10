@@ -31,6 +31,7 @@ use function is_dir;
 use function is_executable;
 use function mkdir;
 use function preg_match;
+use function preg_replace;
 use function sprintf;
 use function strtolower;
 use function trim;
@@ -370,7 +371,50 @@ PHP,
 
         self::assertValidLookingPhpBinary($phpExecutable);
 
-        return new self($phpExecutable, null);
+        return self::guessWithPhpConfig(new self($phpExecutable, null));
+    }
+
+    private static function guessWithPhpConfig(self $phpBinaryPath): self
+    {
+        $phpConfigAttempts = [];
+
+        // Try to add `phpize` from path
+        $whichPhpize = new \Symfony\Component\Process\Process(['which', 'php-config']);
+        if ($whichPhpize->run() === 0) {
+            $phpConfigAttempts[] = trim($whichPhpize->getOutput());
+        }
+
+        $phpConfigAttempts[] = preg_replace('((.*)php)', '$1php-config', $phpBinaryPath->phpBinaryPath);
+
+        foreach ($phpConfigAttempts as $phpConfigAttempt) {
+            assert($phpConfigAttempt !== null);
+            assert($phpConfigAttempt !== '');
+            if (! file_exists($phpConfigAttempt) || ! is_executable($phpConfigAttempt)) {
+                continue;
+            }
+
+            $phpizeProcess = new \Symfony\Component\Process\Process([$phpConfigAttempt, '--php-binary']);
+            if ($phpizeProcess->run() !== 0) {
+                continue;
+            }
+
+            if (trim($phpizeProcess->getOutput()) !== $phpBinaryPath->phpBinaryPath) {
+                continue;
+            }
+
+            $phpConfigApiVersionProcess = new \Symfony\Component\Process\Process([$phpConfigAttempt, '--phpapi']);
+
+            // older versions of php-config did not have `--phpapi`, so we can't perform this validation
+            if ($phpConfigApiVersionProcess->run() !== 0) {
+                return new self($phpBinaryPath->phpBinaryPath, $phpConfigAttempt);
+            }
+
+            if (trim($phpConfigApiVersionProcess->getOutput()) === $phpBinaryPath->phpApiVersion()) {
+                return new self($phpBinaryPath->phpBinaryPath, $phpConfigAttempt);
+            }
+        }
+
+        return $phpBinaryPath;
     }
 
     private static function cleanWarningAndDeprecationsFromOutput(string $testOutput): string
