@@ -51,14 +51,15 @@ use const PHP_VERSION;
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class CommandHelper
 {
-    public const ARG_REQUESTED_PACKAGE_AND_VERSION = 'requested-package-and-version';
-    public const OPTION_WITH_PHP_CONFIG            = 'with-php-config';
-    public const OPTION_WITH_PHP_PATH              = 'with-php-path';
-    public const OPTION_WITH_PHPIZE_PATH           = 'with-phpize-path';
-    public const OPTION_WORKING_DIRECTORY          = 'working-dir';
-    private const OPTION_MAKE_PARALLEL_JOBS        = 'make-parallel-jobs';
-    private const OPTION_SKIP_ENABLE_EXTENSION     = 'skip-enable-extension';
-    private const OPTION_FORCE                     = 'force';
+    public const ARG_REQUESTED_PACKAGE_AND_VERSION             = 'requested-package-and-version';
+    public const OPTION_WITH_PHP_CONFIG                        = 'with-php-config';
+    public const OPTION_WITH_PHP_PATH                          = 'with-php-path';
+    public const OPTION_WITH_PHPIZE_PATH                       = 'with-phpize-path';
+    public const OPTION_WORKING_DIRECTORY                      = 'working-dir';
+    public const OPTION_ALLOW_NON_INTERACTIVE_PROJECT_INSTALL = 'allow-non-interactive-project-install';
+    private const OPTION_MAKE_PARALLEL_JOBS                    = 'make-parallel-jobs';
+    private const OPTION_SKIP_ENABLE_EXTENSION                 = 'skip-enable-extension';
+    private const OPTION_FORCE                                 = 'force';
 
     /** @psalm-suppress UnusedConstructor */
     private function __construct()
@@ -124,6 +125,13 @@ final class CommandHelper
         );
 
         self::configurePhpConfigOptions($command);
+
+        $command->addOption(
+            self::OPTION_ALLOW_NON_INTERACTIVE_PROJECT_INSTALL,
+            null,
+            InputOption::VALUE_NONE,
+            'When installing a PHP project, allow non-interactive project installations. Only used in certain contexts.',
+        );
 
         /**
          * Allows additional options for the `./configure` command to be passed here.

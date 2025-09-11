@@ -17,6 +17,7 @@ use Php\Pie\Installing\InstallForPhpProject\DetermineExtensionsRequired;
 use Php\Pie\Installing\InstallForPhpProject\FindMatchingPackages;
 use Php\Pie\Installing\InstallForPhpProject\InstallPiePackageFromPath;
 use Php\Pie\Installing\InstallForPhpProject\InstallSelectedPackage;
+use Php\Pie\Platform;
 use Php\Pie\Platform\InstalledPiePackages;
 use Php\Pie\Util\Emoji;
 use Psr\Container\ContainerInterface;
@@ -24,6 +25,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -121,6 +123,17 @@ final class InstallExtensionsForProjectCommand extends Command
             $restoreWorkingDir();
 
             return $exit;
+        }
+
+        $allowNonInteractive = $input->hasOption(CommandHelper::OPTION_ALLOW_NON_INTERACTIVE_PROJECT_INSTALL) && $input->getOption(CommandHelper::OPTION_ALLOW_NON_INTERACTIVE_PROJECT_INSTALL);
+        if (! Platform::isInteractive() && ! $allowNonInteractive) {
+            $output->writeln(sprintf(
+                '<warning>Aborting! You are not running in interactive mode, and --%s was not specified.</warning>',
+                CommandHelper::OPTION_ALLOW_NON_INTERACTIVE_PROJECT_INSTALL,
+            ));
+            // @todo more details
+
+            return Command::FAILURE;
         }
 
         $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $output);
@@ -221,27 +234,45 @@ final class InstallExtensionsForProjectCommand extends Command
                     return;
                 }
 
-                $choiceQuestion = new ChoiceQuestion(
-                    "\nThe following packages may be suitable, which would you like to install: ",
-                    array_merge(
-                        ['None'],
-                        array_map(
-                            static function (array $match): string {
-                                return sprintf('%s: %s', $match['name'], $match['description'] ?? 'no description available');
-                            },
-                            $matches,
-                        ),
-                    ),
-                    0,
-                );
-
-                $selectedPackageAnswer = (string) $helper->ask($input, $output, $choiceQuestion);
-
-                if ($selectedPackageAnswer === 'None') {
-                    $output->writeln('Okay I won\'t install anything for ' . $extension->name());
+                if (! Platform::isInteractive() && count($matches) > 1) {
                     $anyErrorsHappened = true;
 
+                    // @todo Figure out if there is a way to improve this, safely
+                    $output->writeln(sprintf(
+                        "<warning>Multiple packages were found for %s:</warning>\n  %s\n\n<warning>This means you cannot `pie install` this project interactively for now.</warning>",
+                        $extension->nameWithExtPrefix(),
+                        implode("\n  ", array_column($matches, 'name')),
+                    ));
+
                     return;
+                }
+
+                if (Platform::isInteractive()) {
+                    $choiceQuestion = new ChoiceQuestion(
+                        "\nThe following packages may be suitable, which would you like to install: ",
+                        array_merge(
+                            ['None'],
+                            array_map(
+                                static function (array $match): string {
+                                    return sprintf('%s: %s', $match['name'], $match['description'] ?? 'no description available');
+                                },
+                                $matches,
+                            ),
+                        ),
+                        0,
+                    );
+
+                    $selectedPackageAnswer = (string) $helper->ask($input, $output, $choiceQuestion);
+
+                    if ($selectedPackageAnswer === 'None') {
+                        $output->writeln('Okay I won\'t install anything for ' . $extension->name());
+                        $anyErrorsHappened = true;
+
+                        return;
+                    }
+                    $selectedPackageName = substr($selectedPackageAnswer, 0, (int) strpos($selectedPackageAnswer, ':'));
+                } else {
+                    $selectedPackageName = $matches[0]['name'];
                 }
 
                 $requestInstallConstraint = '';
@@ -250,8 +281,12 @@ final class InstallExtensionsForProjectCommand extends Command
                 }
 
                 try {
+                    $output->writeln(
+                        sprintf('Invoking pie install of %s%s', $selectedPackageName, $requestInstallConstraint),
+                        OutputInterface::VERBOSITY_VERBOSE,
+                    );
                     $this->installSelectedPackage->withPieCli(
-                        substr($selectedPackageAnswer, 0, (int) strpos($selectedPackageAnswer, ':')) . $requestInstallConstraint,
+                        $selectedPackageName . $requestInstallConstraint,
                         $input,
                         $output,
                     );
