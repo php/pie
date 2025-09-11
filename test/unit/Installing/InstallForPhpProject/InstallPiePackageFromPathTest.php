@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Php\PieBehaviourTest\Installing\InstallForPhpProject;
+namespace Php\PieUnitTest\Installing\InstallForPhpProject;
 
 use Composer\Package\RootPackage;
 use Php\Pie\Command\InvokeSubCommand;
