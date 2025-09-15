@@ -8,6 +8,7 @@ use Composer\Util\AuthHelper;
 use Composer\Util\Http\Response;
 use Composer\Util\HttpDownloader;
 use Php\Pie\SelfManage\Update\FetchPieReleaseFromGitHub;
+use Php\Pie\SelfManage\Update\PiePharMissingFromLatestRelease;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
@@ -70,6 +71,50 @@ final class FetchPieReleaseFromGitHubTest extends TestCase
 
         self::assertSame('1.2.3', $latestRelease->tag);
         self::assertSame(self::TEST_GITHUB_URL . '/path/to/pie.phar', $latestRelease->downloadUrl);
+    }
+
+    public function testLatestReleaseNotHavingPiePharThrowsException(): void
+    {
+        $httpDownloader = $this->createMock(HttpDownloader::class);
+        $authHelper     = $this->createMock(AuthHelper::class);
+
+        $url = self::TEST_GITHUB_URL . '/repos/php/pie/releases/latest';
+        $authHelper
+            ->method('addAuthenticationHeader')
+            ->willReturn(['Authorization: Bearer fake-token']);
+        $httpDownloader->expects(self::once())
+            ->method('get')
+            ->with(
+                $url,
+                [
+                    'retry-auth-failure' => true,
+                    'http' => [
+                        'method' => 'GET',
+                        'header' => ['Authorization: Bearer fake-token'],
+                    ],
+                ],
+            )
+            ->willReturn(
+                new Response(
+                    ['url' => $url],
+                    200,
+                    [],
+                    json_encode([
+                        'tag_name' => '1.2.3',
+                        'assets' => [
+                            [
+                                'name' => 'not-pie.phar',
+                                'browser_download_url' => self::TEST_GITHUB_URL . '/do/not/download/this',
+                            ],
+                        ],
+                    ]),
+                ),
+            );
+
+        $fetch = new FetchPieReleaseFromGitHub(self::TEST_GITHUB_URL, $httpDownloader, $authHelper);
+
+        $this->expectException(PiePharMissingFromLatestRelease::class);
+        $fetch->latestReleaseMetadata();
     }
 
     public function testDownloadContent(): void

@@ -13,6 +13,7 @@ use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use Php\Pie\File\FullPathToSelf;
 use Php\Pie\File\SudoFilePut;
 use Php\Pie\SelfManage\Update\FetchPieReleaseFromGitHub;
+use Php\Pie\SelfManage\Update\PiePharMissingFromLatestRelease;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
 use Php\Pie\SelfManage\Verify\FailedToVerifyRelease;
 use Php\Pie\SelfManage\Verify\VerifyPieReleaseUsingAttestation;
@@ -92,8 +93,15 @@ final class SelfUpdateCommand extends Command
 
             $output->writeln('Downloading the latest nightly release.');
         } else {
-            $latestRelease = $fetchLatestPieRelease->latestReleaseMetadata();
-            $pieVersion    = PieVersion::get();
+            try {
+                $latestRelease = $fetchLatestPieRelease->latestReleaseMetadata();
+            } catch (PiePharMissingFromLatestRelease $piePharMissingFromLatestRelease) {
+                $output->writeln(sprintf('<error>%s</error>', $piePharMissingFromLatestRelease->getMessage()));
+
+                return Command::FAILURE;
+            }
+
+            $pieVersion = PieVersion::get();
 
             if (preg_match('/^(?<tag>.+)@(?<hash>[a-f0-9]{7})$/', $pieVersion, $matches)) {
                 // Have to change the version to something the Semver library understands

@@ -12,6 +12,7 @@ use Webmozart\Assert\Assert;
 
 use function array_filter;
 use function array_map;
+use function count;
 use function file_put_contents;
 use function reset;
 use function sys_get_temp_dir;
@@ -68,6 +69,11 @@ final class FetchPieReleaseFromGitHub implements FetchPieRelease
                 return $asset['name'] === self::PIE_PHAR_NAME;
             },
         );
+
+        if (! count($assetsNamedPiePhar)) {
+            throw PiePharMissingFromLatestRelease::fromRelease($decodedRepsonse['tag_name']);
+        }
+
         $firstAssetNamedPiePhar = reset($assetsNamedPiePhar);
 
         return new ReleaseMetadata(
