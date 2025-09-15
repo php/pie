@@ -19,6 +19,7 @@ use function file_exists;
 use function file_get_contents;
 use function in_array;
 use function is_array;
+use function is_dir;
 use function preg_replace;
 use function scandir;
 use function sprintf;
@@ -39,7 +40,7 @@ class RemoveIniEntryWithFileGetContents implements RemoveIniEntry
         }
 
         $additionalIniDirectory = $targetPlatform->phpBinaryPath->additionalIniDirectory();
-        if ($additionalIniDirectory !== null) {
+        if ($additionalIniDirectory !== null && file_exists($additionalIniDirectory) && is_dir($additionalIniDirectory)) {
             $filenames = scandir($additionalIniDirectory);
             if (is_array($filenames)) {
                 $allIniFiles = array_merge(
