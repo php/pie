@@ -25,20 +25,22 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Throwable;
 
+use function array_column;
 use function array_keys;
 use function array_map;
 use function array_merge;
 use function array_walk;
 use function assert;
 use function chdir;
+use function count;
 use function getcwd;
+use function implode;
 use function in_array;
 use function is_dir;
 use function is_string;
@@ -131,7 +133,6 @@ final class InstallExtensionsForProjectCommand extends Command
                 '<warning>Aborting! You are not running in interactive mode, and --%s was not specified.</warning>',
                 CommandHelper::OPTION_ALLOW_NON_INTERACTIVE_PROJECT_INSTALL,
             ));
-            // @todo more details
 
             return Command::FAILURE;
         }
@@ -270,6 +271,7 @@ final class InstallExtensionsForProjectCommand extends Command
 
                         return;
                     }
+
                     $selectedPackageName = substr($selectedPackageAnswer, 0, (int) strpos($selectedPackageAnswer, ':'));
                 } else {
                     $selectedPackageName = $matches[0]['name'];
