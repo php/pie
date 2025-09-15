@@ -18,6 +18,8 @@ use function array_walk;
 use function file_exists;
 use function file_get_contents;
 use function in_array;
+use function is_array;
+use function is_dir;
 use function preg_replace;
 use function scandir;
 use function sprintf;
@@ -38,25 +40,28 @@ class RemoveIniEntryWithFileGetContents implements RemoveIniEntry
         }
 
         $additionalIniDirectory = $targetPlatform->phpBinaryPath->additionalIniDirectory();
-        if ($additionalIniDirectory !== null) {
-            $allIniFiles = array_merge(
-                array_map(
-                    static function (string $path) use ($additionalIniDirectory): string {
-                        return $additionalIniDirectory . DIRECTORY_SEPARATOR . $path;
-                    },
-                    array_filter(
-                        scandir($additionalIniDirectory),
-                        static function (string $path) use ($additionalIniDirectory): bool {
-                            if (in_array($path, ['.', '..'])) {
-                                return false;
-                            }
-
-                            return file_exists($additionalIniDirectory . DIRECTORY_SEPARATOR . $path);
+        if ($additionalIniDirectory !== null && file_exists($additionalIniDirectory) && is_dir($additionalIniDirectory)) {
+            $filenames = scandir($additionalIniDirectory);
+            if (is_array($filenames)) {
+                $allIniFiles = array_merge(
+                    array_map(
+                        static function (string $path) use ($additionalIniDirectory): string {
+                            return $additionalIniDirectory . DIRECTORY_SEPARATOR . $path;
                         },
+                        array_filter(
+                            $filenames,
+                            static function (string $path) use ($additionalIniDirectory): bool {
+                                if (in_array($path, ['.', '..'])) {
+                                    return false;
+                                }
+
+                                return file_exists($additionalIniDirectory . DIRECTORY_SEPARATOR . $path);
+                            },
+                        ),
                     ),
-                ),
-                $allIniFiles,
-            );
+                    $allIniFiles,
+                );
+            }
         }
 
         // Make sure all symlinks are resolved

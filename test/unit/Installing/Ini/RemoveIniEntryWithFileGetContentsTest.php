@@ -128,6 +128,46 @@ final class RemoveIniEntryWithFileGetContentsTest extends TestCase
         );
     }
 
+    #[DataProvider('extensionTypeProvider')]
+    public function testNonExistentAdditionalIniDirectoryDoesNotCrash(ExtensionType $extensionType): void
+    {
+        $phpBinaryPath = $this->createMock(PhpBinaryPath::class);
+        $phpBinaryPath
+            ->method('loadedIniConfigurationFile')
+            ->willReturn(null);
+        $phpBinaryPath
+            ->method('additionalIniDirectory')
+            ->willReturn('/this/path/should/not/exist/for/testing');
+
+        $package = new Package(
+            $this->createMock(CompletePackageInterface::class),
+            $extensionType,
+            ExtensionName::normaliseFromString('foobar'),
+            'foobar/foobar',
+            '1.2.3',
+            null,
+        );
+
+        $targetPlatform = new TargetPlatform(
+            OperatingSystem::NonWindows,
+            OperatingSystemFamily::Linux,
+            $phpBinaryPath,
+            Architecture::x86_64,
+            ThreadSafetyMode::ThreadSafe,
+            1,
+            null,
+        );
+
+        self::assertSame(
+            [],
+            (new RemoveIniEntryWithFileGetContents())(
+                $package,
+                $targetPlatform,
+                $this->createMock(OutputInterface::class),
+            ),
+        );
+    }
+
     #[RequiresOperatingSystemFamily('Linux')]
     public function testSymlinkedIniFilesAreResolved(): void
     {
