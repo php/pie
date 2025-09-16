@@ -35,7 +35,7 @@ final class FetchPieReleaseFromGitHub implements FetchPieRelease
     {
         $url = $this->githubApiBaseUrl . self::PIE_LATEST_RELEASE_URL;
 
-        $decodedRepsonse = $this->httpDownloader->get(
+        $decodedResponse = $this->httpDownloader->get(
             $url,
             [
                 'retry-auth-failure' => true,
@@ -46,11 +46,11 @@ final class FetchPieReleaseFromGitHub implements FetchPieRelease
             ],
         )->decodeJson();
 
-        Assert::isArray($decodedRepsonse);
-        Assert::keyExists($decodedRepsonse, 'tag_name');
-        Assert::stringNotEmpty($decodedRepsonse['tag_name']);
-        Assert::keyExists($decodedRepsonse, 'assets');
-        Assert::isList($decodedRepsonse['assets']);
+        Assert::isArray($decodedResponse);
+        Assert::keyExists($decodedResponse, 'tag_name');
+        Assert::stringNotEmpty($decodedResponse['tag_name']);
+        Assert::keyExists($decodedResponse, 'assets');
+        Assert::isList($decodedResponse['assets']);
 
         $assetsNamedPiePhar = array_filter(
             array_map(
@@ -63,7 +63,7 @@ final class FetchPieReleaseFromGitHub implements FetchPieRelease
 
                     return $asset;
                 },
-                $decodedRepsonse['assets'],
+                $decodedResponse['assets'],
             ),
             static function (array $asset): bool {
                 return $asset['name'] === self::PIE_PHAR_NAME;
@@ -71,13 +71,13 @@ final class FetchPieReleaseFromGitHub implements FetchPieRelease
         );
 
         if (! count($assetsNamedPiePhar)) {
-            throw PiePharMissingFromLatestRelease::fromRelease($decodedRepsonse['tag_name']);
+            throw PiePharMissingFromLatestRelease::fromRelease($decodedResponse['tag_name']);
         }
 
         $firstAssetNamedPiePhar = reset($assetsNamedPiePhar);
 
         return new ReleaseMetadata(
-            $decodedRepsonse['tag_name'],
+            $decodedResponse['tag_name'],
             $firstAssetNamedPiePhar['browser_download_url'],
         );
     }
