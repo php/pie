@@ -9,7 +9,6 @@ use Composer\Util\AuthHelper;
 use Composer\Util\Http\Response;
 use Composer\Util\HttpDownloader;
 use Php\Pie\File\BinaryFile;
-use Php\Pie\File\BinaryFileFailedVerification;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
 use Php\Pie\SelfManage\Verify\FailedToVerifyRelease;
 use Php\Pie\SelfManage\Verify\FallbackVerificationUsingOpenSsl;
@@ -17,10 +16,13 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Output\BufferedOutput;
+use ThePhpFoundation\Attestation\Verification\VerifyAttestationWithOpenSsl;
 
+use function assert;
 use function base64_encode;
 use function extension_loaded;
 use function file_put_contents;
+use function is_string;
 use function json_encode;
 use function openssl_csr_new;
 use function openssl_csr_sign;
@@ -48,6 +50,7 @@ final class FallbackVerificationUsingOpenSslTest extends TestCase
     private AuthHelper&MockObject $authHelper;
     private BufferedOutput $output;
     private FallbackVerificationUsingOpenSsl $verifier;
+    /** @var non-empty-string */
     private string $trustedRootFilePath;
 
     public function setUp(): void
@@ -61,9 +64,11 @@ final class FallbackVerificationUsingOpenSslTest extends TestCase
         $this->authHelper     = $this->createMock(AuthHelper::class);
         $this->output         = new BufferedOutput();
 
-        $this->trustedRootFilePath = tempnam(sys_get_temp_dir(), 'pie_test_trusted_root_file_path');
+        $trustedRootFilePath = tempnam(sys_get_temp_dir(), 'pie_test_trusted_root_file_path');
+        assert(is_string($trustedRootFilePath) && $trustedRootFilePath !== '');
+        $this->trustedRootFilePath = $trustedRootFilePath;
 
-        $this->verifier = new FallbackVerificationUsingOpenSsl($this->trustedRootFilePath, self::TEST_GITHUB_URL, $this->httpDownloader, $this->authHelper);
+        $this->verifier = new FallbackVerificationUsingOpenSsl(new VerifyAttestationWithOpenSsl($this->trustedRootFilePath, self::TEST_GITHUB_URL, $this->httpDownloader, $this->authHelper));
     }
 
     /** @return array{0: string, 1: string} */
@@ -217,7 +222,7 @@ EOF);
 
         $this->mockAttestationResponse($this->downloadedPhar->checksum, $dsseEnvelopePayload, $signature, $pemCertificate);
 
-        $this->expectException(BinaryFileFailedVerification::class);
+        $this->expectException(FailedToVerifyRelease::class);
         $this->verifier->verify($this->release, $this->downloadedPhar, $this->output);
     }
 

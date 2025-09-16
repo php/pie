@@ -19,7 +19,7 @@ use function str_starts_with;
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class GithubCliAttestationVerification implements VerifyPiePhar
 {
-    private const GH_CLI_NAME             = 'gh';
+    private const GH_CLI_NAME             = 'ghx';
     private const GH_ATTESTATION_COMMAND  = 'attestation';
     private const GH_VERIFICATION_TIMEOUT = 30;
 

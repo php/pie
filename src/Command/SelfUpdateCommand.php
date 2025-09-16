@@ -83,7 +83,7 @@ final class SelfUpdateCommand extends Command
         $httpDownloader        = new HttpDownloader($this->io, $composer->getConfig());
         $authHelper            = new AuthHelper($this->io, $composer->getConfig());
         $fetchLatestPieRelease = new FetchPieReleaseFromGitHub($this->githubApiBaseUrl, $httpDownloader, $authHelper);
-        $verifyPiePhar         = VerifyPieReleaseUsingAttestation::factory($this->githubApiBaseUrl, $httpDownloader, $authHelper);
+        $verifyPiePhar         = VerifyPieReleaseUsingAttestation::factory();
 
         if ($input->hasOption(self::OPTION_NIGHTLY_UPDATE) && $input->getOption(self::OPTION_NIGHTLY_UPDATE)) {
             $latestRelease = new ReleaseMetadata(
