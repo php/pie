@@ -11,6 +11,9 @@
          displayDetailsOnTestsThatTriggerWarnings="true"
          failOnRisky="true"
          failOnWarning="true">
+    <php>
+        <env name="COMPOSER_NO_INTERACTION" value="1" />
+    </php>
     <testsuites>
         <testsuite name="unit">
             <directory>test/unit</directory>
