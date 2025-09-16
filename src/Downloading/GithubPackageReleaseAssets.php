@@ -79,7 +79,7 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
         Assert::notNull($package->downloadUrl());
 
         try {
-            $decodedRepsonse = $httpDownloader->get(
+            $decodedResponse = $httpDownloader->get(
                 $this->githubApiBaseUrl . '/repos/' . $package->githubOrgAndRepository() . '/releases/tags/' . $package->version(),
                 [
                     'retry-auth-failure' => true,
@@ -98,9 +98,9 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
             throw $t;
         }
 
-        Assert::isArray($decodedRepsonse);
-        Assert::keyExists($decodedRepsonse, 'assets');
-        Assert::isList($decodedRepsonse['assets']);
+        Assert::isArray($decodedResponse);
+        Assert::keyExists($decodedResponse, 'assets');
+        Assert::isList($decodedResponse['assets']);
 
         return array_map(
             static function (array $asset): array {
@@ -111,7 +111,7 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
 
                 return $asset;
             },
-            $decodedRepsonse['assets'],
+            $decodedResponse['assets'],
         );
     }
 }
