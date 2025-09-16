@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f542bd5a549fa468020c82327ba6fd88",
+    "content-hash": "eb43eacafa12ac96b2195494d0c0ff0a",
     "packages": [
         {
             "name": "composer/ca-bundle",
@@ -2421,6 +2421,61 @@
                 }
             ],
             "time": "2025-08-22T12:33:20+00:00"
+        },
+        {
+            "name": "thephpf/attestation",
+            "version": "dev-port-pie-initial-implementation",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/asgrim/attestation.git",
+                "reference": "cb547e4611bd489a578386fda9ef2c20cb7af258"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/asgrim/attestation/zipball/cb547e4611bd489a578386fda9ef2c20cb7af258",
+                "reference": "cb547e4611bd489a578386fda9ef2c20cb7af258",
+                "shasum": ""
+            },
+            "require": {
+                "composer/composer": "^2.2",
+                "ext-json": "*",
+                "php": "^7.4||^8.0",
+                "webmozart/assert": "^1.11"
+            },
+            "require-dev": {
+                "doctrine/coding-standard": "^13.0",
+                "phpstan/phpstan": "^2.1",
+                "phpunit/phpunit": "^9.6.25"
+            },
+            "suggest": {
+                "ext-openssl": "Needed to verify certificates using OpenSSL"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "ThePhpFoundation\\Attestation\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "ThePhpFoundation\\UnitTest\\Attestation\\": "test/unit",
+                    "ThePhpFoundation\\IntegrationTest\\Attestation\\": "test/integration"
+                }
+            },
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "James Titcumb",
+                    "email": "james@asgrim.com"
+                }
+            ],
+            "description": "A PHP library to aid in verifying artifact attestations",
+            "support": {
+                "source": "https://github.com/asgrim/attestation/tree/port-pie-initial-implementation"
+            },
+            "time": "2025-09-23T19:09:02+00:00"
         },
         {
             "name": "webmozart/assert",
@@ -7132,7 +7187,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "thephpf/attestation": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

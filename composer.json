@@ -26,6 +26,12 @@
             "homepage": "https://github.com/php/pie/graphs/contributors"
         }
     ],
+    "repositories": {
+        "attestation": {
+            "type": "vcs",
+            "url": "https://github.com/asgrim/attestation.git"
+        }
+    },
     "require": {
         "php": "8.1.*||8.2.*||8.3.*||8.4.*||8.5.*",
         "composer/composer": "^2.8.11",
@@ -37,6 +43,7 @@
         "symfony/console": "^6.4.25",
         "symfony/event-dispatcher": "^6.4.24",
         "symfony/process": "^6.4.25",
+        "thephpf/attestation": "dev-port-pie-initial-implementation",
         "webmozart/assert": "^1.11"
     },
     "require-dev": {

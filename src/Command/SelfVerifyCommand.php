@@ -4,11 +4,6 @@ declare(strict_types=1);
 
 namespace Php\Pie\Command;
 
-use Composer\Util\AuthHelper;
-use Composer\Util\HttpDownloader;
-use Php\Pie\ComposerIntegration\PieComposerFactory;
-use Php\Pie\ComposerIntegration\PieComposerRequest;
-use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use Php\Pie\File\BinaryFile;
 use Php\Pie\File\FullPathToSelf;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
@@ -16,7 +11,6 @@ use Php\Pie\SelfManage\Verify\FailedToVerifyRelease;
 use Php\Pie\SelfManage\Verify\VerifyPieReleaseUsingAttestation;
 use Php\Pie\Util\Emoji;
 use Php\Pie\Util\PieVersion;
-use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -30,11 +24,7 @@ use function sprintf;
 )]
 final class SelfVerifyCommand extends Command
 {
-    /** @param non-empty-string $githubApiBaseUrl */
     public function __construct(
-        private readonly string $githubApiBaseUrl,
-        private readonly QuieterConsoleIO $io,
-        private readonly ContainerInterface $container,
         private readonly FullPathToSelf $fullPathToSelf,
     ) {
         parent::__construct();
@@ -55,19 +45,9 @@ final class SelfVerifyCommand extends Command
             return Command::FAILURE;
         }
 
-        $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $output);
-        $composer       = PieComposerFactory::createPieComposer(
-            $this->container,
-            PieComposerRequest::noOperation(
-                $output,
-                $targetPlatform,
-            ),
-        );
-        $httpDownloader = new HttpDownloader($this->io, $composer->getConfig());
-        $authHelper     = new AuthHelper($this->io, $composer->getConfig());
-        $latestRelease  = new ReleaseMetadata(PieVersion::get(), 'blah');
-        $pharFilename   = BinaryFile::fromFileWithSha256Checksum(($this->fullPathToSelf)());
-        $verifyPiePhar  = VerifyPieReleaseUsingAttestation::factory($this->githubApiBaseUrl, $httpDownloader, $authHelper);
+        $latestRelease = new ReleaseMetadata(PieVersion::get(), 'blah');
+        $pharFilename  = BinaryFile::fromFileWithSha256Checksum(($this->fullPathToSelf)());
+        $verifyPiePhar = VerifyPieReleaseUsingAttestation::factory();
 
         try {
             $verifyPiePhar->verify($latestRelease, $pharFilename, $output);
