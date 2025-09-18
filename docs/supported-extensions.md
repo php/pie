@@ -31,6 +31,7 @@ The following extensions have already added support for PIE:
 | apfd           | [m6w6/ext-apfd](https://packagist.org/packages/m6w6/ext-apfd)                                       |
 | ast            | [nikic/php-ast](https://packagist.org/packages/nikic/php-ast)                                       |
 | bcmath         | php/bcmath                                                                                          |
+| bitset         | [pecl/bitset](https://packagist.org/packages/pecl/bitset)                                           |
 | brotli         | [kjdev/brotli](https://packagist.org/packages/kjdev/brotli)                                         |
 | bz2            | php/bz2                                                                                             |
 | calendar       | php/calendar                                                                                        |
@@ -103,6 +104,7 @@ The following extensions have already added support for PIE:
 | uuid           | [pecl/uuid](https://packagist.org/packages/pecl/uuid)                                               |
 | vld            | [derickr/vld](https://packagist.org/packages/derickr/vld)                                           |
 | win32service   | [win32service/win32service](https://packagist.org/packages/win32service/win32service)               |
+| xattr          | [pecl/xattr](https://packagist.org/packages/pecl/xattr)                                             |
 | Xdebug         | [xdebug/xdebug](https://packagist.org/packages/xdebug/xdebug)                                       |
 | xlswriter      | [viest/xlswriter](https://packagist.org/packages/viest/xlswriter)                                   |
 | xml            | php/xml                                                                                             |
@@ -121,7 +123,6 @@ The following extensions have had efforts started to add support for PIE:
 | PECL Extension | Status                                                                                           |
 |----------------|--------------------------------------------------------------------------------------------------|
 | base58         | ⏰ PR: [jasny/base58-php-ext#14](https://github.com/jasny/base58-php-ext/pull/14)                 |
-| Bitset         | ⏰ PR: [php/pecl-numbers-bitset#16](https://github.com/php/pecl-numbers-bitset/pull/16)           |
 | crypto         | ⏰ PR: [bukka/php-crypto#43](https://github.com/bukka/php-crypto/pull/43)                         |
 | dbase          | ⏰ PR: [php/pecl-database-dbase#6](https://github.com/php/pecl-database-dbase/pull/6)             |
 | hdr_histogram  | ⏰ Coming soon: [beberlei/hdrhistogram](https://packagist.org/packages/beberlei/hdrhistogram)     |
@@ -318,7 +319,6 @@ The following extensions exist on PECL, but either have not added support for PI
 * weakreference_bc
 * WinBinder
 * WinCache
-* xattr
 * xdiff
 * xhprof
 * xmldiff
