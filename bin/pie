@@ -24,7 +24,10 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
-error_reporting(error_reporting() & ~E_DEPRECATED);
+require_once __DIR__ . '/../src/Util/PieVersion.php';
+if (PieVersion::isPharBuild()) {
+    error_reporting(error_reporting() & ~E_DEPRECATED);
+}
 
 /** @psalm-suppress UnresolvableInclude */
 include $_composer_autoload_path ?? __DIR__ . '/../vendor/autoload.php';
