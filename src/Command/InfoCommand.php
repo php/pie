@@ -15,6 +15,7 @@ use Php\Pie\DependencyResolver\InvalidPackageName;
 use Php\Pie\DependencyResolver\UnableToResolveRequirement;
 use Php\Pie\Installing\InstallForPhpProject\FindMatchingPackages;
 use Php\Pie\Platform\InstalledPiePackages;
+use Php\Pie\Platform\ThreadSafetyMode;
 use Php\Pie\Util\Emoji;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -24,6 +25,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 use function array_key_exists;
 use function count;
+use function in_array;
 use function sprintf;
 
 #[AsCommand(
@@ -107,6 +109,19 @@ final class InfoCommand extends Command
         $output->writeln(sprintf('Composer package name: %s', $package->name()));
         $output->writeln(sprintf('Version: %s', $package->version()));
         $output->writeln(sprintf('Download URL: %s', $package->downloadUrl() ?? '(not specified)'));
+        $output->writeln(sprintf(
+            'TS/NTS: %s',
+            ($targetPlatform->threadSafety === ThreadSafetyMode::NonThreadSafe && ! $package->supportNts())
+                || ($targetPlatform->threadSafety === ThreadSafetyMode::ThreadSafe && ! $package->supportZts()) ? sprintf('%s (not supported on %s)', Emoji::PROHIBITED, $targetPlatform->threadSafety->asShort()) : Emoji::GREEN_CHECKMARK,
+        ));
+
+        $output->writeln(sprintf(
+            'OS: %s',
+            ($package->compatibleOsFamilies() === null || in_array($targetPlatform->operatingSystemFamily, $package->compatibleOsFamilies(), true))
+            && ($package->incompatibleOsFamilies() === null || ! in_array($targetPlatform->operatingSystemFamily, $package->incompatibleOsFamilies(), true))
+                ? Emoji::GREEN_CHECKMARK
+                : sprintf('%s (not supported on %s)', Emoji::PROHIBITED, $targetPlatform->operatingSystemFamily->value),
+        ));
 
         $output->writeln("\n<options=bold,underscore>Dependencies:</>");
         $requires = $package->composerPackage()->getRequires();

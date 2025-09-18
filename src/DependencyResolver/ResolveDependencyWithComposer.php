@@ -65,8 +65,9 @@ final class ResolveDependencyWithComposer implements DependencyResolver
 
         $piePackage = Package::fromComposerCompletePackage($package);
 
+        $this->assertBuildProviderProvidersBundledExtensions($targetPlatform, $piePackage, $forceInstallPackageVersion);
+
         if (! $forceInstallPackageVersion) {
-            $this->assertBuildProviderProvidersBundledExtensions($targetPlatform, $piePackage, $forceInstallPackageVersion);
             $this->assertCompatibleOsFamily($targetPlatform, $piePackage);
             $this->assertCompatibleThreadSafetyMode($targetPlatform->threadSafety, $piePackage);
         }
