@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Php\Pie\Command;
 
+use Composer\Semver\Constraint\Constraint;
+use Php\Pie\ComposerIntegration\PhpBinaryPathBasedPlatformRepository;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieOperation;
@@ -12,12 +14,15 @@ use Php\Pie\DependencyResolver\DependencyResolver;
 use Php\Pie\DependencyResolver\InvalidPackageName;
 use Php\Pie\DependencyResolver\UnableToResolveRequirement;
 use Php\Pie\Installing\InstallForPhpProject\FindMatchingPackages;
+use Php\Pie\Platform\InstalledPiePackages;
+use Php\Pie\Util\Emoji;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use function array_key_exists;
 use function count;
 use function sprintf;
 
@@ -78,7 +83,7 @@ final class InfoCommand extends Command
                 $composer,
                 $targetPlatform,
                 $requestedNameAndVersion,
-                CommandHelper::determineForceInstallingPackageVersion($input),
+                true,
             );
         } catch (UnableToResolveRequirement $unableToResolveRequirement) {
             return CommandHelper::handlePackageNotFound(
@@ -103,13 +108,43 @@ final class InfoCommand extends Command
         $output->writeln(sprintf('Version: %s', $package->version()));
         $output->writeln(sprintf('Download URL: %s', $package->downloadUrl() ?? '(not specified)'));
 
+        $output->writeln("\n<options=bold,underscore>Dependencies:</>");
+        $requires = $package->composerPackage()->getRequires();
+
+        if (count($requires) > 0) {
+            /** @var array<string, list<Constraint>> $platformConstraints */
+            $platformConstraints = [];
+            $composerPlatform    = new PhpBinaryPathBasedPlatformRepository($targetPlatform->phpBinaryPath, $composer, new InstalledPiePackages(), null);
+            foreach ($composerPlatform->getPackages() as $platformPackage) {
+                $platformConstraints[$platformPackage->getName()][] = new Constraint('==', $platformPackage->getPrettyVersion());
+            }
+
+            foreach ($requires as $requireName => $requireLink) {
+                $packageStatus = sprintf('    %s: %s %%s', $requireName, $requireLink->getConstraint()->getPrettyString());
+                if (! array_key_exists($requireName, $platformConstraints)) {
+                    $output->writeln(sprintf($packageStatus, Emoji::PROHIBITED . ' (not installed)'));
+                    continue;
+                }
+
+                foreach ($platformConstraints[$requireName] as $constraint) {
+                    if ($requireLink->getConstraint()->matches($constraint)) {
+                        $output->writeln(sprintf($packageStatus, Emoji::GREEN_CHECKMARK));
+                    } else {
+                        $output->writeln(sprintf($packageStatus, Emoji::PROHIBITED . ' (your version is ' . $constraint->getVersion() . ')'));
+                    }
+                }
+            }
+        } else {
+            $output->writeln('    No dependencies.');
+        }
+
+        $output->writeln("\n<options=bold,underscore>Configure options:</>");
         if (count($package->configureOptions())) {
-            $output->writeln('Configure options:');
             foreach ($package->configureOptions() as $configureOption) {
                 $output->writeln(sprintf('    --%s%s  (%s)', $configureOption->name, $configureOption->needsValue ? '=?' : '', $configureOption->description));
             }
         } else {
-            $output->writeln('No configure options are specified.');
+            $output->writeln('    No configure options are specified.');
         }
 
         return Command::SUCCESS;
