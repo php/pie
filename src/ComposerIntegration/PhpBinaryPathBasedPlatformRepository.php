@@ -12,8 +12,11 @@ use Composer\Semver\VersionParser;
 use Php\Pie\ExtensionName;
 use Php\Pie\Platform\InstalledPiePackages;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
+use Php\Pie\Util\Process;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 use UnexpectedValueException;
 
+use function explode;
 use function in_array;
 use function str_replace;
 use function str_starts_with;
@@ -77,6 +80,8 @@ class PhpBinaryPathBasedPlatformRepository extends PlatformRepository
             $this->addPackage($this->packageForExtension($extension, $extensionVersion));
         }
 
+        $this->addLibrariesUsingPkgConfig();
+
         parent::__construct();
     }
 
@@ -106,5 +111,32 @@ class PhpBinaryPathBasedPlatformRepository extends PlatformRepository
         $package->setType('php-ext');
 
         return $package;
+    }
+
+    private function detectLibraryWithPkgConfig(string $alias, string $library): void
+    {
+        try {
+            $pkgConfigResult = Process::run(['pkg-config', '--print-provides', '--print-errors', $library]);
+        } catch (ProcessFailedException) {
+            return;
+        }
+
+        [$library, $prettyVersion] = explode('=', $pkgConfigResult);
+        if (! $library || ! $prettyVersion) {
+            return;
+        }
+
+        $version = $this->versionParser->normalize($prettyVersion);
+
+        $lib = new CompletePackage('lib-' . $alias, $version, $prettyVersion);
+        $lib->setDescription('The ' . $alias . ' library, ' . $library);
+        $this->addPackage($lib);
+    }
+
+    private function addLibrariesUsingPkgConfig(): void
+    {
+        $this->detectLibraryWithPkgConfig('bz2', 'bzip2');
+        $this->detectLibraryWithPkgConfig('curl', 'libcurl');
+        $this->detectLibraryWithPkgConfig('sodium', 'libsodium');
     }
 }
