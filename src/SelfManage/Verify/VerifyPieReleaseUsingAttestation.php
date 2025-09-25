@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace Php\Pie\SelfManage\Verify;
 
-use Composer\Util\AuthHelper;
-use Composer\Util\HttpDownloader;
 use Php\Pie\File\BinaryFile;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\ExecutableFinder;
+use ThePhpFoundation\Attestation\Verification\VerifyAttestationWithOpenSsl;
 
 use function extension_loaded;
 
@@ -22,15 +21,11 @@ final class VerifyPieReleaseUsingAttestation implements VerifyPiePhar
     ) {
     }
 
-    /** @param non-empty-string $githubApiBaseUrl */
-    public static function factory(
-        string $githubApiBaseUrl,
-        HttpDownloader $httpDownloader,
-        AuthHelper $authHelper,
-    ): self {
+    public static function factory(): self
+    {
         return new VerifyPieReleaseUsingAttestation(
             new GithubCliAttestationVerification(new ExecutableFinder()),
-            new FallbackVerificationUsingOpenSsl(FallbackVerificationUsingOpenSsl::TRUSTED_ROOT_FILE_PATH, $githubApiBaseUrl, $httpDownloader, $authHelper),
+            new FallbackVerificationUsingOpenSsl(VerifyAttestationWithOpenSsl::factory()),
         );
     }
 
