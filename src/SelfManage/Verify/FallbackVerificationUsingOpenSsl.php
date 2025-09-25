@@ -8,8 +8,8 @@ use Php\Pie\File\BinaryFile;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
 use Php\Pie\Util\Emoji;
 use Symfony\Component\Console\Output\OutputInterface;
-use ThePhpFoundation\Attestation\Extension;
 use ThePhpFoundation\Attestation\FilenameWithChecksum;
+use ThePhpFoundation\Attestation\FulcioSigstoreOidExtensions;
 use ThePhpFoundation\Attestation\Verification\Exception\FailedToVerifyArtifact;
 use ThePhpFoundation\Attestation\Verification\VerifyAttestation;
 
@@ -20,9 +20,9 @@ final class FallbackVerificationUsingOpenSsl implements VerifyPiePhar
 {
     /** @link https://github.com/sigstore/fulcio/blob/main/docs/oid-info.md#136141572641--fulcio */
     private const ATTESTATION_CERTIFICATE_EXPECTED_EXTENSION_VALUES = [
-        Extension::ISSUER_V2 => 'https://token.actions.githubusercontent.com',
-        Extension::SOURCE_REPOSITORY_URI => 'https://github.com/php/pie',
-        Extension::SOURCE_REPOSITORY_OWNER_URI => 'https://github.com/php',
+        FulcioSigstoreOidExtensions::ISSUER_V2 => 'https://token.actions.githubusercontent.com',
+        FulcioSigstoreOidExtensions::SOURCE_REPOSITORY_URI => 'https://github.com/php/pie',
+        FulcioSigstoreOidExtensions::SOURCE_REPOSITORY_OWNER_URI => 'https://github.com/php',
     ];
 
     private const ORGANISATION = 'php';
