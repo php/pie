@@ -29,7 +29,6 @@ if (PieVersion::isPharBuild()) {
     error_reporting(error_reporting() & ~E_DEPRECATED);
 }
 
-/** @psalm-suppress UnresolvableInclude */
 include $_composer_autoload_path ?? __DIR__ . '/../vendor/autoload.php';
 
 $container = Container::factory();

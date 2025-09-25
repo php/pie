@@ -49,7 +49,7 @@ final class ExtensionName
         $this->normalisedExtensionName = $normalisedExtensionName;
     }
 
-    /** @psalm-assert-if-true non-empty-string $extensionName */
+    /** @phpstan-assert-if-true non-empty-string $extensionName */
     public static function isValidExtensionName(string $extensionName): bool
     {
         return preg_match(self::VALID_PACKAGE_NAME_REGEX, $extensionName) >= 1;
@@ -59,7 +59,6 @@ final class ExtensionName
     {
         $phpExt = $package->getPhpExt();
 
-        /** @psalm-suppress DocblockTypeContradiction just in case runtime type is not correct */
         if (
             $phpExt === null
             || ! array_key_exists('extension-name', $phpExt)

@@ -312,10 +312,6 @@ final class InstallExtensionsForProjectCommand extends Command
 
         $restoreWorkingDir();
 
-        /**
-         * @psalm-suppress TypeDoesNotContainType
-         * @psalm-suppress RedundantCondition
-         */
         return $anyErrorsHappened ? self::FAILURE : self::SUCCESS;
     }
 }

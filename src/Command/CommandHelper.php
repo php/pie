@@ -61,7 +61,6 @@ final class CommandHelper
     private const OPTION_SKIP_ENABLE_EXTENSION                = 'skip-enable-extension';
     private const OPTION_FORCE                                = 'force';
 
-    /** @psalm-suppress UnusedConstructor */
     private function __construct()
     {
     }
@@ -227,7 +226,6 @@ final class CommandHelper
         if ($input->hasOption(self::OPTION_WITH_PHPIZE_PATH)) {
             $phpizePathOption = (string) $input->getOption(self::OPTION_WITH_PHPIZE_PATH);
             if (trim($phpizePathOption) !== '') {
-                /** @psalm-suppress ArgumentTypeCoercion */
                 return new PhpizePath($phpizePathOption);
             }
         }
@@ -328,7 +326,6 @@ final class CommandHelper
             }
 
             if ($repo instanceof VcsRepository) {
-                /** @psalm-suppress InternalMethod */
                 $output->writeln(sprintf(
                     '  - VCS Repository (%s)',
                     $repo->getDriver()?->getUrl() ?? 'no url?',

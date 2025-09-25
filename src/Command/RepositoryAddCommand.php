@@ -59,7 +59,6 @@ final class RepositoryAddCommand extends Command
         $pieJsonEditor  = PieJsonEditor::fromTargetPlatform($targetPlatform);
 
         $type = (string) $input->getArgument(self::ARG_TYPE);
-        /** @psalm-var 'vcs'|'path'|'composer' $type */
         Assert::inArray($type, self::ALLOWED_TYPES);
 
         $url = $originalUrl = (string) $input->getArgument(self::ARG_URL);

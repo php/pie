@@ -16,7 +16,7 @@ use function array_map;
 /**
  * @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks
  *
- * @psalm-type ListOfPiePackages = array<non-empty-string, Package>
+ * @phpstan-type ListOfPiePackages = array<non-empty-string, Package>
  */
 class InstalledPiePackages
 {

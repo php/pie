@@ -65,7 +65,6 @@ MESSAGE);
     public function testFromComposerPackageWithInvalidPhpExtExtensionNameType(): void
     {
         $composerCompletePackage = new CompletePackage('vendor/foo', '1.2.3.0', '1.2.3');
-        /** @psalm-suppress InvalidArgument - the type says otherwise, but in runtime, this might be possible in theory */
         $composerCompletePackage->setPhpExt(['extension-name' => null]);
 
         self::assertSame('foo', ExtensionName::determineFromComposerPackage($composerCompletePackage)->name());

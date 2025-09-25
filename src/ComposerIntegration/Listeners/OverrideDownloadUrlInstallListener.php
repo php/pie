@@ -51,7 +51,6 @@ class OverrideDownloadUrlInstallListener
 
     public function __invoke(InstallerEvent $installerEvent): void
     {
-        /** @psalm-suppress InternalMethod */
         $operations = $installerEvent->getTransaction()?->getOperations() ?? [];
 
         array_walk(
