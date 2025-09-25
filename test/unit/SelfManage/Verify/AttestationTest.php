@@ -44,8 +44,6 @@ final class AttestationTest extends TestCase
 
     /**
      * @return list<array<array-key, array<array-key, mixed>>>
-     *
-     * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
      */
     public static function invalidBundleProvider(): array
     {

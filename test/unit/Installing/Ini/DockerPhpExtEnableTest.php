@@ -45,10 +45,6 @@ final class DockerPhpExtEnableTest extends TestCase
         $this->output = new BufferedOutput(BufferedOutput::VERBOSITY_VERBOSE);
 
         $this->mockPhpBinary = $this->createMock(PhpBinaryPath::class);
-        /**
-         * @psalm-suppress PossiblyNullFunctionCall
-         * @psalm-suppress UndefinedThisPropertyAssignment
-         */
         (fn () => $this->phpBinaryPath = '/path/to/php')
             ->bindTo($this->mockPhpBinary, PhpBinaryPath::class)();
 

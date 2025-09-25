@@ -15,8 +15,6 @@ use Webmozart\Assert\Assert;
 
 /**
  * @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks
- *
- * @psalm-suppress PropertyNotSetInConstructor Property $fixedRootPackage is defined in parent
  */
 class PieComposerInstaller extends Installer
 {
@@ -39,7 +37,6 @@ class PieComposerInstaller extends Installer
         IOInterface $io,
         Composer $composer,
     ): self {
-        /** @psalm-suppress InvalidArgument some kind of unrelated type mismatch, defined in parent */
         $composerInstaller = new self(
             $io,
             $composer->getConfig(),

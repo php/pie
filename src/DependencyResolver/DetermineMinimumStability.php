@@ -23,7 +23,7 @@ final class DetermineMinimumStability
 
     private const DEFAULT_MINIMUM_STABILITY = self::STABILITY_STABLE;
 
-    /** @psalm-assert self::STABILITY_* $stability */
+    /** @phpstan-assert self::STABILITY_* $stability */
     private static function assertValidStabilityString(string $stability): void
     {
         Assert::oneOf(
