@@ -82,17 +82,12 @@ final class RemoveUnrelatedInstallOperationsTest extends TestCase
         );
     }
 
-    /** @psalm-suppress InternalMethod */
     public function testUnrelatedInstallOperationsAreRemoved(): void
     {
         $composerPackage1 = new CompletePackage('foo/bar', '1.2.3.0', '1.2.3');
         $composerPackage2 = new CompletePackage('bat/baz', '3.4.5.0', '3.4.5');
         $composerPackage3 = new CompletePackage('qux/quux', '5.6.7.0', '5.6.7');
 
-        /**
-         * @psalm-suppress InternalClass
-         * @psalm-suppress InternalMethod
-         */
         $installerEvent = new InstallerEvent(
             InstallerEvents::PRE_OPERATIONS_EXEC,
             $this->composer,

@@ -40,7 +40,6 @@ final class UnixBuild implements Build
     ): BinaryFile {
         $outputCallback = null;
         if ($output->isVerbose()) {
-            /** @var callable(SymfonyProcess::ERR|SymfonyProcess::OUT, string):void $outputCallback */
             $outputCallback = static function (string $type, string $outputMessage) use ($output): void {
                 $output->write(sprintf(
                     '%s%s%s',

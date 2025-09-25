@@ -39,10 +39,6 @@ class RemoveUnrelatedInstallOperations
             );
     }
 
-    /**
-     * @psalm-suppress InternalProperty
-     * @psalm-suppress InternalMethod
-     */
     public function __invoke(InstallerEvent $installerEvent): void
     {
         $pieOutput = $this->composerRequest->pieOutput;
@@ -80,7 +76,6 @@ class RemoveUnrelatedInstallOperations
 
         $overrideOperations = Closure::Bind(
             static function (Transaction $transaction) use ($newOperations): void {
-                /** @psalm-suppress InaccessibleProperty */
                 $transaction->operations = $newOperations;
             },
             null,

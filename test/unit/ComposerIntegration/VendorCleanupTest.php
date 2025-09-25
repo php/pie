@@ -64,8 +64,6 @@ final class VendorCleanupTest extends TestCase
 
         /**
          * scandir will emit a warning in this case, causing phpunit to fail with warning
-         *
-         * @psalm-suppress InvalidArgument
          */
         set_error_handler(
             static function (): bool|null {

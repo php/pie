@@ -11,7 +11,7 @@ use function array_column;
 use function implode;
 use function sprintf;
 
-/** @psalm-import-type CapturedErrorList from CaptureErrors */
+/** @import-type CapturedErrorList from CaptureErrors */
 class FailedToWriteFile extends RuntimeException
 {
     /** @param CapturedErrorList $recorded */

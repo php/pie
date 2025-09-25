@@ -36,7 +36,6 @@ class Platform
     private static function useXdg(): bool
     {
         foreach (array_keys($_SERVER) as $key) {
-            /** @psalm-suppress RedundantCastGivenDocblockType */
             if (strpos((string) $key, 'XDG_') === 0) {
                 return true;
             }

@@ -16,7 +16,6 @@ use function sprintf;
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 class InstallPiePackageFromPath
 {
-    /** @psalm-suppress PossiblyUnusedMethod no direct reference; used in service locator */
     public function __construct(private readonly InvokeSubCommand $invokeSubCommand)
     {
     }

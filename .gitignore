@@ -1,11 +1,9 @@
 /vendor/
-/psalm.xml
 /.phpunit.cache/
 /.phpunit.result.cache
 /.phpcs-cache
 phpcs.xml
 phpunit.xml
-psalm.xml
 behat.yml
 box.json
 box.phar

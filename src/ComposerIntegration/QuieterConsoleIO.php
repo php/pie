@@ -42,7 +42,6 @@ class QuieterConsoleIO extends ConsoleIO
     {
         $overrideFunction = Closure::bind(
             function (ConsoleIO $consoleIO) use ($newVerbosityMap): void {
-                /** @psalm-suppress InaccessibleProperty */
                 $consoleIO->verbosityMap = $newVerbosityMap;
             },
             null,

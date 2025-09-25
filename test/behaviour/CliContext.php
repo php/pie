@@ -14,7 +14,6 @@ use Webmozart\Assert\Assert;
 
 use function array_merge;
 
-/** @psalm-api */
 class CliContext implements Context
 {
     private const PHP_BINARY    = 'php';
@@ -46,7 +45,7 @@ class CliContext implements Context
         $this->exitCode = $proc->getExitCode();
     }
 
-    /** @psalm-assert !null $this->output */
+    /** @phpstan-assert !null $this->output */
     private function assertCommandSuccessful(): void
     {
         Assert::same(0, $this->exitCode);
