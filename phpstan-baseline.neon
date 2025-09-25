@@ -1,0 +1,787 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Call to function is_string\(\) with non\-empty\-string will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Command/CommandHelper.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 1
+			path: src/Command/CommandHelper.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: src/Command/CommandHelper.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 2
+			path: src/Command/InstallExtensionsForProjectCommand.php
+
+		-
+			message: '#^Parameter \#1 \$directory of function chdir expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Command/InstallExtensionsForProjectCommand.php
+
+		-
+			message: '#^Parameter \#1 \$path of function realpath expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Command/InstallExtensionsForProjectCommand.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between non\-empty\-string and '''' will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: src/Command/InstallExtensionsForProjectCommand.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 2
+			path: src/Command/RepositoryAddCommand.php
+
+		-
+			message: '#^Parameter \#1 \$haystack of function str_contains expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Command/RepositoryAddCommand.php
+
+		-
+			message: '#^Parameter \#1 \$type of method Php\\Pie\\ComposerIntegration\\PieJsonEditor\:\:addRepository\(\) expects ''composer''\|''path''\|''vcs'', string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Command/RepositoryAddCommand.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: src/Command/RepositoryRemoveCommand.php
+
+		-
+			message: '#^Parameter \#2 \$content of static method Php\\Pie\\File\\SudoFilePut\:\:contents\(\) expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Command/SelfUpdateCommand.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: src/Command/UninstallCommand.php
+
+		-
+			message: '#^Binary operation "\." between ''Found prebuilt…'' and mixed results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/ComposerIntegration/Listeners/OverrideDownloadUrlInstallListener.php
+
+		-
+			message: '#^Cannot call method findMatchingReleaseAssetUrl\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/ComposerIntegration/Listeners/OverrideDownloadUrlInstallListener.php
+
+		-
+			message: '#^Parameter \#1 \$path of function pathinfo expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/ComposerIntegration/Listeners/OverrideDownloadUrlInstallListener.php
+
+		-
+			message: '#^Parameter \#1 \$url of method Composer\\Package\\PackageInterface\:\:setDistUrl\(\) expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/ComposerIntegration/Listeners/OverrideDownloadUrlInstallListener.php
+
+		-
+			message: '#^Call to function assert\(\) with true will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/ComposerIntegration/Listeners/RemoveUnrelatedInstallOperations.php
+
+		-
+			message: '#^Parameter \#1 \$transaction of closure expects Composer\\DependencyResolver\\Transaction, Composer\\DependencyResolver\\Transaction\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/ComposerIntegration/Listeners/RemoveUnrelatedInstallOperations.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between Closure\(Composer\\DependencyResolver\\Transaction\)\: void and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: src/ComposerIntegration/Listeners/RemoveUnrelatedInstallOperations.php
+
+		-
+			message: '#^Offset ''question'' on array\{question\: Symfony\\Component\\Console\\Helper\\QuestionHelper\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: src/ComposerIntegration/MinimalHelperSet.php
+
+		-
+			message: '#^Cannot call method loadConfiguration\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/ComposerIntegration/PieComposerFactory.php
+
+		-
+			message: '#^Parameter \#1 \$io of method Composer\\Factory\:\:createComposer\(\) expects Composer\\IO\\IOInterface, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/ComposerIntegration/PieComposerFactory.php
+
+		-
+			message: '#^Parameter \#2 \$io of static method Php\\Pie\\ComposerIntegration\\Listeners\\OverrideDownloadUrlInstallListener\:\:selfRegister\(\) expects Composer\\IO\\IOInterface, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/ComposerIntegration/PieComposerFactory.php
+
+		-
+			message: '#^Parameter \#5 \$installAndBuildProcess of class Php\\Pie\\ComposerIntegration\\PiePackageInstaller constructor expects Php\\Pie\\ComposerIntegration\\InstallAndBuildProcess, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/ComposerIntegration/PieComposerFactory.php
+
+		-
+			message: '#^Parameter \#6 \$uninstallProcess of class Php\\Pie\\ComposerIntegration\\PiePackageInstaller constructor expects Php\\Pie\\ComposerIntegration\\UninstallProcess, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/ComposerIntegration/PieComposerFactory.php
+
+		-
+			message: '#^Parameter \#3 \$package of class Php\\Pie\\ComposerIntegration\\PieComposerInstaller constructor expects Composer\\Package\\BasePackage&Composer\\Package\\RootPackageInterface, Composer\\Package\\RootPackageInterface given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/ComposerIntegration/PieComposerInstaller.php
+
+		-
+			message: '#^Method Php\\Pie\\ComposerIntegration\\PieJsonEditor\:\:addRepository\(\) should return string but returns string\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: src/ComposerIntegration/PieJsonEditor.php
+
+		-
+			message: '#^Method Php\\Pie\\ComposerIntegration\\PieJsonEditor\:\:addRequire\(\) should return string but returns string\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: src/ComposerIntegration/PieJsonEditor.php
+
+		-
+			message: '#^Method Php\\Pie\\ComposerIntegration\\PieJsonEditor\:\:excludePackagistOrg\(\) should return string but returns string\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: src/ComposerIntegration/PieJsonEditor.php
+
+		-
+			message: '#^Method Php\\Pie\\ComposerIntegration\\PieJsonEditor\:\:removeRepository\(\) should return string but returns string\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: src/ComposerIntegration/PieJsonEditor.php
+
+		-
+			message: '#^Method Php\\Pie\\ComposerIntegration\\PieJsonEditor\:\:removeRequire\(\) should return string but returns string\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: src/ComposerIntegration/PieJsonEditor.php
+
+		-
+			message: '#^Call to function assert\(\) with true will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/ComposerIntegration/QuieterConsoleIO.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between Closure\(Composer\\IO\\ConsoleIO\)\: void and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: src/ComposerIntegration/QuieterConsoleIO.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: src/ComposerIntegration/VendorCleanup.php
+
+		-
+			message: '#^Anonymous function should return Php\\Pie\\Building\\Build but returns mixed\.$#'
+			identifier: return.type
+			count: 2
+			path: src/Container.php
+
+		-
+			message: '#^Anonymous function should return Php\\Pie\\Installing\\Install but returns mixed\.$#'
+			identifier: return.type
+			count: 2
+			path: src/Container.php
+
+		-
+			message: '#^Parameter \#1 \$implementation of method Illuminate\\Contracts\\Container\\ContextualBindingBuilder\:\:give\(\) expects array\|Closure\|string, non\-empty\-string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Container.php
+
+		-
+			message: '#^Parameter \#1 \$input of class Php\\Pie\\ComposerIntegration\\QuieterConsoleIO constructor expects Symfony\\Component\\Console\\Input\\InputInterface, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Container.php
+
+		-
+			message: '#^Parameter \#1 \$possibleApproaches of class Php\\Pie\\Installing\\Ini\\PickBestSetupIniApproach constructor expects list\<Php\\Pie\\Installing\\Ini\\SetupIniApproach\>, array\{mixed, mixed, mixed, mixed, mixed\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Container.php
+
+		-
+			message: '#^Parameter \#2 \$output of class Php\\Pie\\ComposerIntegration\\QuieterConsoleIO constructor expects Symfony\\Component\\Console\\Output\\OutputInterface, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Container.php
+
+		-
+			message: '#^Call to static method Php\\Pie\\DependencyResolver\\DetermineMinimumStability\:\:assertValidStabilityString\(\) with ''alpha''\|''beta''\|''dev''\|''RC''\|''stable'' will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: src/DependencyResolver/DetermineMinimumStability.php
+
+		-
+			message: '#^@readonly property Php\\Pie\\DependencyResolver\\Package\:\:\$buildPath is assigned outside of the constructor\.$#'
+			identifier: property.readOnlyByPhpDocAssignNotInConstructor
+			count: 1
+			path: src/DependencyResolver/Package.php
+
+		-
+			message: '#^@readonly property Php\\Pie\\DependencyResolver\\Package\:\:\$compatibleOsFamilies is assigned outside of the constructor\.$#'
+			identifier: property.readOnlyByPhpDocAssignNotInConstructor
+			count: 1
+			path: src/DependencyResolver/Package.php
+
+		-
+			message: '#^@readonly property Php\\Pie\\DependencyResolver\\Package\:\:\$configureOptions is assigned outside of the constructor\.$#'
+			identifier: property.readOnlyByPhpDocAssignNotInConstructor
+			count: 1
+			path: src/DependencyResolver/Package.php
+
+		-
+			message: '#^@readonly property Php\\Pie\\DependencyResolver\\Package\:\:\$downloadUrlMethod is assigned outside of the constructor\.$#'
+			identifier: property.readOnlyByPhpDocAssignNotInConstructor
+			count: 1
+			path: src/DependencyResolver/Package.php
+
+		-
+			message: '#^@readonly property Php\\Pie\\DependencyResolver\\Package\:\:\$incompatibleOsFamilies is assigned outside of the constructor\.$#'
+			identifier: property.readOnlyByPhpDocAssignNotInConstructor
+			count: 1
+			path: src/DependencyResolver/Package.php
+
+		-
+			message: '#^@readonly property Php\\Pie\\DependencyResolver\\Package\:\:\$priority is assigned outside of the constructor\.$#'
+			identifier: property.readOnlyByPhpDocAssignNotInConstructor
+			count: 1
+			path: src/DependencyResolver/Package.php
+
+		-
+			message: '#^@readonly property Php\\Pie\\DependencyResolver\\Package\:\:\$supportNts is assigned outside of the constructor\.$#'
+			identifier: property.readOnlyByPhpDocAssignNotInConstructor
+			count: 1
+			path: src/DependencyResolver/Package.php
+
+		-
+			message: '#^@readonly property Php\\Pie\\DependencyResolver\\Package\:\:\$supportZts is assigned outside of the constructor\.$#'
+			identifier: property.readOnlyByPhpDocAssignNotInConstructor
+			count: 1
+			path: src/DependencyResolver/Package.php
+
+		-
+			message: '#^@readonly property cannot have a default value\.$#'
+			identifier: property.readOnlyByPhpDocDefaultValue
+			count: 8
+			path: src/DependencyResolver/Package.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\)\: non\-empty\-array given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Downloading/GithubPackageReleaseAssets.php
+
+		-
+			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/ExtensionName.php
+
+		-
+			message: '#^Parameter \#2 \$checksum of class Php\\Pie\\File\\BinaryFile constructor expects non\-empty\-string, non\-falsy\-string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/File/BinaryFile.php
+
+		-
+			message: '#^Negated boolean expression is always false\.$#'
+			identifier: booleanNot.alwaysFalse
+			count: 1
+			path: src/File/SudoUnlink.php
+
+		-
+			message: '#^Right side of \|\| is always true\.$#'
+			identifier: booleanOr.rightAlwaysTrue
+			count: 1
+			path: src/File/SudoUnlink.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: src/File/SudoUnlink.php
+
+		-
+			message: '#^If condition is always true\.$#'
+			identifier: if.alwaysTrue
+			count: 1
+			path: src/File/WindowsDelete.php
+
+		-
+			message: '#^Argument of an invalid type list\<string\>\|false supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 1
+			path: src/Installing/Ini/IsExtensionAlreadyInTheIniFile.php
+
+		-
+			message: '#^Parameter \#2 \$array of function array_key_exists expects array, array\|false given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Installing/Ini/IsExtensionAlreadyInTheIniFile.php
+
+		-
+			message: '#^Call to function array_key_exists\(\) with ''downloads'' and array\{name\: string, description\: string\|null, abandoned\?\: string\|true, url\?\: string\} will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 2
+			path: src/Installing/InstallForPhpProject/FindMatchingPackages.php
+
+		-
+			message: '#^Parameter \#2 \$callback of function array_walk expects callable\(array\|float\|int\|string\|true, int\|string\)\: mixed, Closure\(string, string\)\: void given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Installing/InstallForPhpProject/InstallSelectedPackage.php
+
+		-
+			message: '#^Parameter \#2 \$workingDirectory of static method Php\\Pie\\Util\\Process\:\:run\(\) expects string\|null, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Installing/InstallForPhpProject/InstallSelectedPackage.php
+
+		-
+			message: '#^Negated boolean expression is always false\.$#'
+			identifier: booleanNot.alwaysFalse
+			count: 1
+			path: src/Installing/UninstallUsingUnlink.php
+
+		-
+			message: '#^Call to function assert\(\) with true will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 2
+			path: src/Installing/WindowsInstall.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between non\-empty\-string and '''' will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 2
+			path: src/Installing/WindowsInstall.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: src/Platform.php
+
+		-
+			message: '#^Call to function array_key_exists\(\) with 1 and array\{non\-falsy\-string, non\-empty\-string, non\-empty\-string\} will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Platform/TargetPhp/PhpBinaryPath.php
+
+		-
+			message: '#^Call to function array_key_exists\(\) with 2 and array\{non\-falsy\-string, string, string\} will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 4
+			path: src/Platform/TargetPhp/PhpBinaryPath.php
+
+		-
+			message: '#^Call to function array_key_exists\(\) with 1 and array\{non\-falsy\-string, string\} will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Platform/TargetPhp/PhpizePath.php
+
+		-
+			message: '#^Call to function array_key_exists\(\) with 2 and array\{non\-falsy\-string, string, non\-falsy\-string\} will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Platform/TargetPlatform.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between non\-falsy\-string and '''' will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: src/Platform/TargetPlatform.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\)\: non\-empty\-array given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/SelfManage/Update/FetchPieReleaseFromGitHub.php
+
+		-
+			message: '#^Cannot access offset ''extensions'' on array\|false\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/SelfManage/Verify/FallbackVerificationUsingOpenSsl.php
+
+		-
+			message: '#^Cannot access offset ''issuer'' on array\|false\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: src/SelfManage/Verify/FallbackVerificationUsingOpenSsl.php
+
+		-
+			message: '#^Cannot access offset ''subject'' on array\|false\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/SelfManage/Verify/FallbackVerificationUsingOpenSsl.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\)\: Php\\Pie\\SelfManage\\Verify\\Attestation given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/SelfManage/Verify/FallbackVerificationUsingOpenSsl.php
+
+		-
+			message: '#^Parameter \#1 \$issuer of static method Php\\Pie\\SelfManage\\Verify\\FailedToVerifyRelease\:\:fromIssuerCertificateVerificationFailed\(\) expects array\<string, string\>\|string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/SelfManage/Verify/FallbackVerificationUsingOpenSsl.php
+
+		-
+			message: '#^Parameter \#1 \$issuer of static method Php\\Pie\\SelfManage\\Verify\\FailedToVerifyRelease\:\:fromNoIssuerCertificateInTrustedRoot\(\) expects array\<string, string\>\|string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/SelfManage/Verify/FallbackVerificationUsingOpenSsl.php
+
+		-
+			message: '#^Parameter \#1 \$string of function trim expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/SelfManage/Verify/FallbackVerificationUsingOpenSsl.php
+
+		-
+			message: '#^Dead catch \- Php\\Pie\\SelfManage\\Verify\\GithubCliNotAvailable is never thrown in the try block\.$#'
+			identifier: catch.neverThrown
+			count: 1
+			path: src/SelfManage/Verify/VerifyPieReleaseUsingAttestation.php
+
+		-
+			message: '#^Property Php\\Pie\\SelfManage\\Verify\\VerifyPieReleaseUsingAttestation\:\:\$fallbackVerification is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: src/SelfManage/Verify/VerifyPieReleaseUsingAttestation.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between ''@pie_version@'' and ''@pie_version@'' will always evaluate to false\.$#'
+			identifier: notIdentical.alwaysFalse
+			count: 1
+			path: src/Util/PieVersion.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertNotEmpty\(\) with Php\\Pie\\File\\BinaryFile will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 2
+			path: test/integration/Building/UnixBuildTest.php
+
+		-
+			message: '#^Parameter \#1 \$command of class Symfony\\Component\\Console\\Tester\\CommandTester constructor expects Symfony\\Component\\Console\\Command\\Command, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: test/integration/Command/BuildCommandTest.php
+
+		-
+			message: '#^Parameter \#1 \$command of class Symfony\\Component\\Console\\Tester\\CommandTester constructor expects Symfony\\Component\\Console\\Command\\Command, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: test/integration/Command/DownloadCommandTest.php
+
+		-
+			message: '#^Parameter \#1 \$command of class Symfony\\Component\\Console\\Tester\\CommandTester constructor expects Symfony\\Component\\Console\\Command\\Command, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: test/integration/Command/InfoCommandTest.php
+
+		-
+			message: '#^Call to function array_key_exists\(\) with 1 and array\{non\-falsy\-string, string\} will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 2
+			path: test/integration/Command/InstallCommandTest.php
+
+		-
+			message: '#^Call to function assert\(\) with true will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: test/integration/Command/InstallCommandTest.php
+
+		-
+			message: '#^Call to function is_string\(\) with non\-empty\-string will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: test/integration/Command/InstallCommandTest.php
+
+		-
+			message: '#^Parameter \#1 \$command of class Symfony\\Component\\Console\\Tester\\CommandTester constructor expects Symfony\\Component\\Console\\Command\\Command, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: test/integration/Command/InstallCommandTest.php
+
+		-
+			message: '#^Parameter \#1 \$originalClassName of method PHPUnit\\Framework\\TestCase\:\:createMock\(\) expects class\-string\<object\>, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: test/integration/Command/InstallExtensionsForProjectCommandTest.php
+
+		-
+			message: '#^Unable to resolve the template type RealInstanceType in call to method PHPUnit\\Framework\\TestCase\:\:createMock\(\)$#'
+			identifier: argument.templateType
+			count: 1
+			path: test/integration/Command/InstallExtensionsForProjectCommandTest.php
+
+		-
+			message: '#^Parameter \#1 \$command of class Symfony\\Component\\Console\\Tester\\CommandTester constructor expects Symfony\\Component\\Console\\Command\\Command, mixed given\.$#'
+			identifier: argument.type
+			count: 3
+			path: test/integration/Command/RepositoryManagementCommandsTest.php
+
+		-
+			message: '#^Parameter \#1 \$command of class Symfony\\Component\\Console\\Tester\\CommandTester constructor expects Symfony\\Component\\Console\\Command\\Command, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: test/integration/Command/ShowCommandTest.php
+
+		-
+			message: '#^Cannot call method __invoke\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: test/integration/DependencyResolver/ResolveDependencyWithComposerTest.php
+
+		-
+			message: '#^Cannot call method downloadUrl\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: test/integration/DependencyResolver/ResolveDependencyWithComposerTest.php
+
+		-
+			message: '#^Cannot call method version\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: test/integration/DependencyResolver/ResolveDependencyWithComposerTest.php
+
+		-
+			message: '#^Parameter \#2 \$string of static method PHPUnit\\Framework\\Assert\:\:assertStringMatchesFormat\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: test/integration/DependencyResolver/ResolveDependencyWithComposerTest.php
+
+		-
+			message: '#^Call to function assert\(\) with true will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: test/integration/Installing/WindowsInstallTest.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between non\-falsy\-string and '''' will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: test/integration/Installing/WindowsInstallTest.php
+
+		-
+			message: '#^Parameter \#2 \$extractedSourcePath of static method Php\\Pie\\Downloading\\DownloadedPackage\:\:fromPackageAndExtractedPath\(\) expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 2
+			path: test/unit/ComposerIntegration/BundledPhpExtensionsRepositoryTest.php
+
+		-
+			message: '#^Method Php\\PieUnitTest\\ComposerIntegration\\PieJsonEditorTest\:\:normaliseJson\(\) should return string but returns string\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: test/unit/ComposerIntegration/PieJsonEditorTest.php
+
+		-
+			message: '#^Parameter \#1 \$fileContent of method Php\\PieUnitTest\\ComposerIntegration\\PieJsonEditorTest\:\:normaliseJson\(\) expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 9
+			path: test/unit/ComposerIntegration/PieJsonEditorTest.php
+
+		-
+			message: '#^Match expression does not handle remaining value\: string$#'
+			identifier: match.unhandled
+			count: 1
+			path: test/unit/ComposerIntegration/VendorCleanupTest.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function set_error_handler expects \(callable\(int, string, string, int\)\: bool\)\|null, Closure\(\)\: null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: test/unit/ComposerIntegration/VendorCleanupTest.php
+
+		-
+			message: '#^Parameter \#2 \$extractedSourcePath of static method Php\\Pie\\Downloading\\DownloadedPackage\:\:fromPackageAndExtractedPath\(\) expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 3
+			path: test/unit/Downloading/DownloadedPackageTest.php
+
+		-
+			message: '#^Parameter \#1 \$phpExt of method Composer\\Package\\Package\:\:setPhpExt\(\) expects array\{extension\-name\?\: string, priority\?\: int, support\-zts\?\: bool, support\-nts\?\: bool, build\-path\?\: string\|null, download\-url\-method\?\: string, os\-families\?\: non\-empty\-list\<non\-empty\-string\>, os\-families\-exclude\?\: non\-empty\-list\<non\-empty\-string\>, \.\.\.\}\|null, array\{extension\-name\: null\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: test/unit/ExtensionNameTest.php
+
+		-
+			message: '#^Access to an undefined property Php\\PieUnitTest\\Installing\\Ini\\AddExtensionToTheIniFileTest\:\:\$phpBinaryPath\.$#'
+			identifier: property.notFound
+			count: 1
+			path: test/unit/Installing/Ini/AddExtensionToTheIniFileTest.php
+
+		-
+			message: '#^Access to an undefined property Php\\PieUnitTest\\Installing\\Ini\\CheckAndAddExtensionToIniIfNeededTest\:\:\$phpBinaryPath\.$#'
+			identifier: property.notFound
+			count: 1
+			path: test/unit/Installing/Ini/CheckAndAddExtensionToIniIfNeededTest.php
+
+		-
+			message: '#^Access to an undefined property Php\\PieUnitTest\\Installing\\Ini\\DockerPhpExtEnableTest\:\:\$phpBinaryPath\.$#'
+			identifier: property.notFound
+			count: 1
+			path: test/unit/Installing/Ini/DockerPhpExtEnableTest.php
+
+		-
+			message: '#^Access to an undefined property Php\\PieUnitTest\\Installing\\Ini\\OndrejPhpenmodTest\:\:\$phpBinaryPath\.$#'
+			identifier: property.notFound
+			count: 1
+			path: test/unit/Installing/Ini/OndrejPhpenmodTest.php
+
+		-
+			message: '#^Anonymous function should return bool but returns mixed\.$#'
+			identifier: return.type
+			count: 3
+			path: test/unit/Installing/Ini/OndrejPhpenmodTest.php
+
+		-
+			message: '#^Access to an undefined property Php\\PieUnitTest\\Installing\\Ini\\PreCheckExtensionAlreadyLoadedTest\:\:\$phpBinaryPath\.$#'
+			identifier: property.notFound
+			count: 1
+			path: test/unit/Installing/Ini/PreCheckExtensionAlreadyLoadedTest.php
+
+		-
+			message: '#^Access to an undefined property Php\\PieUnitTest\\Installing\\Ini\\StandardAdditionalPhpIniDirectoryTest\:\:\$phpBinaryPath\.$#'
+			identifier: property.notFound
+			count: 1
+			path: test/unit/Installing/Ini/StandardAdditionalPhpIniDirectoryTest.php
+
+		-
+			message: '#^Access to an undefined property Php\\PieUnitTest\\Installing\\Ini\\StandardSinglePhpIniTest\:\:\$phpBinaryPath\.$#'
+			identifier: property.notFound
+			count: 1
+			path: test/unit/Installing/Ini/StandardSinglePhpIniTest.php
+
+		-
+			message: '#^Parameter \#1 \$originalCwd of class Php\\Pie\\File\\FullPathToSelf constructor expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: test/unit/Installing/InstallForPhpProject/InstallSelectedPackageTest.php
+
+		-
+			message: '#^Parameter \#1 \$filename of function file_exists expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: test/unit/Platform/TargetPhp/PhpBinaryPathTest.php
+
+		-
+			message: '#^Parameter \#1 \$filename of function is_dir expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: test/unit/Platform/TargetPhp/PhpBinaryPathTest.php
+
+		-
+			message: '#^Parameter \#4 \$body of class Composer\\Util\\Http\\Response constructor expects string\|null, string\|false given\.$#'
+			identifier: argument.type
+			count: 2
+			path: test/unit/SelfManage/Update/FetchPieReleaseFromGitHubTest.php
+
+		-
+			message: '#^Method Php\\PieUnitTest\\SelfManage\\Verify\\FallbackVerificationUsingOpenSslTest\:\:prepareCertificateAndSignature\(\) should return array\{string, string\} but returns array\{mixed, mixed\}\.$#'
+			identifier: return.type
+			count: 1
+			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
+
+		-
+			message: '#^Parameter \#1 \$certificate of function openssl_x509_export expects OpenSSLCertificate\|string, OpenSSLCertificate\|false given\.$#'
+			identifier: argument.type
+			count: 2
+			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
+
+		-
+			message: '#^Parameter \#1 \$csr of function openssl_csr_sign expects OpenSSLCertificateSigningRequest\|string, OpenSSLCertificateSigningRequest\|false given\.$#'
+			identifier: argument.type
+			count: 2
+			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
+
+		-
+			message: '#^Parameter \#1 \$dsseEnvelopePayload of method Php\\PieUnitTest\\SelfManage\\Verify\\FallbackVerificationUsingOpenSslTest\:\:prepareCertificateAndSignature\(\) expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 3
+			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
+
+		-
+			message: '#^Parameter \#1 \$string of function trim expects string, array\<string\>\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
+
+		-
+			message: '#^Parameter \#2 \$ca_certificate of function openssl_csr_sign expects OpenSSLCertificate\|string\|null, OpenSSLCertificate\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
+
+		-
+			message: '#^Parameter \#2 \$dsseEnvelopePayload of method Php\\PieUnitTest\\SelfManage\\Verify\\FallbackVerificationUsingOpenSslTest\:\:mockAttestationResponse\(\) expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 3
+			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
+
+		-
+			message: '#^Parameter \#3 \$private_key of function openssl_csr_sign expects array\|OpenSSLAsymmetricKey\|OpenSSLCertificate\|string, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
+
+		-
+			message: '#^Parameter \#3 \$private_key of function openssl_sign expects array\|OpenSSLAsymmetricKey\|OpenSSLCertificate\|string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
+
+		-
+			message: '#^Parameter \#3 \$subject of function str_replace expects array\<string\>\|string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
+
+		-
+			message: '#^Parameter \#4 \$body of class Composer\\Util\\Http\\Response constructor expects string\|null, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php

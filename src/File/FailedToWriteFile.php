@@ -11,7 +11,7 @@ use function array_column;
 use function implode;
 use function sprintf;
 
-/** @import-type CapturedErrorList from CaptureErrors */
+/** @phpstan-import-type CapturedErrorList from CaptureErrors */
 class FailedToWriteFile extends RuntimeException
 {
     /** @param CapturedErrorList $recorded */

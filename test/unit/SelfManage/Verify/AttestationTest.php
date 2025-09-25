@@ -42,9 +42,7 @@ final class AttestationTest extends TestCase
         self::assertSame('signature number one!', $attestation->dsseEnvelopeSignature);
     }
 
-    /**
-     * @return list<array<array-key, array<array-key, mixed>>>
-     */
+    /** @return list<array<array-key, array<array-key, mixed>>> */
     public static function invalidBundleProvider(): array
     {
         return [

@@ -13,9 +13,7 @@ use Php\Pie\Platform\InstalledPiePackages;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Webmozart\Assert\Assert;
 
-/**
- * @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks
- */
+/** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 class PieComposerInstaller extends Installer
 {
     private PhpBinaryPath|null $phpBinaryPath           = null;
