@@ -13,7 +13,7 @@ use function is_string;
 /**
  * @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks
  *
- * @psalm-type PieMetadata = array{
+ * @phpstan-type PieMetadata = array{
  *     pie-target-platform-php-path?: non-empty-string,
  *     pie-target-platform-php-config-path?: non-empty-string,
  *     pie-target-platform-php-version?: non-empty-string,

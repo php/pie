@@ -156,10 +156,6 @@ final class AddExtensionToTheIniFileTest extends TestCase
         $iniFile = tempnam(sys_get_temp_dir(), 'PIE_ini_file');
         file_put_contents($iniFile, $originalIniContent);
 
-        /**
-         * @psalm-suppress PossiblyNullFunctionCall
-         * @psalm-suppress UndefinedThisPropertyAssignment
-         */
         (fn () => $this->phpBinaryPath = '/path/to/php')
             ->bindTo($this->mockPhpBinary, PhpBinaryPath::class)();
         $this->mockPhpBinary

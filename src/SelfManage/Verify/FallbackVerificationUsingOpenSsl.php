@@ -170,7 +170,6 @@ final class FallbackVerificationUsingOpenSsl implements VerifyPiePhar
 
                     // Finally, verify that the located CA cert was used to sign the attestation certificate
                     if (openssl_x509_verify($attestation->certificate, $caCertificateString) !== 1) {
-                        /** @psalm-suppress MixedArgument */
                         throw FailedToVerifyRelease::fromIssuerCertificateVerificationFailed($attestationCertificateInfo['issuer']);
                     }
 
@@ -182,8 +181,6 @@ final class FallbackVerificationUsingOpenSsl implements VerifyPiePhar
         /**
          * If we got here, we skipped all the certificates in the trusted root collection for various reasons; so we
          * therefore cannot trust the attestation certificate.
-         *
-         * @psalm-suppress MixedArgument
          */
         throw FailedToVerifyRelease::fromNoIssuerCertificateInTrustedRoot($attestationCertificateInfo['issuer']);
     }

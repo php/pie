@@ -1,0 +1,10 @@
+includes:
+    - phpstan-baseline.neon
+
+parameters:
+    level: 10
+    paths:
+        - src
+        - test/unit
+        - test/integration
+        - test/behaviour

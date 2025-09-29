@@ -13,11 +13,7 @@ use Php\Pie\Platform\InstalledPiePackages;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Webmozart\Assert\Assert;
 
-/**
- * @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks
- *
- * @psalm-suppress PropertyNotSetInConstructor Property $fixedRootPackage is defined in parent
- */
+/** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 class PieComposerInstaller extends Installer
 {
     private PhpBinaryPath|null $phpBinaryPath           = null;
@@ -39,7 +35,6 @@ class PieComposerInstaller extends Installer
         IOInterface $io,
         Composer $composer,
     ): self {
-        /** @psalm-suppress InvalidArgument some kind of unrelated type mismatch, defined in parent */
         $composerInstaller = new self(
             $io,
             $composer->getConfig(),

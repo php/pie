@@ -20,7 +20,7 @@ use function usort;
 /**
  * @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks
  *
- * @psalm-type MatchingPackages = list<array{name: string, description: ?string, ...}>
+ * @phpstan-type MatchingPackages = list<array{name: string, description: ?string, ...}>
  */
 class FindMatchingPackages
 {

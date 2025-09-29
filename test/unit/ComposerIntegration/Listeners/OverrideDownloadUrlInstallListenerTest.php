@@ -91,10 +91,6 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
         $composerPackage = new CompletePackage('foo/bar', '1.2.3.0', '1.2.3');
         $composerPackage->setDistUrl('https://example.com/git-archive-zip-url');
 
-        /**
-         * @psalm-suppress InternalClass
-         * @psalm-suppress InternalMethod
-         */
         $installerEvent = new InstallerEvent(
             InstallerEvents::PRE_OPERATIONS_EXEC,
             $this->composer,
@@ -137,10 +133,6 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
         $composerPackage = new Package('foo/bar', '1.2.3.0', '1.2.3');
         $composerPackage->setDistUrl('https://example.com/git-archive-zip-url');
 
-        /**
-         * @psalm-suppress InternalClass
-         * @psalm-suppress InternalMethod
-         */
         $installerEvent = new InstallerEvent(
             InstallerEvents::PRE_OPERATIONS_EXEC,
             $this->composer,
@@ -183,10 +175,6 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
         $composerPackage = new CompletePackage('different/package', '1.2.3.0', '1.2.3');
         $composerPackage->setDistUrl('https://example.com/git-archive-zip-url');
 
-        /**
-         * @psalm-suppress InternalClass
-         * @psalm-suppress InternalMethod
-         */
         $installerEvent = new InstallerEvent(
             InstallerEvents::PRE_OPERATIONS_EXEC,
             $this->composer,
@@ -229,10 +217,6 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
         $composerPackage = new CompletePackage('foo/bar', '1.2.3.0', '1.2.3');
         $composerPackage->setDistUrl('https://example.com/git-archive-zip-url');
 
-        /**
-         * @psalm-suppress InternalClass
-         * @psalm-suppress InternalMethod
-         */
         $installerEvent = new InstallerEvent(
             InstallerEvents::PRE_OPERATIONS_EXEC,
             $this->composer,
@@ -280,10 +264,6 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
         $composerPackage = new CompletePackage('foo/bar', '1.2.3.0', '1.2.3');
         $composerPackage->setDistUrl('https://example.com/git-archive-zip-url');
 
-        /**
-         * @psalm-suppress InternalClass
-         * @psalm-suppress InternalMethod
-         */
         $installerEvent = new InstallerEvent(
             InstallerEvents::PRE_OPERATIONS_EXEC,
             $this->composer,
@@ -343,10 +323,6 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
             'download-url-method' => 'pre-packaged-source',
         ]);
 
-        /**
-         * @psalm-suppress InternalClass
-         * @psalm-suppress InternalMethod
-         */
         $installerEvent = new InstallerEvent(
             InstallerEvents::PRE_OPERATIONS_EXEC,
             $this->composer,

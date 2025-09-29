@@ -10,7 +10,7 @@ use function set_error_handler;
 /**
  * @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks
  *
- * @psalm-type CapturedErrorList = list<array{level: int, message: string, filename: string, line: int}>
+ * @phpstan-type CapturedErrorList = list<array{level: int, message: string, filename: string, line: int}>
  */
 final class CaptureErrors
 {

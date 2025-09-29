@@ -36,7 +36,7 @@ use function substr;
 
 use const DIRECTORY_SEPARATOR;
 
-/** @psalm-import-type PieMetadata from PieInstalledJsonMetadataKeys */
+/** @phpstan-import-type PieMetadata from PieInstalledJsonMetadataKeys */
 #[AsCommand(
     name: 'show',
     description: 'List the installed modules and their versions.',
@@ -182,7 +182,7 @@ final class ShowCommand extends Command
 
     /**
      * @param PieMetadata $installedJsonMetadata
-     * @psalm-param '.dll'|'.so' $extensionEnding
+     * @phpstan-param '.dll'|'.so' $extensionEnding
      */
     private static function verifyChecksumInformation(
         string $extensionPath,

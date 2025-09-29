@@ -42,11 +42,7 @@ final class AttestationTest extends TestCase
         self::assertSame('signature number one!', $attestation->dsseEnvelopeSignature);
     }
 
-    /**
-     * @return list<array<array-key, array<array-key, mixed>>>
-     *
-     * @psalm-suppress PossiblyUnusedMethod https://github.com/psalm/psalm-plugin-phpunit/issues/131
-     */
+    /** @return list<array<array-key, array<array-key, mixed>>> */
     public static function invalidBundleProvider(): array
     {
         return [

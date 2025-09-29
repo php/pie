@@ -12,7 +12,7 @@ use function array_column;
 use function implode;
 use function sprintf;
 
-/** @psalm-import-type CapturedErrorList from CaptureErrors */
+/** @phpstan-import-type CapturedErrorList from CaptureErrors */
 class FailedToUnlinkFile extends RuntimeException
 {
     /** @param CapturedErrorList $recorded */

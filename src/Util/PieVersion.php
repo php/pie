@@ -33,8 +33,6 @@ final class PieVersion
 
     public static function isPharBuild(): bool
     {
-        /** @psalm-suppress RedundantCondition */
-
         // phpcs:ignore Generic.Strings.UnnecessaryStringConcat.Found
         return self::PIE_VERSION !== '@pie_version' . '@';
     }

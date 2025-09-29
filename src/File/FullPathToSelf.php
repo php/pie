@@ -16,7 +16,6 @@ use const DIRECTORY_SEPARATOR;
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 class FullPathToSelf
 {
-    /** @psalm-suppress PossiblyUnusedMethod no direct reference; used in service locator */
     public function __construct(private readonly string $originalCwd)
     {
     }
@@ -24,7 +23,6 @@ class FullPathToSelf
     /** @return non-empty-string */
     public function __invoke(): string
     {
-        /** @psalm-suppress TypeDoesNotContainType */
         $phpSelf = array_key_exists('PHP_SELF', $_SERVER) && is_string($_SERVER['PHP_SELF']) ? $_SERVER['PHP_SELF'] : '';
         if ($phpSelf === '') {
             throw new RuntimeException('Could not find PHP_SELF');
