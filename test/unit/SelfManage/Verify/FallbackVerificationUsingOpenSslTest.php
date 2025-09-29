@@ -65,7 +65,7 @@ final class FallbackVerificationUsingOpenSslTest extends TestCase
         $this->output         = new BufferedOutput();
 
         $trustedRootFilePath = tempnam(sys_get_temp_dir(), 'pie_test_trusted_root_file_path');
-        assert(is_string($trustedRootFilePath) && $trustedRootFilePath !== '');
+        assert(is_string($trustedRootFilePath));
         $this->trustedRootFilePath = $trustedRootFilePath;
 
         $this->verifier = new FallbackVerificationUsingOpenSsl(new VerifyAttestationWithOpenSsl($this->trustedRootFilePath, self::TEST_GITHUB_URL, $this->httpDownloader, $this->authHelper));
