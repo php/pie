@@ -7,6 +7,7 @@ namespace Php\Pie\Command;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieInstalledJsonMetadataKeys;
+use Php\Pie\DependencyResolver\BundledPhpExtensionRefusal;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\DependencyResolver\ResolveDependencyWithComposer;
 use Php\Pie\DependencyResolver\UnableToResolveRequirement;
@@ -130,7 +131,7 @@ final class ShowCommand extends Command
                         new RequestedPackageAndVersion($packageName, $packageRequirement),
                         false,
                     );
-                } catch (UnableToResolveRequirement) {
+                } catch (UnableToResolveRequirement | BundledPhpExtensionRefusal) {
                     $latestPackage = null;
                 }
 
