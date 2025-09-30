@@ -41,9 +41,13 @@ class BundledPhpExtensionsRepository extends ArrayRepository
     private static array $bundledPhpExtensions = [
         ['name' => 'bcmath'],
         ['name' => 'bz2'],
+//            'require' => ['lib-bz2' => '*'], libbz2-dev does not provide a bzip2.pc for pkg-config ...
         ['name' => 'calendar'],
         ['name' => 'ctype'],
-        ['name' => 'curl'],
+        [
+            'name' => 'curl',
+            'require' => ['lib-curl' => '*'],
+        ],
         ['name' => 'dba'],
         [
             'name' => 'dom',
@@ -148,7 +152,10 @@ class BundledPhpExtensionsRepository extends ArrayRepository
         ['name' => 'sockets'],
         [
             'name' => 'sodium',
-            'require' => ['php' => '>= 7.2.0'],
+            'require' => [
+                'php' => '>= 7.2.0',
+                'lib-sodium' => '*',
+            ],
         ],
         [
             'name' => 'sqlite3',
