@@ -135,8 +135,10 @@ class PhpBinaryPathBasedPlatformRepository extends PlatformRepository
 
     private function addLibrariesUsingPkgConfig(): void
     {
-        $this->detectLibraryWithPkgConfig('bz2', 'bzip2'); // @todo bzip2 doesn't have pkg-config .pc file
         $this->detectLibraryWithPkgConfig('curl', 'libcurl');
         $this->detectLibraryWithPkgConfig('sodium', 'libsodium');
+        $this->detectLibraryWithPkgConfig('ffi', 'libffi');
+        $this->detectLibraryWithPkgConfig('xslt', 'libxslt');
+        $this->detectLibraryWithPkgConfig('zip', 'libzip');
     }
 }

@@ -41,7 +41,6 @@ class BundledPhpExtensionsRepository extends ArrayRepository
     private static array $bundledPhpExtensions = [
         ['name' => 'bcmath'],
         ['name' => 'bz2'],
-//            'require' => ['lib-bz2' => '*'], libbz2-dev does not provide a bzip2.pc for pkg-config ...
         ['name' => 'calendar'],
         ['name' => 'ctype'],
         [
@@ -63,7 +62,10 @@ class BundledPhpExtensionsRepository extends ArrayRepository
         ['name' => 'exif'],
         [
             'name' => 'ffi',
-            'require' => ['php' => '>= 7.4.0'],
+            'require' => [
+                'php' => '>= 7.4.0',
+                'lib-ffi' => '*',
+            ],
         ],
         // ['name' => 'gd'], // build failure - ext/gd/gd.c:79:11: fatal error: ft2build.h: No such file or directory
         ['name' => 'gettext'],
@@ -192,11 +194,15 @@ class BundledPhpExtensionsRepository extends ArrayRepository
             'require' => [
                 'php' => '>= 5.2.0',
                 'ext-libxml' => '*',
+                'lib-xslt' => '*',
             ],
         ],
         [
             'name' => 'zip',
-            'require' => ['php' => '>= 5.2.0'],
+            'require' => [
+                'php' => '>= 5.2.0',
+                'lib-zip' => '*',
+            ],
         ],
         ['name' => 'zlib'],
     ];
