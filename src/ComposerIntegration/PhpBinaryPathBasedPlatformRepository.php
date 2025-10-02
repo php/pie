@@ -113,6 +113,14 @@ class PhpBinaryPathBasedPlatformRepository extends PlatformRepository
         return $package;
     }
 
+    /**
+     * The `$alias` parameter is the name of the dependency in `composer.json`,
+     * but without the `lib-` prefix; e.g. `curl` would be `lib-curl` in the
+     * `composer.json`.
+     *
+     * The `$library` parameter should be the name of the library to look up
+     * using `pkg-config`.
+     */
     private function detectLibraryWithPkgConfig(string $alias, string $library): void
     {
         try {
@@ -136,9 +144,29 @@ class PhpBinaryPathBasedPlatformRepository extends PlatformRepository
     private function addLibrariesUsingPkgConfig(): void
     {
         $this->detectLibraryWithPkgConfig('curl', 'libcurl');
+        $this->detectLibraryWithPkgConfig('enchant', 'enchant');
+        $this->detectLibraryWithPkgConfig('enchant-2', 'enchant-2');
         $this->detectLibraryWithPkgConfig('sodium', 'libsodium');
         $this->detectLibraryWithPkgConfig('ffi', 'libffi');
         $this->detectLibraryWithPkgConfig('xslt', 'libxslt');
         $this->detectLibraryWithPkgConfig('zip', 'libzip');
+        $this->detectLibraryWithPkgConfig('png', 'libpng');
+        $this->detectLibraryWithPkgConfig('avif', 'libavif');
+        $this->detectLibraryWithPkgConfig('webp', 'libwebp');
+        $this->detectLibraryWithPkgConfig('jpeg', 'libjpeg');
+        $this->detectLibraryWithPkgConfig('xpm', 'xpm');
+        $this->detectLibraryWithPkgConfig('freetype2', 'freetype2');
+        $this->detectLibraryWithPkgConfig('gdlib', 'gdlib');
+        $this->detectLibraryWithPkgConfig('gmp', 'gmp');
+        $this->detectLibraryWithPkgConfig('sasl', 'libsasl2');
+        $this->detectLibraryWithPkgConfig('onig', 'oniguruma');
+        $this->detectLibraryWithPkgConfig('odbc', 'libiodbc');
+        $this->detectLibraryWithPkgConfig('capstone', 'capstone');
+        $this->detectLibraryWithPkgConfig('pcre', 'libpcre2-8');
+        $this->detectLibraryWithPkgConfig('edit', 'libedit');
+        $this->detectLibraryWithPkgConfig('snmp', 'netsnmp');
+        $this->detectLibraryWithPkgConfig('argon2', 'libargon2');
+        $this->detectLibraryWithPkgConfig('uriparser', 'liburiparser');
+        $this->detectLibraryWithPkgConfig('exslt', 'libexslt');
     }
 }
