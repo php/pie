@@ -7,6 +7,8 @@ namespace Php\Pie\DependencyResolver;
 use Composer\Semver\VersionParser;
 use Webmozart\Assert\Assert;
 
+use function str_starts_with;
+
 /**
  * Utility to extract a valid Stability (see {@see \Composer\Package\BasePackage::$stabilities}) from a requested
  * package version in a predictable way.
@@ -39,13 +41,17 @@ final class DetermineMinimumStability
     }
 
     /** @return self::STABILITY_* */
-    public static function fromRequestedVersion(string|null $requestedVersion): string
+    public static function fromRequestedVersion(RequestedPackageAndVersion $requestedPackageAndVersion): string
     {
-        if ($requestedVersion === null) {
+        if ($requestedPackageAndVersion->version === null) {
+            if (str_starts_with($requestedPackageAndVersion->package, 'php/')) {
+                return self::STABILITY_DEV;
+            }
+
             return self::DEFAULT_MINIMUM_STABILITY;
         }
 
-        $stability = VersionParser::parseStability($requestedVersion);
+        $stability = VersionParser::parseStability($requestedPackageAndVersion->version);
         self::assertValidStabilityString($stability);
 
         return $stability;

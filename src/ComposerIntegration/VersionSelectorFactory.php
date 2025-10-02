@@ -20,9 +20,9 @@ final class VersionSelectorFactory
     {
     }
 
-    private static function factoryRepositorySet(Composer $composer, string|null $requestedVersion): RepositorySet
+    private static function factoryRepositorySet(Composer $composer, RequestedPackageAndVersion $requestedPackageAndVersion): RepositorySet
     {
-        $repositorySet = new RepositorySet(DetermineMinimumStability::fromRequestedVersion($requestedVersion));
+        $repositorySet = new RepositorySet(DetermineMinimumStability::fromRequestedVersion($requestedPackageAndVersion));
         $repositorySet->addRepository(new CompositeRepository($composer->getRepositoryManager()->getRepositories()));
 
         return $repositorySet;
@@ -34,7 +34,7 @@ final class VersionSelectorFactory
         TargetPlatform $targetPlatform,
     ): VersionSelector {
         return new VersionSelector(
-            self::factoryRepositorySet($composer, $requestedPackageAndVersion->version),
+            self::factoryRepositorySet($composer, $requestedPackageAndVersion),
             new PhpBinaryPathBasedPlatformRepository($targetPlatform->phpBinaryPath, $composer, new InstalledPiePackages(), null),
         );
     }

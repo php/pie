@@ -131,7 +131,7 @@ final class InfoCommand extends Command
             $platformConstraints = [];
             $composerPlatform    = new PhpBinaryPathBasedPlatformRepository($targetPlatform->phpBinaryPath, $composer, new InstalledPiePackages(), null);
             foreach ($composerPlatform->getPackages() as $platformPackage) {
-                $platformConstraints[$platformPackage->getName()][] = new Constraint('==', $platformPackage->getPrettyVersion());
+                $platformConstraints[$platformPackage->getName()][] = new Constraint('==', $platformPackage->getVersion());
             }
 
             foreach ($requires as $requireName => $requireLink) {
