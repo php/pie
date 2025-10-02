@@ -134,7 +134,11 @@ class PhpBinaryPathBasedPlatformRepository extends PlatformRepository
             return;
         }
 
-        $version = $this->versionParser->normalize($prettyVersion);
+        try {
+            $version = $this->versionParser->normalize($prettyVersion);
+        } catch (UnexpectedValueException) {
+            $version = '*'; // @todo check this is the best way to handle unparsed versions?
+        }
 
         $lib = new CompletePackage('lib-' . $alias, $version, $prettyVersion);
         $lib->setDescription('The ' . $alias . ' library, ' . $library);
