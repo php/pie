@@ -19,6 +19,7 @@ use Webmozart\Assert\Assert;
 
 use function get_loaded_extensions;
 use function phpversion;
+use function str_contains;
 
 use const PHP_VERSION_ID;
 
@@ -69,6 +70,12 @@ final class ShowCommandTest extends TestCase
             '--with-php-config' => $phpConfig,
         ]);
         $installCommand->assertCommandIsSuccessful();
+
+        $outputString = $installCommand->getDisplay();
+
+        if (str_contains($outputString, 'NOT been automatically')) {
+            self::markTestSkipped('PIE couldn\'t automatically enable the extension');
+        }
 
         PieJsonEditor::fromTargetPlatform(
             PiePlatform\TargetPlatform::fromPhpBinaryPath(
