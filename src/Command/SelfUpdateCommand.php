@@ -12,11 +12,13 @@ use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use Php\Pie\File\FullPathToSelf;
 use Php\Pie\File\SudoFilePut;
+use Php\Pie\Platform;
 use Php\Pie\SelfManage\Update\FetchPieReleaseFromGitHub;
 use Php\Pie\SelfManage\Update\PiePharMissingFromLatestRelease;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
 use Php\Pie\SelfManage\Verify\FailedToVerifyRelease;
 use Php\Pie\SelfManage\Verify\VerifyPieReleaseUsingAttestation;
+use Php\Pie\Settings;
 use Php\Pie\Util\Emoji;
 use Php\Pie\Util\PieVersion;
 use Psr\Container\ContainerInterface;
@@ -69,6 +71,11 @@ final class SelfUpdateCommand extends Command
 
             return Command::FAILURE;
         }
+
+        $settings      = new Settings(Platform::getPieBaseWorkingDirectory());
+        $updateChannel = $settings->updateChannel();
+
+        // @todo change channel based on args
 
         $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $output);
 

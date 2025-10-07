@@ -55,29 +55,11 @@ class Platform
         return rtrim(strtr($home, '\\', '/'), '/');
     }
 
-    /**
-     * This is essentially a Composer-controlled `vendor` directory that has downloaded sources
-     *
-     * @throws RuntimeException
-     */
-    public static function getPieWorkingDirectory(TargetPlatform $targetPlatform): string
+    public static function getPieBaseWorkingDirectory(): string
     {
-        // Simple hash of the target platform so we can build against different PHP installs on the same system
-        $targetPlatformPath = DIRECTORY_SEPARATOR . 'php' . $targetPlatform->phpBinaryPath->majorMinorVersion() . '_' . md5(implode(
-            '|',
-            [
-                $targetPlatform->operatingSystem->name,
-                $targetPlatform->phpBinaryPath->phpBinaryPath,
-                $targetPlatform->phpBinaryPath->version(),
-                $targetPlatform->architecture->name,
-                $targetPlatform->threadSafety->name,
-                $targetPlatform->windowsCompiler?->name ?? 'x',
-            ],
-        ));
-
         $home = ComposerPlatform::getEnv('PIE_WORKING_DIRECTORY');
         if ($home !== false && $home !== '') {
-            return $home . $targetPlatformPath;
+            return $home;
         }
 
         if (ComposerPlatform::isWindows()) {
@@ -86,7 +68,7 @@ class Platform
                 throw new RuntimeException('The APPDATA or PIE_WORKING_DIRECTORY environment variable must be set for PIE to run correctly');
             }
 
-            return rtrim(strtr($appData, '\\', '/'), '/') . '/PIE' . $targetPlatformPath . '/';
+            return rtrim(strtr($appData, '\\', '/'), '/') . '/PIE';
         }
 
         $userDir = self::getUserDir();
@@ -107,12 +89,35 @@ class Platform
         // select first dir which exists of: $XDG_CONFIG_HOME/pie or ~/.pie
         foreach ($dirs as $dir) {
             if (Silencer::call('is_dir', $dir)) {
-                return $dir . $targetPlatformPath;
+                return $dir;
             }
         }
 
         // if none exists, we default to first defined one (XDG one if system uses it, or ~/.pie otherwise)
-        return $dirs[0] . $targetPlatformPath;
+        return $dirs[0];
+    }
+
+    /**
+     * This is essentially a Composer-controlled `vendor` directory that has downloaded sources
+     *
+     * @throws RuntimeException
+     */
+    public static function getPieWorkingDirectory(TargetPlatform $targetPlatform): string
+    {
+        // Simple hash of the target platform so we can build against different PHP installs on the same system
+        $targetPlatformPath = DIRECTORY_SEPARATOR . 'php' . $targetPlatform->phpBinaryPath->majorMinorVersion() . '_' . md5(implode(
+            '|',
+            [
+                $targetPlatform->operatingSystem->name,
+                $targetPlatform->phpBinaryPath->phpBinaryPath,
+                $targetPlatform->phpBinaryPath->version(),
+                $targetPlatform->architecture->name,
+                $targetPlatform->threadSafety->name,
+                $targetPlatform->windowsCompiler?->name ?? 'x',
+            ],
+        ));
+
+        return self::getPieBaseWorkingDirectory() . $targetPlatformPath;
     }
 
     /** @return non-empty-string */
