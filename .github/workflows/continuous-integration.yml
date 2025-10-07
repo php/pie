@@ -95,6 +95,7 @@ jobs:
             libsasl2-dev \
             libpq-dev \
             libsqlite3-dev \
+            libbz2-dev \
             libzip-dev
       - name: "Set php-src download URL"
         run: echo "php_src_download_url=https://www.php.net/distributions/php-${{ matrix.php-versions }}.tar.gz" >> $GITHUB_ENV
