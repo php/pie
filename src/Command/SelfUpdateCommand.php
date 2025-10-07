@@ -13,6 +13,7 @@ use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use Php\Pie\File\FullPathToSelf;
 use Php\Pie\File\SudoFilePut;
 use Php\Pie\Platform;
+use Php\Pie\SelfManage\Update\Channel;
 use Php\Pie\SelfManage\Update\FetchPieReleaseFromGitHub;
 use Php\Pie\SelfManage\Update\PiePharMissingFromLatestRelease;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
@@ -39,6 +40,8 @@ use function unlink;
 )]
 final class SelfUpdateCommand extends Command
 {
+    private const OPTION_STABLE_UPDATE  = 'stable';
+    private const OPTION_PREVIEW_UPDATE = 'preview';
     private const OPTION_NIGHTLY_UPDATE = 'nightly';
 
     /** @param non-empty-string $githubApiBaseUrl */
@@ -62,6 +65,18 @@ final class SelfUpdateCommand extends Command
             InputOption::VALUE_NONE,
             'Update to the latest nightly version.',
         );
+        $this->addOption(
+            self::OPTION_PREVIEW_UPDATE,
+            null,
+            InputOption::VALUE_NONE,
+            'Update to the latest preview version.',
+        );
+        $this->addOption(
+            self::OPTION_STABLE_UPDATE,
+            null,
+            InputOption::VALUE_NONE,
+            'Update to the latest stable version.',
+        );
     }
 
     public function execute(InputInterface $input, OutputInterface $output): int
@@ -75,7 +90,18 @@ final class SelfUpdateCommand extends Command
         $settings      = new Settings(Platform::getPieBaseWorkingDirectory());
         $updateChannel = $settings->updateChannel();
 
-        // @todo change channel based on args
+        if ($input->hasOption(self::OPTION_NIGHTLY_UPDATE) && $input->getOption(self::OPTION_NIGHTLY_UPDATE)) {
+            $settings->changeUpdateChannel(Channel::Nightly);
+            $updateChannel = Channel::Nightly;
+        } else if ($input->hasOption(self::OPTION_PREVIEW_UPDATE) && $input->getOption(self::OPTION_PREVIEW_UPDATE)) {
+            $settings->changeUpdateChannel(Channel::Preview);
+            $updateChannel = Channel::Preview;
+        } else if ($input->hasOption(self::OPTION_STABLE_UPDATE) && $input->getOption(self::OPTION_STABLE_UPDATE)) {
+            $settings->changeUpdateChannel(Channel::Stable);
+            $updateChannel = Channel::Stable;
+        }
+
+        $output->writeln(sprintf('Updating using the <info>%s</> channel.', $updateChannel->value));
 
         $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $output);
 
@@ -92,6 +118,7 @@ final class SelfUpdateCommand extends Command
         $fetchLatestPieRelease = new FetchPieReleaseFromGitHub($this->githubApiBaseUrl, $httpDownloader, $authHelper);
         $verifyPiePhar         = VerifyPieReleaseUsingAttestation::factory();
 
+        // @todo use $updateChannel to decide where to update
         if ($input->hasOption(self::OPTION_NIGHTLY_UPDATE) && $input->getOption(self::OPTION_NIGHTLY_UPDATE)) {
             $latestRelease = new ReleaseMetadata(
                 'nightly',
