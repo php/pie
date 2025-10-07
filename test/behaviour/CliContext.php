@@ -133,7 +133,7 @@ class CliContext implements Context
         if (Platform::isWindows()) {
             Assert::regex($this->output, '#👋 Removed extension: [-\\\_:.a-zA-Z0-9]+\\\php_example_pie_extension.dll#');
         } else {
-            Assert::regex($this->output, '#👋 Removed extension: [-_a-zA-Z0-9/]+/example_pie_extension.so#');
+            Assert::regex($this->output, '#👋 Removed extension: [-_.a-zA-Z0-9/]+/example_pie_extension.so#');
         }
 
         $isExtEnabled = (new Process([self::PHP_BINARY, '-r', 'echo extension_loaded("example_pie_extension")?"yes":"no";']))
@@ -156,7 +156,7 @@ class CliContext implements Context
             return;
         }
 
-        Assert::regex($this->output, '#Install complete: [-_a-zA-Z0-9/]+/example_pie_extension.so#');
+        Assert::regex($this->output, '#Install complete: [-_.a-zA-Z0-9/]+/example_pie_extension.so#');
 
         $isExtEnabled = (new Process([self::PHP_BINARY, '-r', 'echo extension_loaded("example_pie_extension")?"yes":"no";']))
             ->mustRun()
