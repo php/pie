@@ -93,10 +93,10 @@ final class SelfUpdateCommand extends Command
         if ($input->hasOption(self::OPTION_NIGHTLY_UPDATE) && $input->getOption(self::OPTION_NIGHTLY_UPDATE)) {
             $settings->changeUpdateChannel(Channel::Nightly);
             $updateChannel = Channel::Nightly;
-        } else if ($input->hasOption(self::OPTION_PREVIEW_UPDATE) && $input->getOption(self::OPTION_PREVIEW_UPDATE)) {
+        } elseif ($input->hasOption(self::OPTION_PREVIEW_UPDATE) && $input->getOption(self::OPTION_PREVIEW_UPDATE)) {
             $settings->changeUpdateChannel(Channel::Preview);
             $updateChannel = Channel::Preview;
-        } else if ($input->hasOption(self::OPTION_STABLE_UPDATE) && $input->getOption(self::OPTION_STABLE_UPDATE)) {
+        } elseif ($input->hasOption(self::OPTION_STABLE_UPDATE) && $input->getOption(self::OPTION_STABLE_UPDATE)) {
             $settings->changeUpdateChannel(Channel::Stable);
             $updateChannel = Channel::Stable;
         }
@@ -118,8 +118,7 @@ final class SelfUpdateCommand extends Command
         $fetchLatestPieRelease = new FetchPieReleaseFromGitHub($this->githubApiBaseUrl, $httpDownloader, $authHelper);
         $verifyPiePhar         = VerifyPieReleaseUsingAttestation::factory();
 
-        // @todo use $updateChannel to decide where to update
-        if ($input->hasOption(self::OPTION_NIGHTLY_UPDATE) && $input->getOption(self::OPTION_NIGHTLY_UPDATE)) {
+        if ($updateChannel === Channel::Nightly) {
             $latestRelease = new ReleaseMetadata(
                 'nightly',
                 'https://php.github.io/pie/pie-nightly.phar',
@@ -128,7 +127,7 @@ final class SelfUpdateCommand extends Command
             $output->writeln('Downloading the latest nightly release.');
         } else {
             try {
-                $latestRelease = $fetchLatestPieRelease->latestReleaseMetadata();
+                $latestRelease = $fetchLatestPieRelease->latestReleaseMetadata($updateChannel);
             } catch (PiePharMissingFromLatestRelease $piePharMissingFromLatestRelease) {
                 $output->writeln(sprintf('<error>%s</error>', $piePharMissingFromLatestRelease->getMessage()));
 
@@ -137,19 +136,14 @@ final class SelfUpdateCommand extends Command
 
             $pieVersion = PieVersion::get();
 
-            if (preg_match('/^(?<tag>.+)@(?<hash>[a-f0-9]{7})$/', $pieVersion, $matches)) {
-                // Have to change the version to something the Semver library understands
-                $pieVersion = sprintf('dev-main#%s', $matches['hash']);
-                $output->writeln(sprintf(
-                    'It looks like you are running a nightly build; if you want to get the newest nightly, specify the --%s flag.',
-                    self::OPTION_NIGHTLY_UPDATE,
-                ));
-            }
-
             $output->writeln(sprintf('You are currently running PIE version %s', $pieVersion));
 
+            // @todo test going from preview->stable, nightly->preview, nightly->stable, stable->preview
             if (! Semver::satisfies($latestRelease->tag, '> ' . $pieVersion)) {
-                $output->writeln('<info>You already have the latest version 😍</info>');
+                $output->writeln(sprintf(
+                    '<info>You already have the latest version for the %s channel 😍</info>',
+                    $updateChannel->value,
+                ));
 
                 return Command::SUCCESS;
             }

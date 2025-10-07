@@ -31,8 +31,9 @@ final class FetchPieReleaseFromGitHub implements FetchPieRelease
     ) {
     }
 
-    public function latestReleaseMetadata(): ReleaseMetadata
+    public function latestReleaseMetadata(Channel $updateChannel): ReleaseMetadata
     {
+        // @todo update to preview or stable
         $url = $this->githubApiBaseUrl . self::PIE_LATEST_RELEASE_URL;
 
         $decodedResponse = $this->httpDownloader->get(
