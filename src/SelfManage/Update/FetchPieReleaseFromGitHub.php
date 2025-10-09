@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\Pie\SelfManage\Update;
 
+use Composer\Package\Version\VersionParser;
 use Composer\Util\AuthHelper;
 use Composer\Util\HttpDownloader;
 use Php\Pie\File\BinaryFile;
@@ -21,8 +22,8 @@ use function tempnam;
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class FetchPieReleaseFromGitHub implements FetchPieRelease
 {
-    private const PIE_PHAR_NAME          = 'pie.phar';
-    private const PIE_LATEST_RELEASE_URL = '/repos/php/pie/releases/latest';
+    private const PIE_PHAR_NAME    = 'pie.phar';
+    private const PIE_RELEASES_URL = '/repos/php/pie/releases';
 
     public function __construct(
         private readonly string $githubApiBaseUrl,
@@ -33,8 +34,7 @@ final class FetchPieReleaseFromGitHub implements FetchPieRelease
 
     public function latestReleaseMetadata(Channel $updateChannel): ReleaseMetadata
     {
-        // @todo update to preview or stable
-        $url = $this->githubApiBaseUrl . self::PIE_LATEST_RELEASE_URL;
+        $url = $this->githubApiBaseUrl . self::PIE_RELEASES_URL;
 
         $decodedResponse = $this->httpDownloader->get(
             $url,
@@ -47,40 +47,67 @@ final class FetchPieReleaseFromGitHub implements FetchPieRelease
             ],
         )->decodeJson();
 
-        Assert::isArray($decodedResponse);
-        Assert::keyExists($decodedResponse, 'tag_name');
-        Assert::stringNotEmpty($decodedResponse['tag_name']);
-        Assert::keyExists($decodedResponse, 'assets');
-        Assert::isList($decodedResponse['assets']);
+        Assert::isList($decodedResponse);
+        Assert::allIsArray($decodedResponse);
 
-        $assetsNamedPiePhar = array_filter(
+        $releases = array_filter(
             array_map(
-                /** @return array{name: non-empty-string, browser_download_url: non-empty-string, ...} */
-                static function (array $asset): array {
-                    Assert::keyExists($asset, 'name');
-                    Assert::stringNotEmpty($asset['name']);
-                    Assert::keyExists($asset, 'browser_download_url');
-                    Assert::stringNotEmpty($asset['browser_download_url']);
+                static function (array $releaseResponse): ReleaseMetadata|null {
+                    Assert::keyExists($releaseResponse, 'tag_name');
+                    Assert::stringNotEmpty($releaseResponse['tag_name']);
+                    Assert::keyExists($releaseResponse, 'assets');
+                    Assert::isList($releaseResponse['assets']);
+                    Assert::allIsArray($releaseResponse['assets']);
 
-                    return $asset;
+                    $assetsNamedPiePhar = array_filter(
+                        array_map(
+                            static function (array $asset): array {
+                                Assert::keyExists($asset, 'name');
+                                Assert::stringNotEmpty($asset['name']);
+                                Assert::keyExists($asset, 'browser_download_url');
+                                Assert::stringNotEmpty($asset['browser_download_url']);
+
+                                return $asset;
+                            },
+                            $releaseResponse['assets'],
+                        ),
+                        static function (array $asset): bool {
+                            return $asset['name'] === self::PIE_PHAR_NAME;
+                        },
+                    );
+
+                    if (! count($assetsNamedPiePhar)) {
+                        return null;
+                    }
+
+                    $firstAssetNamedPiePhar = reset($assetsNamedPiePhar);
+
+                    return new ReleaseMetadata(
+                        $releaseResponse['tag_name'],
+                        $firstAssetNamedPiePhar['browser_download_url'],
+                    );
                 },
-                $decodedResponse['assets'],
+                $decodedResponse,
             ),
-            static function (array $asset): bool {
-                return $asset['name'] === self::PIE_PHAR_NAME;
+            static function (ReleaseMetadata|null $releaseMetadata) use ($updateChannel): bool {
+                if ($releaseMetadata === null) {
+                    return false;
+                }
+
+                $stability = VersionParser::parseStability($releaseMetadata->tag);
+
+                return ($updateChannel === Channel::Stable && $stability === 'stable')
+                    || $updateChannel === Channel::Preview;
             },
         );
 
-        if (! count($assetsNamedPiePhar)) {
-            throw PiePharMissingFromLatestRelease::fromRelease($decodedResponse['tag_name']);
+        $first = reset($releases);
+
+        if (! $first instanceof ReleaseMetadata) {
+            throw new RuntimeException('No PIE release found for channel ' . $updateChannel->value);
         }
 
-        $firstAssetNamedPiePhar = reset($assetsNamedPiePhar);
-
-        return new ReleaseMetadata(
-            $decodedResponse['tag_name'],
-            $firstAssetNamedPiePhar['browser_download_url'],
-        );
+        return $first;
     }
 
     public function downloadContent(ReleaseMetadata $releaseMetadata): BinaryFile
