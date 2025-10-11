@@ -6,7 +6,7 @@ namespace Php\Pie\SelfManage\Update;
 
 enum Channel: string
 {
-    case Stable = 'stable';
+    case Stable  = 'stable';
     case Preview = 'preview';
     case Nightly = 'nightly';
 }

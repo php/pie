@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Php\Pie\Command;
 
-use Composer\Semver\Semver;
 use Composer\Util\AuthHelper;
 use Composer\Util\HttpDownloader;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
@@ -16,6 +15,7 @@ use Php\Pie\Platform;
 use Php\Pie\SelfManage\Update\Channel;
 use Php\Pie\SelfManage\Update\FetchPieReleaseFromGitHub;
 use Php\Pie\SelfManage\Update\PiePharMissingFromLatestRelease;
+use Php\Pie\SelfManage\Update\ReleaseIsNewer;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
 use Php\Pie\SelfManage\Verify\FailedToVerifyRelease;
 use Php\Pie\SelfManage\Verify\VerifyPieReleaseUsingAttestation;
@@ -30,7 +30,6 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use function file_get_contents;
-use function preg_match;
 use function sprintf;
 use function unlink;
 
@@ -138,8 +137,7 @@ final class SelfUpdateCommand extends Command
 
             $output->writeln(sprintf('You are currently running PIE version %s', $pieVersion));
 
-            // @todo test going from preview->stable, nightly->preview, nightly->stable, stable->preview
-            if (! Semver::satisfies($latestRelease->tag, '> ' . $pieVersion)) {
+            if (! ReleaseIsNewer::forChannel($updateChannel, $pieVersion, $latestRelease)) {
                 $output->writeln(sprintf(
                     '<info>You already have the latest version for the %s channel 😍</info>',
                     $updateChannel->value,

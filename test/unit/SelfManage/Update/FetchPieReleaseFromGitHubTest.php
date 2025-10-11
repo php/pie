@@ -22,7 +22,7 @@ use function uniqid;
 #[CoversClass(FetchPieReleaseFromGitHub::class)]
 final class FetchPieReleaseFromGitHubTest extends TestCase
 {
-    private const TEST_GITHUB_URL = 'http://test-github-url.localhost';
+    private const TEST_GITHUB_URL    = 'http://test-github-url.localhost';
     private const TEST_RELEASES_LIST = [
         [
             'tag_name' => '1.2.4-rc1',
