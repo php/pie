@@ -37,7 +37,7 @@
         "symfony/console": "^6.4.26",
         "symfony/event-dispatcher": "^6.4.25",
         "symfony/process": "^6.4.26",
-        "thephpf/attestation": "^0.0.1",
+        "thephpf/attestation": "^0.0.2",
         "webmozart/assert": "^1.11"
     },
     "require-dev": {
