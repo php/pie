@@ -51,7 +51,7 @@ final class ShowCommandTest extends TestCase
         }
     }
 
-    public function testExecuteWithAvailableUpdates(): void
+    public function testExecuteWithAvailableConstrainedUpdates(): void
     {
         if (PHP_VERSION_ID >= 80500) {
             self::markTestSkipped('This test can only run on PHP 8.4 or lower');
@@ -93,7 +93,101 @@ final class ShowCommandTest extends TestCase
         $outputString = $this->commandTester->getDisplay();
 
         self::assertStringMatchesFormat(
-            '%Aexample_pie_extension:%S (from %S asgrim/example-pie-extension:2.0.2%S) — new version %S available%A',
+            '%Aexample_pie_extension:%S (from %S asgrim/example-pie-extension:2.0.2%S), upgradable to %S (within %S)%A',
+            $outputString,
+        );
+    }
+
+    public function testExecuteWithAvailableUnconstrainedUpdates(): void
+    {
+        if (PHP_VERSION_ID >= 80500) {
+            self::markTestSkipped('This test can only run on PHP 8.4 or lower');
+        }
+
+        try {
+            $phpConfig = Process::run(['which', 'php-config']);
+            Assert::stringNotEmpty($phpConfig);
+        } catch (ProcessFailedException | InvalidArgumentException) {
+            self::markTestSkipped('This test can only run on systems with php-config');
+        }
+
+        $installCommand = new CommandTester(Container::factory()->get(InstallCommand::class));
+        $installCommand->execute([
+            'requested-package-and-version' => self::TEST_PACKAGE . ':2.0.2',
+            '--with-php-config' => $phpConfig,
+        ]);
+        $installCommand->assertCommandIsSuccessful();
+
+        $outputString = $installCommand->getDisplay();
+
+        if (str_contains($outputString, 'NOT been automatically')) {
+            self::markTestSkipped('PIE couldn\'t automatically enable the extension');
+        }
+
+        PieJsonEditor::fromTargetPlatform(
+            PiePlatform\TargetPlatform::fromPhpBinaryPath(
+                PiePlatform\TargetPhp\PhpBinaryPath::fromPhpConfigExecutable(
+                    $phpConfig,
+                ),
+                1,
+            ),
+        )
+            ->addRequire(self::TEST_PACKAGE, '^2.0,<=2.0.3');
+
+        $this->commandTester->execute(['--with-php-config' => $phpConfig]);
+        $this->commandTester->assertCommandIsSuccessful();
+
+        $outputString = $this->commandTester->getDisplay();
+
+        self::assertStringMatchesFormat(
+            '%Aexample_pie_extension:%S (from %S asgrim/example-pie-extension:2.0.2%S), upgradable to %S (within %S), latest version is %A',
+            $outputString,
+        );
+    }
+
+    public function testExecuteWithOnlyUnconstrainedUpdates(): void
+    {
+        if (PHP_VERSION_ID >= 80500) {
+            self::markTestSkipped('This test can only run on PHP 8.4 or lower');
+        }
+
+        try {
+            $phpConfig = Process::run(['which', 'php-config']);
+            Assert::stringNotEmpty($phpConfig);
+        } catch (ProcessFailedException | InvalidArgumentException) {
+            self::markTestSkipped('This test can only run on systems with php-config');
+        }
+
+        $installCommand = new CommandTester(Container::factory()->get(InstallCommand::class));
+        $installCommand->execute([
+            'requested-package-and-version' => self::TEST_PACKAGE . ':2.0.2',
+            '--with-php-config' => $phpConfig,
+        ]);
+        $installCommand->assertCommandIsSuccessful();
+
+        $outputString = $installCommand->getDisplay();
+
+        if (str_contains($outputString, 'NOT been automatically')) {
+            self::markTestSkipped('PIE couldn\'t automatically enable the extension');
+        }
+
+        PieJsonEditor::fromTargetPlatform(
+            PiePlatform\TargetPlatform::fromPhpBinaryPath(
+                PiePlatform\TargetPhp\PhpBinaryPath::fromPhpConfigExecutable(
+                    $phpConfig,
+                ),
+                1,
+            ),
+        )
+            ->addRequire(self::TEST_PACKAGE, '^2.0,<2.0.3');
+
+        $this->commandTester->execute(['--with-php-config' => $phpConfig]);
+        $this->commandTester->assertCommandIsSuccessful();
+
+        $outputString = $this->commandTester->getDisplay();
+
+        self::assertStringMatchesFormat(
+            '%Aexample_pie_extension:%S (from %S asgrim/example-pie-extension:2.0.2%S), latest version is %A',
             $outputString,
         );
     }
