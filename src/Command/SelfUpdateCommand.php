@@ -14,7 +14,6 @@ use Php\Pie\File\SudoFilePut;
 use Php\Pie\Platform;
 use Php\Pie\SelfManage\Update\Channel;
 use Php\Pie\SelfManage\Update\FetchPieReleaseFromGitHub;
-use Php\Pie\SelfManage\Update\PiePharMissingFromLatestRelease;
 use Php\Pie\SelfManage\Update\ReleaseIsNewer;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
 use Php\Pie\SelfManage\Verify\FailedToVerifyRelease;
@@ -28,6 +27,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Throwable;
 
 use function file_get_contents;
 use function sprintf;
@@ -127,8 +127,8 @@ final class SelfUpdateCommand extends Command
         } else {
             try {
                 $latestRelease = $fetchLatestPieRelease->latestReleaseMetadata($updateChannel);
-            } catch (PiePharMissingFromLatestRelease $piePharMissingFromLatestRelease) {
-                $output->writeln(sprintf('<error>%s</error>', $piePharMissingFromLatestRelease->getMessage()));
+            } catch (Throwable $throwable) {
+                $output->writeln(sprintf('<error>%s</error>', $throwable->getMessage()));
 
                 return Command::FAILURE;
             }

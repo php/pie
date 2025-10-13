@@ -14,9 +14,7 @@ use PHPUnit\Framework\TestCase;
 use function file_get_contents;
 use function file_put_contents;
 use function mkdir;
-use function str_replace;
 use function sys_get_temp_dir;
-use function trim;
 use function uniqid;
 
 use const DIRECTORY_SEPARATOR;
@@ -46,13 +44,9 @@ final class SettingsTest extends TestCase
         $settings->changeUpdateChannel(Channel::Preview);
         self::assertSame(Channel::Preview, $settings->updateChannel());
 
-        self::assertSame(
-            trim(<<<'JSON'
-{
-    "channel": "preview"
-}
-JSON),
-            str_replace("\r\n", "\n", (string) file_get_contents($workingDir . 'pie-settings.json')),
+        self::assertJsonStringEqualsJsonString(
+            '{"channel": "preview"}',
+            (string) file_get_contents($workingDir . 'pie-settings.json'),
         );
 
         (new Filesystem())->remove($workingDir);
@@ -67,16 +61,12 @@ JSON),
         $settings = new Settings($workingDir);
         self::assertSame(Channel::Stable, $settings->updateChannel());
 
-        $settings->changeUpdateChannel(Channel::Preview);
-        self::assertSame(Channel::Preview, $settings->updateChannel());
+        $settings->changeUpdateChannel(Channel::Nightly);
+        self::assertSame(Channel::Nightly, $settings->updateChannel());
 
-        self::assertSame(
-            trim(<<<'JSON'
-{
-    "channel": "preview"
-}
-JSON),
-            str_replace("\r\n", "\n", (string) file_get_contents($workingDir . 'pie-settings.json')),
+        self::assertJsonStringEqualsJsonString(
+            '{"channel": "nightly"}',
+            (string) file_get_contents($workingDir . 'pie-settings.json'),
         );
 
         (new Filesystem())->remove($workingDir);
