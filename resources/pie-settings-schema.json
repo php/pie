@@ -1,0 +1,18 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/php/pie/main/resources/pie-config-schema.json",
+    "title": "PIE configuration file schema",
+    "description": "Schema for PIE tool configuration file",
+    "type": "object",
+    "properties": {
+        "channel": {
+            "type": "string",
+            "description": "Which update channel to use when running self-update",
+            "enum": [
+                "nightly",
+                "preview",
+                "stable"
+            ]
+        }
+    }
+}

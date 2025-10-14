@@ -8,6 +8,7 @@ use RuntimeException;
 
 use function sprintf;
 
+/** @deprecated This exception is no longer thrown */
 class PiePharMissingFromLatestRelease extends RuntimeException
 {
     /** @param non-empty-string $tagName */

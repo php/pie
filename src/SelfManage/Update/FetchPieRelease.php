@@ -10,7 +10,7 @@ use Php\Pie\File\BinaryFile;
 interface FetchPieRelease
 {
     /** @throws PiePharMissingFromLatestRelease */
-    public function latestReleaseMetadata(): ReleaseMetadata;
+    public function latestReleaseMetadata(Channel $updateChannel): ReleaseMetadata;
 
     /** Download the given pie.phar and return the filename (should be a temp file) */
     public function downloadContent(ReleaseMetadata $releaseMetadata): BinaryFile;

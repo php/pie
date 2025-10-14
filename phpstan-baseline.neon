@@ -433,12 +433,6 @@ parameters:
 			path: src/Platform/TargetPlatform.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\)\: non\-empty\-array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/SelfManage/Update/FetchPieReleaseFromGitHub.php
-
-		-
 			message: '#^Dead catch \- Php\\Pie\\SelfManage\\Verify\\GithubCliNotAvailable is never thrown in the try block\.$#'
 			identifier: catch.neverThrown
 			count: 1
@@ -675,7 +669,7 @@ parameters:
 		-
 			message: '#^Parameter \#4 \$body of class Composer\\Util\\Http\\Response constructor expects string\|null, string\|false given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 1
 			path: test/unit/SelfManage/Update/FetchPieReleaseFromGitHubTest.php
 
 		-
