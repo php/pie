@@ -39,6 +39,24 @@ do this in the right way for PIE.
 Adding PIE support for your extension is relatively straightforward, and the
 flow is quite similar to adding a regular PHP package into Packagist.
 
+### Extensions already on PECL
+
+If you are a maintainer of an existing PECL extension, here are a few helpful
+pieces of information for some context:
+
+ - For an extension already in PECL, the `package.xml` is no longer needed if
+   you no longer want to publish to PECL. If you want to keep publishing to
+   PECL for now, then you can keep `package.xml` maintained.
+ - The `package.xml` lists each release explicitly. With PIE, this is no longer
+   necessary, as Packagist will pick up tags or branch aliases in the same
+   way that regular Composer packages do. This means that to release your
+   package, you need to push a tag and release.
+ - In the default setup, the contents of the package are determined by the
+   [Git archive](https://git-scm.com/docs/git-archive) for the tag or revision
+   of the release. You can exclude files and paths from the archive with the
+   [export-ignore](https://git-scm.com/docs/git-archive#Documentation/git-archive.txt-export-ignore)
+   attribute.
+
 ### Add a `composer.json` to your extension
 
 The first step to adding PIE support is adding a `composer.json` to your
