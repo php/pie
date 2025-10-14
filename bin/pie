@@ -6,10 +6,10 @@ declare(strict_types=1);
 namespace Php\Pie;
 
 use Php\Pie\Command\BuildCommand;
-use Php\Pie\Command\InstallExtensionsForProjectCommand;
 use Php\Pie\Command\DownloadCommand;
 use Php\Pie\Command\InfoCommand;
 use Php\Pie\Command\InstallCommand;
+use Php\Pie\Command\InstallExtensionsForProjectCommand;
 use Php\Pie\Command\RepositoryAddCommand;
 use Php\Pie\Command\RepositoryListCommand;
 use Php\Pie\Command\RepositoryRemoveCommand;
@@ -24,11 +24,16 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
+use function error_reporting;
+
+use const E_DEPRECATED;
+
 require_once __DIR__ . '/../src/Util/PieVersion.php';
 if (PieVersion::isPharBuild()) {
     error_reporting(error_reporting() & ~E_DEPRECATED);
 }
 
+// phpcs:ignore Squiz.NamingConventions.ValidVariableName.NotCamelCaps
 include $_composer_autoload_path ?? __DIR__ . '/../vendor/autoload.php';
 
 $container = Container::factory();
@@ -52,7 +57,7 @@ $application->setCommandLoader(new ContainerCommandLoader(
         'self-update' => SelfUpdateCommand::class,
         'self-verify' => SelfVerifyCommand::class,
         'install-extensions-for-project' => InstallExtensionsForProjectCommand::class,
-    ]
+    ],
 ));
 
 $application->run($container->get(InputInterface::class), $container->get(OutputInterface::class));
