@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0ac6f1ecff2f104985fd365f8a981ed8",
+    "content-hash": "12fab71dbc20dcc0e3bea71fb0d18c37",
     "packages": [
         {
             "name": "composer/ca-bundle",
@@ -2423,16 +2423,16 @@
         },
         {
             "name": "thephpf/attestation",
-            "version": "0.0.1",
+            "version": "0.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ThePHPF/attestation.git",
-                "reference": "edefe3f071c5bf18849586165c991d08529505e2"
+                "reference": "997770de5fcfb548dba84b3b444a67a30943973f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ThePHPF/attestation/zipball/edefe3f071c5bf18849586165c991d08529505e2",
-                "reference": "edefe3f071c5bf18849586165c991d08529505e2",
+                "url": "https://api.github.com/repos/ThePHPF/attestation/zipball/997770de5fcfb548dba84b3b444a67a30943973f",
+                "reference": "997770de5fcfb548dba84b3b444a67a30943973f",
                 "shasum": ""
             },
             "require": {
@@ -2442,7 +2442,7 @@
                 "webmozart/assert": "^1.11"
             },
             "require-dev": {
-                "doctrine/coding-standard": "^13.0",
+                "doctrine/coding-standard": "^13.0 || ^14.0",
                 "phpstan/phpstan": "^2.1",
                 "phpunit/phpunit": "^9.6.25"
             },
@@ -2468,7 +2468,7 @@
             "description": "A PHP library to aid in verifying artifact attestations",
             "support": {
                 "issues": "https://github.com/ThePHPF/attestation/issues",
-                "source": "https://github.com/ThePHPF/attestation/tree/0.0.1"
+                "source": "https://github.com/ThePHPF/attestation/tree/0.0.2"
             },
             "funding": [
                 {
@@ -2480,7 +2480,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2025-09-25T18:12:54+00:00"
+            "time": "2025-10-11T07:40:19+00:00"
         },
         {
             "name": "webmozart/assert",
