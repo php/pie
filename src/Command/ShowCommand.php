@@ -125,22 +125,35 @@ final class ShowCommand extends Command
                     Assert::stringNotEmpty($packageName);
                     Assert::stringNotEmpty($packageRequirement);
 
-                    $latestPackage = ($this->resolveDependencyWithComposer)(
+                    $latestConstrainedPackage = ($this->resolveDependencyWithComposer)(
                         $composer,
                         $targetPlatform,
                         new RequestedPackageAndVersion($packageName, $packageRequirement),
                         false,
                     );
+
+                    $latestPackage = ($this->resolveDependencyWithComposer)(
+                        $composer,
+                        $targetPlatform,
+                        new RequestedPackageAndVersion($packageName, '*'),
+                        false,
+                    );
                 } catch (UnableToResolveRequirement | BundledPhpExtensionRefusal) {
-                    $latestPackage = null;
+                    $latestConstrainedPackage = null;
+                    $latestPackage            = null;
                 }
 
                 $updateNotice = '';
-                if ($latestPackage !== null && $latestPackage->version() !== $piePackage->version()) {
+                if ($latestConstrainedPackage !== null && $latestConstrainedPackage->version() !== $piePackage->version()) {
                     $updateNotice = sprintf(
-                        ' — new version %s available',
-                        $latestPackage->version(),
+                        ', upgradable to %s (within %s)',
+                        $latestConstrainedPackage->version(),
+                        $packageRequirement,
                     );
+                }
+
+                if ($latestPackage !== null && $latestPackage->version() !== $latestConstrainedPackage->version()) {
+                    $updateNotice .= sprintf(', latest version is %s', $latestPackage->version());
                 }
 
                 $output->writeln(sprintf(

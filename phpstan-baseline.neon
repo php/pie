@@ -79,30 +79,6 @@ parameters:
 			path: src/Command/UninstallCommand.php
 
 		-
-			message: '#^Binary operation "\." between ''Found prebuilt…'' and mixed results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: src/ComposerIntegration/Listeners/OverrideDownloadUrlInstallListener.php
-
-		-
-			message: '#^Cannot call method findMatchingReleaseAssetUrl\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/ComposerIntegration/Listeners/OverrideDownloadUrlInstallListener.php
-
-		-
-			message: '#^Parameter \#1 \$path of function pathinfo expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/ComposerIntegration/Listeners/OverrideDownloadUrlInstallListener.php
-
-		-
-			message: '#^Parameter \#1 \$url of method Composer\\Package\\PackageInterface\:\:setDistUrl\(\) expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/ComposerIntegration/Listeners/OverrideDownloadUrlInstallListener.php
-
-		-
 			message: '#^Call to function assert\(\) with true will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1
@@ -125,36 +101,6 @@ parameters:
 			identifier: nullCoalesce.offset
 			count: 1
 			path: src/ComposerIntegration/MinimalHelperSet.php
-
-		-
-			message: '#^Cannot call method loadConfiguration\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/ComposerIntegration/PieComposerFactory.php
-
-		-
-			message: '#^Parameter \#1 \$io of method Composer\\Factory\:\:createComposer\(\) expects Composer\\IO\\IOInterface, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/ComposerIntegration/PieComposerFactory.php
-
-		-
-			message: '#^Parameter \#2 \$io of static method Php\\Pie\\ComposerIntegration\\Listeners\\OverrideDownloadUrlInstallListener\:\:selfRegister\(\) expects Composer\\IO\\IOInterface, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/ComposerIntegration/PieComposerFactory.php
-
-		-
-			message: '#^Parameter \#5 \$installAndBuildProcess of class Php\\Pie\\ComposerIntegration\\PiePackageInstaller constructor expects Php\\Pie\\ComposerIntegration\\InstallAndBuildProcess, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/ComposerIntegration/PieComposerFactory.php
-
-		-
-			message: '#^Parameter \#6 \$uninstallProcess of class Php\\Pie\\ComposerIntegration\\PiePackageInstaller constructor expects Php\\Pie\\ComposerIntegration\\UninstallProcess, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/ComposerIntegration/PieComposerFactory.php
 
 		-
 			message: '#^Parameter \#3 \$package of class Php\\Pie\\ComposerIntegration\\PieComposerInstaller constructor expects Composer\\Package\\BasePackage&Composer\\Package\\RootPackageInterface, Composer\\Package\\RootPackageInterface given\.$#'
@@ -211,37 +157,7 @@ parameters:
 			path: src/ComposerIntegration/VendorCleanup.php
 
 		-
-			message: '#^Anonymous function should return Php\\Pie\\Building\\Build but returns mixed\.$#'
-			identifier: return.type
-			count: 2
-			path: src/Container.php
-
-		-
-			message: '#^Anonymous function should return Php\\Pie\\Installing\\Install but returns mixed\.$#'
-			identifier: return.type
-			count: 2
-			path: src/Container.php
-
-		-
 			message: '#^Parameter \#1 \$implementation of method Illuminate\\Contracts\\Container\\ContextualBindingBuilder\:\:give\(\) expects array\|Closure\|string, non\-empty\-string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Container.php
-
-		-
-			message: '#^Parameter \#1 \$input of class Php\\Pie\\ComposerIntegration\\QuieterConsoleIO constructor expects Symfony\\Component\\Console\\Input\\InputInterface, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Container.php
-
-		-
-			message: '#^Parameter \#1 \$possibleApproaches of class Php\\Pie\\Installing\\Ini\\PickBestSetupIniApproach constructor expects list\<Php\\Pie\\Installing\\Ini\\SetupIniApproach\>, array\{mixed, mixed, mixed, mixed, mixed\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Container.php
-
-		-
-			message: '#^Parameter \#2 \$output of class Php\\Pie\\ComposerIntegration\\QuieterConsoleIO constructor expects Symfony\\Component\\Console\\Output\\OutputInterface, mixed given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Container.php
@@ -457,24 +373,6 @@ parameters:
 			path: test/integration/Building/UnixBuildTest.php
 
 		-
-			message: '#^Parameter \#1 \$command of class Symfony\\Component\\Console\\Tester\\CommandTester constructor expects Symfony\\Component\\Console\\Command\\Command, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: test/integration/Command/BuildCommandTest.php
-
-		-
-			message: '#^Parameter \#1 \$command of class Symfony\\Component\\Console\\Tester\\CommandTester constructor expects Symfony\\Component\\Console\\Command\\Command, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: test/integration/Command/DownloadCommandTest.php
-
-		-
-			message: '#^Parameter \#1 \$command of class Symfony\\Component\\Console\\Tester\\CommandTester constructor expects Symfony\\Component\\Console\\Command\\Command, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: test/integration/Command/InfoCommandTest.php
-
-		-
 			message: '#^Call to function array_key_exists\(\) with 1 and array\{non\-falsy\-string, string\} will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 2
@@ -493,12 +391,6 @@ parameters:
 			path: test/integration/Command/InstallCommandTest.php
 
 		-
-			message: '#^Parameter \#1 \$command of class Symfony\\Component\\Console\\Tester\\CommandTester constructor expects Symfony\\Component\\Console\\Command\\Command, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: test/integration/Command/InstallCommandTest.php
-
-		-
 			message: '#^Parameter \#1 \$originalClassName of method PHPUnit\\Framework\\TestCase\:\:createMock\(\) expects class\-string\<object\>, string given\.$#'
 			identifier: argument.type
 			count: 1
@@ -509,42 +401,6 @@ parameters:
 			identifier: argument.templateType
 			count: 1
 			path: test/integration/Command/InstallExtensionsForProjectCommandTest.php
-
-		-
-			message: '#^Parameter \#1 \$command of class Symfony\\Component\\Console\\Tester\\CommandTester constructor expects Symfony\\Component\\Console\\Command\\Command, mixed given\.$#'
-			identifier: argument.type
-			count: 3
-			path: test/integration/Command/RepositoryManagementCommandsTest.php
-
-		-
-			message: '#^Parameter \#1 \$command of class Symfony\\Component\\Console\\Tester\\CommandTester constructor expects Symfony\\Component\\Console\\Command\\Command, mixed given\.$#'
-			identifier: argument.type
-			count: 2
-			path: test/integration/Command/ShowCommandTest.php
-
-		-
-			message: '#^Cannot call method __invoke\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: test/integration/DependencyResolver/ResolveDependencyWithComposerTest.php
-
-		-
-			message: '#^Cannot call method downloadUrl\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: test/integration/DependencyResolver/ResolveDependencyWithComposerTest.php
-
-		-
-			message: '#^Cannot call method version\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: test/integration/DependencyResolver/ResolveDependencyWithComposerTest.php
-
-		-
-			message: '#^Parameter \#2 \$string of static method PHPUnit\\Framework\\Assert\:\:assertStringMatchesFormat\(\) expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: test/integration/DependencyResolver/ResolveDependencyWithComposerTest.php
 
 		-
 			message: '#^Call to function assert\(\) with true will always evaluate to true\.$#'
