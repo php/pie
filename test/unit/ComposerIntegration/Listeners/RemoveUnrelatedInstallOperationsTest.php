@@ -27,7 +27,6 @@ use Php\Pie\Platform\WindowsCompiler;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Console\Output\OutputInterface;
 
 use function array_filter;
 use function array_map;
@@ -63,7 +62,7 @@ final class RemoveUnrelatedInstallOperationsTest extends TestCase
         RemoveUnrelatedInstallOperations::selfRegister(
             $this->composer,
             new PieComposerRequest(
-                $this->createMock(OutputInterface::class),
+                $this->createMock(IOInterface::class),
                 new TargetPlatform(
                     OperatingSystem::NonWindows,
                     OperatingSystemFamily::Linux,
@@ -99,7 +98,7 @@ final class RemoveUnrelatedInstallOperationsTest extends TestCase
 
         (new RemoveUnrelatedInstallOperations(
             new PieComposerRequest(
-                $this->createMock(OutputInterface::class),
+                $this->createMock(IOInterface::class),
                 new TargetPlatform(
                     OperatingSystem::Windows,
                     OperatingSystemFamily::Linux,

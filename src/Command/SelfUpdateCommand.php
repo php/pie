@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Php\Pie\Command;
 
+use Composer\IO\IOInterface;
+use Composer\IO\NullIO;
 use Composer\Util\AuthHelper;
 use Composer\Util\HttpDownloader;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
@@ -46,7 +48,8 @@ final class SelfUpdateCommand extends Command
     /** @param non-empty-string $githubApiBaseUrl */
     public function __construct(
         private readonly string $githubApiBaseUrl,
-        private readonly QuieterConsoleIO $io,
+        private readonly IOInterface $io,
+        private readonly QuieterConsoleIO $quieterConsoleIo,
         private readonly ContainerInterface $container,
         private readonly FullPathToSelf $fullPathToSelf,
     ) {
@@ -81,7 +84,7 @@ final class SelfUpdateCommand extends Command
     public function execute(InputInterface $input, OutputInterface $output): int
     {
         if (! PieVersion::isPharBuild()) {
-            $output->writeln('<comment>Aborting! You are not running a PHAR, cannot self-update.</comment>');
+            $this->io->write('<comment>Aborting! You are not running a PHAR, cannot self-update.</comment>');
 
             return Command::FAILURE;
         }
@@ -100,20 +103,20 @@ final class SelfUpdateCommand extends Command
             $updateChannel = Channel::Stable;
         }
 
-        $output->writeln(sprintf('Updating using the <info>%s</> channel.', $updateChannel->value));
+        $this->io->write(sprintf('Updating using the <info>%s</> channel.', $updateChannel->value));
 
-        $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $output);
+        $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $this->io);
 
         $composer = PieComposerFactory::createPieComposer(
             $this->container,
             PieComposerRequest::noOperation(
-                $output,
+                new NullIO(),
                 $targetPlatform,
             ),
         );
 
-        $httpDownloader        = new HttpDownloader($this->io, $composer->getConfig());
-        $authHelper            = new AuthHelper($this->io, $composer->getConfig());
+        $httpDownloader        = new HttpDownloader($this->quieterConsoleIo, $composer->getConfig());
+        $authHelper            = new AuthHelper($this->quieterConsoleIo, $composer->getConfig());
         $fetchLatestPieRelease = new FetchPieReleaseFromGitHub($this->githubApiBaseUrl, $httpDownloader, $authHelper);
         $verifyPiePhar         = VerifyPieReleaseUsingAttestation::factory();
 
@@ -123,22 +126,22 @@ final class SelfUpdateCommand extends Command
                 'https://php.github.io/pie/pie-nightly.phar',
             );
 
-            $output->writeln('Downloading the latest nightly release.');
+            $this->io->write('Downloading the latest nightly release.');
         } else {
             try {
                 $latestRelease = $fetchLatestPieRelease->latestReleaseMetadata($updateChannel);
             } catch (Throwable $throwable) {
-                $output->writeln(sprintf('<error>%s</error>', $throwable->getMessage()));
+                $this->io->write(sprintf('<error>%s</error>', $throwable->getMessage()));
 
                 return Command::FAILURE;
             }
 
             $pieVersion = PieVersion::get();
 
-            $output->writeln(sprintf('You are currently running PIE version %s', $pieVersion));
+            $this->io->write(sprintf('You are currently running PIE version %s', $pieVersion));
 
             if (! ReleaseIsNewer::forChannel($updateChannel, $pieVersion, $latestRelease)) {
-                $output->writeln(sprintf(
+                $this->io->write(sprintf(
                     '<info>You already have the latest version for the %s channel 😍</info>',
                     $updateChannel->value,
                 ));
@@ -146,43 +149,43 @@ final class SelfUpdateCommand extends Command
                 return Command::SUCCESS;
             }
 
-            $output->writeln(
+            $this->io->write(
                 sprintf('Newer version %s found, going to update you... ⏳', $latestRelease->tag),
-                OutputInterface::VERBOSITY_VERBOSE,
+                verbosity: IOInterface::VERBOSE,
             );
         }
 
         $pharFilename = $fetchLatestPieRelease->downloadContent($latestRelease);
 
-        $output->writeln(
+        $this->io->write(
             sprintf('Verifying release with digest sha256:%s...', $pharFilename->checksum),
-            OutputInterface::VERBOSITY_VERBOSE,
+            verbosity: IOInterface::VERBOSE,
         );
 
         try {
-            $verifyPiePhar->verify($latestRelease, $pharFilename, $output);
+            $verifyPiePhar->verify($latestRelease, $pharFilename, $this->io);
         } catch (FailedToVerifyRelease $failedToVerifyRelease) {
-            $output->writeln(sprintf(
+            $this->io->write(sprintf(
                 '<error>❌ Failed to verify the pie.phar release %s: %s</error>',
                 $latestRelease->tag,
                 $failedToVerifyRelease->getMessage(),
             ));
 
-            $output->writeln('This means I could not verify that the PHAR we tried to update to was authentic, so I am aborting the self-update.');
+            $this->io->write('This means I could not verify that the PHAR we tried to update to was authentic, so I am aborting the self-update.');
             unlink($pharFilename->filePath);
 
             return Command::FAILURE;
         }
 
         $fullPathToSelf = ($this->fullPathToSelf)();
-        $output->writeln(
+        $this->io->write(
             sprintf('Writing new version to %s', $fullPathToSelf),
-            OutputInterface::VERBOSITY_VERBOSE,
+            verbosity: IOInterface::VERBOSE,
         );
         SudoFilePut::contents($fullPathToSelf, file_get_contents($pharFilename->filePath));
         unlink($pharFilename->filePath);
 
-        $output->writeln(sprintf(
+        $this->io->write(sprintf(
             '<info>%s PIE has been upgraded to %s</info>',
             Emoji::GREEN_CHECKMARK,
             $latestRelease->tag,

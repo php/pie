@@ -6,12 +6,12 @@ namespace Php\PieUnitTest\ComposerIntegration;
 
 use Composer\Composer;
 use Composer\Config;
+use Composer\IO\IOInterface;
 use Composer\Util\Filesystem;
 use Php\Pie\ComposerIntegration\VendorCleanup;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Console\Output\OutputInterface;
 
 use function restore_error_handler;
 use function set_error_handler;
@@ -24,7 +24,7 @@ final class VendorCleanupTest extends TestCase
 {
     private const VENDOR_DIR = __DIR__ . '/../../assets/vendor-cleanup-dir';
 
-    private OutputInterface&MockObject $output;
+    private IOInterface&MockObject $io;
     private Filesystem&MockObject $filesystem;
     private VendorCleanup $vendorCleanup;
 
@@ -32,10 +32,10 @@ final class VendorCleanupTest extends TestCase
     {
         parent::setUp();
 
-        $this->output     = $this->createMock(OutputInterface::class);
+        $this->io         = $this->createMock(IOInterface::class);
         $this->filesystem = $this->createMock(Filesystem::class);
 
-        $this->vendorCleanup = new VendorCleanup($this->output, $this->filesystem);
+        $this->vendorCleanup = new VendorCleanup($this->io, $this->filesystem);
     }
 
     private function composerWithVendorDirConfig(string $vendorDirConfig): Composer&MockObject
@@ -54,12 +54,13 @@ final class VendorCleanupTest extends TestCase
 
     public function testInvalidVendorDirectory(): void
     {
-        $this->output
+        $this->io
             ->expects(self::once())
-            ->method('writeln')
+            ->method('write')
             ->with(
                 '<comment>Vendor directory (vendor-dir config) /path/that/does/not/exist seemed invalid?</comment>',
-                OutputInterface::VERBOSITY_VERY_VERBOSE,
+                true,
+                IOInterface::VERY_VERBOSE,
             );
 
         /**

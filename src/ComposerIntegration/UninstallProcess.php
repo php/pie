@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Php\Pie\ComposerIntegration;
 
+use Composer\IO\IOInterface;
 use Composer\Package\CompletePackageInterface;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Installing\Ini\RemoveIniEntry;
 use Php\Pie\Installing\Uninstall;
-use Symfony\Component\Console\Output\OutputInterface;
 
 use function array_walk;
 use function count;
@@ -28,30 +28,30 @@ class UninstallProcess
         PieComposerRequest $composerRequest,
         CompletePackageInterface $composerPackage,
     ): void {
-        $output = $composerRequest->pieOutput;
+        $io = $composerRequest->pieOutput;
 
         $piePackage = Package::fromComposerCompletePackage($composerPackage);
 
-        $affectedIniFiles = ($this->removeIniEntry)($piePackage, $composerRequest->targetPlatform, $output);
+        $affectedIniFiles = ($this->removeIniEntry)($piePackage, $composerRequest->targetPlatform, $io);
 
         if (count($affectedIniFiles) === 1) {
-            $output->writeln(
+            $io->write(
                 sprintf('INI file "%s" was updated to remove the extension.', reset($affectedIniFiles)),
-                OutputInterface::VERBOSITY_VERBOSE,
+                verbosity: IOInterface::VERBOSE,
             );
         } elseif (count($affectedIniFiles) === 0) {
-            $output->writeln(
+            $io->write(
                 'No INI files were updated to remove the extension.',
-                OutputInterface::VERBOSITY_VERBOSE,
+                verbosity: IOInterface::VERBOSE,
             );
         } else {
-            $output->writeln(
+            $io->write(
                 'The following INI files were updated to remove the extnesion:',
-                OutputInterface::VERBOSITY_VERBOSE,
+                verbosity: IOInterface::VERBOSE,
             );
-            array_walk($affectedIniFiles, static fn (string $ini) => $output->writeln(' - ' . $ini));
+            array_walk($affectedIniFiles, static fn (string $ini) => $io->write(' - ' . $ini));
         }
 
-        $output->writeln(sprintf('👋 <info>Removed extension:</info> %s', ($this->uninstall)($piePackage)->filePath));
+        $io->write(sprintf('👋 <info>Removed extension:</info> %s', ($this->uninstall)($piePackage)->filePath));
     }
 }

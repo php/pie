@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Php\Pie\Installing\Ini;
 
+use Composer\IO\IOInterface;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\ExtensionType;
 use Php\Pie\File\FailedToWriteFile;
 use Php\Pie\File\SudoFilePut;
 use Php\Pie\Platform\TargetPlatform;
-use Symfony\Component\Console\Output\OutputInterface;
 
 use function array_filter;
 use function array_map;
@@ -30,7 +30,7 @@ use const DIRECTORY_SEPARATOR;
 class RemoveIniEntryWithFileGetContents implements RemoveIniEntry
 {
     /** @return list<string> Returns a list of INI files that were updated to remove the extension */
-    public function __invoke(Package $package, TargetPlatform $targetPlatform, OutputInterface $output): array
+    public function __invoke(Package $package, TargetPlatform $targetPlatform, IOInterface $io): array
     {
         $allIniFiles = [];
 
@@ -76,7 +76,7 @@ class RemoveIniEntryWithFileGetContents implements RemoveIniEntry
         $updatedIniFiles = [];
         array_walk(
             $allIniFiles,
-            static function (string $iniFile) use (&$updatedIniFiles, $regex, $package, $output): void {
+            static function (string $iniFile) use (&$updatedIniFiles, $regex, $package, $io): void {
                 $currentContent = file_get_contents($iniFile);
 
                 if ($currentContent === false || $currentContent === '') {
@@ -96,7 +96,7 @@ class RemoveIniEntryWithFileGetContents implements RemoveIniEntry
                 try {
                     SudoFilePut::contents($iniFile, $replacedContent);
                 } catch (FailedToWriteFile) {
-                    $output->writeln(sprintf(
+                    $io->write(sprintf(
                         '<error>Failed to remove extension "%s" from INI file "%s"</error>',
                         $package->extensionName()->name(),
                         $iniFile,

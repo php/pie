@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\PieUnitTest\Installing\Ini;
 
+use Composer\IO\BufferIO;
 use Composer\Package\CompletePackageInterface;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\DownloadedPackage;
@@ -22,7 +23,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\RequiresOperatingSystemFamily;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\Console\Output\OutputInterface;
 
 #[RequiresOperatingSystemFamily('Linux')]
 #[CoversClass(DockerPhpExtEnable::class)]
@@ -32,7 +33,7 @@ final class DockerPhpExtEnableTest extends TestCase
     private const GOOD_DOCKER_PHP_EXT_ENABLE         = __DIR__ . '/../../../assets/docker-php-ext-enable/good';
     private const BAD_DOCKER_PHP_EXT_ENABLE          = __DIR__ . '/../../../assets/docker-php-ext-enable/bad';
 
-    private BufferedOutput $output;
+    private BufferIO $io;
     private PhpBinaryPath&MockObject $mockPhpBinary;
     private TargetPlatform $targetPlatform;
     private DownloadedPackage $downloadedPackage;
@@ -42,7 +43,7 @@ final class DockerPhpExtEnableTest extends TestCase
     {
         parent::setUp();
 
-        $this->output = new BufferedOutput(BufferedOutput::VERBOSITY_VERBOSE);
+        $this->io = new BufferIO(verbosity: OutputInterface::VERBOSITY_VERBOSE);
 
         $this->mockPhpBinary = $this->createMock(PhpBinaryPath::class);
         (fn () => $this->phpBinaryPath = '/path/to/php')
@@ -101,7 +102,7 @@ final class DockerPhpExtEnableTest extends TestCase
                     $this->targetPlatform,
                     $this->downloadedPackage,
                     $this->binaryFile,
-                    $this->output,
+                    $this->io,
                 ),
         );
     }
@@ -111,7 +112,7 @@ final class DockerPhpExtEnableTest extends TestCase
         $this->mockPhpBinary
             ->expects(self::once())
             ->method('assertExtensionIsLoadedInRuntime')
-            ->with($this->downloadedPackage->package->extensionName(), $this->output);
+            ->with($this->downloadedPackage->package->extensionName(), $this->io);
 
         self::assertTrue(
             (new DockerPhpExtEnable(self::GOOD_DOCKER_PHP_EXT_ENABLE))
@@ -119,7 +120,7 @@ final class DockerPhpExtEnableTest extends TestCase
                     $this->targetPlatform,
                     $this->downloadedPackage,
                     $this->binaryFile,
-                    $this->output,
+                    $this->io,
                 ),
         );
     }
@@ -136,7 +137,7 @@ final class DockerPhpExtEnableTest extends TestCase
                     $this->targetPlatform,
                     $this->downloadedPackage,
                     $this->binaryFile,
-                    $this->output,
+                    $this->io,
                 ),
         );
     }
@@ -146,7 +147,7 @@ final class DockerPhpExtEnableTest extends TestCase
         $this->mockPhpBinary
             ->expects(self::once())
             ->method('assertExtensionIsLoadedInRuntime')
-            ->with($this->downloadedPackage->package->extensionName(), $this->output)
+            ->with($this->downloadedPackage->package->extensionName(), $this->io)
             ->willThrowException(ExtensionIsNotLoaded::fromExpectedExtension(
                 $this->mockPhpBinary,
                 $this->downloadedPackage->package->extensionName(),
@@ -158,7 +159,7 @@ final class DockerPhpExtEnableTest extends TestCase
                     $this->targetPlatform,
                     $this->downloadedPackage,
                     $this->binaryFile,
-                    $this->output,
+                    $this->io,
                 ),
         );
     }

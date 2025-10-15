@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Php\Pie\Installing;
 
+use Composer\IO\IOInterface;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\File\BinaryFile;
 use Php\Pie\File\Sudo;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Util\Process;
 use RuntimeException;
-use Symfony\Component\Console\Output\OutputInterface;
 
 use function array_unshift;
 use function file_exists;
@@ -29,7 +29,7 @@ final class UnixInstall implements Install
     public function __invoke(
         DownloadedPackage $downloadedPackage,
         TargetPlatform $targetPlatform,
-        OutputInterface $output,
+        IOInterface $io,
         bool $attemptToSetupIniFile,
     ): BinaryFile {
         $targetExtensionPath = $targetPlatform->phpBinaryPath->extensionPath();
@@ -51,7 +51,7 @@ final class UnixInstall implements Install
             )
             && Sudo::exists()
         ) {
-            $output->writeln(sprintf(
+            $io->write(sprintf(
                 '<comment>Cannot write to %s, so using sudo to elevate privileges.</comment>',
                 $targetExtensionPath,
             ));
@@ -64,15 +64,13 @@ final class UnixInstall implements Install
             self::MAKE_INSTALL_TIMEOUT_SECS,
         );
 
-        if ($output->isVeryVerbose()) {
-            $output->writeln($makeInstallOutput);
-        }
+        $io->write($makeInstallOutput, verbosity: IOInterface::VERY_VERBOSE);
 
         if (! file_exists($expectedSharedObjectLocation)) {
             throw new RuntimeException('Install failed, ' . $expectedSharedObjectLocation . ' was not installed.');
         }
 
-        $output->writeln('<info>Install complete:</info> ' . $expectedSharedObjectLocation);
+        $io->write('<info>Install complete:</info> ' . $expectedSharedObjectLocation);
 
         $binaryFile = BinaryFile::fromFileWithSha256Checksum($expectedSharedObjectLocation);
 
@@ -80,7 +78,7 @@ final class UnixInstall implements Install
             $targetPlatform,
             $downloadedPackage,
             $binaryFile,
-            $output,
+            $io,
             $attemptToSetupIniFile,
         );
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\Pie\Installing\Ini;
 
+use Composer\IO\IOInterface;
 use Composer\Util\Platform;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\File\BinaryFile;
@@ -12,7 +13,6 @@ use Php\Pie\File\SudoCreate;
 use Php\Pie\File\SudoUnlink;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Util\Process;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 
 use function array_unshift;
@@ -47,7 +47,7 @@ final class OndrejPhpenmod implements SetupIniApproach
         TargetPlatform $targetPlatform,
         DownloadedPackage $downloadedPackage,
         BinaryFile $binaryFile,
-        OutputInterface $output,
+        IOInterface $io,
     ): bool {
         $phpenmodPath = $this->phpenmodPath();
 
@@ -60,9 +60,9 @@ final class OndrejPhpenmod implements SetupIniApproach
         $additionalPhpIniPath = $targetPlatform->phpBinaryPath->additionalIniDirectory();
 
         if ($additionalPhpIniPath === null) {
-            $output->writeln(
+            $io->write(
                 'Additional INI file path was not set - may not be Ondrej PHP repo',
-                OutputInterface::VERBOSITY_VERBOSE,
+                verbosity: IOInterface::VERBOSE,
             );
 
             return false;
@@ -70,36 +70,36 @@ final class OndrejPhpenmod implements SetupIniApproach
 
         // Cursory check for the expected PHP INI directory; this is another indication we're using the Ondrej repo
         if (preg_match('#/etc/php/\d\.\d/[a-z-_]+/conf.d#', $additionalPhpIniPath) !== 1) {
-            $output->writeln(
+            $io->write(
                 sprintf(
                     'Warning: additional INI file path was not in the expected format (/etc/php/{version}/{sapi}/conf.d). Path was: %s',
                     $additionalPhpIniPath,
                 ),
-                OutputInterface::VERBOSITY_VERY_VERBOSE,
+                verbosity: IOInterface::VERY_VERBOSE,
             );
         }
 
         $expectedModsAvailablePath = sprintf($this->modsAvailablePath, $targetPlatform->phpBinaryPath->majorMinorVersion());
 
         if (! file_exists($expectedModsAvailablePath)) {
-            $output->writeln(
+            $io->write(
                 sprintf(
                     'Mods available path %s does not exist',
                     $expectedModsAvailablePath,
                 ),
-                OutputInterface::VERBOSITY_VERBOSE,
+                verbosity: IOInterface::VERBOSE,
             );
 
             return false;
         }
 
         if (! is_dir($expectedModsAvailablePath)) {
-            $output->writeln(
+            $io->write(
                 sprintf(
                     'Mods available path %s is not a directory',
                     $expectedModsAvailablePath,
                 ),
-                OutputInterface::VERBOSITY_VERBOSE,
+                verbosity: IOInterface::VERBOSE,
             );
 
             return false;
@@ -108,12 +108,12 @@ final class OndrejPhpenmod implements SetupIniApproach
         $needSudo = false;
         if (! is_writable($expectedModsAvailablePath)) {
             if (! Sudo::exists()) {
-                $output->writeln(
+                $io->write(
                     sprintf(
                         'Mods available path %s is not writable',
                         $expectedModsAvailablePath,
                     ),
-                    OutputInterface::VERBOSITY_VERBOSE,
+                    verbosity: IOInterface::VERBOSE,
                 );
 
                 return false;
@@ -131,12 +131,12 @@ final class OndrejPhpenmod implements SetupIniApproach
 
         $pieCreatedTheIniFile = false;
         if (! file_exists($expectedIniFile)) {
-            $output->writeln(
+            $io->write(
                 sprintf(
                     'Creating new INI file based on extension priority: %s',
                     $expectedIniFile,
                 ),
-                OutputInterface::VERBOSITY_VERY_VERBOSE,
+                verbosity: IOInterface::VERY_VERBOSE,
             );
             $pieCreatedTheIniFile = true;
             SudoCreate::file($expectedIniFile);
@@ -146,8 +146,8 @@ final class OndrejPhpenmod implements SetupIniApproach
             $expectedIniFile,
             $targetPlatform,
             $downloadedPackage,
-            $output,
-            static function () use ($needSudo, $phpenmodPath, $targetPlatform, $downloadedPackage, $output): bool {
+            $io,
+            static function () use ($needSudo, $phpenmodPath, $targetPlatform, $downloadedPackage, $io): bool {
                 try {
                     $processArgs = [
                         $phpenmodPath,
@@ -159,7 +159,10 @@ final class OndrejPhpenmod implements SetupIniApproach
                     ];
 
                     if ($needSudo && Sudo::exists()) {
-                        $output->writeln('Using sudo to elevate privileges for phpenmod', OutputInterface::VERBOSITY_VERBOSE);
+                        $io->write(
+                            'Using sudo to elevate privileges for phpenmod',
+                            verbosity: IOInterface::VERBOSE,
+                        );
                         array_unshift($processArgs, Sudo::find());
                     }
 
@@ -167,7 +170,7 @@ final class OndrejPhpenmod implements SetupIniApproach
 
                     return true;
                 } catch (ProcessFailedException $processFailedException) {
-                    $output->writeln(
+                    $io->write(
                         sprintf(
                             'Failed to use %s to enable %s for PHP %s: %s',
                             $phpenmodPath,
@@ -175,7 +178,7 @@ final class OndrejPhpenmod implements SetupIniApproach
                             $targetPlatform->phpBinaryPath->majorMinorVersion(),
                             $processFailedException->getMessage(),
                         ),
-                        OutputInterface::VERBOSITY_VERBOSE,
+                        verbosity: IOInterface::VERBOSE,
                     );
 
                     return false;

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Php\Pie\Installing\Ini;
 
+use Composer\IO\IOInterface;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\Platform\TargetPlatform;
-use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 
 use function file_exists;
@@ -30,28 +30,28 @@ class CheckAndAddExtensionToIniIfNeeded
         string $iniFile,
         TargetPlatform $targetPlatform,
         DownloadedPackage $downloadedPackage,
-        OutputInterface $output,
+        IOInterface $io,
         callable|null $additionalEnableStep,
     ): bool {
         if (! file_exists($iniFile) || ! is_readable($iniFile)) {
-            $output->writeln(
+            $io->write(
                 sprintf(
                     'PHP is configured to use %s, but it did not exist, or is not readable by PIE.',
                     $iniFile,
                 ),
-                OutputInterface::VERBOSITY_VERBOSE,
+                verbosity: IOInterface::VERBOSE,
             );
 
             return false;
         }
 
         if (($this->isExtensionAlreadyInTheIniFile)($iniFile, $downloadedPackage->package->extensionName())) {
-            $output->writeln(
+            $io->write(
                 sprintf(
                     'Extension is already enabled in the INI file %s',
                     $iniFile,
                 ),
-                OutputInterface::VERBOSITY_VERBOSE,
+                verbosity: IOInterface::VERBOSE,
             );
 
             if ($additionalEnableStep !== null && ! $additionalEnableStep()) {
@@ -59,11 +59,11 @@ class CheckAndAddExtensionToIniIfNeeded
             }
 
             try {
-                $targetPlatform->phpBinaryPath->assertExtensionIsLoadedInRuntime($downloadedPackage->package->extensionName(), $output);
+                $targetPlatform->phpBinaryPath->assertExtensionIsLoadedInRuntime($downloadedPackage->package->extensionName(), $io);
 
                 return true;
             } catch (Throwable $anything) {
-                $output->writeln(sprintf(
+                $io->write(sprintf(
                     '<error>Something went wrong verifying the %s extension is enabled: %s</error>',
                     $downloadedPackage->package->extensionName()->name(),
                     $anything->getMessage(),
@@ -77,7 +77,7 @@ class CheckAndAddExtensionToIniIfNeeded
             $iniFile,
             $downloadedPackage->package,
             $targetPlatform->phpBinaryPath,
-            $output,
+            $io,
             $additionalEnableStep,
         );
     }

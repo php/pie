@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\Pie\Platform\TargetPhp;
 
+use Composer\IO\IOInterface;
 use Composer\Semver\VersionParser;
 use Composer\Util\Platform;
 use Php\Pie\ExtensionName;
@@ -12,7 +13,6 @@ use Php\Pie\Platform\OperatingSystem;
 use Php\Pie\Platform\OperatingSystemFamily;
 use Php\Pie\Util\Process;
 use RuntimeException;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Webmozart\Assert\Assert;
 
@@ -124,7 +124,7 @@ class PhpBinaryPath
         throw new RuntimeException('Could not determine extension path for ' . $this->phpBinaryPath);
     }
 
-    public function assertExtensionIsLoadedInRuntime(ExtensionName $extension, OutputInterface|null $output = null): void
+    public function assertExtensionIsLoadedInRuntime(ExtensionName $extension, IOInterface|null $io = null): void
     {
         if (! in_array(strtolower($extension->name()), array_map('strtolower', array_keys($this->extensions())))) {
             throw Exception\ExtensionIsNotLoaded::fromExpectedExtension(
@@ -133,16 +133,16 @@ class PhpBinaryPath
             );
         }
 
-        if ($output === null) {
+        if ($io === null) {
             return;
         }
 
-        $output->writeln(
+        $io->write(
             sprintf(
                 'Successfully asserted that extension %s is loaded in runtime.',
                 $extension->name(),
             ),
-            OutputInterface::VERBOSITY_VERBOSE,
+            verbosity: IOInterface::VERBOSE,
         );
     }
 
@@ -252,13 +252,13 @@ PHP,
 
     public function operatingSystemFamily(): OperatingSystemFamily
     {
-        $output = self::cleanWarningAndDeprecationsFromOutput(Process::run([
-            $this->phpBinaryPath,
-            '-r',
-            'echo PHP_OS_FAMILY;',
-        ]));
-
-        $osFamily = OperatingSystemFamily::tryFrom(strtolower(trim($output)));
+        $osFamily = OperatingSystemFamily::tryFrom(strtolower(trim(
+            self::cleanWarningAndDeprecationsFromOutput(Process::run([
+                $this->phpBinaryPath,
+                '-r',
+                'echo PHP_OS_FAMILY;',
+            ])),
+        )));
         Assert::notNull($osFamily, 'Could not determine operating system family');
 
         return $osFamily;

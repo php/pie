@@ -29,14 +29,14 @@ class InstallAndBuildProcess
         CompletePackageInterface $composerPackage,
         string $installPath,
     ): void {
-        $output = $composerRequest->pieOutput;
+        $io = $composerRequest->pieOutput;
 
         $downloadedPackage = DownloadedPackage::fromPackageAndExtractedPath(
             Package::fromComposerCompletePackage($composerPackage),
             $installPath,
         );
 
-        $output->writeln(sprintf(
+        $io->write(sprintf(
             '<info>Extracted %s source to:</info> %s',
             $downloadedPackage->package->prettyNameAndVersion(),
             $downloadedPackage->extractedSourcePath,
@@ -53,7 +53,7 @@ class InstallAndBuildProcess
                 $downloadedPackage,
                 $composerRequest->targetPlatform,
                 $composerRequest->configureOptions,
-                $output,
+                $io,
                 $composerRequest->phpizePath,
             );
 
@@ -75,7 +75,7 @@ class InstallAndBuildProcess
             ($this->pieInstall)(
                 $downloadedPackage,
                 $composerRequest->targetPlatform,
-                $output,
+                $io,
                 $composerRequest->attemptToSetupIniFile,
             ),
         );

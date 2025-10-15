@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\Pie\Command;
 
+use Composer\IO\IOInterface;
 use Php\Pie\File\BinaryFile;
 use Php\Pie\File\FullPathToSelf;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
@@ -26,6 +27,7 @@ final class SelfVerifyCommand extends Command
 {
     public function __construct(
         private readonly FullPathToSelf $fullPathToSelf,
+        private readonly IOInterface $io,
     ) {
         parent::__construct();
     }
@@ -40,7 +42,7 @@ final class SelfVerifyCommand extends Command
     public function execute(InputInterface $input, OutputInterface $output): int
     {
         if (! PieVersion::isPharBuild()) {
-            $output->writeln('<comment>Aborting! You are not running a PHAR, cannot self-verify.</comment>');
+            $this->io->write('<comment>Aborting! You are not running a PHAR, cannot self-verify.</comment>');
 
             return Command::FAILURE;
         }
@@ -50,9 +52,9 @@ final class SelfVerifyCommand extends Command
         $verifyPiePhar = VerifyPieReleaseUsingAttestation::factory();
 
         try {
-            $verifyPiePhar->verify($latestRelease, $pharFilename, $output);
+            $verifyPiePhar->verify($latestRelease, $pharFilename, $this->io);
         } catch (FailedToVerifyRelease $failedToVerifyRelease) {
-            $output->writeln(sprintf(
+            $this->io->write(sprintf(
                 '<error>❌ Failed to verify the pie.phar release %s: %s</error>',
                 $latestRelease->tag,
                 $failedToVerifyRelease->getMessage(),
@@ -61,7 +63,7 @@ final class SelfVerifyCommand extends Command
             return Command::FAILURE;
         }
 
-        $output->writeln(sprintf(
+        $this->io->write(sprintf(
             '<info>%s You are running an authentic PIE version %s.</info>',
             Emoji::GREEN_CHECKMARK,
             $latestRelease->tag,

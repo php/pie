@@ -20,12 +20,15 @@ use function array_values;
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 class InvokeSubCommand
 {
+    public function __construct(private readonly OutputInterface $output)
+    {
+    }
+
     /** @param array<array-key, mixed> $subCommandInput */
     public function __invoke(
         Command $command,
         array $subCommandInput,
         InputInterface $originalCommandInput,
-        OutputInterface $output,
     ): int {
         $originalSuppliedOptions = array_filter($originalCommandInput->getOptions());
         $installForProjectInput  = new ArrayInput(array_merge(
@@ -39,6 +42,6 @@ class InvokeSubCommand
         $application = $command->getApplication();
         Assert::notNull($application);
 
-        return $application->doRun($installForProjectInput, $output);
+        return $application->doRun($installForProjectInput, $this->output);
     }
 }

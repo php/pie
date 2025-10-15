@@ -8,7 +8,6 @@ use Php\Pie\Command\InfoCommand;
 use Php\Pie\Container;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Console\Tester\CommandTester;
 
 #[CoversClass(InfoCommand::class)]
 final class InfoCommandTest extends TestCase
@@ -17,7 +16,7 @@ final class InfoCommandTest extends TestCase
 
     public function setUp(): void
     {
-        $this->commandTester = new CommandTester(Container::factory()->get(InfoCommand::class));
+        $this->commandTester = new CommandTester(Container::testFactory()->get(InfoCommand::class));
     }
 
     public function testInfoCommandDisplaysInformation(): void

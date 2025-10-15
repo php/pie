@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Php\Pie\Installing;
 
+use Composer\IO\IOInterface;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\ExtensionType;
 use Php\Pie\File\BinaryFile;
 use Php\Pie\Installing\Ini\SetupIniApproach;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Util\Emoji;
-use Symfony\Component\Console\Output\OutputInterface;
 
 use function sprintf;
 
@@ -25,26 +25,26 @@ class SetupIniFile
         TargetPlatform $targetPlatform,
         DownloadedPackage $downloadedPackage,
         BinaryFile $binaryFile,
-        OutputInterface $output,
+        IOInterface $io,
         bool $attemptToSetupIniFile,
     ): void {
         if (
             $attemptToSetupIniFile
             && $this->setupIniApproach->canBeUsed($targetPlatform)
-            && $this->setupIniApproach->setup($targetPlatform, $downloadedPackage, $binaryFile, $output)
+            && $this->setupIniApproach->setup($targetPlatform, $downloadedPackage, $binaryFile, $io)
         ) {
-            $output->writeln(sprintf(
+            $io->write(sprintf(
                 '<info>%s Extension is enabled and loaded in</info> %s',
                 Emoji::GREEN_CHECKMARK,
                 $targetPlatform->phpBinaryPath->phpBinaryPath,
             ));
         } else {
             if (! $attemptToSetupIniFile) {
-                $output->writeln('Automatic extension enabling was skipped.', OutputInterface::VERBOSITY_VERBOSE);
+                $io->write('Automatic extension enabling was skipped.', verbosity: IOInterface::VERY_VERBOSE);
             }
 
-            $output->writeln(sprintf('<comment>%s Extension has NOT been automatically enabled.</comment>', Emoji::WARNING));
-            $output->writeln(sprintf(
+            $io->write(sprintf('<comment>%s Extension has NOT been automatically enabled.</comment>', Emoji::WARNING));
+            $io->write(sprintf(
                 '<comment>You must now add "%s=%s" to your php.ini</comment>',
                 $downloadedPackage->package->extensionType() === ExtensionType::PhpModule ? 'extension' : 'zend_extension',
                 $downloadedPackage->package->extensionName()->name(),

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\PieIntegrationTest\Building;
 
+use Composer\IO\BufferIO;
 use Composer\Package\CompletePackage;
 use Composer\Util\Platform;
 use Php\Pie\Building\ExtensionBinaryNotFound;
@@ -16,7 +17,6 @@ use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
 
@@ -33,7 +33,7 @@ final class UnixBuildTest extends TestCase
             self::markTestSkipped('Unix build test cannot be run on Windows');
         }
 
-        $output = new BufferedOutput();
+        $output = new BufferIO();
 
         $downloadedPackage = DownloadedPackage::fromPackageAndExtractedPath(
             new Package(
@@ -58,7 +58,7 @@ final class UnixBuildTest extends TestCase
 
         self::assertNotEmpty($builtBinary);
 
-        $outputString = $output->fetch();
+        $outputString = $output->getOutput();
 
         self::assertStringContainsString('phpize complete.', $outputString);
         self::assertStringContainsString('Configure complete with options: --enable-pie_test_ext', $outputString);
@@ -82,7 +82,7 @@ final class UnixBuildTest extends TestCase
             self::markTestSkipped('Unix build test cannot be run on Windows');
         }
 
-        $output = new BufferedOutput();
+        $output = new BufferIO();
 
         $downloadedPackage = DownloadedPackage::fromPackageAndExtractedPath(
             new Package(
@@ -119,7 +119,7 @@ final class UnixBuildTest extends TestCase
             self::markTestSkipped('Unix build test cannot be run on Windows');
         }
 
-        $output = new BufferedOutput();
+        $output = new BufferIO();
 
         $composerPackage = $this->createMock(CompletePackage::class);
         $composerPackage->method('getPrettyName')->willReturn('myvendor/pie_test_ext');
@@ -143,7 +143,7 @@ final class UnixBuildTest extends TestCase
 
         self::assertNotEmpty($builtBinary);
 
-        $outputString = $output->fetch();
+        $outputString = $output->getOutput();
 
         self::assertStringContainsString('phpize complete.', $outputString);
         self::assertStringContainsString('Configure complete with options: --enable-pie_test_ext', $outputString);
@@ -170,8 +170,7 @@ final class UnixBuildTest extends TestCase
         (new Process(['phpize', '--clean'], self::TEST_EXTENSION_PATH))->mustRun();
         self::assertFileDoesNotExist(self::TEST_EXTENSION_PATH . '/configure');
 
-        $output = new BufferedOutput();
-        $output->setVerbosity(OutputInterface::VERBOSITY_VERBOSE);
+        $output = new BufferIO(verbosity: OutputInterface::VERBOSITY_VERBOSE);
 
         $downloadedPackage = DownloadedPackage::fromPackageAndExtractedPath(
             new Package(
@@ -194,7 +193,7 @@ final class UnixBuildTest extends TestCase
             null,
         );
 
-        $outputString = $output->fetch();
+        $outputString = $output->getOutput();
         self::assertStringContainsString('Skipping phpize --clean, configure does not exist', $outputString);
         self::assertStringNotContainsString('Build files cleaned up', $outputString);
     }
@@ -208,8 +207,7 @@ final class UnixBuildTest extends TestCase
         (new Process(['phpize'], self::TEST_EXTENSION_PATH))->mustRun();
         self::assertFileExists(self::TEST_EXTENSION_PATH . '/configure');
 
-        $output = new BufferedOutput();
-        $output->setVerbosity(OutputInterface::VERBOSITY_VERBOSE);
+        $output = new BufferIO(verbosity: OutputInterface::VERBOSITY_VERBOSE);
 
         $downloadedPackage = DownloadedPackage::fromPackageAndExtractedPath(
             new Package(
@@ -232,7 +230,7 @@ final class UnixBuildTest extends TestCase
             null,
         );
 
-        $outputString = $output->fetch();
+        $outputString = $output->getOutput();
         self::assertStringContainsString('Running phpize --clean step', $outputString);
         self::assertStringContainsString('Build files cleaned up', $outputString);
     }

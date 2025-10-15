@@ -95,7 +95,7 @@ class OverrideDownloadUrlInstallListener
                     $possibleAssetNames,
                 );
 
-                $this->composerRequest->pieOutput->writeln('Found prebuilt archive: ' . $url);
+                $this->composerRequest->pieOutput->write('Found prebuilt archive: ' . $url);
                 $composerPackage->setDistUrl($url);
 
                 if (pathinfo($url, PATHINFO_EXTENSION) !== 'tgz') {

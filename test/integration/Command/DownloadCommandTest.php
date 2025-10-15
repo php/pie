@@ -12,7 +12,6 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\RequiresOperatingSystemFamily;
 use PHPUnit\Framework\Attributes\RequiresPhp;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Console\Tester\CommandTester;
 
 use function array_combine;
 use function array_map;
@@ -31,7 +30,7 @@ class DownloadCommandTest extends TestCase
 
     public function setUp(): void
     {
-        $this->commandTester = new CommandTester(Container::factory()->get(DownloadCommand::class));
+        $this->commandTester = new CommandTester(Container::testFactory()->get(DownloadCommand::class));
     }
 
     /**

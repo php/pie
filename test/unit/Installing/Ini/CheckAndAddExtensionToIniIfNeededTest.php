@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\PieUnitTest\Installing\Ini;
 
+use Composer\IO\BufferIO;
 use Composer\Package\CompletePackageInterface;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\DownloadedPackage;
@@ -22,14 +23,14 @@ use Php\Pie\Platform\ThreadSafetyMode;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\Console\Output\OutputInterface;
 
 #[CoversClass(CheckAndAddExtensionToIniIfNeeded::class)]
 final class CheckAndAddExtensionToIniIfNeededTest extends TestCase
 {
     private const INI_FILE = __DIR__ . '/../../../assets/example_ini_files/with_commented_extension.ini';
 
-    private BufferedOutput $output;
+    private BufferIO $io;
     private PhpBinaryPath&MockObject $mockPhpBinary;
     private IsExtensionAlreadyInTheIniFile&MockObject $isExtensionAlreadyInTheIniFile;
     private AddExtensionToTheIniFile&MockObject $addExtensionToTheIniFile;
@@ -41,7 +42,7 @@ final class CheckAndAddExtensionToIniIfNeededTest extends TestCase
     {
         parent::setUp();
 
-        $this->output = new BufferedOutput(BufferedOutput::VERBOSITY_VERBOSE);
+        $this->io = new BufferIO(verbosity: OutputInterface::VERBOSITY_VERBOSE);
 
         $this->mockPhpBinary = $this->createMock(PhpBinaryPath::class);
         (fn () => $this->phpBinaryPath = '/path/to/php')
@@ -96,13 +97,13 @@ final class CheckAndAddExtensionToIniIfNeededTest extends TestCase
             '/path/to/non/existent/php.ini',
             $this->targetPlatform,
             $this->downloadedPackage,
-            $this->output,
+            $this->io,
             null,
         ));
 
         self::assertStringContainsString(
             'PHP is configured to use /path/to/non/existent/php.ini, but it did not exist, or is not readable by PIE.',
-            $this->output->fetch(),
+            $this->io->getOutput(),
         );
     }
 
@@ -117,7 +118,7 @@ final class CheckAndAddExtensionToIniIfNeededTest extends TestCase
         $this->mockPhpBinary
             ->expects(self::once())
             ->method('assertExtensionIsLoadedInRuntime')
-            ->with($this->downloadedPackage->package->extensionName(), $this->output)
+            ->with($this->downloadedPackage->package->extensionName(), $this->io)
             ->willThrowException(ExtensionIsNotLoaded::fromExpectedExtension(
                 $this->mockPhpBinary,
                 $this->downloadedPackage->package->extensionName(),
@@ -131,18 +132,18 @@ final class CheckAndAddExtensionToIniIfNeededTest extends TestCase
             self::INI_FILE,
             $this->targetPlatform,
             $this->downloadedPackage,
-            $this->output,
+            $this->io,
             null,
         ));
 
-        $output = $this->output->fetch();
+        $stringOutput = $this->io->getOutput();
         self::assertStringContainsString(
             'Extension is already enabled in the INI file',
-            $output,
+            $stringOutput,
         );
         self::assertStringContainsString(
             'Something went wrong verifying the foobar extension is enabled: Expected extension foobar to be loaded in PHP /path/to/php, but it was not detected.',
-            $output,
+            $stringOutput,
         );
     }
 
@@ -157,7 +158,7 @@ final class CheckAndAddExtensionToIniIfNeededTest extends TestCase
         $this->mockPhpBinary
             ->expects(self::once())
             ->method('assertExtensionIsLoadedInRuntime')
-            ->with($this->downloadedPackage->package->extensionName(), $this->output);
+            ->with($this->downloadedPackage->package->extensionName(), $this->io);
 
         $this->addExtensionToTheIniFile
             ->expects(self::never())
@@ -167,14 +168,14 @@ final class CheckAndAddExtensionToIniIfNeededTest extends TestCase
             self::INI_FILE,
             $this->targetPlatform,
             $this->downloadedPackage,
-            $this->output,
+            $this->io,
             null,
         ));
 
-        $output = $this->output->fetch();
+        $stringOutput = $this->io->getOutput();
         self::assertStringContainsString(
             'Extension is already enabled in the INI file',
-            $output,
+            $stringOutput,
         );
     }
 
@@ -189,7 +190,7 @@ final class CheckAndAddExtensionToIniIfNeededTest extends TestCase
         $this->mockPhpBinary
             ->expects(self::once())
             ->method('assertExtensionIsLoadedInRuntime')
-            ->with($this->downloadedPackage->package->extensionName(), $this->output);
+            ->with($this->downloadedPackage->package->extensionName(), $this->io);
 
         $this->addExtensionToTheIniFile
             ->expects(self::never())
@@ -200,7 +201,7 @@ final class CheckAndAddExtensionToIniIfNeededTest extends TestCase
             self::INI_FILE,
             $this->targetPlatform,
             $this->downloadedPackage,
-            $this->output,
+            $this->io,
             static function () use (&$additionalStepInvoked): bool {
                 $additionalStepInvoked = true;
 
@@ -210,10 +211,9 @@ final class CheckAndAddExtensionToIniIfNeededTest extends TestCase
 
         self::assertTrue($additionalStepInvoked, 'Failed asserting that the additional step was invoked');
 
-        $output = $this->output->fetch();
         self::assertStringContainsString(
             'Extension is already enabled in the INI file',
-            $output,
+            $this->io->getOutput(),
         );
     }
 
@@ -236,7 +236,7 @@ final class CheckAndAddExtensionToIniIfNeededTest extends TestCase
                 self::INI_FILE,
                 $this->downloadedPackage->package,
                 $this->targetPlatform->phpBinaryPath,
-                $this->output,
+                $this->io,
             )
             ->willReturn(true);
 
@@ -244,7 +244,7 @@ final class CheckAndAddExtensionToIniIfNeededTest extends TestCase
             self::INI_FILE,
             $this->targetPlatform,
             $this->downloadedPackage,
-            $this->output,
+            $this->io,
             null,
         ));
     }
@@ -268,7 +268,7 @@ final class CheckAndAddExtensionToIniIfNeededTest extends TestCase
                 self::INI_FILE,
                 $this->downloadedPackage->package,
                 $this->targetPlatform->phpBinaryPath,
-                $this->output,
+                $this->io,
             )
             ->willReturn(false);
 
@@ -276,7 +276,7 @@ final class CheckAndAddExtensionToIniIfNeededTest extends TestCase
             self::INI_FILE,
             $this->targetPlatform,
             $this->downloadedPackage,
-            $this->output,
+            $this->io,
             null,
         ));
     }

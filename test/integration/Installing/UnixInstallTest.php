@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\PieIntegrationTest\Installing;
 
+use Composer\IO\BufferIO;
 use Composer\Package\CompletePackage;
 use Composer\Util\Platform;
 use Php\Pie\Building\UnixBuild;
@@ -19,7 +20,6 @@ use Php\Pie\Platform\TargetPlatform;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Process\Process;
 
 use function array_combine;
@@ -72,7 +72,7 @@ final class UnixInstallTest extends TestCase
             self::markTestSkipped('Unix build test cannot be run on Windows');
         }
 
-        $output         = new BufferedOutput();
+        $output         = new BufferIO();
         $targetPlatform = TargetPlatform::fromPhpBinaryPath(PhpBinaryPath::fromPhpConfigExecutable($phpConfig), null);
         $extensionPath  = $targetPlatform->phpBinaryPath->extensionPath();
 
@@ -102,7 +102,7 @@ final class UnixInstallTest extends TestCase
             $output,
             true,
         );
-        $outputString          = $output->fetch();
+        $outputString          = $output->getOutput();
 
         self::assertStringContainsString('Install complete: ' . $extensionPath . '/pie_test_ext.so', $outputString);
         self::assertStringContainsString('You must now add "extension=pie_test_ext" to your php.ini', $outputString);

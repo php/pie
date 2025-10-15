@@ -12,7 +12,6 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\RequiresOperatingSystemFamily;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Output\BufferedOutput;
-use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Process\Process;
 
 use function array_combine;
@@ -37,7 +36,7 @@ class InstallCommandTest extends TestCase
 
     public function setUp(): void
     {
-        $this->commandTester = new CommandTester(Container::factory()->get(InstallCommand::class));
+        $this->commandTester = new CommandTester(Container::testFactory()->get(InstallCommand::class));
     }
 
     /** @return array<string, array{0: string}> */

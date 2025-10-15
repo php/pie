@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\PieIntegrationTest\DependencyResolver;
 
+use Composer\IO\IOInterface;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieOperation;
@@ -16,7 +17,6 @@ use Php\Pie\Platform\TargetPlatform;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Console\Output\OutputInterface;
 
 use function array_combine;
 use function array_map;
@@ -81,7 +81,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
             PieComposerFactory::createPieComposer(
                 $container,
                 new PieComposerRequest(
-                    $this->createMock(OutputInterface::class),
+                    $this->createMock(IOInterface::class),
                     $targetPlatform,
                     $requestedPackageAndVersion,
                     PieOperation::Resolve,

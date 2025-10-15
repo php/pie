@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\PieIntegrationTest\Installing;
 
+use Composer\IO\BufferIO;
 use Composer\Package\CompletePackage;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\DownloadedPackage;
@@ -25,7 +26,6 @@ use PHPUnit\Framework\TestCase;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
-use Symfony\Component\Console\Output\BufferedOutput;
 
 use function assert;
 use function dirname;
@@ -56,7 +56,7 @@ final class WindowsInstallTest extends TestCase
             ),
             self::TEST_EXTENSION_PATH,
         );
-        $output            = new BufferedOutput();
+        $output            = new BufferIO();
         $targetPlatform    = new TargetPlatform(
             OperatingSystem::Windows,
             OperatingSystemFamily::Windows,
@@ -74,7 +74,7 @@ final class WindowsInstallTest extends TestCase
         $installedDll = $installer->__invoke($downloadedPackage, $targetPlatform, $output, true);
         self::assertSame($extensionPath . '\php_pie_test_ext.dll', $installedDll->filePath);
 
-        $outputString = $output->fetch();
+        $outputString = $output->getOutput();
 
         self::assertStringContainsString('Copied DLL to: ' . $extensionPath . '\php_pie_test_ext.dll', $outputString);
         self::assertStringContainsString('You must now add "extension=pie_test_ext" to your php.ini', $outputString);

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\PieUnitTest\Platform\TargetPhp;
 
+use Composer\IO\BufferIO;
 use Composer\Util\Platform;
 use Php\Pie\ExtensionName;
 use Php\Pie\Platform\Architecture;
@@ -16,7 +17,7 @@ use Php\Pie\Util\Process;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\PhpExecutableFinder;
 
 use function array_column;
@@ -313,12 +314,12 @@ final class PhpBinaryPathTest extends TestCase
             self::fail('Core extension is not loaded, this is quite unexpected...');
         }
 
-        $output = new BufferedOutput(BufferedOutput::VERBOSITY_VERBOSE);
-        $php->assertExtensionIsLoadedInRuntime(ExtensionName::normaliseFromString('Core'), $output);
+        $io = new BufferIO(verbosity: OutputInterface::VERBOSITY_VERBOSE);
+        $php->assertExtensionIsLoadedInRuntime(ExtensionName::normaliseFromString('Core'), $io);
 
         self::assertStringContainsString(
             'Successfully asserted that extension Core is loaded in runtime.',
-            $output->fetch(),
+            $io->getOutput(),
         );
     }
 
@@ -331,12 +332,12 @@ final class PhpBinaryPathTest extends TestCase
             self::fail('Core extension is not loaded, this is quite unexpected...');
         }
 
-        $output = new BufferedOutput(BufferedOutput::VERBOSITY_VERBOSE);
-        $php->assertExtensionIsLoadedInRuntime(ExtensionName::normaliseFromString('CORE'), $output);
+        $io = new BufferIO(verbosity: OutputInterface::VERBOSITY_VERBOSE);
+        $php->assertExtensionIsLoadedInRuntime(ExtensionName::normaliseFromString('CORE'), $io);
 
         self::assertStringContainsString(
             'Successfully asserted that extension CORE is loaded in runtime.',
-            $output->fetch(),
+            $io->getOutput(),
         );
     }
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\Pie\Command;
 
+use Composer\IO\IOInterface;
 use Php\Pie\ComposerIntegration\ComposerIntegrationHandler;
 use Php\Pie\ComposerIntegration\ComposerRunFailed;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
@@ -33,6 +34,7 @@ final class DownloadCommand extends Command
         private readonly DependencyResolver $dependencyResolver,
         private readonly ComposerIntegrationHandler $composerIntegrationHandler,
         private readonly FindMatchingPackages $findMatchingPackages,
+        private readonly IOInterface $io,
     ) {
         parent::__construct();
     }
@@ -48,14 +50,14 @@ final class DownloadCommand extends Command
     {
         CommandHelper::validateInput($input, $this);
 
-        $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $output);
+        $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $this->io);
         try {
             $requestedNameAndVersion = CommandHelper::requestedNameAndVersionPair($input);
         } catch (InvalidPackageName $invalidPackageName) {
             return CommandHelper::handlePackageNotFound(
                 $invalidPackageName,
                 $this->findMatchingPackages,
-                $output,
+                $this->io,
                 $targetPlatform,
                 $this->container,
             );
@@ -66,7 +68,7 @@ final class DownloadCommand extends Command
         $composer = PieComposerFactory::createPieComposer(
             $this->container,
             new PieComposerRequest(
-                $output,
+                $this->io,
                 $targetPlatform,
                 $requestedNameAndVersion,
                 PieOperation::Download,
@@ -87,18 +89,18 @@ final class DownloadCommand extends Command
             return CommandHelper::handlePackageNotFound(
                 $unableToResolveRequirement,
                 $this->findMatchingPackages,
-                $output,
+                $this->io,
                 $targetPlatform,
                 $this->container,
             );
         } catch (BundledPhpExtensionRefusal $bundledPhpExtensionRefusal) {
-            $output->writeln('');
-            $output->writeln('<comment>' . $bundledPhpExtensionRefusal->getMessage() . '</comment>');
+            $this->io->write('');
+            $this->io->write('<comment>' . $bundledPhpExtensionRefusal->getMessage() . '</comment>');
 
             return self::INVALID;
         }
 
-        $output->writeln(sprintf('<info>Found package:</info> %s which provides <info>%s</info>', $package->prettyNameAndVersion(), $package->extensionName()->nameWithExtPrefix()));
+        $this->io->write(sprintf('<info>Found package:</info> %s which provides <info>%s</info>', $package->prettyNameAndVersion(), $package->extensionName()->nameWithExtPrefix()));
 
         try {
             $this->composerIntegrationHandler->runInstall(
@@ -110,7 +112,7 @@ final class DownloadCommand extends Command
                 false,
             );
         } catch (ComposerRunFailed $composerRunFailed) {
-            $output->writeln('<error>' . $composerRunFailed->getMessage() . '</error>');
+            $this->io->write('<error>' . $composerRunFailed->getMessage() . '</error>');
 
             return $composerRunFailed->getCode();
         }

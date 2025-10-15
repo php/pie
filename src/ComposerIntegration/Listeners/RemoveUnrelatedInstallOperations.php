@@ -12,8 +12,8 @@ use Composer\DependencyResolver\Operation\UninstallOperation;
 use Composer\DependencyResolver\Transaction;
 use Composer\Installer\InstallerEvent;
 use Composer\Installer\InstallerEvents;
+use Composer\IO\IOInterface;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
-use Symfony\Component\Console\Output\OutputInterface;
 
 use function array_filter;
 use function assert;
@@ -47,12 +47,12 @@ class RemoveUnrelatedInstallOperations
             $installerEvent->getTransaction()?->getOperations() ?? [],
             function (OperationInterface $operation) use ($pieOutput): bool {
                 if (! $operation instanceof InstallOperation && ! $operation instanceof UninstallOperation) {
-                    $pieOutput->writeln(
+                    $pieOutput->write(
                         sprintf(
                             'Unexpected operation during installer: %s',
                             $operation::class,
                         ),
-                        OutputInterface::VERBOSITY_VERY_VERBOSE,
+                        verbosity: IOInterface::VERY_VERBOSE,
                     );
 
                     return false;
@@ -61,12 +61,12 @@ class RemoveUnrelatedInstallOperations
                 $isRequestedPiePackage = $this->composerRequest->requestedPackage->package === $operation->getPackage()->getName();
 
                 if (! $isRequestedPiePackage) {
-                    $pieOutput->writeln(
+                    $pieOutput->write(
                         sprintf(
                             'Filtering package %s from install operations, as it was not the requested package',
                             $operation->getPackage()->getName(),
                         ),
-                        OutputInterface::VERBOSITY_VERY_VERBOSE,
+                        verbosity: IOInterface::VERY_VERBOSE,
                     );
                 }
 

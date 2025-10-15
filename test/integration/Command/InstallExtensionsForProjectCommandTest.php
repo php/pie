@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\PieIntegrationTest\Command;
 
 use Composer\Composer;
+use Composer\IO\IOInterface;
 use Composer\Package\Link;
 use Composer\Package\RootPackage;
 use Composer\Repository\InstalledArrayRepository;
@@ -15,6 +16,7 @@ use Php\Pie\Command\InstallExtensionsForProjectCommand;
 use Php\Pie\ComposerIntegration\MinimalHelperSet;
 use Php\Pie\ComposerIntegration\PieJsonEditor;
 use Php\Pie\ComposerIntegration\QuieterConsoleIO;
+use Php\Pie\Container;
 use Php\Pie\ExtensionType;
 use Php\Pie\Installing\InstallForPhpProject\ComposerFactoryForProject;
 use Php\Pie\Installing\InstallForPhpProject\DetermineExtensionsRequired;
@@ -32,8 +34,6 @@ use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\BufferedOutput;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Tester\CommandTester;
 
 use function getcwd;
 
@@ -77,6 +77,7 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
         $this->installPiePackage         = $this->createMock(InstallPiePackageFromPath::class);
         $this->questionHelper            = $this->createMock(QuestionHelper::class);
 
+        Container::testFactory();
         $cmd = new InstallExtensionsForProjectCommand(
             $this->composerFactoryForProject,
             new DetermineExtensionsRequired(),
@@ -85,6 +86,7 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
             $this->installSelectedPackage,
             $this->installPiePackage,
             $container,
+            Container::testBuffer(),
         );
         $cmd->setHelperSet(new HelperSet([
             'question' => $this->questionHelper,
@@ -200,7 +202,7 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
                 $rootPackage,
                 self::isInstanceOf(PieJsonEditor::class),
                 self::isInstanceOf(InputInterface::class),
-                self::isInstanceOf(OutputInterface::class),
+                self::isInstanceOf(IOInterface::class),
             )
             ->willReturn(Command::SUCCESS);
 

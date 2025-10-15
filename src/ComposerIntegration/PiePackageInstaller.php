@@ -12,7 +12,6 @@ use Composer\PartialComposer;
 use Composer\Repository\InstalledRepositoryInterface;
 use Composer\Util\Filesystem;
 use Php\Pie\ExtensionType;
-use Symfony\Component\Console\Output\OutputInterface;
 
 use function sprintf;
 
@@ -38,23 +37,23 @@ class PiePackageInstaller extends LibraryInstaller
 
         return parent::install($repo, $composerPackage)
             ?->then(function () use ($composerPackage) {
-                $output = $this->composerRequest->pieOutput;
+                $io = $this->composerRequest->pieOutput;
 
                 if ($this->composerRequest->requestedPackage->package !== $composerPackage->getName()) {
-                    $output->writeln(
+                    $io->write(
                         sprintf(
                             '<comment>Skipping %s install request from Composer as it was not the expected PIE package %s</comment>',
                             $composerPackage->getName(),
                             $this->composerRequest->requestedPackage->package,
                         ),
-                        OutputInterface::VERBOSITY_VERY_VERBOSE,
+                        verbosity: IOInterface::VERY_VERBOSE,
                     );
 
                     return null;
                 }
 
                 if (! $composerPackage instanceof CompletePackage) {
-                    $output->writeln(sprintf(
+                    $io->write(sprintf(
                         '<error>Not using PIE to install %s as it was not a Complete Package</error>',
                         $composerPackage->getName(),
                     ));
@@ -80,23 +79,23 @@ class PiePackageInstaller extends LibraryInstaller
 
         return parent::uninstall($repo, $composerPackage)
             ?->then(function () use ($composerPackage) {
-                $output = $this->composerRequest->pieOutput;
+                $io = $this->composerRequest->pieOutput;
 
                 if ($this->composerRequest->requestedPackage->package !== $composerPackage->getName()) {
-                    $output->writeln(
+                    $io->write(
                         sprintf(
                             '<comment>Skipping %s uninstall request from Composer as it was not the expected PIE package %s</comment>',
                             $composerPackage->getName(),
                             $this->composerRequest->requestedPackage->package,
                         ),
-                        OutputInterface::VERBOSITY_VERY_VERBOSE,
+                        verbosity: IOInterface::VERY_VERBOSE,
                     );
 
                     return null;
                 }
 
                 if (! $composerPackage instanceof CompletePackage) {
-                    $output->writeln(sprintf(
+                    $io->write(sprintf(
                         '<error>Not using PIE to install %s as it was not a Complete Package</error>',
                         $composerPackage->getName(),
                     ));

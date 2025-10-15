@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Php\Pie\Command;
 
+use Composer\IO\IOInterface;
+use Composer\IO\NullIO;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieInstalledJsonMetadataKeys;
@@ -22,7 +24,6 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Webmozart\Assert\Assert;
 
@@ -50,6 +51,7 @@ final class ShowCommand extends Command
         private readonly InstalledPiePackages $installedPiePackages,
         private readonly ContainerInterface $container,
         private readonly ResolveDependencyWithComposer $resolveDependencyWithComposer,
+        private readonly IOInterface $io,
     ) {
         parent::__construct();
     }
@@ -71,25 +73,24 @@ final class ShowCommand extends Command
     public function execute(InputInterface $input, OutputInterface $output): int
     {
         $showAll        = $input->hasOption(self::OPTION_ALL) && $input->getOption(self::OPTION_ALL);
-        $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $output);
+        $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $this->io);
 
-        if ($output->getVerbosity() < OutputInterface::VERBOSITY_VERBOSE) {
-            $output->writeln(
-                sprintf(
-                    '<info>Using pie.json:</info> %s',
-                    PiePlatform::getPieJsonFilename($targetPlatform),
-                ),
-            );
-        }
+        $this->io->write(
+            sprintf(
+                '<info>Using pie.json:</info> %s',
+                PiePlatform::getPieJsonFilename($targetPlatform),
+            ),
+            verbosity: IOInterface::VERBOSE,
+        );
 
         if (! $showAll) {
-            $output->writeln('Tip: to include extensions in this list that PIE does not manage, use the --all flag.');
+            $this->io->write('Tip: to include extensions in this list that PIE does not manage, use the --all flag.');
         }
 
         $composer = PieComposerFactory::createPieComposer(
             $this->container,
             PieComposerRequest::noOperation(
-                new NullOutput(),
+                new NullIO(),
                 $targetPlatform,
             ),
         );
@@ -101,16 +102,16 @@ final class ShowCommand extends Command
         $piePackagesMatched   = [];
         $rootPackageRequires  = $composer->getPackage()->getRequires();
 
-        $output->writeln(sprintf(
+        $this->io->write(sprintf(
             "\n" . '<options=bold,underscore>%s:</>',
             $showAll ? 'All loaded extensions' : 'Loaded PIE extensions',
         ));
         array_walk(
             $phpEnabledExtensions,
-            function (string $version, string $phpExtensionName) use ($composer, $rootPackageRequires, $targetPlatform, $showAll, $output, $piePackages, $extensionPath, $extensionEnding, &$piePackagesMatched): void {
+            function (string $version, string $phpExtensionName) use ($composer, $rootPackageRequires, $targetPlatform, $showAll, $piePackages, $extensionPath, $extensionEnding, &$piePackagesMatched): void {
                 if (! array_key_exists($phpExtensionName, $piePackages)) {
                     if ($showAll) {
-                        $output->writeln(sprintf('  <comment>%s:%s</comment>', $phpExtensionName, $version));
+                        $this->io->write(sprintf('  <comment>%s:%s</comment>', $phpExtensionName, $version));
                     }
 
                     return;
@@ -156,7 +157,7 @@ final class ShowCommand extends Command
                     $updateNotice .= sprintf(', latest version is %s', $latestPackage->version());
                 }
 
-                $output->writeln(sprintf(
+                $this->io->write(sprintf(
                     '  <info>%s:%s</info> (from 🥧 <info>%s</info>%s)%s',
                     $phpExtensionName,
                     $version,
@@ -173,21 +174,21 @@ final class ShowCommand extends Command
         );
 
         if (! $showAll && ! count($piePackagesMatched)) {
-            $output->writeln('(none)');
+            $this->io->write('(none)');
         }
 
         $unmatchedPiePackages = array_diff(array_keys($piePackages), $piePackagesMatched);
 
         if (count($unmatchedPiePackages)) {
-            $output->writeln(sprintf(
+            $this->io->write(sprintf(
                 '%s %s <options=bold,underscore>PIE packages not loaded:</>',
                 "\n",
                 Emoji::WARNING,
             ));
-            $output->writeln('These extensions were installed with PIE but are not currently enabled.' . "\n");
+            $this->io->write('These extensions were installed with PIE but are not currently enabled.' . "\n");
 
             foreach ($unmatchedPiePackages as $unmatchedPiePackage) {
-                $output->writeln(sprintf(' - %s', $piePackages[$unmatchedPiePackage]->prettyNameAndVersion()));
+                $this->io->write(sprintf(' - %s', $piePackages[$unmatchedPiePackage]->prettyNameAndVersion()));
             }
         }
 

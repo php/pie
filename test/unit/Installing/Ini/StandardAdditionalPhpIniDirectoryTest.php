@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\PieUnitTest\Installing\Ini;
 
+use Composer\IO\BufferIO;
 use Composer\Package\CompletePackageInterface;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\DownloadedPackage;
@@ -21,7 +22,7 @@ use Php\Pie\Platform\ThreadSafetyMode;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\Console\Output\OutputInterface;
 
 use function mkdir;
 use function rmdir;
@@ -35,7 +36,7 @@ use const DIRECTORY_SEPARATOR;
 #[CoversClass(StandardAdditionalPhpIniDirectory::class)]
 final class StandardAdditionalPhpIniDirectoryTest extends TestCase
 {
-    private BufferedOutput $output;
+    private BufferIO $io;
     private PhpBinaryPath&MockObject $mockPhpBinary;
     private CheckAndAddExtensionToIniIfNeeded&MockObject $checkAndAddExtensionToIniIfNeeded;
     private TargetPlatform $targetPlatform;
@@ -47,7 +48,7 @@ final class StandardAdditionalPhpIniDirectoryTest extends TestCase
     {
         parent::setUp();
 
-        $this->output = new BufferedOutput(BufferedOutput::VERBOSITY_VERBOSE);
+        $this->io = new BufferIO(verbosity: OutputInterface::VERBOSITY_VERBOSE);
 
         $this->mockPhpBinary = $this->createMock(PhpBinaryPath::class);
         (fn () => $this->phpBinaryPath = '/path/to/php')
@@ -119,7 +120,7 @@ final class StandardAdditionalPhpIniDirectoryTest extends TestCase
             $this->targetPlatform,
             $this->downloadedPackage,
             $this->binaryFile,
-            $this->output,
+            $this->io,
         ));
     }
 
@@ -138,11 +139,11 @@ final class StandardAdditionalPhpIniDirectoryTest extends TestCase
             $this->targetPlatform,
             $this->downloadedPackage,
             $this->binaryFile,
-            $this->output,
+            $this->io,
         ));
         self::assertStringContainsString(
             'PHP is configured to use additional INI file path /path/to/something/does/not/exist, but it did not exist',
-            $this->output->fetch(),
+            $this->io->getOutput(),
         );
     }
 
@@ -166,7 +167,7 @@ final class StandardAdditionalPhpIniDirectoryTest extends TestCase
                 $expectedIniFile,
                 $this->targetPlatform,
                 $this->downloadedPackage,
-                $this->output,
+                $this->io,
             )
             ->willReturn(true);
 
@@ -174,7 +175,7 @@ final class StandardAdditionalPhpIniDirectoryTest extends TestCase
             $this->targetPlatform,
             $this->downloadedPackage,
             $this->binaryFile,
-            $this->output,
+            $this->io,
         ));
         self::assertFileExists($expectedIniFile);
 
@@ -202,7 +203,7 @@ final class StandardAdditionalPhpIniDirectoryTest extends TestCase
                 $expectedIniFile,
                 $this->targetPlatform,
                 $this->downloadedPackage,
-                $this->output,
+                $this->io,
             )
             ->willReturn(false);
 
@@ -210,7 +211,7 @@ final class StandardAdditionalPhpIniDirectoryTest extends TestCase
             $this->targetPlatform,
             $this->downloadedPackage,
             $this->binaryFile,
-            $this->output,
+            $this->io,
         ));
         self::assertFileDoesNotExist($expectedIniFile);
 
@@ -238,7 +239,7 @@ final class StandardAdditionalPhpIniDirectoryTest extends TestCase
                 $expectedIniFile,
                 $this->targetPlatform,
                 $this->downloadedPackage,
-                $this->output,
+                $this->io,
             )
             ->willReturn(false);
 
@@ -246,7 +247,7 @@ final class StandardAdditionalPhpIniDirectoryTest extends TestCase
             $this->targetPlatform,
             $this->downloadedPackage,
             $this->binaryFile,
-            $this->output,
+            $this->io,
         ));
         self::assertFileExists($expectedIniFile);
 

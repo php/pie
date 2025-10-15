@@ -13,7 +13,6 @@ use Php\Pie\Platform as PiePlatform;
 use Php\Pie\Util\Process;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Webmozart\Assert\Assert;
 
@@ -32,7 +31,7 @@ final class ShowCommandTest extends TestCase
 
     public function setUp(): void
     {
-        $this->commandTester = new CommandTester(Container::factory()->get(ShowCommand::class));
+        $this->commandTester = new CommandTester(Container::testFactory()->get(ShowCommand::class));
     }
 
     public function testExecute(): void
@@ -64,7 +63,7 @@ final class ShowCommandTest extends TestCase
             self::markTestSkipped('This test can only run on systems with php-config');
         }
 
-        $installCommand = new CommandTester(Container::factory()->get(InstallCommand::class));
+        $installCommand = new CommandTester(Container::testFactory()->get(InstallCommand::class));
         $installCommand->execute([
             'requested-package-and-version' => self::TEST_PACKAGE . ':2.0.2',
             '--with-php-config' => $phpConfig,
@@ -111,7 +110,7 @@ final class ShowCommandTest extends TestCase
             self::markTestSkipped('This test can only run on systems with php-config');
         }
 
-        $installCommand = new CommandTester(Container::factory()->get(InstallCommand::class));
+        $installCommand = new CommandTester(Container::testFactory()->get(InstallCommand::class));
         $installCommand->execute([
             'requested-package-and-version' => self::TEST_PACKAGE . ':2.0.2',
             '--with-php-config' => $phpConfig,
@@ -158,7 +157,7 @@ final class ShowCommandTest extends TestCase
             self::markTestSkipped('This test can only run on systems with php-config');
         }
 
-        $installCommand = new CommandTester(Container::factory()->get(InstallCommand::class));
+        $installCommand = new CommandTester(Container::testFactory()->get(InstallCommand::class));
         $installCommand->execute([
             'requested-package-and-version' => self::TEST_PACKAGE . ':2.0.2',
             '--with-php-config' => $phpConfig,

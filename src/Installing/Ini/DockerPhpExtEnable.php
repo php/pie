@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Php\Pie\Installing\Ini;
 
+use Composer\IO\IOInterface;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\File\BinaryFile;
 use Php\Pie\Platform\TargetPhp\Exception\ExtensionIsNotLoaded;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Util\Process;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 
 use function sprintf;
@@ -32,7 +32,7 @@ final class DockerPhpExtEnable implements SetupIniApproach
         TargetPlatform $targetPlatform,
         DownloadedPackage $downloadedPackage,
         BinaryFile $binaryFile,
-        OutputInterface $output,
+        IOInterface $io,
     ): bool {
         $dockerPhpExtEnable = $this->dockerPhpExtEnablePath();
 
@@ -43,14 +43,14 @@ final class DockerPhpExtEnable implements SetupIniApproach
         try {
             $enableOutput = Process::run([$dockerPhpExtEnable, $downloadedPackage->package->extensionName()->name()]);
         } catch (ProcessFailedException $processFailed) {
-            $output->writeln(
+            $io->write(
                 sprintf(
                     'Could not enable extension %s using %s. Exception was: %s',
                     $downloadedPackage->package->extensionName()->name(),
                     $this->dockerPhpExtEnableName,
                     $processFailed->getMessage(),
                 ),
-                OutputInterface::VERBOSITY_VERBOSE,
+                verbosity: IOInterface::VERBOSE,
             );
 
             return false;
@@ -59,19 +59,19 @@ final class DockerPhpExtEnable implements SetupIniApproach
         try {
             $targetPlatform->phpBinaryPath->assertExtensionIsLoadedInRuntime(
                 $downloadedPackage->package->extensionName(),
-                $output,
+                $io,
             );
 
             return true;
         } catch (ExtensionIsNotLoaded) {
-            $output->writeln(
+            $io->write(
                 sprintf(
                     'Asserting that extension %s was enabled using %s failed. Output was: %s',
                     $downloadedPackage->package->extensionName()->name(),
                     $this->dockerPhpExtEnableName,
                     $enableOutput !== '' ? $enableOutput : '(empty)',
                 ),
-                OutputInterface::VERBOSITY_VERBOSE,
+                verbosity: IOInterface::VERBOSE,
             );
 
             return false;

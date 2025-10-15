@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace Php\Pie\Installing\InstallForPhpProject;
 
+use Composer\IO\IOInterface;
 use Php\Pie\Command\CommandHelper;
 use Php\Pie\File\FullPathToSelf;
 use Php\Pie\Util\Process;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\ConsoleOutputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 
 use function array_filter;
 use function array_walk;
@@ -25,7 +24,7 @@ class InstallSelectedPackage
     {
     }
 
-    public function withPieCli(string $selectedPackage, InputInterface $input, OutputInterface $output): void
+    public function withPieCli(string $selectedPackage, InputInterface $input, IOInterface $io): void
     {
         $process = [
             ($this->fullPathToSelf)(),
@@ -62,14 +61,14 @@ class InstallSelectedPackage
             $process,
             getcwd(),
             null,
-            static function (string $outOrErr, string $message) use ($output): void {
-                if ($output instanceof ConsoleOutputInterface && $outOrErr === \Symfony\Component\Process\Process::ERR) {
-                    $output->getErrorOutput()->write('   > ' . $message);
+            static function (string $outOrErr, string $message) use ($io): void {
+                if ($outOrErr === \Symfony\Component\Process\Process::ERR) {
+                    $io->writeError('   > ' . $message);
 
                     return;
                 }
 
-                $output->write('   > ' . $message);
+                $io->write('   > ' . $message);
             },
         );
     }

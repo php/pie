@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Php\Pie\Command;
 
+use Composer\IO\IOInterface;
+use Composer\IO\NullIO;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieJsonEditor;
@@ -31,6 +33,7 @@ final class RepositoryAddCommand extends Command
 
     public function __construct(
         private readonly ContainerInterface $container,
+        private readonly IOInterface $io,
     ) {
         parent::__construct();
     }
@@ -55,7 +58,7 @@ final class RepositoryAddCommand extends Command
 
     public function execute(InputInterface $input, OutputInterface $output): int
     {
-        $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $output);
+        $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $this->io);
         $pieJsonEditor  = PieJsonEditor::fromTargetPlatform($targetPlatform);
 
         $type = (string) $input->getArgument(self::ARG_TYPE);
@@ -84,11 +87,11 @@ final class RepositoryAddCommand extends Command
             PieComposerFactory::createPieComposer(
                 $this->container,
                 PieComposerRequest::noOperation(
-                    $output,
+                    new NullIO(),
                     $targetPlatform,
                 ),
             ),
-            $output,
+            $this->io,
         );
 
         return 0;

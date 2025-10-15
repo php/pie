@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Php\Pie\Command;
 
 use Composer\Composer;
+use Composer\IO\IOInterface;
+use Composer\IO\NullIO;
 use Php\Pie\ComposerIntegration\ComposerIntegrationHandler;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
@@ -18,7 +20,6 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Webmozart\Assert\Assert;
 
@@ -34,6 +35,7 @@ final class UninstallCommand extends Command
         private readonly InstalledPiePackages $installedPiePackages,
         private readonly ContainerInterface $container,
         private readonly ComposerIntegrationHandler $composerIntegrationHandler,
+        private readonly IOInterface $io,
     ) {
         parent::__construct();
     }
@@ -54,19 +56,19 @@ final class UninstallCommand extends Command
     public function execute(InputInterface $input, OutputInterface $output): int
     {
         if (! TargetPlatform::isRunningAsRoot()) {
-            $output->writeln('This command may need elevated privileges, and may prompt you for your password.');
+            $this->io->write('This command may need elevated privileges, and may prompt you for your password.');
         }
 
         $packageToRemove = (string) $input->getArgument(self::ARG_PACKAGE_NAME);
         Assert::stringNotEmpty($packageToRemove);
         $requestedPackageAndVersionToRemove = new RequestedPackageAndVersion($packageToRemove, null);
 
-        $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $output);
+        $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $this->io);
 
         $composer = PieComposerFactory::createPieComposer(
             $this->container,
             PieComposerRequest::noOperation(
-                new NullOutput(),
+                new NullIO(),
                 $targetPlatform,
             ),
         );
@@ -74,7 +76,7 @@ final class UninstallCommand extends Command
         $piePackage = $this->findPiePackageByPackageName($packageToRemove, $composer);
 
         if ($piePackage === null) {
-            $output->writeln('<error>No package found: ' . $packageToRemove . '</error>');
+            $this->io->write('<error>No package found: ' . $packageToRemove . '</error>');
 
             return 1;
         }
@@ -82,7 +84,7 @@ final class UninstallCommand extends Command
         $composer = PieComposerFactory::createPieComposer(
             $this->container,
             new PieComposerRequest(
-                $output,
+                $this->io,
                 $targetPlatform,
                 $requestedPackageAndVersionToRemove,
                 PieOperation::Uninstall,

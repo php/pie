@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\PieUnitTest\Installing\InstallForPhpProject;
 
+use Composer\IO\BufferIO;
 use Composer\Util\Platform;
 use Php\Pie\File\FullPathToSelf;
 use Php\Pie\Installing\InstallForPhpProject\InstallSelectedPackage;
@@ -12,7 +13,6 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\BufferedOutput;
 
 use function getcwd;
 use function trim;
@@ -27,20 +27,23 @@ final class InstallSelectedPackageTest extends TestCase
     {
         $_SERVER['PHP_SELF'] = Platform::isWindows() ? self::FAKE_HAPPY_BAT : self::FAKE_HAPPY_SH;
 
-        $input  = new ArrayInput(
+        $input = new ArrayInput(
             ['--with-php-config' => '/path/to/php/config'],
             new InputDefinition([
                 new InputOption('with-php-config', null, InputOption::VALUE_REQUIRED),
             ]),
         );
-        $output = new BufferedOutput();
+        $io    = new BufferIO();
 
         (new InstallSelectedPackage(new FullPathToSelf(getcwd())))->withPieCli(
             'foo/bar',
             $input,
-            $output,
+            $io,
         );
 
-        self::assertSame('> Params passed: install foo/bar --with-php-config /path/to/php/config', trim($output->fetch()));
+        self::assertSame(
+            '> Params passed: install foo/bar --with-php-config /path/to/php/config',
+            trim($io->getOutput()),
+        );
     }
 }

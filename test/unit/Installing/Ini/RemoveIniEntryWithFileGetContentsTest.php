@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\PieUnitTest\Installing\Ini;
 
+use Composer\IO\IOInterface;
 use Composer\Package\CompletePackageInterface;
 use Composer\Util\Filesystem;
 use Php\Pie\DependencyResolver\Package;
@@ -20,7 +21,6 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\RequiresOperatingSystemFamily;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Console\Output\OutputInterface;
 use Webmozart\Assert\Assert;
 
 use function file_get_contents;
@@ -109,7 +109,7 @@ final class RemoveIniEntryWithFileGetContentsTest extends TestCase
         $affectedFiles = (new RemoveIniEntryWithFileGetContents())(
             $package,
             $targetPlatform,
-            $this->createMock(OutputInterface::class),
+            $this->createMock(IOInterface::class),
         );
 
         self::assertSame(
@@ -163,7 +163,7 @@ final class RemoveIniEntryWithFileGetContentsTest extends TestCase
             (new RemoveIniEntryWithFileGetContents())(
                 $package,
                 $targetPlatform,
-                $this->createMock(OutputInterface::class),
+                $this->createMock(IOInterface::class),
             ),
         );
     }
@@ -207,7 +207,7 @@ final class RemoveIniEntryWithFileGetContentsTest extends TestCase
         $affectedFiles = (new RemoveIniEntryWithFileGetContents())(
             $package,
             $targetPlatform,
-            $this->createMock(OutputInterface::class),
+            $this->createMock(IOInterface::class),
         );
 
         self::assertSame(

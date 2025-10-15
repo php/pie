@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\Pie\Command;
 
+use Composer\IO\IOInterface;
 use Composer\Semver\Constraint\Constraint;
 use Php\Pie\ComposerIntegration\PhpBinaryPathBasedPlatformRepository;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
@@ -38,6 +39,7 @@ final class InfoCommand extends Command
         private readonly ContainerInterface $container,
         private readonly DependencyResolver $dependencyResolver,
         private readonly FindMatchingPackages $findMatchingPackages,
+        private readonly IOInterface $io,
     ) {
         parent::__construct();
     }
@@ -53,7 +55,7 @@ final class InfoCommand extends Command
     {
         CommandHelper::validateInput($input, $this);
 
-        $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $output);
+        $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $this->io);
 
         try {
             $requestedNameAndVersion = CommandHelper::requestedNameAndVersionPair($input);
@@ -61,7 +63,7 @@ final class InfoCommand extends Command
             return CommandHelper::handlePackageNotFound(
                 $invalidPackageName,
                 $this->findMatchingPackages,
-                $output,
+                $this->io,
                 $targetPlatform,
                 $this->container,
             );
@@ -70,7 +72,7 @@ final class InfoCommand extends Command
         $composer = PieComposerFactory::createPieComposer(
             $this->container,
             new PieComposerRequest(
-                $output,
+                $this->io,
                 $targetPlatform,
                 $requestedNameAndVersion,
                 PieOperation::Resolve,
@@ -91,31 +93,31 @@ final class InfoCommand extends Command
             return CommandHelper::handlePackageNotFound(
                 $unableToResolveRequirement,
                 $this->findMatchingPackages,
-                $output,
+                $this->io,
                 $targetPlatform,
                 $this->container,
             );
         } catch (BundledPhpExtensionRefusal $bundledPhpExtensionRefusal) {
-            $output->writeln('');
-            $output->writeln('<comment>' . $bundledPhpExtensionRefusal->getMessage() . '</comment>');
+            $this->io->write('');
+            $this->io->write('<comment>' . $bundledPhpExtensionRefusal->getMessage() . '</comment>');
 
             return self::INVALID;
         }
 
-        $output->writeln(sprintf('<info>Found package:</info> %s which provides <info>%s</info>', $package->prettyNameAndVersion(), $package->extensionName()->nameWithExtPrefix()));
+        $this->io->write(sprintf('<info>Found package:</info> %s which provides <info>%s</info>', $package->prettyNameAndVersion(), $package->extensionName()->nameWithExtPrefix()));
 
-        $output->writeln(sprintf('Extension name: %s', $package->extensionName()->name()));
-        $output->writeln(sprintf('Extension type: %s (%s)', $package->extensionType()->value, $package->extensionType()->name));
-        $output->writeln(sprintf('Composer package name: %s', $package->name()));
-        $output->writeln(sprintf('Version: %s', $package->version()));
-        $output->writeln(sprintf('Download URL: %s', $package->downloadUrl() ?? '(not specified)'));
-        $output->writeln(sprintf(
+        $this->io->write(sprintf('Extension name: %s', $package->extensionName()->name()));
+        $this->io->write(sprintf('Extension type: %s (%s)', $package->extensionType()->value, $package->extensionType()->name));
+        $this->io->write(sprintf('Composer package name: %s', $package->name()));
+        $this->io->write(sprintf('Version: %s', $package->version()));
+        $this->io->write(sprintf('Download URL: %s', $package->downloadUrl() ?? '(not specified)'));
+        $this->io->write(sprintf(
             'TS/NTS: %s',
             ($targetPlatform->threadSafety === ThreadSafetyMode::NonThreadSafe && ! $package->supportNts())
                 || ($targetPlatform->threadSafety === ThreadSafetyMode::ThreadSafe && ! $package->supportZts()) ? sprintf('%s (not supported on %s)', Emoji::PROHIBITED, $targetPlatform->threadSafety->asShort()) : Emoji::GREEN_CHECKMARK,
         ));
 
-        $output->writeln(sprintf(
+        $this->io->write(sprintf(
             'OS: %s',
             ($package->compatibleOsFamilies() === null || in_array($targetPlatform->operatingSystemFamily, $package->compatibleOsFamilies(), true))
             && ($package->incompatibleOsFamilies() === null || ! in_array($targetPlatform->operatingSystemFamily, $package->incompatibleOsFamilies(), true))
@@ -123,7 +125,7 @@ final class InfoCommand extends Command
                 : sprintf('%s (not supported on %s)', Emoji::PROHIBITED, $targetPlatform->operatingSystemFamily->value),
         ));
 
-        $output->writeln("\n<options=bold,underscore>Dependencies:</>");
+        $this->io->write("\n<options=bold,underscore>Dependencies:</>");
         $requires = $package->composerPackage()->getRequires();
 
         if (count($requires) > 0) {
@@ -137,29 +139,29 @@ final class InfoCommand extends Command
             foreach ($requires as $requireName => $requireLink) {
                 $packageStatus = sprintf('    %s: %s %%s', $requireName, $requireLink->getConstraint()->getPrettyString());
                 if (! array_key_exists($requireName, $platformConstraints)) {
-                    $output->writeln(sprintf($packageStatus, Emoji::PROHIBITED . ' (not installed)'));
+                    $this->io->write(sprintf($packageStatus, Emoji::PROHIBITED . ' (not installed)'));
                     continue;
                 }
 
                 foreach ($platformConstraints[$requireName] as $constraint) {
                     if ($requireLink->getConstraint()->matches($constraint)) {
-                        $output->writeln(sprintf($packageStatus, Emoji::GREEN_CHECKMARK));
+                        $this->io->write(sprintf($packageStatus, Emoji::GREEN_CHECKMARK));
                     } else {
-                        $output->writeln(sprintf($packageStatus, Emoji::PROHIBITED . ' (your version is ' . $constraint->getVersion() . ')'));
+                        $this->io->write(sprintf($packageStatus, Emoji::PROHIBITED . ' (your version is ' . $constraint->getVersion() . ')'));
                     }
                 }
             }
         } else {
-            $output->writeln('    No dependencies.');
+            $this->io->write('    No dependencies.');
         }
 
-        $output->writeln("\n<options=bold,underscore>Configure options:</>");
+        $this->io->write("\n<options=bold,underscore>Configure options:</>");
         if (count($package->configureOptions())) {
             foreach ($package->configureOptions() as $configureOption) {
-                $output->writeln(sprintf('    --%s%s  (%s)', $configureOption->name, $configureOption->needsValue ? '=?' : '', $configureOption->description));
+                $this->io->write(sprintf('    --%s%s  (%s)', $configureOption->name, $configureOption->needsValue ? '=?' : '', $configureOption->description));
             }
         } else {
-            $output->writeln('    No configure options are specified.');
+            $this->io->write('    No configure options are specified.');
         }
 
         return Command::SUCCESS;

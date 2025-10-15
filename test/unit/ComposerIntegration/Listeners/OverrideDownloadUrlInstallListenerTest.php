@@ -28,7 +28,6 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 
 #[CoversClass(OverrideDownloadUrlInstallListener::class)]
 final class OverrideDownloadUrlInstallListenerTest extends TestCase
@@ -67,7 +66,7 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
             $this->io,
             $this->container,
             new PieComposerRequest(
-                $this->createMock(OutputInterface::class),
+                $this->createMock(IOInterface::class),
                 new TargetPlatform(
                     OperatingSystem::NonWindows,
                     OperatingSystemFamily::Linux,
@@ -109,7 +108,7 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
             $this->io,
             $this->container,
             new PieComposerRequest(
-                $this->createMock(OutputInterface::class),
+                $this->createMock(IOInterface::class),
                 new TargetPlatform(
                     OperatingSystem::NonWindows,
                     OperatingSystemFamily::Linux,
@@ -151,7 +150,7 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
             $this->io,
             $this->container,
             new PieComposerRequest(
-                $this->createMock(OutputInterface::class),
+                $this->createMock(IOInterface::class),
                 new TargetPlatform(
                     OperatingSystem::NonWindows,
                     OperatingSystemFamily::Linux,
@@ -193,7 +192,7 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
             $this->io,
             $this->container,
             new PieComposerRequest(
-                $this->createMock(OutputInterface::class),
+                $this->createMock(IOInterface::class),
                 new TargetPlatform(
                     OperatingSystem::NonWindows,
                     OperatingSystemFamily::Linux,
@@ -235,7 +234,7 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
             $this->io,
             $this->container,
             new PieComposerRequest(
-                $this->createMock(OutputInterface::class),
+                $this->createMock(IOInterface::class),
                 new TargetPlatform(
                     OperatingSystem::NonWindows,
                     OperatingSystemFamily::Linux,
@@ -289,7 +288,7 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
             $this->io,
             $this->container,
             new PieComposerRequest(
-                $this->createMock(OutputInterface::class),
+                $this->createMock(IOInterface::class),
                 new TargetPlatform(
                     OperatingSystem::Windows,
                     OperatingSystemFamily::Linux,
@@ -348,7 +347,7 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
             $this->io,
             $this->container,
             new PieComposerRequest(
-                $this->createMock(OutputInterface::class),
+                $this->createMock(IOInterface::class),
                 new TargetPlatform(
                     OperatingSystem::NonWindows,
                     OperatingSystemFamily::Linux,
