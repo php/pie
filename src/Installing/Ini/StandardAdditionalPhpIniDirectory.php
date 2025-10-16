@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Php\Pie\Installing\Ini;
 
+use Composer\IO\IOInterface;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\File\BinaryFile;
 use Php\Pie\File\Sudo;
 use Php\Pie\File\SudoCreate;
 use Php\Pie\File\SudoUnlink;
 use Php\Pie\Platform\TargetPlatform;
-use Symfony\Component\Console\Output\OutputInterface;
 
 use function file_exists;
 use function is_writable;
@@ -36,7 +36,7 @@ final class StandardAdditionalPhpIniDirectory implements SetupIniApproach
         TargetPlatform $targetPlatform,
         DownloadedPackage $downloadedPackage,
         BinaryFile $binaryFile,
-        OutputInterface $output,
+        IOInterface $io,
     ): bool {
         $additionalIniFilesPath = $targetPlatform->phpBinaryPath->additionalIniDirectory();
 
@@ -46,24 +46,24 @@ final class StandardAdditionalPhpIniDirectory implements SetupIniApproach
         }
 
         if (! file_exists($additionalIniFilesPath)) {
-            $output->writeln(
+            $io->write(
                 sprintf(
                     'PHP is configured to use additional INI file path %s, but it did not exist.',
                     $additionalIniFilesPath,
                 ),
-                OutputInterface::VERBOSITY_VERBOSE,
+                verbosity: IOInterface::VERBOSE,
             );
 
             return false;
         }
 
         if (! is_writable($additionalIniFilesPath) && ! Sudo::exists()) {
-            $output->writeln(
+            $io->write(
                 sprintf(
                     'PHP is configured to use additional INI file path %s, but it was not writable by PIE.',
                     $additionalIniFilesPath,
                 ),
-                OutputInterface::VERBOSITY_VERBOSE,
+                verbosity: IOInterface::VERBOSE,
             );
 
             return false;
@@ -79,12 +79,12 @@ final class StandardAdditionalPhpIniDirectory implements SetupIniApproach
 
         $pieCreatedTheIniFile = false;
         if (! file_exists($expectedIniFile)) {
-            $output->writeln(
+            $io->write(
                 sprintf(
                     'Creating new INI file based on extension priority: %s',
                     $expectedIniFile,
                 ),
-                OutputInterface::VERBOSITY_VERY_VERBOSE,
+                verbosity: IOInterface::VERY_VERBOSE,
             );
             $pieCreatedTheIniFile = true;
             SudoCreate::file($expectedIniFile);
@@ -94,7 +94,7 @@ final class StandardAdditionalPhpIniDirectory implements SetupIniApproach
             $expectedIniFile,
             $targetPlatform,
             $downloadedPackage,
-            $output,
+            $io,
             null,
         );
 

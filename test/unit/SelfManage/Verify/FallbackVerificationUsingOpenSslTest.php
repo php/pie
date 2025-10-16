@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\PieUnitTest\SelfManage\Verify;
 
 use Composer\Downloader\TransportException;
+use Composer\IO\BufferIO;
 use Composer\Util\AuthHelper;
 use Composer\Util\Http\Response;
 use Composer\Util\HttpDownloader;
@@ -15,7 +16,6 @@ use Php\Pie\SelfManage\Verify\FallbackVerificationUsingOpenSsl;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Console\Output\BufferedOutput;
 use ThePhpFoundation\Attestation\Verification\VerifyAttestationWithOpenSsl;
 
 use function assert;
@@ -48,7 +48,7 @@ final class FallbackVerificationUsingOpenSslTest extends TestCase
     private BinaryFile $downloadedPhar;
     private HttpDownloader&MockObject $httpDownloader;
     private AuthHelper&MockObject $authHelper;
-    private BufferedOutput $output;
+    private BufferIO $io;
     private FallbackVerificationUsingOpenSsl $verifier;
     /** @var non-empty-string */
     private string $trustedRootFilePath;
@@ -62,7 +62,7 @@ final class FallbackVerificationUsingOpenSslTest extends TestCase
 
         $this->httpDownloader = $this->createMock(HttpDownloader::class);
         $this->authHelper     = $this->createMock(AuthHelper::class);
-        $this->output         = new BufferedOutput();
+        $this->io             = new BufferIO();
 
         $trustedRootFilePath = tempnam(sys_get_temp_dir(), 'pie_test_trusted_root_file_path');
         assert(is_string($trustedRootFilePath));
@@ -198,9 +198,9 @@ EOF);
 
         $this->mockAttestationResponse($this->downloadedPhar->checksum, $dsseEnvelopePayload, $signature, $pemCertificate);
 
-        $this->verifier->verify($this->release, $this->downloadedPhar, $this->output);
+        $this->verifier->verify($this->release, $this->downloadedPhar, $this->io);
 
-        self::assertStringContainsString('Verified the new PIE version (using fallback verification)', $this->output->fetch());
+        self::assertStringContainsString('Verified the new PIE version (using fallback verification)', $this->io->getOutput());
     }
 
     public function testFailedToVerifyBecauseDigestMismatch(): void
@@ -223,7 +223,7 @@ EOF);
         $this->mockAttestationResponse($this->downloadedPhar->checksum, $dsseEnvelopePayload, $signature, $pemCertificate);
 
         $this->expectException(FailedToVerifyRelease::class);
-        $this->verifier->verify($this->release, $this->downloadedPhar, $this->output);
+        $this->verifier->verify($this->release, $this->downloadedPhar, $this->io);
     }
 
     public function testFailedToVerifyBecauseSignatureVerificationFailed(): void
@@ -259,7 +259,7 @@ EOF);
         );
 
         $this->expectException(FailedToVerifyRelease::class);
-        $this->verifier->verify($this->release, $this->downloadedPhar, $this->output);
+        $this->verifier->verify($this->release, $this->downloadedPhar, $this->io);
     }
 
     public function testFailedToVerifyBecauseDigestNotFoundOnGitHub(): void
@@ -279,6 +279,6 @@ EOF);
             ->willThrowException($transportException);
 
         $this->expectException(FailedToVerifyRelease::class);
-        $this->verifier->verify($this->release, $this->downloadedPhar, $this->output);
+        $this->verifier->verify($this->release, $this->downloadedPhar, $this->io);
     }
 }

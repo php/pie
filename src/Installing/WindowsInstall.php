@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\Pie\Installing;
 
+use Composer\IO\IOInterface;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\File\BinaryFile;
 use Php\Pie\File\WindowsDelete;
@@ -13,7 +14,6 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use RuntimeException;
 use SplFileInfo;
-use Symfony\Component\Console\Output\OutputInterface;
 
 use function assert;
 use function copy;
@@ -37,7 +37,7 @@ final class WindowsInstall implements Install
     public function __invoke(
         DownloadedPackage $downloadedPackage,
         TargetPlatform $targetPlatform,
-        OutputInterface $output,
+        IOInterface $io,
         bool $attemptToSetupIniFile,
     ): BinaryFile {
         $extractedSourcePath = $downloadedPackage->extractedSourcePath;
@@ -46,11 +46,11 @@ final class WindowsInstall implements Install
         assert($sourcePdbName !== '');
 
         $destinationDllName = $this->copyExtensionDll($targetPlatform, $downloadedPackage, $sourceDllName);
-        $output->writeln('<info>Copied DLL to:</info> ' . $destinationDllName);
+        $io->write('<info>Copied DLL to:</info> ' . $destinationDllName);
 
         $destinationPdbName = $this->copyExtensionPdb($targetPlatform, $downloadedPackage, $sourcePdbName, $destinationDllName);
         if ($destinationPdbName !== null) {
-            $output->writeln('<info>Copied PDB to:</info> ' . $destinationPdbName);
+            $io->write('<info>Copied PDB to:</info> ' . $destinationPdbName);
         }
 
         foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($extractedSourcePath)) as $file) {
@@ -69,13 +69,13 @@ final class WindowsInstall implements Install
 
             $destinationExtraDll = $this->copyDependencyDll($targetPlatform, $file);
             if ($destinationExtraDll !== null) {
-                $output->writeln('<info>Copied extra DLL:</info> ' . $destinationExtraDll);
+                $io->write('<info>Copied extra DLL:</info> ' . $destinationExtraDll);
 
                 continue;
             }
 
             $destinationPathname = $this->copyExtraFile($targetPlatform, $downloadedPackage, $file);
-            $output->writeln('<info>Copied extras:</info> ' . $destinationPathname);
+            $io->write('<info>Copied extras:</info> ' . $destinationPathname);
         }
 
         $binaryFile = BinaryFile::fromFileWithSha256Checksum($destinationDllName);
@@ -84,7 +84,7 @@ final class WindowsInstall implements Install
             $targetPlatform,
             $downloadedPackage,
             $binaryFile,
-            $output,
+            $io,
             $attemptToSetupIniFile,
         );
 

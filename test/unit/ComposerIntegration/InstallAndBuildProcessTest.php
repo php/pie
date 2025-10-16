@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\PieUnitTest\ComposerIntegration;
 
+use Composer\IO\NullIO;
 use Composer\Package\CompletePackage;
 use Composer\PartialComposer;
 use Php\Pie\Building\Build;
@@ -23,7 +24,6 @@ use Php\Pie\Platform\ThreadSafetyMode;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Console\Output\OutputInterface;
 
 #[CoversClass(InstallAndBuildProcess::class)]
 final class InstallAndBuildProcessTest extends TestCase
@@ -51,10 +51,9 @@ final class InstallAndBuildProcessTest extends TestCase
 
     public function testDownloadWithoutBuildAndInstall(): void
     {
-        $symfonyOutput   = $this->createMock(OutputInterface::class);
         $composer        = $this->createMock(PartialComposer::class);
         $composerRequest = new PieComposerRequest(
-            $symfonyOutput,
+            new NullIO(),
             new TargetPlatform(
                 OperatingSystem::NonWindows,
                 OperatingSystemFamily::Linux,
@@ -93,10 +92,9 @@ final class InstallAndBuildProcessTest extends TestCase
 
     public function testDownloadAndBuildWithoutInstall(): void
     {
-        $symfonyOutput   = $this->createMock(OutputInterface::class);
         $composer        = $this->createMock(PartialComposer::class);
         $composerRequest = new PieComposerRequest(
-            $symfonyOutput,
+            new NullIO(),
             new TargetPlatform(
                 OperatingSystem::NonWindows,
                 OperatingSystemFamily::Linux,
@@ -138,10 +136,9 @@ final class InstallAndBuildProcessTest extends TestCase
 
     public function testDownloadBuildAndInstall(): void
     {
-        $symfonyOutput   = $this->createMock(OutputInterface::class);
         $composer        = $this->createMock(PartialComposer::class);
         $composerRequest = new PieComposerRequest(
-            $symfonyOutput,
+            new NullIO(),
             new TargetPlatform(
                 OperatingSystem::NonWindows,
                 OperatingSystemFamily::Linux,

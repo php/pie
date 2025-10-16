@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Php\Pie\ComposerIntegration;
 
+use Composer\IO\IOInterface;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\Platform\TargetPhp\PhpizePath;
 use Php\Pie\Platform\TargetPlatform;
-use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks
@@ -18,7 +18,7 @@ final class PieComposerRequest
 {
     /** @param list<non-empty-string> $configureOptions */
     public function __construct(
-        public readonly OutputInterface $pieOutput,
+        public readonly IOInterface $pieOutput,
         public readonly TargetPlatform $targetPlatform,
         public readonly RequestedPackageAndVersion $requestedPackage,
         public readonly PieOperation $operation,
@@ -33,7 +33,7 @@ final class PieComposerRequest
      * for example just reading metadata about the installed system.
      */
     public static function noOperation(
-        OutputInterface $pieOutput,
+        IOInterface $pieOutput,
         TargetPlatform $targetPlatform,
     ): self {
         return new PieComposerRequest(

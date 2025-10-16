@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Php\Pie\ComposerIntegration;
 
 use Composer\Composer;
+use Composer\IO\IOInterface;
 use Composer\Util\Filesystem;
-use Symfony\Component\Console\Output\OutputInterface;
 
 use function array_filter;
 use function array_walk;
@@ -21,7 +21,7 @@ use const DIRECTORY_SEPARATOR;
 class VendorCleanup
 {
     public function __construct(
-        private readonly OutputInterface $output,
+        private readonly IOInterface $io,
         private readonly Filesystem $filesystem,
     ) {
     }
@@ -32,12 +32,12 @@ class VendorCleanup
         $vendorContents = scandir($vendorDir);
 
         if (! is_array($vendorContents)) {
-            $this->output->writeln(
+            $this->io->write(
                 sprintf(
                     '<comment>Vendor directory (vendor-dir config) %s seemed invalid?</comment>',
                     $vendorDir,
                 ),
-                OutputInterface::VERBOSITY_VERY_VERBOSE,
+                verbosity: IOInterface::VERY_VERBOSE,
             );
 
             return;
@@ -63,24 +63,24 @@ class VendorCleanup
             function (string $pathToRemove) use ($vendorDir): void {
                 $fullPathToRemove = $vendorDir . DIRECTORY_SEPARATOR . $pathToRemove;
 
-                $this->output->writeln(
+                $this->io->write(
                     sprintf(
                         '<comment>Removing: %s</comment>',
                         $fullPathToRemove,
                     ),
-                    OutputInterface::VERBOSITY_VERY_VERBOSE,
+                    verbosity: IOInterface::VERY_VERBOSE,
                 );
 
                 if ($this->filesystem->remove($fullPathToRemove)) {
                     return;
                 }
 
-                $this->output->writeln(
+                $this->io->write(
                     sprintf(
                         '<comment>Warning: failed to remove %s</comment>',
                         $fullPathToRemove,
                     ),
-                    OutputInterface::VERBOSITY_VERBOSE,
+                    verbosity: IOInterface::VERBOSE,
                 );
             },
         );

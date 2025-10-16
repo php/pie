@@ -6,32 +6,25 @@ namespace Php\Pie\Installing\InstallForPhpProject;
 
 use Composer\Composer;
 use Composer\Factory as ComposerFactory;
-use Composer\IO\ConsoleIO;
+use Composer\IO\IOInterface;
 use Composer\Package\RootPackageInterface;
-use Symfony\Component\Console\Helper\HelperSet;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 class ComposerFactoryForProject
 {
     private Composer|null $memoizedComposer = null;
 
-    public function composer(InputInterface $input, OutputInterface $output): Composer
+    public function composer(IOInterface $io): Composer
     {
         if ($this->memoizedComposer === null) {
-            $this->memoizedComposer = ComposerFactory::create(new ConsoleIO(
-                $input,
-                $output,
-                new HelperSet([]),
-            ));
+            $this->memoizedComposer = ComposerFactory::create($io);
         }
 
         return $this->memoizedComposer;
     }
 
-    public function rootPackage(InputInterface $input, OutputInterface $output): RootPackageInterface
+    public function rootPackage(IOInterface $io): RootPackageInterface
     {
-        return $this->composer($input, $output)->getPackage();
+        return $this->composer($io)->getPackage();
     }
 }

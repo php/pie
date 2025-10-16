@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\PieUnitTest\ComposerIntegration;
 
 use Composer\Composer;
+use Composer\IO\IOInterface;
 use Composer\Package\CompletePackage;
 use Composer\Repository\InstalledArrayRepository;
 use Composer\Repository\RepositoryManager;
@@ -23,7 +24,6 @@ use Php\Pie\Platform\ThreadSafetyMode;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Console\Output\OutputInterface;
 
 #[CoversClass(InstalledJsonMetadata::class)]
 final class InstalledJsonMetadataTest extends TestCase
@@ -50,7 +50,7 @@ final class InstalledJsonMetadataTest extends TestCase
         (new InstalledJsonMetadata())->addDownloadMetadata(
             $this->mockComposerInstalledRepositoryWith($package),
             new PieComposerRequest(
-                $this->createMock(OutputInterface::class),
+                $this->createMock(IOInterface::class),
                 new TargetPlatform(
                     OperatingSystem::NonWindows,
                     OperatingSystemFamily::Linux,
@@ -89,7 +89,7 @@ final class InstalledJsonMetadataTest extends TestCase
         (new InstalledJsonMetadata())->addBuildMetadata(
             $this->mockComposerInstalledRepositoryWith($package),
             new PieComposerRequest(
-                $this->createMock(OutputInterface::class),
+                $this->createMock(IOInterface::class),
                 new TargetPlatform(
                     OperatingSystem::NonWindows,
                     OperatingSystemFamily::Linux,

@@ -6,13 +6,13 @@ namespace Php\Pie\DependencyResolver;
 
 use Composer\Composer;
 use Composer\Filter\PlatformRequirementFilter\PlatformRequirementFilterFactory;
+use Composer\IO\IOInterface;
 use Composer\Package\CompletePackageInterface;
 use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use Php\Pie\ComposerIntegration\VersionSelectorFactory;
 use Php\Pie\ExtensionType;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\ThreadSafetyMode;
-use Symfony\Component\Console\Output\OutputInterface;
 
 use function in_array;
 use function preg_match;
@@ -22,7 +22,7 @@ use function sprintf;
 final class ResolveDependencyWithComposer implements DependencyResolver
 {
     public function __construct(
-        private readonly OutputInterface $output,
+        private readonly IOInterface $io,
         private readonly QuieterConsoleIO $arrayCollectionIo,
     ) {
     }
@@ -115,7 +115,7 @@ final class ResolveDependencyWithComposer implements DependencyResolver
 
         if ($buildProvider === 'https://github.com/docker-library/php') {
             $identifiedBuildProvider = true;
-            $this->output->writeln(sprintf(
+            $this->io->write(sprintf(
                 '<comment>%sYou should probably use "docker-php-ext-install %s" instead</comment>',
                 $note,
                 $piePackage->extensionName()->name(),
@@ -124,7 +124,7 @@ final class ResolveDependencyWithComposer implements DependencyResolver
 
         if ($buildProvider === 'Debian') {
             $identifiedBuildProvider = true;
-            $this->output->writeln(sprintf(
+            $this->io->write(sprintf(
                 '<comment>%sYou should probably use "apt install php%s-%s" or "apt install php-%s" (or similar) instead</comment>',
                 $note,
                 $targetPlatform->phpBinaryPath->majorMinorVersion(),
@@ -135,7 +135,7 @@ final class ResolveDependencyWithComposer implements DependencyResolver
 
         if ($buildProvider === 'Remi\'s RPM repository <https://rpms.remirepo.net/> #StandWithUkraine') {
             $identifiedBuildProvider = true;
-            $this->output->writeln(sprintf(
+            $this->io->write(sprintf(
                 '<comment>%sYou should probably use "dnf install php-%s" instead</comment>',
                 $note,
                 $piePackage->extensionName()->name(),

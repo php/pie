@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\PieUnitTest\Installing\InstallForPhpProject;
 
+use Composer\IO\BufferIO;
 use Composer\Package\RootPackage;
 use Php\Pie\Command\InvokeSubCommand;
 use Php\Pie\ComposerIntegration\PieJsonEditor;
@@ -14,7 +15,6 @@ use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\BufferedOutput;
 
 #[CoversClass(InstallPiePackageFromPath::class)]
 final class InstallPiePackageFromPathTest extends TestCase
@@ -24,7 +24,7 @@ final class InstallPiePackageFromPathTest extends TestCase
     private InvokeSubCommand&MockObject $invokeSubCommand;
     private PieJsonEditor&MockObject $pieJsonEditor;
     private InputInterface&MockObject $input;
-    private BufferedOutput $output;
+    private BufferIO $io;
 
     public function setUp(): void
     {
@@ -35,7 +35,7 @@ final class InstallPiePackageFromPathTest extends TestCase
         $this->invokeSubCommand = $this->createMock(InvokeSubCommand::class);
         $this->pieJsonEditor    = $this->createMock(PieJsonEditor::class);
         $this->input            = $this->createMock(InputInterface::class);
-        $this->output           = new BufferedOutput();
+        $this->io               = new BufferIO();
     }
 
     public function testInvokeWithSuccessfulSubCommand(): void
@@ -62,7 +62,6 @@ final class InstallPiePackageFromPathTest extends TestCase
                     'requested-package-and-version' => 'foo/bar:*@dev',
                 ],
                 $this->input,
-                $this->output,
             )
             ->willReturn(Command::SUCCESS);
 
@@ -74,7 +73,7 @@ final class InstallPiePackageFromPathTest extends TestCase
                 $this->rootPackage,
                 $this->pieJsonEditor,
                 $this->input,
-                $this->output,
+                $this->io,
             ),
         );
     }
@@ -105,7 +104,6 @@ final class InstallPiePackageFromPathTest extends TestCase
                     'requested-package-and-version' => 'foo/bar:*@dev',
                 ],
                 $this->input,
-                $this->output,
             )
             ->willThrowException(new RuntimeException('oh no'));
 
@@ -119,7 +117,7 @@ final class InstallPiePackageFromPathTest extends TestCase
             $this->rootPackage,
             $this->pieJsonEditor,
             $this->input,
-            $this->output,
+            $this->io,
         );
     }
 }

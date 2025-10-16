@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Php\Pie;
 
 use Composer\Factory;
+use Composer\IO\BufferIO;
+use Composer\IO\ConsoleIO;
+use Composer\IO\IOInterface;
 use Composer\Util\Platform as ComposerPlatform;
 use Illuminate\Container\Container as IlluminateContainer;
 use Php\Pie\Building\Build;
@@ -46,12 +49,15 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
+use function assert;
 use function getcwd;
 use function str_starts_with;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class Container
 {
+    private static BufferIO|null $testBuffer = null;
+
     public static function factory(): ContainerInterface
     {
         $container = new IlluminateContainer();
@@ -78,12 +84,14 @@ final class Container
                 );
             },
         );
-        $container->singleton(EventDispatcher::class, static function () {
+        $container->singleton(EventDispatcher::class, static function (ContainerInterface $container) {
+            $io = $container->get(IOInterface::class);
+
             $displayedBanner = false;
             $eventDispatcher = new EventDispatcher();
             $eventDispatcher->addListener(
                 ConsoleEvents::COMMAND,
-                static function (ConsoleCommandEvent $event) use (&$displayedBanner): void {
+                static function (ConsoleCommandEvent $event) use (&$displayedBanner, $io): void {
                     $command     = $event->getCommand();
                     $application = $command?->getApplication();
 
@@ -92,7 +100,7 @@ final class Container
                     }
 
                     $displayedBanner = true;
-                    $event->getOutput()->writeln($application->getLongVersion() . ', from The PHP Foundation');
+                    $io->write($application->getLongVersion() . ', from The PHP Foundation');
                 },
             );
 
@@ -112,6 +120,17 @@ final class Container
         $container->singleton(SelfVerifyCommand::class);
         $container->singleton(InstallExtensionsForProjectCommand::class);
 
+        $container->singleton(IOInterface::class, static function (ContainerInterface $container): IOInterface {
+            return new ConsoleIO(
+                $container->get(InputInterface::class),
+                $container->get(OutputInterface::class),
+                new MinimalHelperSet(
+                    [
+                        'question' => new QuestionHelper(),
+                    ],
+                ),
+            );
+        });
         $container->singleton(QuieterConsoleIO::class, static function (ContainerInterface $container): QuieterConsoleIO {
             return new QuieterConsoleIO(
                 $container->get(InputInterface::class),
@@ -183,5 +202,26 @@ final class Container
         $container->alias(Ini\RemoveIniEntryWithFileGetContents::class, Ini\RemoveIniEntry::class);
 
         return $container;
+    }
+
+    public static function testFactory(): ContainerInterface
+    {
+        self::$testBuffer ??= new BufferIO();
+
+        $container = self::factory();
+        assert($container instanceof IlluminateContainer);
+
+        $container->singleton(IOInterface::class, static function () {
+            return self::$testBuffer;
+        });
+
+        return $container;
+    }
+
+    public static function testBuffer(): BufferIO
+    {
+        assert(self::$testBuffer !== null);
+
+        return self::$testBuffer;
     }
 }

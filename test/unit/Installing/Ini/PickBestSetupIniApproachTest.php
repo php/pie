@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\PieUnitTest\Installing\Ini;
 
+use Composer\IO\BufferIO;
 use Composer\Package\CompletePackage;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\DownloadedPackage;
@@ -20,7 +21,7 @@ use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\ThreadSafetyMode;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\Console\Output\OutputInterface;
 
 #[CoversClass(PickBestSetupIniApproach::class)]
 final class PickBestSetupIniApproachTest extends TestCase
@@ -85,7 +86,7 @@ final class PickBestSetupIniApproachTest extends TestCase
 
     public function testVerboseMessageIsEmittedSettingUpWithoutAnyApproaches(): void
     {
-        $output = new BufferedOutput(BufferedOutput::VERBOSITY_VERBOSE);
+        $io = new BufferIO(verbosity: OutputInterface::VERBOSITY_VERBOSE);
 
         self::assertFalse((new PickBestSetupIniApproach([]))->setup(
             $this->targetPlatform(),
@@ -101,19 +102,19 @@ final class PickBestSetupIniApproachTest extends TestCase
                 '/path/to/extracted/source',
             ),
             new BinaryFile('/path/to/extracted/source/module/foo.so', 'some-checksum'),
-            $output,
+            $io,
         ));
 
-        $outputString = $output->fetch();
+        $stringOutput = $io->getOutput();
         self::assertStringContainsString(
             'No INI setup approaches can be used on this platform.',
-            $outputString,
+            $stringOutput,
         );
     }
 
     public function testWorkingApproachIsUsed(): void
     {
-        $output = new BufferedOutput(BufferedOutput::VERBOSITY_VERBOSE);
+        $io = new BufferIO(verbosity: OutputInterface::VERBOSITY_VERBOSE);
 
         $one = $this->createMock(SetupIniApproach::class);
         $one->method('canBeUsed')->willReturn(true);
@@ -136,19 +137,19 @@ final class PickBestSetupIniApproachTest extends TestCase
                 '/path/to/extracted/source',
             ),
             new BinaryFile('/path/to/extracted/source/module/foo.so', 'some-checksum'),
-            $output,
+            $io,
         ));
 
-        $outputString = $output->fetch();
+        $stringOutput = $io->getOutput();
         self::assertStringContainsString(
             'Trying to enable extension using MockObject_SetupIniApproach',
-            $outputString,
+            $stringOutput,
         );
     }
 
     public function testSetupFailsWhenNoApproachesWork(): void
     {
-        $output = new BufferedOutput(BufferedOutput::VERBOSITY_VERBOSE);
+        $io = new BufferIO(verbosity: OutputInterface::VERBOSITY_VERBOSE);
 
         $one = $this->createMock(SetupIniApproach::class);
         $one->method('canBeUsed')->willReturn(true);
@@ -171,13 +172,13 @@ final class PickBestSetupIniApproachTest extends TestCase
                 '/path/to/extracted/source',
             ),
             new BinaryFile('/path/to/extracted/source/module/foo.so', 'some-checksum'),
-            $output,
+            $io,
         ));
 
-        $outputString = $output->fetch();
+        $stringOutput = $io->getOutput();
         self::assertStringContainsString(
             'None of the INI setup approaches succeeded.',
-            $outputString,
+            $stringOutput,
         );
     }
 }

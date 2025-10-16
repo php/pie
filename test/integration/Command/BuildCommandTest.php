@@ -9,7 +9,6 @@ use Php\Pie\Command\BuildCommand;
 use Php\Pie\Container;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Console\Tester\CommandTester;
 
 #[CoversClass(BuildCommand::class)]
 class BuildCommandTest extends TestCase
@@ -20,7 +19,7 @@ class BuildCommandTest extends TestCase
 
     public function setUp(): void
     {
-        $this->commandTester = new CommandTester(Container::factory()->get(BuildCommand::class));
+        $this->commandTester = new CommandTester(Container::testFactory()->get(BuildCommand::class));
     }
 
     public function testBuildCommandWillBuildTheExtension(): void

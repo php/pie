@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Php\Pie\Building;
 
+use Composer\IO\IOInterface;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\File\BinaryFile;
 use Php\Pie\Platform\TargetPhp\PhpizePath;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\WindowsExtensionAssetName;
-use Symfony\Component\Console\Output\OutputInterface;
 
 use function sprintf;
 
@@ -21,12 +21,12 @@ final class WindowsBuild implements Build
         DownloadedPackage $downloadedPackage,
         TargetPlatform $targetPlatform,
         array $configureOptions,
-        OutputInterface $output,
+        IOInterface $io,
         PhpizePath|null $phpizePath,
     ): BinaryFile {
         $prebuiltDll = WindowsExtensionAssetName::determineDllName($targetPlatform, $downloadedPackage);
 
-        $output->writeln(sprintf(
+        $io->write(sprintf(
             '<info>Nothing to do on Windows, prebuilt DLL found:</info> %s',
             $prebuiltDll,
         ));

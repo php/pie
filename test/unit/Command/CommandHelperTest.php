@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Php\PieUnitTest\Command;
 
 use Composer\Composer;
+use Composer\IO\BufferIO;
+use Composer\IO\NullIO;
 use Composer\Package\CompletePackage;
 use Composer\Repository\ComposerRepository;
 use Composer\Repository\PathRepository;
@@ -25,8 +27,6 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\BufferedOutput;
-use Symfony\Component\Console\Output\NullOutput;
 
 use function array_combine;
 use function array_map;
@@ -132,13 +132,13 @@ final class CommandHelperTest extends TestCase
     {
         $command = new Command();
         $input   = new ArrayInput(['--with-php-config' => 'C:\path\to\php-config']);
-        $output  = new NullOutput();
+        $io      = new NullIO();
         CommandHelper::configureDownloadBuildInstallOptions($command);
         CommandHelper::validateInput($input, $command);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('The --with-php-config=/path/to/php-config cannot be used on Windows, use --with-php-path=/path/to/php instead.');
-        CommandHelper::determineTargetPlatformFromInputs($input, $output);
+        CommandHelper::determineTargetPlatformFromInputs($input, $io);
     }
 
     public function testNonWindowsMachinesCannotUseWithPhpPathOption(): void
@@ -149,13 +149,13 @@ final class CommandHelperTest extends TestCase
 
         $command = new Command();
         $input   = new ArrayInput(['--with-php-path' => '/usr/bin/php']);
-        $output  = new NullOutput();
+        $io      = new NullIO();
         CommandHelper::configureDownloadBuildInstallOptions($command);
         CommandHelper::validateInput($input, $command);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('The --with-php-path=/path/to/php cannot be used on non-Windows, use --with-php-config=/path/to/php-config instead.');
-        CommandHelper::determineTargetPlatformFromInputs($input, $output);
+        CommandHelper::determineTargetPlatformFromInputs($input, $io);
     }
 
     #[RequiresOperatingSystemFamily('Windows')]
@@ -163,18 +163,18 @@ final class CommandHelperTest extends TestCase
     {
         $command = new Command();
         $input   = new ArrayInput(['--with-phpize-path' => 'C:\path\to\phpize']);
-        $output  = new NullOutput();
+        $io      = new NullIO();
         CommandHelper::configureDownloadBuildInstallOptions($command);
         CommandHelper::validateInput($input, $command);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('The --with-phpize-path=/path/to/phpize cannot be used on Windows.');
-        CommandHelper::determineTargetPlatformFromInputs($input, $output);
+        CommandHelper::determineTargetPlatformFromInputs($input, $io);
     }
 
     public function testListRepositories(): void
     {
-        $output = new BufferedOutput();
+        $io = new BufferIO();
 
         $packagistRepo = $this->createMock(ComposerRepository::class);
         $packagistRepo->method('getRepoConfig')->willReturn(['url' => 'https://repo.packagist.org']);
@@ -202,7 +202,7 @@ final class CommandHelperTest extends TestCase
         $composer = $this->createMock(Composer::class);
         $composer->method('getRepositoryManager')->willReturn($repoManager);
 
-        CommandHelper::listRepositories($composer, $output);
+        CommandHelper::listRepositories($composer, $io);
 
         self::assertSame(
             str_replace("\r\n", "\n", <<<'OUTPUT'
@@ -212,7 +212,7 @@ final class CommandHelperTest extends TestCase
               - VCS Repository (https://github.com/php/pie)
               - Path Repository (/path/to/repo)
             OUTPUT),
-            str_replace("\r\n", "\n", trim($output->fetch())),
+            str_replace("\r\n", "\n", trim($io->getOutput())),
         );
     }
 }

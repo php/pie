@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\Pie\Command;
 
 use Composer\Composer;
+use Composer\IO\IOInterface;
 use Composer\Package\CompletePackageInterface;
 use Composer\Package\Version\VersionParser;
 use Composer\Repository\ComposerRepository;
@@ -30,7 +31,6 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 use Webmozart\Assert\Assert;
 
@@ -144,7 +144,7 @@ final class CommandHelper
         $input->bind($command->getDefinition());
     }
 
-    public static function determineTargetPlatformFromInputs(InputInterface $input, OutputInterface $output): TargetPlatform
+    public static function determineTargetPlatformFromInputs(InputInterface $input, IOInterface $io): TargetPlatform
     {
         $phpBinaryPath = PhpBinaryPath::fromCurrentProcess();
 
@@ -190,8 +190,8 @@ final class CommandHelper
 
         $targetPlatform = TargetPlatform::fromPhpBinaryPath($phpBinaryPath, $makeParallelJobs);
 
-        $output->writeln(sprintf('<info>You are running PHP %s</info>', PHP_VERSION));
-        $output->writeln(sprintf(
+        $io->write(sprintf('<info>You are running PHP %s</info>', PHP_VERSION));
+        $io->write(sprintf(
             '<info>Target PHP installation:</info> %s %s%s, on %s %s (from %s)',
             $phpBinaryPath->version(),
             $targetPlatform->threadSafety->asShort(),
@@ -200,12 +200,12 @@ final class CommandHelper
             $targetPlatform->architecture->name,
             $phpBinaryPath->phpBinaryPath,
         ));
-        $output->writeln(
+        $io->write(
             sprintf(
                 '<info>Using pie.json:</info> %s',
                 PiePlatform::getPieJsonFilename($targetPlatform),
             ),
-            OutputInterface::VERBOSITY_VERBOSE,
+            verbosity: IOInterface::VERBOSE,
         );
 
         return $targetPlatform;
@@ -306,9 +306,9 @@ final class CommandHelper
         return $configureOptionsValues;
     }
 
-    public static function listRepositories(Composer $composer, OutputInterface $output): void
+    public static function listRepositories(Composer $composer, IOInterface $io): void
     {
-        $output->writeln('The following repositories are in use for this Target PHP:');
+        $io->write('The following repositories are in use for this Target PHP:');
 
         foreach ($composer->getRepositoryManager()->getRepositories() as $repo) {
             if ($repo instanceof ComposerRepository) {
@@ -317,16 +317,16 @@ final class CommandHelper
                 $repoUrl = array_key_exists('url', $repoConfig) && is_string($repoConfig['url']) && $repoConfig['url'] !== '' ? $repoConfig['url'] : null;
 
                 if ($repoUrl === 'https://repo.packagist.org') {
-                    $output->writeln('  - Packagist');
+                    $io->write('  - Packagist');
                     continue;
                 }
 
-                $output->writeln(sprintf('  - Composer (%s)', $repoUrl ?? 'no url?'));
+                $io->write(sprintf('  - Composer (%s)', $repoUrl ?? 'no url?'));
                 continue;
             }
 
             if ($repo instanceof VcsRepository) {
-                $output->writeln(sprintf(
+                $io->write(sprintf(
                     '  - VCS Repository (%s)',
                     $repo->getDriver()?->getUrl() ?? 'no url?',
                 ));
@@ -338,7 +338,7 @@ final class CommandHelper
             }
 
             $repoConfig = $repo->getRepoConfig();
-            $output->writeln(sprintf(
+            $io->write(sprintf(
                 '  - Path Repository (%s)',
                 array_key_exists('url', $repoConfig) && is_string($repoConfig['url']) && $repoConfig['url'] !== '' ? $repoConfig['url'] : 'no path?',
             ));
@@ -348,14 +348,14 @@ final class CommandHelper
     public static function handlePackageNotFound(
         InvalidPackageName|UnableToResolveRequirement $exception,
         FindMatchingPackages $findMatchingPackages,
-        OutputInterface $output,
+        IOInterface $io,
         TargetPlatform $targetPlatform,
         ContainerInterface $container,
     ): int {
         $pieComposer = PieComposerFactory::createPieComposer(
             $container,
             PieComposerRequest::noOperation(
-                $output,
+                $io,
                 $targetPlatform,
             ),
         );
@@ -365,13 +365,13 @@ final class CommandHelper
             $requestedPackageName = substr($requestedPackageName, 4);
         }
 
-        $output->writeln('');
-        $output->writeln(sprintf('<error>Could not install package: %s</error>', $requestedPackageName));
-        $output->writeln($exception->getMessage());
+        $io->writeError('');
+        $io->writeError(sprintf('<error>Could not install package: %s</error>', $requestedPackageName));
+        $io->writeError($exception->getMessage());
 
         try {
             $matches = array_map(
-                static function (array $match) use ($output, $pieComposer): array {
+                static function (array $match) use ($io, $pieComposer): array {
                     $composerMatchingPackage = $pieComposer->getRepositoryManager()->findPackage($match['name'], '*');
 
                     // Attempts to augment the Composer packages found with the PIE extension name
@@ -382,13 +382,13 @@ final class CommandHelper
                                 ->extensionName()
                                 ->name();
                         } catch (Throwable $t) {
-                            $output->writeln(
+                            $io->writeError(
                                 sprintf(
                                     'Tried looking up extension name for %s, but failed: %s',
                                     $match['name'],
                                     $t->getMessage(),
                                 ),
-                                OutputInterface::VERBOSITY_VERY_VERBOSE,
+                                verbosity: IOInterface::VERY_VERBOSE,
                             );
                         }
                     }
@@ -399,16 +399,16 @@ final class CommandHelper
             );
 
             if (count($matches)) {
-                $output->writeln('');
+                $io->write('');
                 if (count($matches) === 1) {
-                    $output->writeln('<info>Did you mean this?</info>');
+                    $io->write('<info>Did you mean this?</info>');
                 } else {
-                    $output->writeln('<info>Did you mean one of these?</info>');
+                    $io->write('<info>Did you mean one of these?</info>');
                 }
 
                 array_map(
-                    static function (array $match) use ($output): void {
-                        $output->writeln(sprintf(
+                    static function (array $match) use ($io): void {
+                        $io->write(sprintf(
                             ' - %s%s: %s',
                             $match['name'],
                             array_key_exists('extension-name', $match) && is_string($match['extension-name'])
@@ -421,12 +421,12 @@ final class CommandHelper
                 );
             }
         } catch (OutOfRangeException) {
-            $output->writeln(
+            $io->writeError(
                 sprintf(
                     'Tried searching for "%s", but nothing was found.',
                     $requestedPackageName,
                 ),
-                OutputInterface::VERBOSITY_VERBOSE,
+                verbosity: IOInterface::VERBOSE,
             );
         }
 

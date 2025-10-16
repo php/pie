@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Php\Pie\Installing\Ini;
 
+use Composer\IO\IOInterface;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\File\BinaryFile;
 use Php\Pie\Platform\TargetPlatform;
-use Symfony\Component\Console\Output\OutputInterface;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class StandardSinglePhpIni implements SetupIniApproach
@@ -26,7 +26,7 @@ final class StandardSinglePhpIni implements SetupIniApproach
         TargetPlatform $targetPlatform,
         DownloadedPackage $downloadedPackage,
         BinaryFile $binaryFile,
-        OutputInterface $output,
+        IOInterface $io,
     ): bool {
         $ini = $targetPlatform->phpBinaryPath->loadedIniConfigurationFile();
 
@@ -39,7 +39,7 @@ final class StandardSinglePhpIni implements SetupIniApproach
             $ini,
             $targetPlatform,
             $downloadedPackage,
-            $output,
+            $io,
             null,
         );
     }

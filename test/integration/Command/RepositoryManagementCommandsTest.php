@@ -10,7 +10,6 @@ use Php\Pie\Command\RepositoryRemoveCommand;
 use Php\Pie\Container;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Console\Tester\CommandTester;
 
 use function array_filter;
 use function array_map;
@@ -36,9 +35,9 @@ final class RepositoryManagementCommandsTest extends TestCase
 
     public function setUp(): void
     {
-        $this->listCommand   = new CommandTester(Container::factory()->get(RepositoryListCommand::class));
-        $this->addCommand    = new CommandTester(Container::factory()->get(RepositoryAddCommand::class));
-        $this->removeCommand = new CommandTester(Container::factory()->get(RepositoryRemoveCommand::class));
+        $this->listCommand   = new CommandTester(Container::testFactory()->get(RepositoryListCommand::class));
+        $this->addCommand    = new CommandTester(Container::testFactory()->get(RepositoryAddCommand::class));
+        $this->removeCommand = new CommandTester(Container::testFactory()->get(RepositoryRemoveCommand::class));
 
         $this->addCommand->execute([
             'type' => 'composer',

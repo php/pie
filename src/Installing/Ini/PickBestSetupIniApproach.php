@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Php\Pie\Installing\Ini;
 
+use Composer\IO\IOInterface;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\File\BinaryFile;
 use Php\Pie\Platform\TargetPlatform;
 use ReflectionClass;
-use Symfony\Component\Console\Output\OutputInterface;
 
 use function array_filter;
 use function array_values;
@@ -49,30 +49,36 @@ final class PickBestSetupIniApproach implements SetupIniApproach
         TargetPlatform $targetPlatform,
         DownloadedPackage $downloadedPackage,
         BinaryFile $binaryFile,
-        OutputInterface $output,
+        IOInterface $io,
     ): bool {
         $approaches = $this->approachesThatCanBeUsed($targetPlatform);
 
         if (count($approaches) === 0) {
-            $output->writeln('No INI setup approaches can be used on this platform.', OutputInterface::VERBOSITY_VERBOSE);
+            $io->write(
+                'No INI setup approaches can be used on this platform.',
+                verbosity: IOInterface::VERBOSE,
+            );
 
             return false;
         }
 
         foreach ($approaches as $approach) {
-            $output->writeln(
+            $io->write(
                 sprintf(
                     'Trying to enable extension using %s',
                     (new ReflectionClass($approach))->getShortName(),
                 ),
-                OutputInterface::VERBOSITY_VERBOSE,
+                verbosity: IOInterface::VERBOSE,
             );
-            if ($approach->setup($targetPlatform, $downloadedPackage, $binaryFile, $output)) {
+            if ($approach->setup($targetPlatform, $downloadedPackage, $binaryFile, $io)) {
                 return true;
             }
         }
 
-        $output->writeln('None of the INI setup approaches succeeded.', OutputInterface::VERBOSITY_VERBOSE);
+        $io->write(
+            'None of the INI setup approaches succeeded.',
+            verbosity: IOInterface::VERBOSE,
+        );
 
         return false;
     }

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Php\Pie\SelfManage\Verify;
 
+use Composer\IO\IOInterface;
 use Php\Pie\File\BinaryFile;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\ExecutableFinder;
 use ThePhpFoundation\Attestation\Verification\VerifyAttestationWithOpenSsl;
 
@@ -29,18 +29,18 @@ final class VerifyPieReleaseUsingAttestation implements VerifyPiePhar
         );
     }
 
-    public function verify(ReleaseMetadata $releaseMetadata, BinaryFile $pharFilename, OutputInterface $output): void
+    public function verify(ReleaseMetadata $releaseMetadata, BinaryFile $pharFilename, IOInterface $io): void
     {
         try {
-            $this->githubCliVerification->verify($releaseMetadata, $pharFilename, $output);
+            $this->githubCliVerification->verify($releaseMetadata, $pharFilename, $io);
         } catch (GithubCliNotAvailable $githubCliNotAvailable) {
-            $output->writeln($githubCliNotAvailable->getMessage(), OutputInterface::VERBOSITY_VERBOSE);
+            $io->writeError($githubCliNotAvailable->getMessage(), verbosity: IOInterface::VERBOSE);
 
             if (! extension_loaded('openssl')) {
                 throw FailedToVerifyRelease::fromNoOpenssl();
             }
 
-            $this->fallbackVerification->verify($releaseMetadata, $pharFilename, $output);
+            $this->fallbackVerification->verify($releaseMetadata, $pharFilename, $io);
         }
     }
 }

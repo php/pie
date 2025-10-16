@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Php\Pie\SelfManage\Verify;
 
+use Composer\IO\IOInterface;
 use Php\Pie\File\BinaryFile;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
 use Php\Pie\Util\Emoji;
-use Symfony\Component\Console\Output\OutputInterface;
 use ThePhpFoundation\Attestation\FilenameWithChecksum;
 use ThePhpFoundation\Attestation\FulcioSigstoreOidExtensions;
 use ThePhpFoundation\Attestation\Verification\Exception\FailedToVerifyArtifact;
@@ -34,11 +34,11 @@ final class FallbackVerificationUsingOpenSsl implements VerifyPiePhar
     ) {
     }
 
-    public function verify(ReleaseMetadata $releaseMetadata, BinaryFile $pharFilename, OutputInterface $output): void
+    public function verify(ReleaseMetadata $releaseMetadata, BinaryFile $pharFilename, IOInterface $io): void
     {
-        $output->writeln(
+        $io->write(
             'Falling back to basic verification. To use full verification, install the `gh` CLI tool.',
-            OutputInterface::VERBOSITY_VERBOSE,
+            verbosity: IOInterface::VERBOSE,
         );
 
         try {
@@ -53,7 +53,7 @@ final class FallbackVerificationUsingOpenSsl implements VerifyPiePhar
             throw FailedToVerifyRelease::fromAttestationException($failedToVerifyArtifact);
         }
 
-        $output->writeln(sprintf(
+        $io->write(sprintf(
             '<info>%s Verified the new PIE version (using fallback verification)</info>',
             Emoji::GREEN_CHECKMARK,
         ));

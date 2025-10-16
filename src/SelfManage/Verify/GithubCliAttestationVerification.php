@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Php\Pie\SelfManage\Verify;
 
+use Composer\IO\IOInterface;
 use Php\Pie\File\BinaryFile;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
 use Php\Pie\Util\Emoji;
 use Php\Pie\Util\Process;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\ExecutableFinder;
 
@@ -27,7 +27,7 @@ final class GithubCliAttestationVerification implements VerifyPiePhar
     {
     }
 
-    public function verify(ReleaseMetadata $releaseMetadata, BinaryFile $pharFilename, OutputInterface $output): void
+    public function verify(ReleaseMetadata $releaseMetadata, BinaryFile $pharFilename, IOInterface $io): void
     {
         $gh = $this->executableFinder->find(self::GH_CLI_NAME);
 
@@ -54,7 +54,10 @@ final class GithubCliAttestationVerification implements VerifyPiePhar
             $pharFilename->filePath,
         ];
 
-        $output->writeln('Verifying using: ' . implode(' ', $verificationCommand), OutputInterface::VERBOSITY_VERBOSE);
+        $io->write(
+            'Verifying using: ' . implode(' ', $verificationCommand),
+            verbosity: IOInterface::VERBOSE,
+        );
 
         try {
             Process::run($verificationCommand, null, self::GH_VERIFICATION_TIMEOUT);
@@ -62,6 +65,6 @@ final class GithubCliAttestationVerification implements VerifyPiePhar
             throw FailedToVerifyRelease::fromGhCliFailure($releaseMetadata, $processFailedException);
         }
 
-        $output->writeln(sprintf('<info>%s Verified the new PIE version</info>', Emoji::GREEN_CHECKMARK));
+        $io->write(sprintf('<info>%s Verified the new PIE version</info>', Emoji::GREEN_CHECKMARK));
     }
 }
