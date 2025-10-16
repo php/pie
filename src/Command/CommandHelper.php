@@ -365,9 +365,9 @@ final class CommandHelper
             $requestedPackageName = substr($requestedPackageName, 4);
         }
 
-        $io->write('');
-        $io->write(sprintf('<error>Could not install package: %s</error>', $requestedPackageName));
-        $io->write($exception->getMessage());
+        $io->writeError('');
+        $io->writeError(sprintf('<error>Could not install package: %s</error>', $requestedPackageName));
+        $io->writeError($exception->getMessage());
 
         try {
             $matches = array_map(
@@ -382,7 +382,7 @@ final class CommandHelper
                                 ->extensionName()
                                 ->name();
                         } catch (Throwable $t) {
-                            $io->write(
+                            $io->writeError(
                                 sprintf(
                                     'Tried looking up extension name for %s, but failed: %s',
                                     $match['name'],
@@ -421,7 +421,7 @@ final class CommandHelper
                 );
             }
         } catch (OutOfRangeException) {
-            $io->write(
+            $io->writeError(
                 sprintf(
                     'Tried searching for "%s", but nothing was found.',
                     $requestedPackageName,

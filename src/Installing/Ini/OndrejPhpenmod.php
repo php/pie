@@ -170,7 +170,7 @@ final class OndrejPhpenmod implements SetupIniApproach
 
                     return true;
                 } catch (ProcessFailedException $processFailedException) {
-                    $io->write(
+                    $io->writeError(
                         sprintf(
                             'Failed to use %s to enable %s for PHP %s: %s',
                             $phpenmodPath,

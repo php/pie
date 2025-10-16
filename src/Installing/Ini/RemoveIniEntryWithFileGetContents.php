@@ -96,7 +96,7 @@ class RemoveIniEntryWithFileGetContents implements RemoveIniEntry
                 try {
                     SudoFilePut::contents($iniFile, $replacedContent);
                 } catch (FailedToWriteFile) {
-                    $io->write(sprintf(
+                    $io->writeError(sprintf(
                         '<error>Failed to remove extension "%s" from INI file "%s"</error>',
                         $package->extensionName()->name(),
                         $iniFile,

@@ -84,7 +84,7 @@ final class SelfUpdateCommand extends Command
     public function execute(InputInterface $input, OutputInterface $output): int
     {
         if (! PieVersion::isPharBuild()) {
-            $this->io->write('<comment>Aborting! You are not running a PHAR, cannot self-update.</comment>');
+            $this->io->writeError('<comment>Aborting! You are not running a PHAR, cannot self-update.</comment>');
 
             return Command::FAILURE;
         }
@@ -131,7 +131,7 @@ final class SelfUpdateCommand extends Command
             try {
                 $latestRelease = $fetchLatestPieRelease->latestReleaseMetadata($updateChannel);
             } catch (Throwable $throwable) {
-                $this->io->write(sprintf('<error>%s</error>', $throwable->getMessage()));
+                $this->io->writeError(sprintf('<error>%s</error>', $throwable->getMessage()));
 
                 return Command::FAILURE;
             }
@@ -165,13 +165,13 @@ final class SelfUpdateCommand extends Command
         try {
             $verifyPiePhar->verify($latestRelease, $pharFilename, $this->io);
         } catch (FailedToVerifyRelease $failedToVerifyRelease) {
-            $this->io->write(sprintf(
+            $this->io->writeError(sprintf(
                 '<error>❌ Failed to verify the pie.phar release %s: %s</error>',
                 $latestRelease->tag,
                 $failedToVerifyRelease->getMessage(),
             ));
 
-            $this->io->write('This means I could not verify that the PHAR we tried to update to was authentic, so I am aborting the self-update.');
+            $this->io->writeError('This means I could not verify that the PHAR we tried to update to was authentic, so I am aborting the self-update.');
             unlink($pharFilename->filePath);
 
             return Command::FAILURE;

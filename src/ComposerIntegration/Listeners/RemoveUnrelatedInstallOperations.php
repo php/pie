@@ -47,7 +47,7 @@ class RemoveUnrelatedInstallOperations
             $installerEvent->getTransaction()?->getOperations() ?? [],
             function (OperationInterface $operation) use ($pieOutput): bool {
                 if (! $operation instanceof InstallOperation && ! $operation instanceof UninstallOperation) {
-                    $pieOutput->write(
+                    $pieOutput->writeError(
                         sprintf(
                             'Unexpected operation during installer: %s',
                             $operation::class,
@@ -61,7 +61,7 @@ class RemoveUnrelatedInstallOperations
                 $isRequestedPiePackage = $this->composerRequest->requestedPackage->package === $operation->getPackage()->getName();
 
                 if (! $isRequestedPiePackage) {
-                    $pieOutput->write(
+                    $pieOutput->writeError(
                         sprintf(
                             'Filtering package %s from install operations, as it was not the requested package',
                             $operation->getPackage()->getName(),

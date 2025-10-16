@@ -76,7 +76,7 @@ final class UninstallCommand extends Command
         $piePackage = $this->findPiePackageByPackageName($packageToRemove, $composer);
 
         if ($piePackage === null) {
-            $this->io->write('<error>No package found: ' . $packageToRemove . '</error>');
+            $this->io->writeError('<error>No package found: ' . $packageToRemove . '</error>');
 
             return 1;
         }

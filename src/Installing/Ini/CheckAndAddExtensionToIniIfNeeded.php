@@ -63,7 +63,7 @@ class CheckAndAddExtensionToIniIfNeeded
 
                 return true;
             } catch (Throwable $anything) {
-                $io->write(sprintf(
+                $io->writeError(sprintf(
                     '<error>Something went wrong verifying the %s extension is enabled: %s</error>',
                     $downloadedPackage->package->extensionName()->name(),
                     $anything->getMessage(),

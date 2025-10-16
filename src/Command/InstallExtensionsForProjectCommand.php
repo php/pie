@@ -101,7 +101,7 @@ final class InstallExtensionsForProjectCommand extends Command
         if (ExtensionType::isValid($rootPackage->getType())) {
             $cwd = realpath(getcwd());
             if (! is_string($cwd) || $cwd === '') {
-                $this->io->write('<error>Failed to determine current working directory.</error>');
+                $this->io->writeError('<error>Failed to determine current working directory.</error>');
 
                 $restoreWorkingDir();
 
@@ -124,7 +124,7 @@ final class InstallExtensionsForProjectCommand extends Command
 
         $allowNonInteractive = $input->hasOption(CommandHelper::OPTION_ALLOW_NON_INTERACTIVE_PROJECT_INSTALL) && $input->getOption(CommandHelper::OPTION_ALLOW_NON_INTERACTIVE_PROJECT_INSTALL);
         if (! Platform::isInteractive() && ! $allowNonInteractive) {
-            $this->io->write(sprintf(
+            $this->io->writeError(sprintf(
                 '<warning>Aborting! You are not running in interactive mode, and --%s was not specified.</warning>',
                 CommandHelper::OPTION_ALLOW_NON_INTERACTIVE_PROJECT_INSTALL,
             ));
@@ -226,7 +226,7 @@ final class InstallExtensionsForProjectCommand extends Command
                     $anyErrorsHappened = true;
 
                     // @todo Figure out if there is a way to improve this, safely
-                    $this->io->write(sprintf(
+                    $this->io->writeError(sprintf(
                         "<warning>Multiple packages were found for %s:</warning>\n  %s\n\n<warning>This means you cannot `pie install` this project interactively for now.</warning>",
                         $extension->nameWithExtPrefix(),
                         implode("\n  ", array_column($matches, 'name')),

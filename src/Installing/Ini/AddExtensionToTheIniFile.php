@@ -93,7 +93,7 @@ class AddExtensionToTheIniFile
         } catch (Throwable $anything) {
             SudoFilePut::contents($ini, $originalIniContent);
 
-            $io->write(sprintf(
+            $io->writeError(sprintf(
                 '<error>Something went wrong enabling the %s extension: %s</error>',
                 $package->extensionName()->name(),
                 $anything->getMessage(),

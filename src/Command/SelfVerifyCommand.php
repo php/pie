@@ -42,7 +42,7 @@ final class SelfVerifyCommand extends Command
     public function execute(InputInterface $input, OutputInterface $output): int
     {
         if (! PieVersion::isPharBuild()) {
-            $this->io->write('<comment>Aborting! You are not running a PHAR, cannot self-verify.</comment>');
+            $this->io->writeError('<comment>Aborting! You are not running a PHAR, cannot self-verify.</comment>');
 
             return Command::FAILURE;
         }
@@ -54,7 +54,7 @@ final class SelfVerifyCommand extends Command
         try {
             $verifyPiePhar->verify($latestRelease, $pharFilename, $this->io);
         } catch (FailedToVerifyRelease $failedToVerifyRelease) {
-            $this->io->write(sprintf(
+            $this->io->writeError(sprintf(
                 '<error>❌ Failed to verify the pie.phar release %s: %s</error>',
                 $latestRelease->tag,
                 $failedToVerifyRelease->getMessage(),

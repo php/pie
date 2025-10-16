@@ -98,8 +98,8 @@ final class InfoCommand extends Command
                 $this->container,
             );
         } catch (BundledPhpExtensionRefusal $bundledPhpExtensionRefusal) {
-            $this->io->write('');
-            $this->io->write('<comment>' . $bundledPhpExtensionRefusal->getMessage() . '</comment>');
+            $this->io->writeError('');
+            $this->io->writeError('<comment>' . $bundledPhpExtensionRefusal->getMessage() . '</comment>');
 
             return self::INVALID;
         }

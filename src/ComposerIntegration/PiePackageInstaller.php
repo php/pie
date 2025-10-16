@@ -53,7 +53,7 @@ class PiePackageInstaller extends LibraryInstaller
                 }
 
                 if (! $composerPackage instanceof CompletePackage) {
-                    $io->write(sprintf(
+                    $io->writeError(sprintf(
                         '<error>Not using PIE to install %s as it was not a Complete Package</error>',
                         $composerPackage->getName(),
                     ));
@@ -95,7 +95,7 @@ class PiePackageInstaller extends LibraryInstaller
                 }
 
                 if (! $composerPackage instanceof CompletePackage) {
-                    $io->write(sprintf(
+                    $io->writeError(sprintf(
                         '<error>Not using PIE to install %s as it was not a Complete Package</error>',
                         $composerPackage->getName(),
                     ));

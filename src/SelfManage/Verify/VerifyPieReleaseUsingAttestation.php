@@ -34,7 +34,7 @@ final class VerifyPieReleaseUsingAttestation implements VerifyPiePhar
         try {
             $this->githubCliVerification->verify($releaseMetadata, $pharFilename, $io);
         } catch (GithubCliNotAvailable $githubCliNotAvailable) {
-            $io->write($githubCliNotAvailable->getMessage(), verbosity: IOInterface::VERBOSE);
+            $io->writeError($githubCliNotAvailable->getMessage(), verbosity: IOInterface::VERBOSE);
 
             if (! extension_loaded('openssl')) {
                 throw FailedToVerifyRelease::fromNoOpenssl();
