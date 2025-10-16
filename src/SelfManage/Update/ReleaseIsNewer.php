@@ -7,6 +7,7 @@ namespace Php\Pie\SelfManage\Update;
 use Composer\Semver\Semver;
 use Composer\Semver\VersionParser;
 
+use function preg_match;
 use function strtolower;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
@@ -31,6 +32,10 @@ class ReleaseIsNewer
         string $currentPieVersion,
         ReleaseMetadata $newRelease,
     ): bool {
+        if (preg_match('#([0-9]+\.[0-9]+\.[0-9]+)@([a-f0-9]{7})#', $currentPieVersion, $matches)) {
+            $currentPieVersion = 'dev-main#' . $matches[2];
+        }
+
         $newVersion   = $newRelease->tag;
         $newStability = self::stabilityToChannel(VersionParser::parseStability($newVersion));
 
