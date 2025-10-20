@@ -56,7 +56,6 @@ final class Attestation
         $decoratedCertificate = "-----BEGIN CERTIFICATE-----\n"
             . wordwrap($attestation['bundle']['verificationMaterial']['certificate']['rawBytes'], 67, "\n", true) . "\n"
             . "-----END CERTIFICATE-----\n";
-        Assert::stringNotEmpty($decoratedCertificate);
 
         $decodedPayload = base64_decode($attestation['bundle']['dsseEnvelope']['payload']);
         Assert::stringNotEmpty($decodedPayload);

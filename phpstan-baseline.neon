@@ -97,12 +97,6 @@ parameters:
 			path: src/ComposerIntegration/Listeners/RemoveUnrelatedInstallOperations.php
 
 		-
-			message: '#^Offset ''question'' on array\{question\: Symfony\\Component\\Console\\Helper\\QuestionHelper\} on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: src/ComposerIntegration/MinimalHelperSet.php
-
-		-
 			message: '#^Parameter \#3 \$package of class Php\\Pie\\ComposerIntegration\\PieComposerInstaller constructor expects Composer\\Package\\BasePackage&Composer\\Package\\RootPackageInterface, Composer\\Package\\RootPackageInterface given\.$#'
 			identifier: argument.type
 			count: 1
