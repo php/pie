@@ -17,6 +17,7 @@ use function str_starts_with;
 use function strlen;
 use function substr;
 
+/** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 class DetermineExtensionsRequired
 {
     public static function linkFilter(Link $link): bool
