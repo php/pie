@@ -59,7 +59,7 @@ jobs:
           - '8.2.29'
           - '8.3.25'
           - '8.4.12'
-          - '8.5.0beta2'
+          - '8.5.0RC2'
     steps:
       - name: "Purge built-in PHP version"
         run: |
@@ -101,7 +101,7 @@ jobs:
         run: echo "php_src_download_url=https://www.php.net/distributions/php-${{ matrix.php-versions }}.tar.gz" >> $GITHUB_ENV
       - name: "Set php-src download URL (8.5 pre-release)"
         if: ${{ startsWith(matrix.php-versions, '8.5.') }}
-        run: echo "php_src_download_url=https://downloads.php.net/~daniels/php-${{ matrix.php-versions }}.tar.gz" >> $GITHUB_ENV
+        run: echo "php_src_download_url=https://downloads.php.net/~edorian/php-${{ matrix.php-versions }}.tar.gz" >> $GITHUB_ENV
       - name: "Install PHP ${{ matrix.php-versions }}"
         run: |
           mkdir -p /tmp/php
