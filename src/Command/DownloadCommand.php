@@ -64,6 +64,7 @@ final class DownloadCommand extends Command
         }
 
         $forceInstallPackageVersion = CommandHelper::determineForceInstallingPackageVersion($input);
+        CommandHelper::applyNoCacheOptionIfSet($input, $this->io);
 
         $composer = PieComposerFactory::createPieComposer(
             $this->container,

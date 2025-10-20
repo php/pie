@@ -36,6 +36,8 @@ final class RepositoryListCommand extends Command
 
     public function execute(InputInterface $input, OutputInterface $output): int
     {
+        CommandHelper::applyNoCacheOptionIfSet($input, $this->io);
+
         CommandHelper::listRepositories(
             PieComposerFactory::createPieComposer(
                 $this->container,

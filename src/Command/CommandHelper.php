@@ -60,6 +60,7 @@ final class CommandHelper
     private const OPTION_MAKE_PARALLEL_JOBS                   = 'make-parallel-jobs';
     private const OPTION_SKIP_ENABLE_EXTENSION                = 'skip-enable-extension';
     private const OPTION_FORCE                                = 'force';
+    private const OPTION_NO_CACHE                             = 'no-cache';
 
     private function __construct()
     {
@@ -84,6 +85,12 @@ final class CommandHelper
             null,
             InputOption::VALUE_REQUIRED,
             'The path to the `phpize` binary to use as the target PHP platform, e.g. --' . self::OPTION_WITH_PHPIZE_PATH . '=/usr/bin/phpize7.4',
+        );
+        $command->addOption(
+            self::OPTION_NO_CACHE,
+            null,
+            InputOption::VALUE_NONE,
+            'Prevent the use of the Composer cache.',
         );
     }
 
@@ -431,5 +438,15 @@ final class CommandHelper
         }
 
         return 1;
+    }
+
+    public static function applyNoCacheOptionIfSet(InputInterface $input, IOInterface $io): void
+    {
+        if (! $input->hasOption(self::OPTION_NO_CACHE) || ! $input->getOption(self::OPTION_NO_CACHE)) {
+            return;
+        }
+
+        $io->writeError('Disabling cache usage', verbosity: IOInterface::DEBUG);
+        Platform::putEnv('COMPOSER_CACHE_DIR', Platform::isWindows() ? 'nul' : '/dev/null');
     }
 }

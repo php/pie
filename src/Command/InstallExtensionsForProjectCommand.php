@@ -96,6 +96,8 @@ final class InstallExtensionsForProjectCommand extends Command
             );
         }
 
+        CommandHelper::applyNoCacheOptionIfSet($input, $this->io);
+
         $rootPackage = $this->composerFactoryForProject->rootPackage($this->io);
 
         if (ExtensionType::isValid($rootPackage->getType())) {

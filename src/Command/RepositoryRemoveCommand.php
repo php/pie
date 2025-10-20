@@ -66,6 +66,8 @@ final class RepositoryRemoveCommand extends Command
                 ->removeRepository($url);
         }
 
+        CommandHelper::applyNoCacheOptionIfSet($input, $this->io);
+
         CommandHelper::listRepositories(
             PieComposerFactory::createPieComposer(
                 $this->container,
