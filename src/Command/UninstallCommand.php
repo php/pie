@@ -65,6 +65,8 @@ final class UninstallCommand extends Command
 
         $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $this->io);
 
+        CommandHelper::applyNoCacheOptionIfSet($input, $this->io);
+
         $composer = PieComposerFactory::createPieComposer(
             $this->container,
             PieComposerRequest::noOperation(

@@ -87,6 +87,8 @@ final class ShowCommand extends Command
             $this->io->write('Tip: to include extensions in this list that PIE does not manage, use the --all flag.');
         }
 
+        CommandHelper::applyNoCacheOptionIfSet($input, $this->io);
+
         $composer = PieComposerFactory::createPieComposer(
             $this->container,
             PieComposerRequest::noOperation(

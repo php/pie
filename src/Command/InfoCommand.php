@@ -69,6 +69,8 @@ final class InfoCommand extends Command
             );
         }
 
+        CommandHelper::applyNoCacheOptionIfSet($input, $this->io);
+
         $composer = PieComposerFactory::createPieComposer(
             $this->container,
             new PieComposerRequest(
