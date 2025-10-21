@@ -55,11 +55,11 @@ jobs:
         operating-system:
           - ubuntu-latest
         php-versions:
-          - '8.1.33'
-          - '8.2.29'
-          - '8.3.25'
-          - '8.4.12'
-          - '8.5.0beta2'
+          - '8.1'
+          - '8.2'
+          - '8.3'
+          - '8.4'
+          - '8.5'
     steps:
       - name: "Purge built-in PHP version"
         run: |
@@ -98,10 +98,15 @@ jobs:
             libbz2-dev \
             libzip-dev
       - name: "Set php-src download URL"
-        run: echo "php_src_download_url=https://www.php.net/distributions/php-${{ matrix.php-versions }}.tar.gz" >> $GITHUB_ENV
+        if: ${{ !startsWith(matrix.php-versions, '8.5') }}
+        run: |
+          DIST_URL=`curl -fsSL "https://www.php.net/releases/index.php?json&max=1&version=${{ matrix.php-versions }}" | jq -r '.[].source[]|select(.filename|endswith(".gz")).filename'`
+          echo "php_src_download_url=https://www.php.net/distributions/$DIST_URL" >> $GITHUB_ENV
       - name: "Set php-src download URL (8.5 pre-release)"
-        if: ${{ startsWith(matrix.php-versions, '8.5.') }}
-        run: echo "php_src_download_url=https://downloads.php.net/~daniels/php-${{ matrix.php-versions }}.tar.gz" >> $GITHUB_ENV
+        if: ${{ startsWith(matrix.php-versions, '8.5') }}
+        run: |
+          RC_URL=`curl -fsSL "https://www.php.net/release-candidates.php?format=json" | jq -r '.releases[]|select(.version|startswith("${{ matrix.php-versions }}")).files.gz.path'`
+          echo "php_src_download_url=$RC_URL" >> $GITHUB_ENV
       - name: "Install PHP ${{ matrix.php-versions }}"
         run: |
           mkdir -p /tmp/php

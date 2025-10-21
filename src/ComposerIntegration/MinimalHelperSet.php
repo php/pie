@@ -11,7 +11,7 @@ use Webmozart\Assert\Assert;
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 class MinimalHelperSet extends HelperSet
 {
-    /** @param array{question: QuestionHelper} $helpers */
+    /** @param array{question?: QuestionHelper|mixed} $helpers */
     public function __construct(array $helpers)
     {
         Assert::isInstanceOf(
