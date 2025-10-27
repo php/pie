@@ -45,6 +45,7 @@ use function is_dir;
 use function is_string;
 use function realpath;
 use function sprintf;
+use function strtolower;
 
 use const PHP_EOL;
 
@@ -152,7 +153,7 @@ final class InstallExtensionsForProjectCommand extends Command
             ),
         );
 
-        $phpEnabledExtensions = array_keys($targetPlatform->phpBinaryPath->extensions());
+        $phpEnabledExtensions = array_map('strtolower', array_keys($targetPlatform->phpBinaryPath->extensions()));
         $installedPiePackages = $this->installedPiePackages->allPiePackages($pieComposer);
 
         $anyErrorsHappened = false;
@@ -177,7 +178,7 @@ final class InstallExtensionsForProjectCommand extends Command
                         );
                 }
 
-                if (in_array($extension->name(), $phpEnabledExtensions)) {
+                if (in_array(strtolower($extension->name()), $phpEnabledExtensions)) {
                     if ($piePackageVersion !== null && $piePackageVersionMatchesLinkConstraint === false) {
                         $this->io->write(sprintf(
                             '%s: <comment>%s:%s</comment> %s Version %s is installed, but does not meet the version requirement %s',

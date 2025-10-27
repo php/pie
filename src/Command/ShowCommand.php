@@ -125,6 +125,11 @@ final class ShowCommand extends Command
                 $packageRequirement   = $rootPackageRequires[$piePackage->name()]->getPrettyConstraint();
 
                 try {
+                    // Don't check for updates for bundled PHP extensions
+                    if ($piePackage->isBundledPhpExtension()) {
+                        throw new BundledPhpExtensionRefusal();
+                    }
+
                     Assert::stringNotEmpty($packageName);
                     Assert::stringNotEmpty($packageRequirement);
 

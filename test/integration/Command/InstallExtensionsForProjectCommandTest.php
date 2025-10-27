@@ -99,6 +99,7 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
         $rootPackage = new RootPackage('my/project', '1.2.3.0', '1.2.3');
         $rootPackage->setRequires([
             'ext-standard' => new Link('my/project', 'ext-standard', new Constraint('=', '*'), Link::TYPE_REQUIRE, '*'),
+            'ext-spl' => new Link('my/project', 'ext-spl', new Constraint('=', '*'), Link::TYPE_REQUIRE, '*'),
             'ext-foobar' => new Link('my/project', 'ext-foobar', new MultiConstraint([
                 new Constraint('>=', '1.2.0.0-dev'),
                 new Constraint('<', '2.0.0.0-dev'),
@@ -137,6 +138,7 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
         $this->commandTester->assertCommandIsSuccessful($outputString);
         self::assertStringContainsString('Checking extensions for your project my/project', $outputString);
         self::assertStringContainsString('requires: ext-standard:* ✅ Already installed', $outputString);
+        self::assertStringContainsString('requires: ext-spl:* ✅ Already installed', $outputString);
         self::assertStringContainsString('requires: ext-foobar:^1.2 🚫 Missing', $outputString);
     }
 
