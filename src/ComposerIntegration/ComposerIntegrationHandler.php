@@ -42,6 +42,16 @@ class ComposerIntegrationHandler
             $recommendedRequireVersion = $versionSelector->findRecommendedRequireVersion($package->composerPackage());
         }
 
+        if ($package->isBundledPhpExtension()) {
+            $stability       = $package->composerPackage()->getStability();
+            $stabilitySuffix = '';
+            if ($stability !== 'stable') {
+                $stabilitySuffix = '@' . $stability;
+            }
+
+            $recommendedRequireVersion = '*' . $stabilitySuffix;
+        }
+
         // Write the new requirement to pie.json; because we later essentially just do a `composer install` using that file
         $pieComposerJson        = Platform::getPieJsonFilename($targetPlatform);
         $pieJsonEditor          = PieJsonEditor::fromTargetPlatform($targetPlatform);
