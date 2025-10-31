@@ -135,6 +135,10 @@ final class PhpBinaryPathTest extends TestCase
                 && is_executable($phpConfigPath[0]),
         );
 
+        if ($possiblePhpConfigPaths === []) {
+            return ['skip' => ['skip', 'skip']];
+        }
+
         return array_combine(
             array_column($possiblePhpConfigPaths, 0),
             $possiblePhpConfigPaths,
