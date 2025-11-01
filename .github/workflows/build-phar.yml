@@ -59,7 +59,7 @@ jobs:
         uses: actions/attest-build-provenance@v3
         with:
           subject-path: '${{ github.workspace }}/pie.phar'
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: pie-${{ github.sha }}.phar
           path: pie.phar
