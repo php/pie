@@ -36,7 +36,7 @@ jobs:
       - name: Build documentation
         run: .github/docs/build-docs.sh
       - name: Fetch built PHAR from artifacts
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: pie-${{ github.sha }}.phar
       - name: Verify the PHAR
