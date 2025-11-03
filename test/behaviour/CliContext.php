@@ -39,7 +39,7 @@ class CliContext implements Context
     {
         $pieCommand = array_merge([self::PHP_BINARY, ...$this->phpArguments, 'bin/pie'], $command);
 
-        $proc = (new Process($pieCommand))->mustRun();
+        $proc = (new Process($pieCommand, timeout: 120))->mustRun();
 
         $this->output   = $proc->getOutput();
         $this->exitCode = $proc->getExitCode();
