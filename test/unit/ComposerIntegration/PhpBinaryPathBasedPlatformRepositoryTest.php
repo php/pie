@@ -188,7 +188,7 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
             ],
             static function (array $pkg): bool {
                 try {
-                    Process::run(['pkg-config', '--print-provides', '--print-errors', $pkg[1]], timeout: 10);
+                    Process::run(['pkg-config', '--print-provides', '--print-errors', $pkg[1]], timeout: 30);
 
                     return true;
                 } catch (ProcessFailedException) {
