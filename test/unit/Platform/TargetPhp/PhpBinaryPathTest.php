@@ -135,6 +135,10 @@ final class PhpBinaryPathTest extends TestCase
                 && is_executable($phpConfigPath[0]),
         );
 
+        if ($possiblePhpConfigPaths === []) {
+            return ['skip' => ['skip', 'skip']];
+        }
+
         return array_combine(
             array_column($possiblePhpConfigPaths, 0),
             $possiblePhpConfigPaths,
@@ -146,6 +150,10 @@ final class PhpBinaryPathTest extends TestCase
     {
         if (Platform::isWindows()) {
             self::markTestSkipped('Do not need to test php-config on Windows as we are not building on Windows.');
+        }
+
+        if ($expectedMajorMinor === 'skip') {
+            self::markTestSkipped('No known system php-config could be found.');
         }
 
         assert($phpConfigPath !== '');
