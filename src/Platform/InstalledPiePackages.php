@@ -48,6 +48,11 @@ class InstalledPiePackages
             /** @return non-empty-string */
                 static function (Package $package): string {
                     return match ($package->extensionName()->name()) {
+                        'core' => 'Core',
+                        'spl' => 'SPL',
+                        'phar' => 'Phar',
+                        'reflection' => 'Reflection',
+                        'pdo' => 'PDO',
                         'ffi' => 'FFI',
                         'opcache' => 'Zend OPcache',
                         'simplexml' => 'SimpleXML',
