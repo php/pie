@@ -32,7 +32,7 @@ class ReleaseIsNewer
         string $currentPieVersion,
         ReleaseMetadata $newRelease,
     ): bool {
-        if (preg_match('#([0-9]+\.[0-9]+\.[0-9]+)@([a-f0-9]{7})#', $currentPieVersion, $matches)) {
+        if (preg_match('#(.*)@([a-f0-9]{7})$#', $currentPieVersion, $matches)) {
             $currentPieVersion = 'dev-main#' . $matches[2];
         }
 
