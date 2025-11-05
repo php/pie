@@ -47,6 +47,7 @@ jobs:
       # contents:write is required to upload the binaries to the release.
       contents: write
     steps:
+      - uses: actions/checkout@v4
       - name: Fetch built PHAR from artifacts
         uses: actions/download-artifact@v6
         with:
