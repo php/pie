@@ -34,6 +34,9 @@ final class ReleaseIsNewerTest extends TestCase
             'stable-nightly2-to-nightly'       => [Channel::Stable, '1.2.1@86e1b52', 'dev-main', false],
             'stable-nightly2-to-stable'        => [Channel::Stable, '1.2.1@86e1b52', '1.0.0', true],
             'stable-nightly2-to-preview'       => [Channel::Stable, '1.2.1@86e1b52', '1.0.1-rc1', false],
+            'stable-nightly3-to-nightly'       => [Channel::Stable, '1.2.1-alpha.2@86e1b52', 'dev-main', false],
+            'stable-nightly3-to-stable'        => [Channel::Stable, '1.2.1-alpha.2@86e1b52', '1.0.0', true],
+            'stable-nightly3-to-preview'       => [Channel::Stable, '1.2.1-alpha.2@86e1b52', '1.0.1-rc1', false],
 
             'preview-oldstable-to-newstable'   => [Channel::Preview, '1.0.0', '1.0.1', true],
             'preview-newstable-to-oldstable'   => [Channel::Preview, '1.0.1', '1.0.0', false],
@@ -51,6 +54,9 @@ final class ReleaseIsNewerTest extends TestCase
             'preview-nightly2-to-nightly'      => [Channel::Preview, '1.2.1@86e1b52', 'dev-main', false],
             'preview-nightly2-to-stable'       => [Channel::Preview, '1.2.1@86e1b52', '1.0.0', true],
             'preview-nightly2-to-preview'      => [Channel::Preview, '1.2.1@86e1b52', '1.0.1-rc1', true],
+            'preview-nightly3-to-nightly'      => [Channel::Preview, '1.2.1-alpha.2@86e1b52', 'dev-main', false],
+            'preview-nightly3-to-stable'       => [Channel::Preview, '1.2.1-alpha.2@86e1b52', '1.0.0', true],
+            'preview-nightly3-to-preview'      => [Channel::Preview, '1.2.1-alpha.2@86e1b52', '1.0.1-rc1', true],
 
             'nightly-oldstable-to-newstable'   => [Channel::Nightly, '1.0.0', '1.0.1', true],
             'nightly-newstable-to-oldstable'   => [Channel::Nightly, '1.0.1', '1.0.0', false],
@@ -68,6 +74,9 @@ final class ReleaseIsNewerTest extends TestCase
             'nightly-nightly2-to-nightly'      => [Channel::Nightly, '1.2.1@86e1b52', 'dev-main', true],
             'nightly-nightly2-to-stable'       => [Channel::Nightly, '1.2.1@86e1b52', '1.0.0', false],
             'nightly-nightly2-to-preview'      => [Channel::Nightly, '1.2.1@86e1b52', '1.0.1-rc1', false],
+            'nightly-nightly3-to-nightly'      => [Channel::Nightly, '1.2.1-alpha.2@86e1b52', 'dev-main', true],
+            'nightly-nightly3-to-stable'       => [Channel::Nightly, '1.2.1-alpha.2@86e1b52', '1.0.0', false],
+            'nightly-nightly3-to-preview'      => [Channel::Nightly, '1.2.1-alpha.2@86e1b52', '1.0.1-rc1', false],
         ];
     }
 
