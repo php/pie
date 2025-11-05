@@ -1,9 +1,9 @@
-name: "Publish the PHAR for Releases"
+name: "Publish a draft release with PHAR attached"
 
 on:
-  release:
-    types:
-      - published
+  push:
+    tags:
+      - '*'
 
 permissions:
   contents: read
@@ -17,10 +17,32 @@ jobs:
       attestations: write
     uses: ./.github/workflows/build-phar.yml
 
-  release-phar:
+  create-draft-release:
     runs-on: ubuntu-latest
     needs:
       - build-phar
+    permissions:
+      # contents:write is required to create the draft release
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-tags: 'true'
+          ref: ${{ github.ref }}
+      # The changelog is generated locally using jwage/changelog-generator and
+      # that forms the signed tag body. The `--notes-from-tag` option below
+      # will copy the release notes from the tag so it will contain the changelog
+      # Note we must create a *draft* release first, to allow attaching assets
+      # before the release is finalised when using immutable releases.
+      - name: Create draft release from tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${{ github.ref_name }}" --title "${{ github.ref_name }}" --draft --notes-from-tag
+
+  release-phar:
+    runs-on: ubuntu-latest
+    needs:
+      - create-draft-release
     permissions:
       # contents:write is required to upload the binaries to the release.
       contents: write
@@ -33,11 +55,15 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh attestation verify pie.phar --repo ${{ github.repository }}
-      - name: Upload binaries to release
-        uses: softprops/action-gh-release@v2
-        if: ${{startsWith(github.ref, 'refs/tags/') }}
-        with:
-          files: pie.phar
+      # Once the PHAR has been attached to the release, it is ready for review
+      # before publishing it. Note that if immutable releases are enabled,
+      # the tag, pre-release/latest release flag, and all assets become
+      # immutable, so checking this over is a manual exercise.
+      # More info: https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/immutable-releases
+      - name: Attach an asset to the draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.ref_name }}" "pie.phar" --clobber
 
   build-and-push-docker-image:
     if: ${{ startsWith(github.ref, 'refs/tags/') }}

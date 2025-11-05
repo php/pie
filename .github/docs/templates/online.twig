@@ -65,7 +65,9 @@
 
         <ul class="nav nav-pills" id="docs-side-nav">
             {% for page in pages %}
+            {% if page.slug != 'pie-maintainers-handbook' %}
             <li class="nav-item"><a href="#docs/{{ page.slug }}" class="nav-link fragmentRoute">{{ page.title }}</a></li>
+            {% endif %}
             {% endfor %}
         </ul>
     </header>
@@ -73,9 +75,11 @@
 
 <section id="docs" class="tab-content"><div id="docs-content">
     {% for page in pages %}
+    {% if page.slug != 'pie-maintainers-handbook' %}
     <section id="docs/{{ page.slug }}" class="container my-md-4 bd-layout hidden">
         {{ page.content|preg_replace('~\./docs/~', '')|raw }}
     </section>
+    {% endif %}
     {% endfor %}
 </div></section>
 
