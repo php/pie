@@ -16,9 +16,10 @@ use function array_merge;
 
 class CliContext implements Context
 {
-    private const PHP_BINARY    = 'php';
-    private string|null $output = null;
-    private int|null $exitCode  = null;
+    private const PHP_BINARY         = 'php';
+    private string|null $output      = null;
+    private string|null $errorOutput = null;
+    private int|null $exitCode       = null;
     /** @var list<string> */
     private array $phpArguments = [];
 
@@ -41,10 +42,12 @@ class CliContext implements Context
     {
         $pieCommand = array_merge([self::PHP_BINARY, ...$this->phpArguments, 'bin/pie'], $command);
 
-        $proc = (new Process($pieCommand, timeout: 120))->mustRun();
+        $proc = new Process($pieCommand, timeout: 120);
+        $proc->run();
 
-        $this->output   = $proc->getOutput();
-        $this->exitCode = $proc->getExitCode();
+        $this->output      = $proc->getOutput();
+        $this->errorOutput = $proc->getErrorOutput();
+        $this->exitCode    = $proc->getExitCode();
     }
 
     /** @phpstan-assert !null $this->output */
@@ -247,7 +250,35 @@ class CliContext implements Context
     #[When('I install the sodium extension with PIE')]
     public function iInstallTheSodiumExtensionWithPie(): void
     {
-        $this->runPieCommand(['install', '--force', 'php/sodium']);
+        $this->runPieCommand(['install', 'php/sodium']);
         $this->theExtension = 'sodium';
+    }
+
+    #[Given('I do not have libsodium on my system')]
+    public function iDoNotHaveLibsodiumOnMySystem(): void
+    {
+        (new Process(['apt-get', '-y', '-m', 'remove', 'libsodium*'], timeout: 120))->run();
+    }
+
+    #[When('I display information about the sodium extension with PIE')]
+    public function iDisplayInformationAboutTheSodiumExtensionWithPie(): void
+    {
+        $this->runPieCommand(['info', 'php/sodium']);
+        $this->theExtension = 'sodium';
+    }
+
+    #[Then('the information should show that libsodium is a missing dependency')]
+    public function theInformationShouldShowThatLibsodiumIsAMissingDependency(): void
+    {
+        Assert::notNull($this->output);
+        Assert::contains($this->output, 'lib-sodium: * 🚫 (not installed)');
+    }
+
+    #[Then('the extension fails to install due to the missing library')]
+    public function theExtensionFailsToInstallDueToTheMissingLibrary(): void
+    {
+        Assert::notSame(0, $this->exitCode);
+        Assert::notNull($this->errorOutput);
+        Assert::regex($this->errorOutput, '#Cannot use php/sodium\'s latest version .* as it requires lib-sodium .* which is missing from your platform.#');
     }
 }
