@@ -22,6 +22,8 @@ class CliContext implements Context
     /** @var list<string> */
     private array $phpArguments = [];
 
+    private string $theExtension = 'example_pie_extension';
+
     #[When('I run a command to download the latest version of an extension')]
     public function iRunACommandToDownloadTheLatestVersionOfAnExtension(): void
     {
@@ -113,22 +115,25 @@ class CliContext implements Context
     }
 
     #[When('I run a command to install an extension')]
-    #[Given('an extension was previously installed')]
+    #[Given('an extension was previously installed and enabled')]
     public function iRunACommandToInstallAnExtension(): void
     {
         $this->runPieCommand(['install', 'asgrim/example-pie-extension']);
+        $this->theExtension = 'example_pie_extension';
     }
 
     #[When('I run a command to install an extension without enabling it')]
     public function iRunACommandToInstallAnExtensionWithoutEnabling(): void
     {
         $this->runPieCommand(['install', 'asgrim/example-pie-extension', '--skip-enable-extension']);
+        $this->theExtension = 'example_pie_extension';
     }
 
     #[When('I run a command to uninstall an extension')]
     public function iRunACommandToUninstallAnExtension(): void
     {
         $this->runPieCommand(['uninstall', 'asgrim/example-pie-extension']);
+        $this->theExtension = 'example_pie_extension';
     }
 
     #[Then('the extension should not be installed anymore')]
@@ -137,12 +142,12 @@ class CliContext implements Context
         $this->assertCommandSuccessful();
 
         if (Platform::isWindows()) {
-            Assert::regex($this->output, '#👋 Removed extension: [-\\\_:.a-zA-Z0-9]+\\\php_example_pie_extension.dll#');
+            Assert::regex($this->output, '#👋 Removed extension: [-\\\_:.a-zA-Z0-9]+\\\php_' . $this->theExtension . '.dll#');
         } else {
-            Assert::regex($this->output, '#👋 Removed extension: [-_.a-zA-Z0-9/]+/example_pie_extension.so#');
+            Assert::regex($this->output, '#👋 Removed extension: [-_.a-zA-Z0-9/]+/' . $this->theExtension . '.so#');
         }
 
-        $isExtEnabled = (new Process([self::PHP_BINARY, '-r', 'echo extension_loaded("example_pie_extension")?"yes":"no";']))
+        $isExtEnabled = (new Process([self::PHP_BINARY, '-r', 'echo extension_loaded("' . $this->theExtension . '")?"yes":"no";']))
             ->mustRun()
             ->getOutput();
 
@@ -157,12 +162,12 @@ class CliContext implements Context
         Assert::contains($this->output, 'Extension has NOT been automatically enabled.');
 
         if (Platform::isWindows()) {
-            Assert::regex($this->output, '#Copied DLL to: [-\\\_:.a-zA-Z0-9]+\\\php_example_pie_extension.dll#');
+            Assert::regex($this->output, '#Copied DLL to: [-\\\_:.a-zA-Z0-9]+\\\php_' . $this->theExtension . '.dll#');
 
             return;
         }
 
-        Assert::regex($this->output, '#Install complete: [-_.a-zA-Z0-9/]+/example_pie_extension.so#');
+        Assert::regex($this->output, '#Install complete: [-_.a-zA-Z0-9/]+/' . $this->theExtension . '.so#');
     }
 
     #[Then('the extension should have been installed and enabled')]
@@ -173,14 +178,14 @@ class CliContext implements Context
         Assert::contains($this->output, 'Extension is enabled and loaded');
 
         if (Platform::isWindows()) {
-            Assert::regex($this->output, '#Copied DLL to: [-\\\_:.a-zA-Z0-9]+\\\php_example_pie_extension.dll#');
+            Assert::regex($this->output, '#Copied DLL to: [-\\\_:.a-zA-Z0-9]+\\\php_' . $this->theExtension . '.dll#');
 
             return;
         }
 
-        Assert::regex($this->output, '#Install complete: [-_.a-zA-Z0-9/]+/example_pie_extension.so#');
+        Assert::regex($this->output, '#Install complete: [-_.a-zA-Z0-9/]+/' . $this->theExtension . '.so#');
 
-        $isExtEnabled = (new Process([self::PHP_BINARY, '-r', 'echo extension_loaded("example_pie_extension")?"yes":"no";']))
+        $isExtEnabled = (new Process([self::PHP_BINARY, '-r', 'echo extension_loaded("' . $this->theExtension . '")?"yes":"no";']))
             ->mustRun()
             ->getOutput();
 
@@ -230,5 +235,19 @@ class CliContext implements Context
     {
         Assert::notNull($this->output);
         Assert::notContains($this->output, 'Path repository (' . __DIR__ . ')');
+    }
+
+    #[Given('I have libsodium on my system')]
+    public function iHaveLibsodiumOnMySystem(): void
+    {
+        (new Process(['apt-get', 'update'], timeout: 120))->mustRun();
+        (new Process(['apt-get', '-y', 'install', 'libsodium-dev'], timeout: 120))->mustRun();
+    }
+
+    #[When('I install the sodium extension with PIE')]
+    public function iInstallTheSodiumExtensionWithPie(): void
+    {
+        $this->runPieCommand(['install', '--force', 'php/sodium']);
+        $this->theExtension = 'sodium';
     }
 }
