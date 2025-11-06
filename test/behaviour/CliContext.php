@@ -119,6 +119,12 @@ class CliContext implements Context
         $this->runPieCommand(['install', 'asgrim/example-pie-extension']);
     }
 
+    #[When('I run a command to install an extension without enabling it')]
+    public function iRunACommandToInstallAnExtensionWithoutEnabling(): void
+    {
+        $this->runPieCommand(['install', 'asgrim/example-pie-extension', '--skip-enable-extension']);
+    }
+
     #[When('I run a command to uninstall an extension')]
     public function iRunACommandToUninstallAnExtension(): void
     {
@@ -145,6 +151,22 @@ class CliContext implements Context
 
     #[Then('the extension should have been installed')]
     public function theExtensionShouldHaveBeenInstalled(): void
+    {
+        $this->assertCommandSuccessful();
+
+        Assert::contains($this->output, 'Extension has NOT been automatically enabled.');
+
+        if (Platform::isWindows()) {
+            Assert::regex($this->output, '#Copied DLL to: [-\\\_:.a-zA-Z0-9]+\\\php_example_pie_extension.dll#');
+
+            return;
+        }
+
+        Assert::regex($this->output, '#Install complete: [-_.a-zA-Z0-9/]+/example_pie_extension.so#');
+    }
+
+    #[Then('the extension should have been installed and enabled')]
+    public function theExtensionShouldHaveBeenInstalledAndEnabled(): void
     {
         $this->assertCommandSuccessful();
 
