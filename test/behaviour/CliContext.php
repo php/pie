@@ -13,6 +13,9 @@ use Symfony\Component\Process\Process;
 use Webmozart\Assert\Assert;
 
 use function array_merge;
+use function assert;
+use function realpath;
+use function sprintf;
 
 class CliContext implements Context
 {
@@ -21,9 +24,10 @@ class CliContext implements Context
     private string|null $errorOutput = null;
     private int|null $exitCode       = null;
     /** @var list<string> */
-    private array $phpArguments = [];
-
-    private string $theExtension = 'example_pie_extension';
+    private array $phpArguments           = [];
+    private string $theExtension          = 'example_pie_extension';
+    private string $thePackage            = 'asgrim/example-pie-extension';
+    private string|null $workingDirectory = null;
 
     #[When('I run a command to download the latest version of an extension')]
     public function iRunACommandToDownloadTheLatestVersionOfAnExtension(): void
@@ -42,6 +46,11 @@ class CliContext implements Context
     {
         $pieCommand = array_merge([self::PHP_BINARY, ...$this->phpArguments, 'bin/pie'], $command);
 
+        if ($this->workingDirectory !== null) {
+            $pieCommand[] = '--working-dir';
+            $pieCommand[] = $this->workingDirectory;
+        }
+
         $proc = new Process($pieCommand, timeout: 120);
         $proc->run();
 
@@ -53,7 +62,24 @@ class CliContext implements Context
     /** @phpstan-assert !null $this->output */
     private function assertCommandSuccessful(): void
     {
-        Assert::same(0, $this->exitCode);
+        Assert::same(
+            0,
+            $this->exitCode,
+            sprintf(
+                <<<'EOF'
+                Last command was not successful - exit code was: %d.
+
+                Output:
+                %s
+
+                Error output:
+                %s
+                EOF,
+                $this->exitCode,
+                $this->output,
+                $this->errorOutput,
+            ),
+        );
 
         Assert::notNull($this->output);
     }
@@ -121,22 +147,24 @@ class CliContext implements Context
     #[Given('an extension was previously installed and enabled')]
     public function iRunACommandToInstallAnExtension(): void
     {
-        $this->runPieCommand(['install', 'asgrim/example-pie-extension']);
         $this->theExtension = 'example_pie_extension';
+        $this->thePackage   = 'asgrim/example-pie-extension';
+        $this->runPieCommand(['install', $this->thePackage]);
     }
 
     #[When('I run a command to install an extension without enabling it')]
     public function iRunACommandToInstallAnExtensionWithoutEnabling(): void
     {
-        $this->runPieCommand(['install', 'asgrim/example-pie-extension', '--skip-enable-extension']);
         $this->theExtension = 'example_pie_extension';
+        $this->thePackage   = 'asgrim/example-pie-extension';
+        $this->runPieCommand(['install', $this->thePackage, '--skip-enable-extension']);
     }
 
     #[When('I run a command to uninstall an extension')]
     public function iRunACommandToUninstallAnExtension(): void
     {
-        $this->runPieCommand(['uninstall', 'asgrim/example-pie-extension']);
-        $this->theExtension = 'example_pie_extension';
+        assert($this->thePackage !== '');
+        $this->runPieCommand(['uninstall', $this->thePackage]);
     }
 
     #[Then('the extension should not be installed anymore')]
@@ -248,10 +276,12 @@ class CliContext implements Context
     }
 
     #[When('I install the sodium extension with PIE')]
+    #[Given('I have the sodium extension installed with PIE')]
     public function iInstallTheSodiumExtensionWithPie(): void
     {
-        $this->runPieCommand(['install', 'php/sodium']);
         $this->theExtension = 'sodium';
+        $this->thePackage   = 'php/sodium';
+        $this->runPieCommand(['install', $this->thePackage]);
     }
 
     #[Given('I do not have libsodium on my system')]
@@ -263,8 +293,9 @@ class CliContext implements Context
     #[When('I display information about the sodium extension with PIE')]
     public function iDisplayInformationAboutTheSodiumExtensionWithPie(): void
     {
-        $this->runPieCommand(['info', 'php/sodium']);
         $this->theExtension = 'sodium';
+        $this->thePackage   = 'php/sodium';
+        $this->runPieCommand(['info', $this->thePackage]);
     }
 
     #[Then('the information should show that libsodium is a missing dependency')]
@@ -280,5 +311,38 @@ class CliContext implements Context
         Assert::notSame(0, $this->exitCode);
         Assert::notNull($this->errorOutput);
         Assert::regex($this->errorOutput, '#Cannot use php/sodium\'s latest version .* as it requires lib-sodium .* which is missing from your platform.#');
+    }
+
+    #[Given('I am in a PHP project that has missing extensions')]
+    public function iAmInAPHPProjectThatHasMissingExtensions(): void
+    {
+        $this->runPieCommand(['uninstall', 'asgrim/example-pie-extension']);
+
+        $this->runPieCommand(['show']);
+        $this->assertCommandSuccessful();
+        Assert::notContains($this->output, 'example_pie_extension');
+
+        $examplePhpProject = (string) realpath(__DIR__ . '/../assets/example-php-project');
+        assert($examplePhpProject !== '');
+
+        $this->workingDirectory = $examplePhpProject;
+    }
+
+    #[When('I run a command to install the extensions')]
+    public function iRunACommandToInstallTheExtensions(): void
+    {
+        $this->runPieCommand(['install', '--allow-non-interactive-project-install']);
+
+        $this->assertCommandSuccessful();
+    }
+
+    #[Then('I should see all the extensions are now installed')]
+    public function iShouldSeeAllTheExtensionsAreNowInstalled(): void
+    {
+        $this->workingDirectory = null;
+
+        $this->runPieCommand(['show']);
+        $this->assertCommandSuccessful();
+        Assert::contains($this->output, 'example_pie_extension');
     }
 }

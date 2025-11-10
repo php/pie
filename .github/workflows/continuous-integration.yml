@@ -157,10 +157,14 @@ jobs:
       - uses: ramsey/composer-install@v3
       - name: Run Behat on Windows
         if: matrix.operating-system == 'windows-latest'
-        run: vendor/bin/behat --tags="~@non-windows"
+        run: vendor/bin/behat --no-snippets --tags="~@non-windows"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run Behat on non-Windows
         if: matrix.operating-system != 'windows-latest'
-        run: sudo vendor/bin/behat
+        run: sudo vendor/bin/behat --no-snippets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   coding-standards:
     runs-on: ubuntu-latest

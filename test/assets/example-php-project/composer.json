@@ -1,0 +1,9 @@
+{
+    "name": "php-pie-test-project/php-pie-test-project",
+    "description": "Example PHP project for test cases",
+    "type": "project",
+    "require": {
+        "php": "^8.0",
+        "ext-example_pie_extension": "^2.0"
+    }
+}
