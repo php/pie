@@ -150,10 +150,17 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
-          extensions: intl, sodium, zip
+          extensions: none, intl, zip
+          tools: composer
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/checkout@v5
+      - name: Testing
+        run: |
+          php -m
+          bin/pie show --all
+          which composer
+          composer -v
       - uses: ramsey/composer-install@v3
       - name: Run Behat on Windows
         if: matrix.operating-system == 'windows-latest'

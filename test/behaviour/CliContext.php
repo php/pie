@@ -182,7 +182,11 @@ class CliContext implements Context
             ->mustRun()
             ->getOutput();
 
-        Assert::same($isExtEnabled, 'no');
+        Assert::same(
+            $isExtEnabled,
+            'no',
+            sprintf("Failed to remove extension.\n\nOutput:\n%s\n\nError output:\n%s\n", $this->output, $this->errorOutput),
+        );
     }
 
     #[Then('the extension should have been installed')]
@@ -302,7 +306,11 @@ class CliContext implements Context
     public function theInformationShouldShowThatLibsodiumIsAMissingDependency(): void
     {
         Assert::notNull($this->output);
-        Assert::contains($this->output, 'lib-sodium: * 🚫 (not installed)');
+        Assert::contains(
+            $this->output,
+            'lib-sodium: * 🚫 (not installed)',
+            sprintf("Could not find missing lib-sodium.\n\nOutput:\n%s\n\nError output:\n%s\n", $this->output, $this->errorOutput),
+        );
     }
 
     #[Then('the extension fails to install due to the missing library')]
@@ -310,7 +318,11 @@ class CliContext implements Context
     {
         Assert::notSame(0, $this->exitCode);
         Assert::notNull($this->errorOutput);
-        Assert::regex($this->errorOutput, '#Cannot use php/sodium\'s latest version .* as it requires lib-sodium .* which is missing from your platform.#');
+        Assert::regex(
+            $this->errorOutput,
+            '#Cannot use php/sodium\'s latest version .* as it requires lib-sodium .* which is missing from your platform.#',
+            sprintf("Did not detect missing lib-sodium correctly.\n\nOutput:\n%s\n\nError output:\n%s\n", $this->output, $this->errorOutput),
+        );
     }
 
     #[Given('I am in a PHP project that has missing extensions')]
