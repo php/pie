@@ -3,7 +3,11 @@
 #
 # docker buildx build --file .github/pie-behaviour-tests/Dockerfile -t pie-behat-test .
 # docker run --volume .:/github/workspace -ti pie-behat-test
-FROM ubuntu:24.04
+FROM alpine/git:v2.49.1 AS clone_ext_repo
+
+RUN cd / && git clone https://github.com/asgrim/example-pie-extension.git
+
+FROM ubuntu:24.04 AS default
 
 # Add the `unzip` package which PIE uses to extract .zip files
 RUN export DEBIAN_FRONTEND="noninteractive"; \
@@ -35,6 +39,8 @@ RUN touch /usr/local/lib/php.ini
 
 COPY --from=ghcr.io/php/pie:bin /pie /usr/bin/pie
 RUN pie install xdebug/xdebug
+
+COPY --from=clone_ext_repo /example-pie-extension /example-pie-extension
 
 WORKDIR /github/workspace
 

@@ -357,4 +357,21 @@ class CliContext implements Context
         $this->assertCommandSuccessful();
         Assert::contains($this->output, 'example_pie_extension');
     }
+
+    #[Given('I am in a PIE project')]
+    public function iAmInAPIEProject(): void
+    {
+        $examplePieProject = (string) realpath('/example-pie-extension');
+        assert($examplePieProject !== '');
+
+        $this->workingDirectory = $examplePieProject;
+    }
+
+    #[When('I run a command to install the extension')]
+    public function iRunACommandToInstallTheExtension(): void
+    {
+        $this->theExtension = 'example_pie_extension';
+        $this->thePackage   = 'asgrim/example-pie-extension';
+        $this->runPieCommand(['install']);
+    }
 }
