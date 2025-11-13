@@ -21,6 +21,7 @@ use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\ThreadSafetyMode;
 use Php\Pie\Platform\WindowsCompiler;
 use Php\Pie\Platform\WindowsExtensionAssetName;
+use Php\Pie\Util\PieComposerAuthHelper;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\RequiresOperatingSystemFamily;
 use PHPUnit\Framework\TestCase;
@@ -65,7 +66,7 @@ final class GithubPackageReleaseAssetsTest extends TestCase
                 ->findMatchingReleaseAssetUrl(
                     $targetPlatform,
                     $package,
-                    new AuthHelper($io, $config),
+                    new PieComposerAuthHelper(new AuthHelper($io, $config)),
                     new HttpDownloader($io, $config),
                     WindowsExtensionAssetName::zipNames(
                         $targetPlatform,

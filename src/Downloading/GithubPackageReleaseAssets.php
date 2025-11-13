@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Php\Pie\Downloading;
 
 use Composer\Downloader\TransportException;
-use Composer\Util\AuthHelper;
 use Composer\Util\HttpDownloader;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Platform\TargetPlatform;
+use Php\Pie\Util\PieComposerAuthHelper;
 use Webmozart\Assert\Assert;
 
 use function array_map;
@@ -31,7 +31,7 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
     public function findMatchingReleaseAssetUrl(
         TargetPlatform $targetPlatform,
         Package $package,
-        AuthHelper $authHelper,
+        PieComposerAuthHelper $authHelper,
         HttpDownloader $httpDownloader,
         array $possibleReleaseAssetNames,
     ): string {
@@ -72,24 +72,19 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
     /** @return list<array{name: non-empty-string, browser_download_url: non-empty-string, ...}> */
     private function getReleaseAssetsForPackage(
         Package $package,
-        AuthHelper $authHelper,
+        PieComposerAuthHelper $authHelper,
         HttpDownloader $httpDownloader,
     ): array {
         Assert::notNull($package->downloadUrl());
 
         try {
-            $authOptions = $authHelper->addAuthenticationOptions([], $this->githubApiBaseUrl, $package->downloadUrl());
-            Assert::keyExists($authOptions, 'http');
-            Assert::isArray($authOptions['http']);
-            Assert::keyExists($authOptions['http'], 'header');
-
             $decodedResponse = $httpDownloader->get(
                 $this->githubApiBaseUrl . '/repos/' . $package->githubOrgAndRepository() . '/releases/tags/' . $package->version(),
                 [
                     'retry-auth-failure' => true,
                     'http' => [
                         'method' => 'GET',
-                        'header' => $authOptions['http']['header'],
+                        'header' => [$authHelper->authHeader($this->githubApiBaseUrl, $package->downloadUrl())],
                     ],
                 ],
             )->decodeJson();

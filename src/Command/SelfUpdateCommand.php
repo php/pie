@@ -22,6 +22,7 @@ use Php\Pie\SelfManage\Verify\FailedToVerifyRelease;
 use Php\Pie\SelfManage\Verify\VerifyPieReleaseUsingAttestation;
 use Php\Pie\Settings;
 use Php\Pie\Util\Emoji;
+use Php\Pie\Util\PieComposerAuthHelper;
 use Php\Pie\Util\PieVersion;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -118,7 +119,7 @@ final class SelfUpdateCommand extends Command
         );
 
         $httpDownloader        = new HttpDownloader($this->quieterConsoleIo, $composer->getConfig());
-        $authHelper            = new AuthHelper($this->quieterConsoleIo, $composer->getConfig());
+        $authHelper            = new PieComposerAuthHelper(new AuthHelper($this->quieterConsoleIo, $composer->getConfig()));
         $fetchLatestPieRelease = new FetchPieReleaseFromGitHub($this->githubApiBaseUrl, $httpDownloader, $authHelper);
         $verifyPiePhar         = VerifyPieReleaseUsingAttestation::factory();
 

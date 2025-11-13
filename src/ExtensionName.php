@@ -67,7 +67,6 @@ final class ExtensionName
         ) {
             $packageNameParts = explode('/', $package->getPrettyName());
             Assert::count($packageNameParts, 2, 'Expected a package name like vendor/package for ' . $package->getPrettyName());
-            Assert::keyExists($packageNameParts, 1);
 
             return self::normaliseFromString($packageNameParts[1]);
         }

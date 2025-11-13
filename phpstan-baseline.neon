@@ -55,12 +55,6 @@ parameters:
 			path: src/Command/RepositoryAddCommand.php
 
 		-
-			message: '#^Parameter \#1 \$type of method Php\\Pie\\ComposerIntegration\\PieJsonEditor\:\:addRepository\(\) expects ''composer''\|''path''\|''vcs'', string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Command/RepositoryAddCommand.php
-
-		-
 			message: '#^Cannot cast mixed to string\.$#'
 			identifier: cast.string
 			count: 1

@@ -17,6 +17,7 @@ use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\DownloadUrlMethod;
 use Php\Pie\Downloading\PackageReleaseAssets;
+use Php\Pie\Util\PieComposerAuthHelper;
 use Psr\Container\ContainerInterface;
 
 use function array_walk;
@@ -90,7 +91,7 @@ class OverrideDownloadUrlInstallListener
                 $url = $packageReleaseAssets->findMatchingReleaseAssetUrl(
                     $targetPlatform,
                     $piePackage,
-                    new AuthHelper($this->io, $this->composer->getConfig()),
+                    new PieComposerAuthHelper(new AuthHelper($this->io, $this->composer->getConfig())),
                     new HttpDownloader($this->io, $this->composer->getConfig()),
                     $possibleAssetNames,
                 );

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Php\PieUnitTest\SelfManage\Update;
 
-use Composer\Util\AuthHelper;
 use Composer\Util\Http\Response;
 use Composer\Util\HttpDownloader;
 use Php\Pie\SelfManage\Update\Channel;
 use Php\Pie\SelfManage\Update\FetchPieReleaseFromGitHub;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
+use Php\Pie\Util\PieComposerAuthHelper;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
@@ -55,12 +55,12 @@ final class FetchPieReleaseFromGitHubTest extends TestCase
     public function testLatestReleaseMetadataForStableChannel(): void
     {
         $httpDownloader = $this->createMock(HttpDownloader::class);
-        $authHelper     = $this->createMock(AuthHelper::class);
+        $authHelper     = $this->createMock(PieComposerAuthHelper::class);
 
         $url = self::TEST_GITHUB_URL . '/repos/php/pie/releases';
         $authHelper
-            ->method('addAuthenticationOptions')
-            ->willReturn(['http' => ['header' => ['Authorization: Bearer fake-token']]]);
+            ->method('authHeader')
+            ->willReturn('Authorization: Bearer fake-token');
         $httpDownloader->expects(self::once())
             ->method('get')
             ->with(
@@ -93,12 +93,12 @@ final class FetchPieReleaseFromGitHubTest extends TestCase
     public function testLatestReleaseMetadataForPreviewChannel(): void
     {
         $httpDownloader = $this->createMock(HttpDownloader::class);
-        $authHelper     = $this->createMock(AuthHelper::class);
+        $authHelper     = $this->createMock(PieComposerAuthHelper::class);
 
         $url = self::TEST_GITHUB_URL . '/repos/php/pie/releases';
         $authHelper
-            ->method('addAuthenticationOptions')
-            ->willReturn(['http' => ['header' => ['Authorization: Bearer fake-token']]]);
+            ->method('authHeader')
+            ->willReturn('Authorization: Bearer fake-token');
         $httpDownloader->expects(self::once())
             ->method('get')
             ->with(
@@ -131,12 +131,12 @@ final class FetchPieReleaseFromGitHubTest extends TestCase
     public function testLatestReleaseNotHavingPiePharThrowsException(): void
     {
         $httpDownloader = $this->createMock(HttpDownloader::class);
-        $authHelper     = $this->createMock(AuthHelper::class);
+        $authHelper     = $this->createMock(PieComposerAuthHelper::class);
 
         $url = self::TEST_GITHUB_URL . '/repos/php/pie/releases';
         $authHelper
-            ->method('addAuthenticationOptions')
-            ->willReturn(['http' => ['header' => ['Authorization: Bearer fake-token']]]);
+            ->method('authHeader')
+            ->willReturn('Authorization: Bearer fake-token');
         $httpDownloader->expects(self::once())
             ->method('get')
             ->with(
@@ -192,11 +192,11 @@ final class FetchPieReleaseFromGitHubTest extends TestCase
         $latestRelease = new ReleaseMetadata('1.2.3', $url);
 
         $httpDownloader = $this->createMock(HttpDownloader::class);
-        $authHelper     = $this->createMock(AuthHelper::class);
+        $authHelper     = $this->createMock(PieComposerAuthHelper::class);
 
         $authHelper
-            ->method('addAuthenticationOptions')
-            ->willReturn(['http' => ['header' => ['Authorization: Bearer fake-token']]]);
+            ->method('authHeader')
+            ->willReturn('Authorization: Bearer fake-token');
         $httpDownloader->expects(self::once())
             ->method('get')
             ->with(
