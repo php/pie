@@ -409,18 +409,6 @@ parameters:
 			path: test/unit/ComposerIntegration/BundledPhpExtensionsRepositoryTest.php
 
 		-
-			message: '#^Method Php\\PieUnitTest\\ComposerIntegration\\PieJsonEditorTest\:\:normaliseJson\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: test/unit/ComposerIntegration/PieJsonEditorTest.php
-
-		-
-			message: '#^Parameter \#1 \$fileContent of method Php\\PieUnitTest\\ComposerIntegration\\PieJsonEditorTest\:\:normaliseJson\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 9
-			path: test/unit/ComposerIntegration/PieJsonEditorTest.php
-
-		-
 			message: '#^Match expression does not handle remaining value\: string$#'
 			identifier: match.unhandled
 			count: 1
