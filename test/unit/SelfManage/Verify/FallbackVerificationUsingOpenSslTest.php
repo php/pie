@@ -6,7 +6,6 @@ namespace Php\PieUnitTest\SelfManage\Verify;
 
 use Composer\Downloader\TransportException;
 use Composer\IO\BufferIO;
-use Composer\Util\AuthHelper;
 use Composer\Util\Http\Response;
 use Composer\Util\HttpDownloader;
 use Php\Pie\File\BinaryFile;
@@ -47,7 +46,6 @@ final class FallbackVerificationUsingOpenSslTest extends TestCase
     private ReleaseMetadata $release;
     private BinaryFile $downloadedPhar;
     private HttpDownloader&MockObject $httpDownloader;
-    private AuthHelper&MockObject $authHelper;
     private BufferIO $io;
     private FallbackVerificationUsingOpenSsl $verifier;
     /** @var non-empty-string */
@@ -61,14 +59,13 @@ final class FallbackVerificationUsingOpenSslTest extends TestCase
         $this->downloadedPhar = new BinaryFile('/path/to/pie.phar', 'fake-checksum');
 
         $this->httpDownloader = $this->createMock(HttpDownloader::class);
-        $this->authHelper     = $this->createMock(AuthHelper::class);
         $this->io             = new BufferIO();
 
         $trustedRootFilePath = tempnam(sys_get_temp_dir(), 'pie_test_trusted_root_file_path');
         assert(is_string($trustedRootFilePath));
         $this->trustedRootFilePath = $trustedRootFilePath;
 
-        $this->verifier = new FallbackVerificationUsingOpenSsl(new VerifyAttestationWithOpenSsl($this->trustedRootFilePath, self::TEST_GITHUB_URL, $this->httpDownloader, $this->authHelper));
+        $this->verifier = new FallbackVerificationUsingOpenSsl(new VerifyAttestationWithOpenSsl($this->trustedRootFilePath, self::TEST_GITHUB_URL, $this->httpDownloader));
     }
 
     /** @return array{0: string, 1: string} */
@@ -139,9 +136,6 @@ EOF);
     private function mockAttestationResponse(string $digestInUrl, string $dsseEnvelopePayload, string $signature, string $pemCertificate): void
     {
         $url = self::TEST_GITHUB_URL . '/orgs/php/attestations/sha256:' . $digestInUrl;
-        $this->authHelper
-            ->method('addAuthenticationHeader')
-            ->willReturn(['Authorization: Bearer fake-token']);
         $this->httpDownloader->expects(self::once())
             ->method('get')
             ->with(
@@ -150,7 +144,7 @@ EOF);
                     'retry-auth-failure' => true,
                     'http' => [
                         'method' => 'GET',
-                        'header' => ['Authorization: Bearer fake-token'],
+                        'header' => [],
                     ],
                 ],
             )
@@ -271,9 +265,6 @@ EOF);
         $transportException = new TransportException('404 Not Found');
         $transportException->setStatusCode(404);
 
-        $this->authHelper
-            ->method('addAuthenticationHeader')
-            ->willReturn(['Authorization: Bearer fake-token']);
         $this->httpDownloader->expects(self::once())
             ->method('get')
             ->willThrowException($transportException);

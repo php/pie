@@ -55,12 +55,6 @@ parameters:
 			path: src/Command/RepositoryAddCommand.php
 
 		-
-			message: '#^Parameter \#1 \$type of method Php\\Pie\\ComposerIntegration\\PieJsonEditor\:\:addRepository\(\) expects ''composer''\|''path''\|''vcs'', string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Command/RepositoryAddCommand.php
-
-		-
 			message: '#^Cannot cast mixed to string\.$#'
 			identifier: cast.string
 			count: 1
@@ -415,18 +409,6 @@ parameters:
 			path: test/unit/ComposerIntegration/BundledPhpExtensionsRepositoryTest.php
 
 		-
-			message: '#^Method Php\\PieUnitTest\\ComposerIntegration\\PieJsonEditorTest\:\:normaliseJson\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: test/unit/ComposerIntegration/PieJsonEditorTest.php
-
-		-
-			message: '#^Parameter \#1 \$fileContent of method Php\\PieUnitTest\\ComposerIntegration\\PieJsonEditorTest\:\:normaliseJson\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 9
-			path: test/unit/ComposerIntegration/PieJsonEditorTest.php
-
-		-
 			message: '#^Match expression does not handle remaining value\: string$#'
 			identifier: match.unhandled
 			count: 1
@@ -515,12 +497,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: test/unit/Platform/TargetPhp/PhpBinaryPathTest.php
-
-		-
-			message: '#^Parameter \#4 \$body of class Composer\\Util\\Http\\Response constructor expects string\|null, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: test/unit/SelfManage/Update/FetchPieReleaseFromGitHubTest.php
 
 		-
 			message: '#^Method Php\\PieUnitTest\\SelfManage\\Verify\\FallbackVerificationUsingOpenSslTest\:\:prepareCertificateAndSignature\(\) should return array\{string, string\} but returns array\{mixed, mixed\}\.$#'

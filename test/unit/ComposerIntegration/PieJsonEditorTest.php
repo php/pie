@@ -10,6 +10,7 @@ use PHPUnit\Framework\TestCase;
 
 use function dirname;
 use function file_get_contents;
+use function file_put_contents;
 use function json_decode;
 use function json_encode;
 use function sys_get_temp_dir;
@@ -31,6 +32,53 @@ final class PieJsonEditorTest extends TestCase
         self::assertFileExists($testPieJson);
         self::assertSame(
             $this->normaliseJson("{\n}\n"),
+            $this->normaliseJson(file_get_contents($testPieJson)),
+        );
+    }
+
+    public function testCanReadOldRepositoryConfiguration(): void
+    {
+        $testPieJson = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('pie_json_test_', true) . '.json';
+
+        $editor = new PieJsonEditor($testPieJson, dirname($testPieJson));
+        $editor->ensureExists();
+        file_put_contents(
+            $testPieJson,
+            $this->normaliseJson(
+                <<<'JSON'
+                {
+                    "repositories": {
+                        "https://github.com/php/pie": {
+                            "type": "vcs",
+                            "url": "https://github.com/php/pie"
+                        }
+                    }
+                }
+                JSON,
+            ),
+        );
+
+        $editor->addRepository('vcs', 'https://github.com/asgrim/example_pie_extension');
+
+        self::assertSame(
+            $this->normaliseJson(
+                <<<'JSON'
+                {
+                    "repositories": [
+                        {
+                            "name": "https://github.com/php/pie",
+                            "type": "vcs",
+                            "url": "https://github.com/php/pie"
+                        },
+                        {
+                            "name": "https://github.com/asgrim/example_pie_extension",
+                            "type": "vcs",
+                            "url": "https://github.com/asgrim/example_pie_extension"
+                        }
+                    ]
+                }
+                JSON,
+            ),
             $this->normaliseJson(file_get_contents($testPieJson)),
         );
     }
@@ -94,12 +142,13 @@ final class PieJsonEditorTest extends TestCase
 
         $expectedRepoContent = $this->normaliseJson(<<<'EOF'
             {
-                "repositories": {
-                    "https://github.com/php/pie": {
+                "repositories": [
+                    {
+                        "name": "https://github.com/php/pie",
                         "type": "vcs",
                         "url": "https://github.com/php/pie"
                     }
-                }
+                ]
             }
             EOF);
 
@@ -116,8 +165,6 @@ final class PieJsonEditorTest extends TestCase
 
         $noRepositoriesContent = $this->normaliseJson(<<<'EOF'
             {
-                "repositories": {
-                }
             }
             EOF);
 
@@ -135,9 +182,11 @@ final class PieJsonEditorTest extends TestCase
         self::assertSame(
             $this->normaliseJson(<<<'EOF'
             {
-                "repositories": {
-                    "packagist.org": false
-                }
+                "repositories": [
+                    {
+                        "packagist.org": false
+                    }
+                ]
             }
             EOF),
             $this->normaliseJson(file_get_contents($testPieJson)),
@@ -163,12 +212,13 @@ final class PieJsonEditorTest extends TestCase
 
         $expectedRepoContent = $this->normaliseJson(<<<'EOF'
             {
-                "repositories": {
-                    "/pwd/dummy": {
+                "repositories": [
+                    {
+                        "name": "/pwd/dummy",
                         "type": "path",
                         "url": "/pwd/dummy/"
                     }
-                }
+                ]
             }
             EOF);
 
@@ -185,8 +235,6 @@ final class PieJsonEditorTest extends TestCase
 
         $noRepositoriesContent = $this->normaliseJson(<<<'EOF'
             {
-                "repositories": {
-                }
             }
             EOF);
 
@@ -196,8 +244,8 @@ final class PieJsonEditorTest extends TestCase
         );
     }
 
-    private function normaliseJson(string $fileContent): string
+    private function normaliseJson(string|false $fileContent): string
     {
-        return json_encode(json_decode($fileContent));
+        return (string) json_encode(json_decode((string) $fileContent));
     }
 }

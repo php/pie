@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Php\Pie\Downloading;
 
-use Composer\Util\AuthHelper;
 use Composer\Util\HttpDownloader;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Platform\TargetPlatform;
@@ -20,7 +19,6 @@ interface PackageReleaseAssets
     public function findMatchingReleaseAssetUrl(
         TargetPlatform $targetPlatform,
         Package $package,
-        AuthHelper $authHelper,
         HttpDownloader $httpDownloader,
         array $possibleReleaseAssetNames,
     ): string;

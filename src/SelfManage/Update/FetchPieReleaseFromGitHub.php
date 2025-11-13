@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Php\Pie\SelfManage\Update;
 
 use Composer\Package\Version\VersionParser;
-use Composer\Util\AuthHelper;
 use Composer\Util\HttpDownloader;
 use Php\Pie\File\BinaryFile;
 use RuntimeException;
@@ -28,7 +27,6 @@ final class FetchPieReleaseFromGitHub implements FetchPieRelease
     public function __construct(
         private readonly string $githubApiBaseUrl,
         private readonly HttpDownloader $httpDownloader,
-        private readonly AuthHelper $authHelper,
     ) {
     }
 
@@ -42,7 +40,7 @@ final class FetchPieReleaseFromGitHub implements FetchPieRelease
                 'retry-auth-failure' => true,
                 'http' => [
                     'method' => 'GET',
-                    'header' => $this->authHelper->addAuthenticationHeader([], $this->githubApiBaseUrl, $url),
+                    'header' => [],
                 ],
             ],
         )->decodeJson();
@@ -118,7 +116,7 @@ final class FetchPieReleaseFromGitHub implements FetchPieRelease
                 'retry-auth-failure' => true,
                 'http' => [
                     'method' => 'GET',
-                    'header' => $this->authHelper->addAuthenticationHeader([], $this->githubApiBaseUrl, $releaseMetadata->downloadUrl),
+                    'header' => [],
                 ],
             ],
         )->getBody();

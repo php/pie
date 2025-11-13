@@ -6,7 +6,6 @@ namespace Php\PieUnitTest\Downloading;
 
 use Composer\Downloader\TransportException;
 use Composer\Package\CompletePackage;
-use Composer\Util\AuthHelper;
 use Composer\Util\Http\Response;
 use Composer\Util\HttpDownloader;
 use Php\Pie\DependencyResolver\Package;
@@ -47,8 +46,6 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             WindowsCompiler::VC14,
         );
 
-        $authHelper = $this->createMock(AuthHelper::class);
-
         $httpDownloaderResponse = $this->createMock(Response::class);
         $httpDownloaderResponse
             ->expects(self::once())
@@ -88,7 +85,6 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             $releaseAssets->findMatchingReleaseAssetUrl(
                 $targetPlatform,
                 $package,
-                $authHelper,
                 $httpDownloader,
                 WindowsExtensionAssetName::zipNames(
                     $targetPlatform,
@@ -114,8 +110,6 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             1,
             WindowsCompiler::VC14,
         );
-
-        $authHelper = $this->createMock(AuthHelper::class);
 
         $httpDownloaderResponse = $this->createMock(Response::class);
         $httpDownloaderResponse
@@ -156,7 +150,6 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             $releaseAssets->findMatchingReleaseAssetUrl(
                 $targetPlatform,
                 $package,
-                $authHelper,
                 $httpDownloader,
                 WindowsExtensionAssetName::zipNames(
                     $targetPlatform,
@@ -177,8 +170,6 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             1,
             WindowsCompiler::VC14,
         );
-
-        $authHelper = $this->createMock(AuthHelper::class);
 
         $e = new TransportException('not found', 404);
         $e->setStatusCode(404);
@@ -204,7 +195,6 @@ final class GithubPackageReleaseAssetsTest extends TestCase
         $releaseAssets->findMatchingReleaseAssetUrl(
             $targetPlatform,
             $package,
-            $authHelper,
             $httpDownloader,
             WindowsExtensionAssetName::zipNames(
                 $targetPlatform,

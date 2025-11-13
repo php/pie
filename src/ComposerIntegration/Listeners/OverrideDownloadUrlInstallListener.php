@@ -11,7 +11,6 @@ use Composer\Installer\InstallerEvent;
 use Composer\Installer\InstallerEvents;
 use Composer\IO\IOInterface;
 use Composer\Package\CompletePackageInterface;
-use Composer\Util\AuthHelper;
 use Composer\Util\HttpDownloader;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\DependencyResolver\Package;
@@ -90,7 +89,6 @@ class OverrideDownloadUrlInstallListener
                 $url = $packageReleaseAssets->findMatchingReleaseAssetUrl(
                     $targetPlatform,
                     $piePackage,
-                    new AuthHelper($this->io, $this->composer->getConfig()),
                     new HttpDownloader($this->io, $this->composer->getConfig()),
                     $possibleAssetNames,
                 );
