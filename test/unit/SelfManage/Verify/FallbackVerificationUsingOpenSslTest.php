@@ -68,7 +68,7 @@ final class FallbackVerificationUsingOpenSslTest extends TestCase
         assert(is_string($trustedRootFilePath));
         $this->trustedRootFilePath = $trustedRootFilePath;
 
-        $this->verifier = new FallbackVerificationUsingOpenSsl(new VerifyAttestationWithOpenSsl($this->trustedRootFilePath, self::TEST_GITHUB_URL, $this->httpDownloader, $this->authHelper));
+        $this->verifier = new FallbackVerificationUsingOpenSsl(new VerifyAttestationWithOpenSsl($this->trustedRootFilePath, self::TEST_GITHUB_URL, $this->httpDownloader));
     }
 
     /** @return array{0: string, 1: string} */
@@ -150,7 +150,7 @@ EOF);
                     'retry-auth-failure' => true,
                     'http' => [
                         'method' => 'GET',
-                        'header' => ['Authorization: Bearer fake-token'],
+                        'header' => [],
                     ],
                 ],
             )

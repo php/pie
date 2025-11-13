@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4956e9821d801a9b289455af8ec11168",
+    "content-hash": "bb9132e97a1770caf55cb6c374836405",
     "packages": [
         {
             "name": "composer/ca-bundle",
@@ -2425,16 +2425,16 @@
         },
         {
             "name": "thephpf/attestation",
-            "version": "0.0.2",
+            "version": "dev-composer-2-9-compatibility-auth-helper",
             "source": {
                 "type": "git",
-                "url": "https://github.com/ThePHPF/attestation.git",
-                "reference": "997770de5fcfb548dba84b3b444a67a30943973f"
+                "url": "https://github.com/asgrim/attestation.git",
+                "reference": "d49b41bfe1d7800d30e0eede8cbe0963208931ea"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ThePHPF/attestation/zipball/997770de5fcfb548dba84b3b444a67a30943973f",
-                "reference": "997770de5fcfb548dba84b3b444a67a30943973f",
+                "url": "https://api.github.com/repos/asgrim/attestation/zipball/d49b41bfe1d7800d30e0eede8cbe0963208931ea",
+                "reference": "d49b41bfe1d7800d30e0eede8cbe0963208931ea",
                 "shasum": ""
             },
             "require": {
@@ -2446,6 +2446,7 @@
             "require-dev": {
                 "doctrine/coding-standard": "^13.0 || ^14.0",
                 "phpstan/phpstan": "^2.1",
+                "phpstan/phpstan-webmozart-assert": "^2.0",
                 "phpunit/phpunit": "^9.6.25"
             },
             "suggest": {
@@ -2457,7 +2458,12 @@
                     "ThePhpFoundation\\Attestation\\": "src/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
+            "autoload-dev": {
+                "psr-4": {
+                    "ThePhpFoundation\\UnitTest\\Attestation\\": "test/unit",
+                    "ThePhpFoundation\\IntegrationTest\\Attestation\\": "test/integration"
+                }
+            },
             "license": [
                 "BSD-3-Clause"
             ],
@@ -2469,20 +2475,10 @@
             ],
             "description": "A PHP library to aid in verifying artifact attestations",
             "support": {
-                "issues": "https://github.com/ThePHPF/attestation/issues",
-                "source": "https://github.com/ThePHPF/attestation/tree/0.0.2"
+                "source": "https://github.com/asgrim/attestation/tree/composer-2-9-compatibility-auth-helper",
+                "issues": "https://github.com/asgrim/attestation/issues"
             },
-            "funding": [
-                {
-                    "url": "https://github.com/ThePHPF",
-                    "type": "github"
-                },
-                {
-                    "url": "https://opencollective.com/phpfoundation",
-                    "type": "open_collective"
-                }
-            ],
-            "time": "2025-10-11T07:40:19+00:00"
+            "time": "2025-11-13T14:41:37+00:00"
         },
         {
             "name": "webmozart/assert",
@@ -5382,7 +5378,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "thephpf/attestation": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
