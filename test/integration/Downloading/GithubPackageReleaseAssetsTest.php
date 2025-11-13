@@ -7,7 +7,6 @@ namespace Php\PieIntegrationTest\Downloading;
 use Composer\Factory;
 use Composer\IO\NullIO;
 use Composer\Package\CompletePackage;
-use Composer\Util\AuthHelper;
 use Composer\Util\HttpDownloader;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\GithubPackageReleaseAssets;
@@ -21,7 +20,6 @@ use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\ThreadSafetyMode;
 use Php\Pie\Platform\WindowsCompiler;
 use Php\Pie\Platform\WindowsExtensionAssetName;
-use Php\Pie\Util\PieComposerAuthHelper;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\RequiresOperatingSystemFamily;
 use PHPUnit\Framework\TestCase;
@@ -66,7 +64,6 @@ final class GithubPackageReleaseAssetsTest extends TestCase
                 ->findMatchingReleaseAssetUrl(
                     $targetPlatform,
                     $package,
-                    new PieComposerAuthHelper(new AuthHelper($io, $config)),
                     new HttpDownloader($io, $config),
                     WindowsExtensionAssetName::zipNames(
                         $targetPlatform,

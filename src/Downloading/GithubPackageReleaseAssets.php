@@ -8,7 +8,6 @@ use Composer\Downloader\TransportException;
 use Composer\Util\HttpDownloader;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Platform\TargetPlatform;
-use Php\Pie\Util\PieComposerAuthHelper;
 use Webmozart\Assert\Assert;
 
 use function array_map;
@@ -31,14 +30,13 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
     public function findMatchingReleaseAssetUrl(
         TargetPlatform $targetPlatform,
         Package $package,
-        PieComposerAuthHelper $authHelper,
         HttpDownloader $httpDownloader,
         array $possibleReleaseAssetNames,
     ): string {
         $releaseAsset = $this->selectMatchingReleaseAsset(
             $targetPlatform,
             $package,
-            $this->getReleaseAssetsForPackage($package, $authHelper, $httpDownloader),
+            $this->getReleaseAssetsForPackage($package, $httpDownloader),
             $possibleReleaseAssetNames,
         );
 
@@ -72,7 +70,6 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
     /** @return list<array{name: non-empty-string, browser_download_url: non-empty-string, ...}> */
     private function getReleaseAssetsForPackage(
         Package $package,
-        PieComposerAuthHelper $authHelper,
         HttpDownloader $httpDownloader,
     ): array {
         Assert::notNull($package->downloadUrl());
@@ -84,7 +81,7 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
                     'retry-auth-failure' => true,
                     'http' => [
                         'method' => 'GET',
-                        'header' => [$authHelper->authHeader($this->githubApiBaseUrl, $package->downloadUrl())],
+                        'header' => [],
                     ],
                 ],
             )->decodeJson();

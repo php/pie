@@ -21,7 +21,6 @@ use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\ThreadSafetyMode;
 use Php\Pie\Platform\WindowsCompiler;
 use Php\Pie\Platform\WindowsExtensionAssetName;
-use Php\Pie\Util\PieComposerAuthHelper;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
@@ -46,8 +45,6 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             1,
             WindowsCompiler::VC14,
         );
-
-        $authHelper = $this->createMock(PieComposerAuthHelper::class);
 
         $httpDownloaderResponse = $this->createMock(Response::class);
         $httpDownloaderResponse
@@ -88,7 +85,6 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             $releaseAssets->findMatchingReleaseAssetUrl(
                 $targetPlatform,
                 $package,
-                $authHelper,
                 $httpDownloader,
                 WindowsExtensionAssetName::zipNames(
                     $targetPlatform,
@@ -114,8 +110,6 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             1,
             WindowsCompiler::VC14,
         );
-
-        $authHelper = $this->createMock(PieComposerAuthHelper::class);
 
         $httpDownloaderResponse = $this->createMock(Response::class);
         $httpDownloaderResponse
@@ -156,7 +150,6 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             $releaseAssets->findMatchingReleaseAssetUrl(
                 $targetPlatform,
                 $package,
-                $authHelper,
                 $httpDownloader,
                 WindowsExtensionAssetName::zipNames(
                     $targetPlatform,
@@ -177,8 +170,6 @@ final class GithubPackageReleaseAssetsTest extends TestCase
             1,
             WindowsCompiler::VC14,
         );
-
-        $authHelper = $this->createMock(PieComposerAuthHelper::class);
 
         $e = new TransportException('not found', 404);
         $e->setStatusCode(404);
@@ -204,7 +195,6 @@ final class GithubPackageReleaseAssetsTest extends TestCase
         $releaseAssets->findMatchingReleaseAssetUrl(
             $targetPlatform,
             $package,
-            $authHelper,
             $httpDownloader,
             WindowsExtensionAssetName::zipNames(
                 $targetPlatform,

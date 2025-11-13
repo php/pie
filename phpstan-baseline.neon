@@ -499,12 +499,6 @@ parameters:
 			path: test/unit/Platform/TargetPhp/PhpBinaryPathTest.php
 
 		-
-			message: '#^Parameter \#4 \$body of class Composer\\Util\\Http\\Response constructor expects string\|null, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: test/unit/SelfManage/Update/FetchPieReleaseFromGitHubTest.php
-
-		-
 			message: '#^Method Php\\PieUnitTest\\SelfManage\\Verify\\FallbackVerificationUsingOpenSslTest\:\:prepareCertificateAndSignature\(\) should return array\{string, string\} but returns array\{mixed, mixed\}\.$#'
 			identifier: return.type
 			count: 1
