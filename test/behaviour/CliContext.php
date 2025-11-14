@@ -399,4 +399,25 @@ class CliContext implements Context
         Assert::contains($this->output, '✅ Verified the new PIE version');
         Assert::contains($this->output, '✅ PIE has been upgraded to nightly');
     }
+
+    #[Given('I have a pie.phar built on a nasty hacker\'s machine')]
+    public function iHaveAPiePharBuiltOnANastyHackerSMachine(): void
+    {
+        // noop - the pie.phar built in this does not have attestations
+    }
+
+    #[When('I verify my PIE installation')]
+    public function iVerifyMyPIEInstallation(): void
+    {
+        $this->runPieCommand(['self-verify']);
+    }
+
+    #[Then('I should see it has failed verification')]
+    public function iShouldSeeItHasFailedVerification(): void
+    {
+        Assert::same($this->exitCode, 1);
+
+        Assert::notNull($this->errorOutput);
+        Assert::contains($this->errorOutput, '❌ Failed to verify the pie.phar release');
+    }
 }

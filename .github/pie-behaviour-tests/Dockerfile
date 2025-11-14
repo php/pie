@@ -11,7 +11,7 @@ FROM boxproject/box:4.6.10 AS build_pie_phar
 
 RUN apk add git
 COPY . /app
-RUN cd /app && /box.phar compile
+RUN cd /app && touch creating_this_means_phar_will_never_be_verified && /box.phar compile
 
 FROM ubuntu:24.04 AS default
 
@@ -43,7 +43,7 @@ RUN mkdir -p /usr/local/src/php; \
 
 RUN touch /usr/local/lib/php.ini
 
-COPY --from=ghcr.io/php/pie:bin /pie /usr/bin/pie
+COPY --from=ghcr.io/php/pie:bin /pie /usr/local/bin/pie
 RUN pie install xdebug/xdebug
 
 COPY --from=clone_ext_repo /example-pie-extension /example-pie-extension
