@@ -138,29 +138,28 @@ jobs:
       matrix:
         operating-system:
           - ubuntu-latest
-          - windows-latest
         php-versions:
           - '8.1'
           - '8.2'
           - '8.3'
           - '8.4'
-          - '8.5'
     steps:
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+      - uses: actions/checkout@v5
         with:
-          php-version: ${{ matrix.php-versions }}
-          extensions: intl, sodium, zip
+          fetch-depth: 0
+      # Fixes `git describe` picking the wrong tag - see https://github.com/php/pie/issues/307
+      - run: git fetch --tags --force
+      # Ensure some kind of previous tag exists, otherwise box fails
+      - run: git describe --tags HEAD || git tag 0.0.0
+      - uses: ramsey/composer-install@v3
+      - name: Build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/checkout@v5
-      - uses: ramsey/composer-install@v3
-      - name: Run Behat on Windows
-        if: matrix.operating-system == 'windows-latest'
-        run: vendor/bin/behat --tags="~@non-windows"
-      - name: Run Behat on non-Windows
-        if: matrix.operating-system != 'windows-latest'
-        run: sudo vendor/bin/behat
+        run: docker buildx build --file .github/pie-behaviour-tests/Dockerfile --secret id=GITHUB_TOKEN,env=GITHUB_TOKEN --build-arg PHP_VERSION=${{ matrix.php-versions }} -t pie-behat-test .
+      - name: Run Behat
+        run: docker run --volume .:/github/workspace pie-behat-test
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   coding-standards:
     runs-on: ubuntu-latest

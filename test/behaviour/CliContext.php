@@ -13,14 +13,24 @@ use Symfony\Component\Process\Process;
 use Webmozart\Assert\Assert;
 
 use function array_merge;
+use function assert;
+use function copy;
+use function realpath;
+use function sprintf;
 
 class CliContext implements Context
 {
-    private const PHP_BINARY    = 'php';
-    private string|null $output = null;
-    private int|null $exitCode  = null;
+    private const PHP_BINARY         = 'php';
+    private const PIE_BINARY         = '/usr/local/bin/pie';
+    private const PIE_BINARY_BACKUP  = '/usr/local/bin/pie.original';
+    private string|null $output      = null;
+    private string|null $errorOutput = null;
+    private int|null $exitCode       = null;
     /** @var list<string> */
-    private array $phpArguments = [];
+    private array $phpArguments           = [];
+    private string $theExtension          = 'example_pie_extension';
+    private string $thePackage            = 'asgrim/example-pie-extension';
+    private string|null $workingDirectory = null;
 
     #[When('I run a command to download the latest version of an extension')]
     public function iRunACommandToDownloadTheLatestVersionOfAnExtension(): void
@@ -37,18 +47,42 @@ class CliContext implements Context
     /** @param list<non-empty-string> $command */
     public function runPieCommand(array $command): void
     {
-        $pieCommand = array_merge([self::PHP_BINARY, ...$this->phpArguments, 'bin/pie'], $command);
+        $pieCommand = array_merge([self::PHP_BINARY, ...$this->phpArguments, self::PIE_BINARY], $command);
 
-        $proc = (new Process($pieCommand))->mustRun();
+        if ($this->workingDirectory !== null) {
+            $pieCommand[] = '--working-dir';
+            $pieCommand[] = $this->workingDirectory;
+        }
 
-        $this->output   = $proc->getOutput();
-        $this->exitCode = $proc->getExitCode();
+        $proc = new Process($pieCommand, timeout: 120);
+        $proc->run();
+
+        $this->output      = $proc->getOutput();
+        $this->errorOutput = $proc->getErrorOutput();
+        $this->exitCode    = $proc->getExitCode();
     }
 
     /** @phpstan-assert !null $this->output */
     private function assertCommandSuccessful(): void
     {
-        Assert::same(0, $this->exitCode);
+        Assert::same(
+            0,
+            $this->exitCode,
+            sprintf(
+                <<<'EOF'
+                Last command was not successful - exit code was: %d.
+
+                Output:
+                %s
+
+                Error output:
+                %s
+                EOF,
+                $this->exitCode,
+                $this->output,
+                $this->errorOutput,
+            ),
+        );
 
         Assert::notNull($this->output);
     }
@@ -113,16 +147,27 @@ class CliContext implements Context
     }
 
     #[When('I run a command to install an extension')]
-    #[Given('an extension was previously installed')]
+    #[Given('an extension was previously installed and enabled')]
     public function iRunACommandToInstallAnExtension(): void
     {
-        $this->runPieCommand(['install', 'asgrim/example-pie-extension']);
+        $this->theExtension = 'example_pie_extension';
+        $this->thePackage   = 'asgrim/example-pie-extension';
+        $this->runPieCommand(['install', $this->thePackage]);
+    }
+
+    #[When('I run a command to install an extension without enabling it')]
+    public function iRunACommandToInstallAnExtensionWithoutEnabling(): void
+    {
+        $this->theExtension = 'example_pie_extension';
+        $this->thePackage   = 'asgrim/example-pie-extension';
+        $this->runPieCommand(['install', $this->thePackage, '--skip-enable-extension']);
     }
 
     #[When('I run a command to uninstall an extension')]
     public function iRunACommandToUninstallAnExtension(): void
     {
-        $this->runPieCommand(['uninstall', 'asgrim/example-pie-extension']);
+        assert($this->thePackage !== '');
+        $this->runPieCommand(['uninstall', $this->thePackage]);
     }
 
     #[Then('the extension should not be installed anymore')]
@@ -131,16 +176,20 @@ class CliContext implements Context
         $this->assertCommandSuccessful();
 
         if (Platform::isWindows()) {
-            Assert::regex($this->output, '#👋 Removed extension: [-\\\_:.a-zA-Z0-9]+\\\php_example_pie_extension.dll#');
+            Assert::regex($this->output, '#👋 Removed extension: [-\\\_:.a-zA-Z0-9]+\\\php_' . $this->theExtension . '.dll#');
         } else {
-            Assert::regex($this->output, '#👋 Removed extension: [-_.a-zA-Z0-9/]+/example_pie_extension.so#');
+            Assert::regex($this->output, '#👋 Removed extension: [-_.a-zA-Z0-9/]+/' . $this->theExtension . '.so#');
         }
 
-        $isExtEnabled = (new Process([self::PHP_BINARY, '-r', 'echo extension_loaded("example_pie_extension")?"yes":"no";']))
+        $isExtEnabled = (new Process([self::PHP_BINARY, '-r', 'echo extension_loaded("' . $this->theExtension . '")?"yes":"no";']))
             ->mustRun()
             ->getOutput();
 
-        Assert::same($isExtEnabled, 'no');
+        Assert::same(
+            $isExtEnabled,
+            'no',
+            sprintf("Failed to remove extension.\n\nOutput:\n%s\n\nError output:\n%s\n", $this->output, $this->errorOutput),
+        );
     }
 
     #[Then('the extension should have been installed')]
@@ -148,17 +197,33 @@ class CliContext implements Context
     {
         $this->assertCommandSuccessful();
 
-        Assert::contains($this->output, 'Extension is enabled and loaded');
+        Assert::contains($this->output, 'Extension has NOT been automatically enabled.');
 
         if (Platform::isWindows()) {
-            Assert::regex($this->output, '#Copied DLL to: [-\\\_:.a-zA-Z0-9]+\\\php_example_pie_extension.dll#');
+            Assert::regex($this->output, '#Copied DLL to: [-\\\_:.a-zA-Z0-9]+\\\php_' . $this->theExtension . '.dll#');
 
             return;
         }
 
-        Assert::regex($this->output, '#Install complete: [-_.a-zA-Z0-9/]+/example_pie_extension.so#');
+        Assert::regex($this->output, '#Install complete: [-_.a-zA-Z0-9/]+/' . $this->theExtension . '.so#');
+    }
 
-        $isExtEnabled = (new Process([self::PHP_BINARY, '-r', 'echo extension_loaded("example_pie_extension")?"yes":"no";']))
+    #[Then('the extension should have been installed and enabled')]
+    public function theExtensionShouldHaveBeenInstalledAndEnabled(): void
+    {
+        $this->assertCommandSuccessful();
+
+        Assert::contains($this->output, 'Extension is enabled and loaded');
+
+        if (Platform::isWindows()) {
+            Assert::regex($this->output, '#Copied DLL to: [-\\\_:.a-zA-Z0-9]+\\\php_' . $this->theExtension . '.dll#');
+
+            return;
+        }
+
+        Assert::regex($this->output, '#Install complete: [-_.a-zA-Z0-9/]+/' . $this->theExtension . '.so#');
+
+        $isExtEnabled = (new Process([self::PHP_BINARY, '-r', 'echo extension_loaded("' . $this->theExtension . '")?"yes":"no";']))
             ->mustRun()
             ->getOutput();
 
@@ -208,5 +273,151 @@ class CliContext implements Context
     {
         Assert::notNull($this->output);
         Assert::notContains($this->output, 'Path repository (' . __DIR__ . ')');
+    }
+
+    #[Given('I have libsodium on my system')]
+    public function iHaveLibsodiumOnMySystem(): void
+    {
+        (new Process(['apt-get', 'update'], timeout: 120))->mustRun();
+        (new Process(['apt-get', '-y', 'install', 'libsodium-dev'], timeout: 120))->mustRun();
+    }
+
+    #[When('I install the sodium extension with PIE')]
+    #[Given('I have the sodium extension installed with PIE')]
+    public function iInstallTheSodiumExtensionWithPie(): void
+    {
+        $this->theExtension = 'sodium';
+        $this->thePackage   = 'php/sodium';
+        $this->runPieCommand(['install', $this->thePackage]);
+    }
+
+    #[Given('I do not have libsodium on my system')]
+    public function iDoNotHaveLibsodiumOnMySystem(): void
+    {
+        (new Process(['apt-get', '-y', '-m', 'remove', 'libsodium*'], timeout: 120))->run();
+    }
+
+    #[When('I display information about the sodium extension with PIE')]
+    public function iDisplayInformationAboutTheSodiumExtensionWithPie(): void
+    {
+        $this->theExtension = 'sodium';
+        $this->thePackage   = 'php/sodium';
+        $this->runPieCommand(['info', $this->thePackage]);
+    }
+
+    #[Then('the information should show that libsodium is a missing dependency')]
+    public function theInformationShouldShowThatLibsodiumIsAMissingDependency(): void
+    {
+        Assert::notNull($this->output);
+        Assert::contains(
+            $this->output,
+            'lib-sodium: * 🚫 (not installed)',
+            sprintf("Could not find missing lib-sodium.\n\nOutput:\n%s\n\nError output:\n%s\n", $this->output, $this->errorOutput),
+        );
+    }
+
+    #[Then('the extension fails to install due to the missing library')]
+    public function theExtensionFailsToInstallDueToTheMissingLibrary(): void
+    {
+        Assert::notSame(0, $this->exitCode);
+        Assert::notNull($this->errorOutput);
+        Assert::regex(
+            $this->errorOutput,
+            '#Cannot use php/sodium\'s latest version .* as it requires lib-sodium .* which is missing from your platform.#',
+            sprintf("Did not detect missing lib-sodium correctly.\n\nOutput:\n%s\n\nError output:\n%s\n", $this->output, $this->errorOutput),
+        );
+    }
+
+    #[Given('I am in a PHP project that has missing extensions')]
+    public function iAmInAPHPProjectThatHasMissingExtensions(): void
+    {
+        $this->runPieCommand(['uninstall', 'asgrim/example-pie-extension']);
+
+        $this->runPieCommand(['show']);
+        $this->assertCommandSuccessful();
+        Assert::notContains($this->output, 'example_pie_extension');
+
+        $examplePhpProject = (string) realpath(__DIR__ . '/../assets/example-php-project');
+        assert($examplePhpProject !== '');
+
+        $this->workingDirectory = $examplePhpProject;
+    }
+
+    #[When('I run a command to install the extensions')]
+    public function iRunACommandToInstallTheExtensions(): void
+    {
+        $this->runPieCommand(['install', '--allow-non-interactive-project-install']);
+
+        $this->assertCommandSuccessful();
+    }
+
+    #[Then('I should see all the extensions are now installed')]
+    public function iShouldSeeAllTheExtensionsAreNowInstalled(): void
+    {
+        $this->workingDirectory = null;
+
+        $this->runPieCommand(['show']);
+        $this->assertCommandSuccessful();
+        Assert::contains($this->output, 'example_pie_extension');
+    }
+
+    #[Given('I am in a PIE project')]
+    public function iAmInAPIEProject(): void
+    {
+        $examplePieProject = (string) realpath('/example-pie-extension');
+        assert($examplePieProject !== '');
+
+        $this->workingDirectory = $examplePieProject;
+    }
+
+    #[When('I run a command to install the extension')]
+    public function iRunACommandToInstallTheExtension(): void
+    {
+        $this->theExtension = 'example_pie_extension';
+        $this->thePackage   = 'asgrim/example-pie-extension';
+        $this->runPieCommand(['install']);
+    }
+
+    #[Given('I have an old version of PIE')]
+    public function iHaveAnOldVersionOfPIE(): void
+    {
+        // noop
+    }
+
+    #[When('I update PIE to the latest version')]
+    public function iUpdatePIEToTheLatestNightlyVersion(): void
+    {
+        $this->runPieCommand(['self-update', '--nightly', '-v']);
+
+        copy(self::PIE_BINARY_BACKUP, self::PIE_BINARY);
+    }
+
+    #[Then('I should see I have been updated to the latest version')]
+    public function iShouldSeeIHaveBeenUpdatedToTheLatestVersion(): void
+    {
+        $this->assertCommandSuccessful();
+        Assert::contains($this->output, '✅ Verified the new PIE version');
+        Assert::contains($this->output, '✅ PIE has been upgraded to nightly');
+    }
+
+    #[Given('I have a pie.phar built on a nasty hacker\'s machine')]
+    public function iHaveAPiePharBuiltOnANastyHackerSMachine(): void
+    {
+        // noop - the pie.phar built in this does not have attestations
+    }
+
+    #[When('I verify my PIE installation')]
+    public function iVerifyMyPIEInstallation(): void
+    {
+        $this->runPieCommand(['self-verify']);
+    }
+
+    #[Then('I should see it has failed verification')]
+    public function iShouldSeeItHasFailedVerification(): void
+    {
+        Assert::same($this->exitCode, 1);
+
+        Assert::notNull($this->errorOutput);
+        Assert::contains($this->errorOutput, '❌ Failed to verify the pie.phar release');
     }
 }
