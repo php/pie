@@ -145,8 +145,16 @@ jobs:
           - '8.4'
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      # Fixes `git describe` picking the wrong tag - see https://github.com/php/pie/issues/307
+      - run: git fetch --tags --force
+      # Ensure some kind of previous tag exists, otherwise box fails
+      - run: git describe --tags HEAD || git tag 0.0.0
       - uses: ramsey/composer-install@v3
       - name: Build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: docker buildx build --file .github/pie-behaviour-tests/Dockerfile --secret id=GITHUB_TOKEN,env=GITHUB_TOKEN --build-arg PHP_VERSION=${{ matrix.php-versions }} -t pie-behat-test .
       - name: Run Behat
         run: docker run --volume .:/github/workspace pie-behat-test
