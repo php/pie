@@ -147,7 +147,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: ramsey/composer-install@v3
       - name: Build
-        run: docker buildx build --file .github/pie-behaviour-tests/Dockerfile --build-arg PHP_VERSION=${{ matrix.php-versions }} -t pie-behat-test .
+        run: docker buildx build --file .github/pie-behaviour-tests/Dockerfile --secret id=GITHUB_TOKEN,env=GITHUB_TOKEN --build-arg PHP_VERSION=${{ matrix.php-versions }} -t pie-behat-test .
       - name: Run Behat
         run: docker run --volume .:/github/workspace pie-behat-test
         env:

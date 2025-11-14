@@ -3,7 +3,7 @@ Feature: PIE can update itself and verify it is authentic
   # pie self-update
   Example: PIE can update itself
     Given I have an old version of PIE
-    When I update PIE to the latest stable version
+    When I update PIE to the latest version
     Then I should see I have been updated to the latest version
 
   # pie self-verify

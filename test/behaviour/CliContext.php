@@ -14,12 +14,15 @@ use Webmozart\Assert\Assert;
 
 use function array_merge;
 use function assert;
+use function copy;
 use function realpath;
 use function sprintf;
 
 class CliContext implements Context
 {
     private const PHP_BINARY         = 'php';
+    private const PIE_BINARY         = '/usr/local/bin/pie';
+    private const PIE_BINARY_BACKUP  = '/usr/local/bin/pie.original';
     private string|null $output      = null;
     private string|null $errorOutput = null;
     private int|null $exitCode       = null;
@@ -44,7 +47,7 @@ class CliContext implements Context
     /** @param list<non-empty-string> $command */
     public function runPieCommand(array $command): void
     {
-        $pieCommand = array_merge([self::PHP_BINARY, ...$this->phpArguments, 'bin/pie'], $command);
+        $pieCommand = array_merge([self::PHP_BINARY, ...$this->phpArguments, self::PIE_BINARY], $command);
 
         if ($this->workingDirectory !== null) {
             $pieCommand[] = '--working-dir';
@@ -373,5 +376,27 @@ class CliContext implements Context
         $this->theExtension = 'example_pie_extension';
         $this->thePackage   = 'asgrim/example-pie-extension';
         $this->runPieCommand(['install']);
+    }
+
+    #[Given('I have an old version of PIE')]
+    public function iHaveAnOldVersionOfPIE(): void
+    {
+        // noop
+    }
+
+    #[When('I update PIE to the latest version')]
+    public function iUpdatePIEToTheLatestNightlyVersion(): void
+    {
+        $this->runPieCommand(['self-update', '--nightly', '-v']);
+
+        copy(self::PIE_BINARY_BACKUP, self::PIE_BINARY);
+    }
+
+    #[Then('I should see I have been updated to the latest version')]
+    public function iShouldSeeIHaveBeenUpdatedToTheLatestVersion(): void
+    {
+        $this->assertCommandSuccessful();
+        Assert::contains($this->output, '✅ Verified the new PIE version');
+        Assert::contains($this->output, '✅ PIE has been upgraded to nightly');
     }
 }
