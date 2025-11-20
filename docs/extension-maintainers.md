@@ -249,13 +249,14 @@ to restrict the Operating System compatibility.
  * `os-families` An array of OS families to mark as compatible with the extension.
    (e.g. `"os-families": ["windows"]` for an extension only available on Windows)
  * `os-families-exclude` An array of OS families to mark as incompatible with the
-   extension. (e.g. `"os-families-exclude": ["windows"]` for an extension cannot
-   be installed available on Windows)
+   extension. (e.g. `"os-families-exclude": ["windows"]` for an extension that
+   cannot be installed available on Windows)
 
 The list of accepted OS families: "windows", "bsd", "darwin", "solaris", "linux",
 "unknown"
 
-> Note: only once of `os-families` and `os-families-exclude` can be defined.
+> [!WARNING]
+> Only one of `os-families` and `os-families-exclude` can be defined.
 
 #### Extension dependencies
 
