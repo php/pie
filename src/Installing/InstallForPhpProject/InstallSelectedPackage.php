@@ -60,8 +60,7 @@ class InstallSelectedPackage
         Process::run(
             $process,
             getcwd(),
-            null,
-            static function (string $outOrErr, string $message) use ($io): void {
+            outputCallback: static function (string $outOrErr, string $message) use ($io): void {
                 if ($outOrErr === \Symfony\Component\Process\Process::ERR) {
                     $io->writeError('   > ' . $message);
 

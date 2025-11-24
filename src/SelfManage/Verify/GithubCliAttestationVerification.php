@@ -19,9 +19,8 @@ use function str_starts_with;
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class GithubCliAttestationVerification implements VerifyPiePhar
 {
-    private const GH_CLI_NAME             = 'gh';
-    private const GH_ATTESTATION_COMMAND  = 'attestation';
-    private const GH_VERIFICATION_TIMEOUT = 30;
+    private const GH_CLI_NAME            = 'gh';
+    private const GH_ATTESTATION_COMMAND = 'attestation';
 
     public function __construct(private readonly ExecutableFinder $executableFinder)
     {
@@ -37,7 +36,7 @@ final class GithubCliAttestationVerification implements VerifyPiePhar
 
         // Try to use `gh attestation --help` to ensure it is not an old `gh` cli version
         try {
-            Process::run([$gh, self::GH_ATTESTATION_COMMAND, '--help'], null, self::GH_VERIFICATION_TIMEOUT);
+            Process::run([$gh, self::GH_ATTESTATION_COMMAND, '--help']);
         } catch (ProcessFailedException $attestationCommandCheck) {
             if (str_starts_with($attestationCommandCheck->getProcess()->getErrorOutput(), sprintf('unknown command "%s" for "%s"', self::GH_ATTESTATION_COMMAND, self::GH_CLI_NAME))) {
                 throw GithubCliNotAvailable::withMissingAttestationCommand(self::GH_CLI_NAME);
@@ -60,7 +59,7 @@ final class GithubCliAttestationVerification implements VerifyPiePhar
         );
 
         try {
-            Process::run($verificationCommand, null, self::GH_VERIFICATION_TIMEOUT);
+            Process::run($verificationCommand);
         } catch (ProcessFailedException $processFailedException) {
             throw FailedToVerifyRelease::fromGhCliFailure($releaseMetadata, $processFailedException);
         }

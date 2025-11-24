@@ -124,7 +124,7 @@ class PhpBinaryPathBasedPlatformRepository extends PlatformRepository
     private function detectLibraryWithPkgConfig(string $alias, string $library): void
     {
         try {
-            $pkgConfigResult = Process::run(['pkg-config', '--print-provides', '--print-errors', $library], timeout: 30);
+            $pkgConfigResult = Process::run(['pkg-config', '--print-provides', '--print-errors', $library]);
         } catch (ProcessFailedException) {
             return;
         }

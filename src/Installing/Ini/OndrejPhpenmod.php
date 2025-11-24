@@ -166,7 +166,7 @@ final class OndrejPhpenmod implements SetupIniApproach
                         array_unshift($processArgs, Sudo::find());
                     }
 
-                    Process::run($processArgs);
+                    Process::run($processArgs, timeout: Process::SHORT_TIMEOUT);
 
                     return true;
                 } catch (ProcessFailedException $processFailedException) {
