@@ -98,15 +98,9 @@ jobs:
             libbz2-dev \
             libzip-dev
       - name: "Set php-src download URL"
-        if: ${{ !startsWith(matrix.php-versions, '8.5') }}
         run: |
           DIST_URL=`curl -fsSL "https://www.php.net/releases/index.php?json&max=1&version=${{ matrix.php-versions }}" | jq -r '.[].source[]|select(.filename|endswith(".gz")).filename'`
           echo "php_src_download_url=https://www.php.net/distributions/$DIST_URL" >> $GITHUB_ENV
-      - name: "Set php-src download URL (8.5 pre-release)"
-        if: ${{ startsWith(matrix.php-versions, '8.5') }}
-        run: |
-          RC_URL=`curl -fsSL "https://www.php.net/release-candidates.php?format=json" | jq -r '.releases[]|select(.version|startswith("${{ matrix.php-versions }}")).files.gz.path'`
-          echo "php_src_download_url=$RC_URL" >> $GITHUB_ENV
       - name: "Install PHP ${{ matrix.php-versions }}"
         run: |
           mkdir -p /tmp/php
