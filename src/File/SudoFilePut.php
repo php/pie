@@ -66,7 +66,7 @@ final class SudoFilePut
             self::copyOwnership($filename, $tempFilename);
         }
 
-        Process::run([Sudo::find(), 'mv', $tempFilename, $filename]);
+        Process::run([Sudo::find(), 'mv', $tempFilename, $filename], timeout: Process::SHORT_TIMEOUT);
     }
 
     /**
@@ -77,18 +77,18 @@ final class SudoFilePut
     {
         try {
             // GNU chmod supports `--reference`, so try this first
-            Process::run([Sudo::find(), 'chmod', '--reference=' . $sourceFile, $targetFile]);
+            Process::run([Sudo::find(), 'chmod', '--reference=' . $sourceFile, $targetFile], timeout: Process::SHORT_TIMEOUT);
 
             return;
         } catch (ProcessFailedException) {
             // Fall back to using `stat` to determine uid/gid
             try {
                 // Try using GNU stat (-c) first
-                $userAndGroup = Process::run(['stat', '-c', '%u:%g', $sourceFile], timeout: 2);
+                $userAndGroup = Process::run(['stat', '-c', '%u:%g', $sourceFile]);
             } catch (ProcessFailedException) {
                 try {
                     // Fall back to using OSX stat (-f)
-                    $userAndGroup = Process::run(['stat', '-f', '%u:%g', $sourceFile], timeout: 2);
+                    $userAndGroup = Process::run(['stat', '-f', '%u:%g', $sourceFile]);
                 } catch (ProcessFailedException) {
                     return;
                 }
@@ -98,7 +98,7 @@ final class SudoFilePut
                 return;
             }
 
-            Process::run([Sudo::find(), 'chown', $userAndGroup, $targetFile]);
+            Process::run([Sudo::find(), 'chown', $userAndGroup, $targetFile], timeout: Process::SHORT_TIMEOUT);
         }
     }
 }

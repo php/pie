@@ -47,7 +47,7 @@ final class SudoUnlink
         }
 
         try {
-            Process::run([Sudo::find(), 'rm', $filename]);
+            Process::run([Sudo::find(), 'rm', $filename], timeout: Process::SHORT_TIMEOUT);
         } catch (ProcessFailedException $processFailedException) {
             throw FailedToUnlinkFile::fromSudoRmProcessFailed($filename, $processFailedException);
         }

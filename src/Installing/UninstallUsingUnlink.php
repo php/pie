@@ -46,7 +46,7 @@ class UninstallUsingUnlink implements Uninstall
 
         // If the target directory isn't writable, or a .so file already exists and isn't writable, try to use sudo
         if (file_exists($expectedBinaryFile->filePath) && ! is_writable($expectedBinaryFile->filePath) && Sudo::exists()) {
-            Process::run([Sudo::find(), 'rm', $expectedBinaryFile->filePath]);
+            Process::run([Sudo::find(), 'rm', $expectedBinaryFile->filePath], timeout: Process::SHORT_TIMEOUT);
 
             // Removal worked, bail out
             if (! file_exists($expectedBinaryFile->filePath)) {

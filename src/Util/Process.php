@@ -12,6 +12,9 @@ use function trim;
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class Process
 {
+    public const NO_TIMEOUT    = null;
+    public const SHORT_TIMEOUT = 10;
+
     private function __construct()
     {
     }
@@ -33,7 +36,7 @@ final class Process
     public static function run(
         array $command,
         string|null $workingDirectory = null,
-        int|null $timeout = 5,
+        int|null $timeout = self::NO_TIMEOUT,
         callable|null $outputCallback = null,
     ): string {
         return trim((new SymfonyProcess($command, $workingDirectory, timeout: $timeout))

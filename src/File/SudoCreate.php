@@ -51,7 +51,7 @@ final class SudoCreate
         }
 
         try {
-            Process::run([Sudo::find(), 'touch', $filename]);
+            Process::run([Sudo::find(), 'touch', $filename], timeout: Process::SHORT_TIMEOUT);
         } catch (ProcessFailedException $processFailedException) {
             throw FailedToCreateFile::fromSudoTouchProcessFailed($filename, $processFailedException);
         }

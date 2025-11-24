@@ -26,10 +26,6 @@ use const DIRECTORY_SEPARATOR;
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class UnixBuild implements Build
 {
-    private const PHPIZE_TIMEOUT_SECS    = 60; // 1 minute
-    private const CONFIGURE_TIMEOUT_SECS = 120; // 2 minutes
-    private const MAKE_TIMEOUT_SECS      = null; // unlimited
-
     /** {@inheritDoc} */
     public function __invoke(
         DownloadedPackage $downloadedPackage,
@@ -137,8 +133,7 @@ final class UnixBuild implements Build
         Process::run(
             $phpizeCommand,
             $downloadedPackage->extractedSourcePath,
-            self::PHPIZE_TIMEOUT_SECS,
-            $outputCallback,
+            outputCallback: $outputCallback,
         );
     }
 
@@ -162,8 +157,7 @@ final class UnixBuild implements Build
         Process::run(
             $configureCommand,
             $downloadedPackage->extractedSourcePath,
-            self::CONFIGURE_TIMEOUT_SECS,
-            $outputCallback,
+            outputCallback: $outputCallback,
         );
     }
 
@@ -195,8 +189,7 @@ final class UnixBuild implements Build
         Process::run(
             $makeCommand,
             $downloadedPackage->extractedSourcePath,
-            self::MAKE_TIMEOUT_SECS,
-            $outputCallback,
+            outputCallback: $outputCallback,
         );
     }
 
@@ -231,8 +224,7 @@ final class UnixBuild implements Build
         Process::run(
             $phpizeCleanCommand,
             $downloadedPackage->extractedSourcePath,
-            self::PHPIZE_TIMEOUT_SECS,
-            $outputCallback,
+            outputCallback: $outputCallback,
         );
 
         $io->write('<info>Build files cleaned up.</info>');
