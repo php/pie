@@ -1,4 +1,4 @@
-php-version: 8.4
+php-version: 8.5
 extensions: "curl,filter,iconv,openssl,phar,zlib"
 sapi: micro
 download-options:

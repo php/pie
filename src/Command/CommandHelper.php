@@ -37,15 +37,18 @@ use Webmozart\Assert\Assert;
 use function array_key_exists;
 use function array_map;
 use function count;
+use function defined;
 use function is_array;
 use function is_string;
 use function reset;
 use function sprintf;
+use function str_contains;
 use function str_starts_with;
 use function strtolower;
 use function substr;
 use function trim;
 
+use const PHP_BUILD_PROVIDER;
 use const PHP_VERSION;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
@@ -197,7 +200,12 @@ final class CommandHelper
 
         $targetPlatform = TargetPlatform::fromPhpBinaryPath($phpBinaryPath, $makeParallelJobs);
 
-        $io->write(sprintf('<info>You are running PHP %s</info>', PHP_VERSION));
+        if (defined('PHP_BUILD_PROVIDER') && str_contains(PHP_BUILD_PROVIDER, 'static-php-cli')) {
+            $io->write(sprintf('<info>You are running a PIE Static PHP %s build</info>', PHP_VERSION));
+        } else {
+            $io->write(sprintf('<info>You are running PHP %s</info>', PHP_VERSION));
+        }
+
         $io->write(sprintf(
             '<info>Target PHP installation:</info> %s %s%s, on %s %s (from %s)',
             $phpBinaryPath->version(),
