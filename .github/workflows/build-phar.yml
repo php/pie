@@ -37,7 +37,7 @@ jobs:
           coverage: none
           tools: composer, box
           php-version: "${{ matrix.php-version }}"
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       # Fixes `git describe` picking the wrong tag - see https://github.com/php/pie/issues/307

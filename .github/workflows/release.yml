@@ -25,7 +25,7 @@ jobs:
       # contents:write is required to create the draft release
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-tags: 'true'
           ref: ${{ github.ref }}
@@ -47,7 +47,7 @@ jobs:
       # contents:write is required to upload the binaries to the release.
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Fetch built PHAR from artifacts
         uses: actions/download-artifact@v6
         with:

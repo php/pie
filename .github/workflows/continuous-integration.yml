@@ -29,7 +29,7 @@ jobs:
           extensions: intl, sodium, zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: ramsey/composer-install@v3
       - name: GH token (non-Windows)
         if: matrix.operating-system != 'windows-latest'
@@ -118,7 +118,7 @@ jobs:
           make -j$(nproc)
           sudo make install
           cd $GITHUB_WORKSPACE
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Composer Install
         run: composer install --ignore-platform-reqs
       - name: Run bundled PHP install test
@@ -138,7 +138,7 @@ jobs:
           - '8.3'
           - '8.4'
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       # Fixes `git describe` picking the wrong tag - see https://github.com/php/pie/issues/307
@@ -165,7 +165,7 @@ jobs:
           extensions: intl, sodium, zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: ramsey/composer-install@v3
       - name: Run PHPCS
         run: vendor/bin/phpcs
@@ -180,7 +180,7 @@ jobs:
           extensions: intl, sodium, zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: ramsey/composer-install@v3
       - name: Validate the composer configuration
         run: composer validate --strict
