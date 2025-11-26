@@ -81,6 +81,7 @@ The following extensions have already added support for PIE:
 | rdkafka        | [rdkafka/rdkafka](https://packagist.org/packages/rdkafka/rdkafka)                                   |
 | readline       | php/readline                                                                                        |
 | redis          | [phpredis/phpredis](https://packagist.org/packages/phpredis/phpredis)                               |
+| relay          | [cachewerk/relay](https://packagist.org/packages/cachewerk/ext-relay)                               |
 | rpminfo        | [remi/rpminfo](https://packagist.org/packages/remi/rpminfo)                                         |
 | selinux        | [pecl/selinux](https://packagist.org/packages/pecl/selinux)                                         |
 | session        | php/session                                                                                         |
