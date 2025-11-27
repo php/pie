@@ -1,15 +1,21 @@
 #!/usr/bin/env bash
 
+# A little test build script for manually building a self-contained PIE executable
+# Note; needs `spc` pre-installed:
+# curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-linux-x86_64
+# chmod +x spc
+
 set -xeuo pipefail
 
 SPC_ROOT=$(dirname "$0")
+PIE_PROJECT_ROOT="$SPC_ROOT/../.."
 
 # First up, build the regular pie.phar
-cd "$SPC_ROOT/.."
+cd "$PIE_PROJECT_ROOT"
 php box.phar compile
 mv pie.phar "$SPC_ROOT/pie.phar"
 
-cd $SPC_ROOT
+cd "$SPC_ROOT"
 
 # Build the static PHP micro.sfx
 ./spc craft
