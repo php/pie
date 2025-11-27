@@ -135,7 +135,7 @@ EOF);
 
     private function mockAttestationResponse(string $digestInUrl, string $dsseEnvelopePayload, string $signature, string $pemCertificate): void
     {
-        $url = self::TEST_GITHUB_URL . '/orgs/php/attestations/sha256:' . $digestInUrl;
+        $url = self::TEST_GITHUB_URL . '/orgs/php/attestations/sha256:' . $digestInUrl . '?predicate_type=provenance';
         $this->httpDownloader->expects(self::once())
             ->method('get')
             ->with(
