@@ -76,10 +76,11 @@ jobs:
           - ubuntu-24.04-arm
           - macos-15-intel
           - macos-26
-          #- windows-2025 ## @todo bash script isn't going to work here
+          - windows-2025
     steps:
       - uses: actions/checkout@v6
-      - name: Download SPC
+      - name: Download SPC (non-Windows)
+        if: runner.os != 'Windows'
         run: |
           # @todo find a better way to do this :/
           # Source URL: https://static-php.dev/en/guide/manual-build.html#build-locally-using-spc-binary-recommended
@@ -100,34 +101,36 @@ jobs:
               curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-macos-aarch64
               ;;
 
-            windows-2025)
-              curl.exe -fsSL -o spc.exe https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-windows-x64.exe
-              ;;
-
             *)
               echo "unsupported operating system: ${{ matrix.operating-system }}"
               exit 1
               ;;
           esac
           chmod +x spc
+          echo "SPC_BINARY=./spc" >> $GITHUB_ENV
+          echo "PIE_BINARY_OUTPUT=pie" >> $GITHUB_ENV
+      - name: Download SPC (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          curl.exe -fsSL -o spc.exe https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-windows-x64.exe
+          chmod +x spc.exe
+          echo "SPC_BINARY=.\spc.exe" >> $env:GITHUB_ENV
+          echo "PIE_BINARY_OUTPUT=pie.exe" >> $env:GITHUB_ENV
       - name: Grab built pie.phar
         uses: actions/download-artifact@v5
         with:
           name: pie-${{ github.sha }}.phar
       - run: cp resources/spc/craft.yml craft.yml
-      - run: ls -l
       - run: echo "building for ${{ runner.os }}-${{ runner.arch }} on ${{ matrix.operating-system }}"
-      - run: ./spc craft
+      - run: ${{ env.SPC_BINARY }} craft
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # @todo call it `pie` or `pie.exe` depending on os
-      - run: ./spc micro:combine pie.phar --output=pie.bin
-      - run: ./pie.bin --version
+      - run: ${{ env.SPC_BINARY }} micro:combine pie.phar --output=${{ env.PIE_BINARY_OUTPUT }}
+      - run: ./${{ env.PIE_BINARY_OUTPUT }} --version
       - uses: actions/upload-artifact@v5
         with:
           name: pie-${{ github.sha }}-${{ runner.os }}-${{ runner.arch }}.bin
-          # @todo call it `pie` or `pie.exe` depending on os
-          path: pie.bin
+          path: ${{ env.PIE_BINARY_OUTPUT }}
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -135,4 +138,4 @@ jobs:
           coverage: none
           tools: composer
           php-version: "7.4"
-      - run: ./pie.bin show --all
+      - run: ./${{ env.PIE_BINARY_OUTPUT }} show --all
