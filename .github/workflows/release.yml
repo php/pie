@@ -52,19 +52,29 @@ jobs:
         uses: actions/download-artifact@v6
         with:
           name: pie-${{ github.sha }}.phar
-      - name: Verify the PHAR
+      - name: Fetch the executable PIEs from artifacts
+        uses: actions/download-artifact@v5
+        with:
+          path: executable-pie-binaries
+          pattern: pie-${{ github.sha }}-*.bin
+          merge-multiple: true
+      - name: Verify the PHAR and binaries
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh attestation verify pie.phar --repo ${{ github.repository }}
+        run: |
+          gh attestation verify pie.phar --repo ${{ github.repository }} ;
+          find executable-pie-binaries -type f -exec gh attestation verify {} --repo ${{ github.repository }} \;
       # Once the PHAR has been attached to the release, it is ready for review
       # before publishing it. Note that if immutable releases are enabled,
       # the tag, pre-release/latest release flag, and all assets become
       # immutable, so checking this over is a manual exercise.
       # More info: https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/immutable-releases
-      - name: Attach an asset to the draft release
+      - name: Attach the assets to the draft release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "${{ github.ref_name }}" "pie.phar" --clobber
+        run: |
+          gh release upload "${{ github.ref_name }}" "pie.phar" --clobber ;
+          find executable-pie-binaries -type f -exec gh release upload "${{ github.ref_name }}" {} --clobber \;
 
   build-and-push-docker-image:
     if: ${{ startsWith(github.ref, 'refs/tags/') }}
