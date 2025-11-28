@@ -77,8 +77,14 @@ jobs:
           - macos-15-intel
           - macos-26
           - windows-2025
+    permissions:
+      # id-token:write is required for build provenance attestation.
+      id-token: write
+      # attestations:write is required for build provenance attestation.
+      attestations: write
     steps:
       - uses: actions/checkout@v6
+
       - name: Download SPC (non-Windows)
         if: runner.os != 'Windows'
         run: |
@@ -108,29 +114,26 @@ jobs:
           esac
           chmod +x spc
           echo "SPC_BINARY=./spc" >> $GITHUB_ENV
-          echo "PIE_BINARY_OUTPUT=pie" >> $GITHUB_ENV
+          echo "PIE_BINARY_OUTPUT=pie-${{ runner.os }}-${{ runner.arch }}" >> $GITHUB_ENV
       - name: Download SPC (Windows)
         if: runner.os == 'Windows'
         run: |
           curl.exe -fsSL -o spc.exe https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-windows-x64.exe
           chmod +x spc.exe
           echo "SPC_BINARY=.\spc.exe" >> $env:GITHUB_ENV
-          echo "PIE_BINARY_OUTPUT=pie.exe" >> $env:GITHUB_ENV
-      - name: Grab built pie.phar
+          echo "PIE_BINARY_OUTPUT=pie-${{ runner.os }}-${{ runner.arch }}.exe" >> $env:GITHUB_ENV
+
+      - name: Grab the pie.phar from artifacts
         uses: actions/download-artifact@v5
         with:
           name: pie-${{ github.sha }}.phar
-      - run: cp resources/spc/craft.yml craft.yml
-      - run: echo "building for ${{ runner.os }}-${{ runner.arch }} on ${{ matrix.operating-system }}"
-      - run: ${{ env.SPC_BINARY }} craft
+
+      - name: Build for ${{ runner.os }} ${{ runner.arch }} on ${{ matrix.operating-system }}
+        run: ${{ env.SPC_BINARY }} craft resources/spc/craft.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: ${{ env.SPC_BINARY }} micro:combine pie.phar --output=${{ env.PIE_BINARY_OUTPUT }}
-      - run: ./${{ env.PIE_BINARY_OUTPUT }} --version
-      - uses: actions/upload-artifact@v5
-        with:
-          name: pie-${{ github.sha }}-${{ runner.os }}-${{ runner.arch }}.bin
-          path: ${{ env.PIE_BINARY_OUTPUT }}
+      - name: Bundle pie.phar into executable PIE binary
+        run: ${{ env.SPC_BINARY }} micro:combine pie.phar --output=${{ env.PIE_BINARY_OUTPUT }}
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -138,4 +141,21 @@ jobs:
           coverage: none
           tools: composer
           php-version: "7.4"
-      - run: ./${{ env.PIE_BINARY_OUTPUT }} show --all
+      - name: Quick validation that the binary runs
+        run: ./${{ env.PIE_BINARY_OUTPUT }} show --all
+
+      - name: Generate build provenance attestation
+        # It does not make sense to do this for PR builds, nor do contributors
+        # have permission to do. We can't write attestations to `php/pie` in an
+        # unprivileged context, otherwise anyone could send a PR with malicious
+        # code, which would store attestation that `php/pie` built the PHAR, and
+        # it would look genuine. So this should NOT run for PR builds.
+        if: github.event_name != 'pull_request'
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: '${{ github.workspace }}/${{ env.PIE_BINARY_OUTPUT }}'
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: pie-${{ github.sha }}-${{ runner.os }}-${{ runner.arch }}.bin
+          path: ${{ env.PIE_BINARY_OUTPUT }}
