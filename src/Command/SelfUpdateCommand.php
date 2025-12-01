@@ -82,7 +82,7 @@ final class SelfUpdateCommand extends Command
 
     public function execute(InputInterface $input, OutputInterface $output): int
     {
-        if (! PieVersion::isPharBuild()) {
+        if (! PieVersion::isPharBuild() || Platform::isRunningStaticPhp()) {
             $this->io->writeError('<comment>Aborting! You are not running a PHAR, cannot self-update.</comment>');
 
             return Command::FAILURE;

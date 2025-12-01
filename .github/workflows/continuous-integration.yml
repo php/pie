@@ -187,14 +187,14 @@ jobs:
       - name: Run phpstan
         run: vendor/bin/phpstan
 
-  build-phar:
+  build-assets:
     needs:
       - unit-tests
       - coding-standards
       - static-analysis
-    # See build-phar.yml for a list of the permissions and why they are needed
+    # See build-assets.yml for a list of the permissions and why they are needed
     permissions:
       contents: read
       id-token: write
       attestations: write
-    uses: ./.github/workflows/build-phar.yml
+    uses: ./.github/workflows/build-assets.yml
