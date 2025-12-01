@@ -2,7 +2,7 @@
 # in a way to pass those permissions on, e.g.:
 #
 #  build-and-push-docker-image:
-#    needs: build-phar
+#    needs: build-assets
 #    permissions:
 #      contents: read
 #      id-token: write
