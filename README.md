@@ -8,10 +8,12 @@ just like Composer, and works in a similar way to Composer, but it installs PHP
 extensions (PHP Modules or Zend Extensions) to your PHP installation, rather
 than pulling PHP packages into your project or library.
 
-## What do I need to get started?
+# Using PIE - what do I need to get started?
+
+## Prerequisites
 
 You will need PHP 8.1 or newer to run PIE, but PIE can install an extension to
-any installed PHP version.
+any other installed PHP version.
 
 On Linux, you will need a build toolchain installed. On Debian/Ubuntu type
 systems, you could run something like:
@@ -24,14 +26,7 @@ On Windows, you do not need any build toolchain installed, since PHP extensions
 for Windows are distributed as pre-compiled packages containing the extension
 DLL.
 
-## I'm an extension maintainer
-
-If you are an extension maintainer wanting to add PIE support to your extension,
-please read [extension-maintainers](./docs/extension-maintainers.md).
-
 ## Installing PIE
-
-### Manual installation
 
 - Download `pie.phar` either:
   - [latest stable release](https://github.com/php/pie/releases)
@@ -43,12 +38,7 @@ Further installation details can be found in the [usage](./docs/usage.md) docs.
 This documentation assumes you have moved `pie.phar` into your `$PATH`, e.g.
 `/usr/local/bin/pie` on non-Windows systems.
 
-## Extensions that support PIE
-
-A list of extensions that support PIE can be found on
-[https://packagist.org/extensions](https://packagist.org/extensions).
-
-## Installing an extension using PIE
+## Installing a single extension using PIE
 
 You can install an extension using the `install` command. For example, to
 install the `example_pie_extension` extension, you would run:
@@ -67,7 +57,7 @@ You must now add "extension=example_pie_extension" to your php.ini
 $
 ```
 
-## Installing all extensions for a project
+## Installing all extensions for a PHP project
 
 When in your PHP project, you can install any missing top-level extensions:
 
@@ -96,6 +86,24 @@ The following packages may be suitable, which would you like to install:
 
 Finished checking extensions.
 ```
+
+## Extensions that support PIE
+
+A list of extensions that support PIE can be found on
+[https://packagist.org/extensions](https://packagist.org/extensions).
+
+# I have a bug, feature idea, question, need help, etc.
+
+ - If you have an idea, question, or need help, please use the [Discussions](https://github.com/php/pie/discussions).
+   - **Please check with us first before contributing new features** - it may be
+     something we're already working on, as the PHP Foundation is actively
+     developing this too, and there are new features already in the pipeline...
+ - If you have a bug to report, please use the [Issues](https://github.com/php/pie/issues).
+
+# I'm an extension maintainer - how do I add PIE support?
+
+If you are an extension maintainer wanting to add PIE support to your extension,
+please read [extension-maintainers](./docs/extension-maintainers.md).
 
 ## More documentation...
 
