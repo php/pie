@@ -12,16 +12,16 @@ permissions:
   contents: read
 
 jobs:
-  build-phar:
-    # See build-phar.yml for a list of the permissions and why they are needed
+  build-assets:
+    # See build-assets.yml for a list of the permissions and why they are needed
     permissions:
       contents: read
       id-token: write
       attestations: write
-    uses: ./.github/workflows/build-phar.yml
+    uses: ./.github/workflows/build-assets.yml
 
   build-and-push-docker-image:
-    needs: build-phar
+    needs: build-assets
     # See build-and-push-docker-image.yml for a list of the permissions and why they are needed
     permissions:
       contents: read

@@ -197,7 +197,12 @@ final class CommandHelper
 
         $targetPlatform = TargetPlatform::fromPhpBinaryPath($phpBinaryPath, $makeParallelJobs);
 
-        $io->write(sprintf('<info>You are running PHP %s</info>', PHP_VERSION));
+        if (PiePlatform::isRunningStaticPhp()) {
+            $io->write(sprintf('<info>You are running a PIE Static PHP %s build</info>', PHP_VERSION));
+        } else {
+            $io->write(sprintf('<info>You are running PHP %s</info>', PHP_VERSION));
+        }
+
         $io->write(sprintf(
             '<info>Target PHP installation:</info> %s %s%s, on %s %s (from %s)',
             $phpBinaryPath->version(),
