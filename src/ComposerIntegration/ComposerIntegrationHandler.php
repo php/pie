@@ -9,6 +9,7 @@ use Composer\Filter\PlatformRequirementFilter\PlatformRequirementFilterFactory;
 use Composer\Installer;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
+use Php\Pie\ExtensionName;
 use Php\Pie\Platform;
 use Php\Pie\Platform\TargetPlatform;
 use Psr\Container\ContainerInterface;
@@ -22,8 +23,7 @@ class ComposerIntegrationHandler
         private readonly ContainerInterface $container,
         private readonly QuieterConsoleIO $arrayCollectionIo,
         private readonly VendorCleanup $vendorCleanup,
-    ) {
-    }
+    ) {}
 
     public function runInstall(
         Package $package,
@@ -53,7 +53,6 @@ class ComposerIntegrationHandler
         }
 
         // Write the new requirement to pie.json; because we later essentially just do a `composer install` using that file
-        $pieComposerJson        = Platform::getPieJsonFilename($targetPlatform);
         $pieJsonEditor          = PieJsonEditor::fromTargetPlatform($targetPlatform);
         $originalPieJsonContent = $pieJsonEditor->addRequire(
             $requestedPackageAndVersion->package,
@@ -68,33 +67,15 @@ class ComposerIntegrationHandler
             $composer->getRepositoryManager()->getLocalRepository()->removePackage($pkg);
         }
 
-        $composerInstaller = PieComposerInstaller::createWithPhpBinary(
-            $targetPlatform->phpBinaryPath,
+        $composerInstaller = $this->createConfiguredInstaller(
+            $targetPlatform,
             $package->extensionName(),
-            $this->arrayCollectionIo,
             $composer,
+            $requestedPackageAndVersion->package,
+            $forceInstallPackageVersion,
         );
-        $composerInstaller
-            ->setAllowedTypes(['php-ext', 'php-ext-zend'])
-            ->setInstall(true)
-            ->setIgnoredTypes([])
-            ->setDryRun(false)
-            ->setPlatformRequirementFilter(PlatformRequirementFilterFactory::fromBoolOrList($forceInstallPackageVersion))
-            ->setDownloadOnly(false);
 
-        if (file_exists(PieComposerFactory::getLockFile($pieComposerJson))) {
-            $composerInstaller->setUpdate(true);
-            $composerInstaller->setUpdateAllowList([$requestedPackageAndVersion->package]);
-        }
-
-        $resultCode = $composerInstaller->run();
-
-        if ($resultCode !== Installer::ERROR_NONE) {
-            // Revert composer.json change
-            $pieJsonEditor->revert($originalPieJsonContent);
-
-            throw ComposerRunFailed::fromExitCode($resultCode);
-        }
+        $this->executeComposerInstaller($composerInstaller, $pieJsonEditor, $originalPieJsonContent);
 
         if (! $runCleanup) {
             return;
@@ -110,19 +91,42 @@ class ComposerIntegrationHandler
         RequestedPackageAndVersion $requestedPackageAndVersionToRemove,
     ): void {
         // Write the new requirement to pie.json; because we later essentially just do a `composer install` using that file
-        $pieComposerJson        = Platform::getPieJsonFilename($targetPlatform);
         $pieJsonEditor          = PieJsonEditor::fromTargetPlatform($targetPlatform);
         $originalPieJsonContent = $pieJsonEditor->removeRequire($requestedPackageAndVersionToRemove->package);
 
         // Refresh the Composer instance so it re-reads the updated pie.json
         $composer = PieComposerFactory::recreatePieComposer($this->container, $composer);
 
+        $composerInstaller = $this->createConfiguredInstaller(
+            $targetPlatform,
+            $packageToRemove->extensionName(),
+            $composer,
+            $requestedPackageAndVersionToRemove->package,
+            false,
+        );
+
+        $this->executeComposerInstaller($composerInstaller, $pieJsonEditor, $originalPieJsonContent);
+    }
+
+    /**
+     * Creates and configures a PieComposerInstaller instance with common settings.
+     */
+    private function createConfiguredInstaller(
+        TargetPlatform $targetPlatform,
+        ExtensionName $extensionName,
+        Composer $composer,
+        string $packageName,
+        bool $forceInstallPackageVersion,
+    ): PieComposerInstaller {
+        $pieComposerJson = Platform::getPieJsonFilename($targetPlatform);
+
         $composerInstaller = PieComposerInstaller::createWithPhpBinary(
             $targetPlatform->phpBinaryPath,
-            $packageToRemove->extensionName(),
+            $extensionName,
             $this->arrayCollectionIo,
             $composer,
         );
+
         $composerInstaller
             ->setAllowedTypes(['php-ext', 'php-ext-zend'])
             ->setInstall(true)
@@ -130,11 +134,30 @@ class ComposerIntegrationHandler
             ->setDryRun(false)
             ->setDownloadOnly(false);
 
-        if (file_exists(PieComposerFactory::getLockFile($pieComposerJson))) {
-            $composerInstaller->setUpdate(true);
-            $composerInstaller->setUpdateAllowList([$requestedPackageAndVersionToRemove->package]);
+        if ($forceInstallPackageVersion) {
+            $composerInstaller->setPlatformRequirementFilter(
+                PlatformRequirementFilterFactory::fromBoolOrList(true),
+            );
         }
 
+        if (file_exists(PieComposerFactory::getLockFile($pieComposerJson))) {
+            $composerInstaller->setUpdate(true);
+            $composerInstaller->setUpdateAllowList([$packageName]);
+        }
+
+        return $composerInstaller;
+    }
+
+    /**
+     * Executes the Composer installer and handles errors with automatic revert.
+     *
+     * @throws ComposerRunFailed
+     */
+    private function executeComposerInstaller(
+        PieComposerInstaller $composerInstaller,
+        PieJsonEditor $pieJsonEditor,
+        string $originalPieJsonContent,
+    ): void {
         $resultCode = $composerInstaller->run();
 
         if ($resultCode !== Installer::ERROR_NONE) {
