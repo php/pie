@@ -49,7 +49,7 @@ final class CommandHelperTest extends TestCase
         ];
 
         return array_combine(
-            array_map(static fn(array $data) => $data[0], $packages),
+            array_map(static fn (array $data) => $data[0], $packages),
             $packages,
         );
     }

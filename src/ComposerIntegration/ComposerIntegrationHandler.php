@@ -23,7 +23,8 @@ class ComposerIntegrationHandler
         private readonly ContainerInterface $container,
         private readonly QuieterConsoleIO $arrayCollectionIo,
         private readonly VendorCleanup $vendorCleanup,
-    ) {}
+    ) {
+    }
 
     public function runInstall(
         Package $package,

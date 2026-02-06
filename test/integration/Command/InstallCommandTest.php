@@ -58,13 +58,13 @@ class InstallCommandTest extends TestCase
                 '/usr/bin/php-config8.0',
                 '/usr/bin/php-config7.4',
             ],
-            static fn(string $phpConfigPath) => file_exists($phpConfigPath)
+            static fn (string $phpConfigPath) => file_exists($phpConfigPath)
                 && is_executable($phpConfigPath),
         );
 
         return array_combine(
             $possiblePhpConfigPaths,
-            array_map(static fn(string $phpConfigPath) => [$phpConfigPath], $possiblePhpConfigPaths),
+            array_map(static fn (string $phpConfigPath) => [$phpConfigPath], $possiblePhpConfigPaths),
         );
     }
 

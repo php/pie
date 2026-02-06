@@ -64,7 +64,9 @@ final class CommandHelper
     private const OPTION_AUTO_INSTALL_BUILD_TOOLS             = 'auto-install-build-tools';
     private const OPTION_SUPPRESS_BUILD_TOOLS_CHECK           = 'no-build-tools-check';
 
-    private function __construct() {}
+    private function __construct()
+    {
+    }
 
     public static function configurePhpConfigOptions(Command $command): void
     {
@@ -282,11 +284,11 @@ final class CommandHelper
 
         if (! is_array($requestedPackages)) {
             // 兼容单个字符串的情况（向后兼容）
-            if (is_string($requestedPackages) && $requestedPackages !== '') {
-                $requestedPackages = [$requestedPackages];
-            } else {
+            if (! is_string($requestedPackages) || $requestedPackages === '') {
                 throw new InvalidArgumentException('No package was requested for installation');
             }
+
+            $requestedPackages = [$requestedPackages];
         }
 
         if (count($requestedPackages) === 0) {
