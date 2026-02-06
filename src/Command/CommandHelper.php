@@ -64,9 +64,7 @@ final class CommandHelper
     private const OPTION_AUTO_INSTALL_BUILD_TOOLS             = 'auto-install-build-tools';
     private const OPTION_SUPPRESS_BUILD_TOOLS_CHECK           = 'no-build-tools-check';
 
-    private function __construct()
-    {
-    }
+    private function __construct() {}
 
     public static function configurePhpConfigOptions(Command $command): void
     {
@@ -202,7 +200,8 @@ final class CommandHelper
             $phpBinaryPath = PhpBinaryPath::fromPhpBinaryPath($withPhpPath);
         }
 
-        $makeParallelJobs = null; /** `null` means {@see TargetPlatform} will try to auto-detect */
+        $makeParallelJobs = null;
+        /** `null` means {@see TargetPlatform} will try to auto-detect */
         if ($input->hasOption(self::OPTION_MAKE_PARALLEL_JOBS)) {
             $makeParallelJobsOptions = (int) $input->getOption(self::OPTION_MAKE_PARALLEL_JOBS);
             if ($makeParallelJobsOptions > 0) {
@@ -276,33 +275,65 @@ final class CommandHelper
         return null;
     }
 
-    public static function requestedNameAndVersionPair(InputInterface $input): RequestedPackageAndVersion
+    /** @return list<RequestedPackageAndVersion> */
+    public static function requestedNameAndVersionPairs(InputInterface $input): array
     {
-        $requestedPackageString = $input->getArgument(self::ARG_REQUESTED_PACKAGE_AND_VERSION);
+        $requestedPackages = $input->getArgument(self::ARG_REQUESTED_PACKAGE_AND_VERSION);
 
-        if (! is_string($requestedPackageString) || $requestedPackageString === '') {
+        if (! is_array($requestedPackages)) {
+            // 兼容单个字符串的情况（向后兼容）
+            if (is_string($requestedPackages) && $requestedPackages !== '') {
+                $requestedPackages = [$requestedPackages];
+            } else {
+                throw new InvalidArgumentException('No package was requested for installation');
+            }
+        }
+
+        if (count($requestedPackages) === 0) {
             throw new InvalidArgumentException('No package was requested for installation');
         }
 
-        $nameAndVersionPairs         = (new VersionParser())
-            ->parseNameVersionPairs([$requestedPackageString]);
-        $requestedNameAndVersionPair = reset($nameAndVersionPairs);
+        $versionParser = new VersionParser();
+        $results       = [];
 
-        if (! is_array($requestedNameAndVersionPair)) {
-            throw new InvalidArgumentException('Failed to parse the name/version pair');
+        foreach ($requestedPackages as $requestedPackageString) {
+            if (! is_string($requestedPackageString) || $requestedPackageString === '') {
+                continue;
+            }
+
+            $nameAndVersionPairs         = $versionParser->parseNameVersionPairs([$requestedPackageString]);
+            $requestedNameAndVersionPair = reset($nameAndVersionPairs);
+
+            if (! is_array($requestedNameAndVersionPair)) {
+                throw new InvalidArgumentException('Failed to parse the name/version pair: ' . $requestedPackageString);
+            }
+
+            if (! array_key_exists('version', $requestedNameAndVersionPair)) {
+                $requestedNameAndVersionPair['version'] = null;
+            }
+
+            Assert::stringNotEmpty($requestedNameAndVersionPair['name']);
+            Assert::nullOrStringNotEmpty($requestedNameAndVersionPair['version']);
+
+            $results[] = new RequestedPackageAndVersion(
+                $requestedNameAndVersionPair['name'],
+                $requestedNameAndVersionPair['version'],
+            );
         }
 
-        if (! array_key_exists('version', $requestedNameAndVersionPair)) {
-            $requestedNameAndVersionPair['version'] = null;
+        return $results;
+    }
+
+    public static function requestedNameAndVersionPair(InputInterface $input): RequestedPackageAndVersion
+    {
+        $pairs = self::requestedNameAndVersionPairs($input);
+
+        if (count($pairs) === 0) {
+            throw new InvalidArgumentException('No package was requested for installation');
         }
 
-        Assert::stringNotEmpty($requestedNameAndVersionPair['name']);
-        Assert::nullOrStringNotEmpty($requestedNameAndVersionPair['version']);
-
-        return new RequestedPackageAndVersion(
-            $requestedNameAndVersionPair['name'],
-            $requestedNameAndVersionPair['version'],
-        );
+        // 如果传入多个，只返回第一个（向后兼容单包逻辑）
+        return $pairs[0];
     }
 
     public static function bindConfigureOptionsFromPackage(Command $command, Package $package, InputInterface $input): void

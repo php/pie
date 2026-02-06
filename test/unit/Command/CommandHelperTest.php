@@ -49,7 +49,7 @@ final class CommandHelperTest extends TestCase
         ];
 
         return array_combine(
-            array_map(static fn (array $data) => $data[0], $packages),
+            array_map(static fn(array $data) => $data[0], $packages),
             $packages,
         );
     }
@@ -86,6 +86,81 @@ final class CommandHelperTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('No package was requested for installation');
         CommandHelper::requestedNameAndVersionPair($input);
+    }
+
+    public function testRequestedNameAndVersionPairsWithMultiplePackages(): void
+    {
+        $input = $this->createMock(InputInterface::class);
+
+        $input->expects(self::once())
+            ->method('getArgument')
+            ->with('requested-package-and-version')
+            ->willReturn(['php/ext1', 'php/ext2:^1.0', 'php/ext3:@alpha']);
+
+        $result = CommandHelper::requestedNameAndVersionPairs($input);
+
+        self::assertCount(3, $result);
+        self::assertEquals(new RequestedPackageAndVersion('php/ext1', null), $result[0]);
+        self::assertEquals(new RequestedPackageAndVersion('php/ext2', '^1.0'), $result[1]);
+        self::assertEquals(new RequestedPackageAndVersion('php/ext3', '@alpha'), $result[2]);
+    }
+
+    public function testRequestedNameAndVersionPairsWithSinglePackage(): void
+    {
+        $input = $this->createMock(InputInterface::class);
+
+        $input->expects(self::once())
+            ->method('getArgument')
+            ->with('requested-package-and-version')
+            ->willReturn(['php/ext1:^2.0']);
+
+        $result = CommandHelper::requestedNameAndVersionPairs($input);
+
+        self::assertCount(1, $result);
+        self::assertEquals(new RequestedPackageAndVersion('php/ext1', '^2.0'), $result[0]);
+    }
+
+    public function testRequestedNameAndVersionPairsBackwardsCompatibleWithString(): void
+    {
+        $input = $this->createMock(InputInterface::class);
+
+        $input->expects(self::once())
+            ->method('getArgument')
+            ->with('requested-package-and-version')
+            ->willReturn('php/ext1:^1.0');
+
+        $result = CommandHelper::requestedNameAndVersionPairs($input);
+
+        self::assertCount(1, $result);
+        self::assertEquals(new RequestedPackageAndVersion('php/ext1', '^1.0'), $result[0]);
+    }
+
+    public function testRequestedNameAndVersionPairsThrowsExceptionWhenEmpty(): void
+    {
+        $input = $this->createMock(InputInterface::class);
+
+        $input->expects(self::once())
+            ->method('getArgument')
+            ->with('requested-package-and-version')
+            ->willReturn([]);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('No package was requested for installation');
+        CommandHelper::requestedNameAndVersionPairs($input);
+    }
+
+    public function testRequestedNameAndVersionPairUsesFirstFromMultiple(): void
+    {
+        $input = $this->createMock(InputInterface::class);
+
+        $input->expects(self::once())
+            ->method('getArgument')
+            ->with('requested-package-and-version')
+            ->willReturn(['php/ext1', 'php/ext2']);
+
+        $result = CommandHelper::requestedNameAndVersionPair($input);
+
+        self::assertEquals(new RequestedPackageAndVersion('php/ext1', null), $result);
     }
 
     public function testBindingConfigurationOptionsFromPackage(): void
