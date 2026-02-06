@@ -64,7 +64,9 @@ final class CommandHelper
     private const OPTION_AUTO_INSTALL_BUILD_TOOLS             = 'auto-install-build-tools';
     private const OPTION_SUPPRESS_BUILD_TOOLS_CHECK           = 'no-build-tools-check';
 
-    private function __construct() {}
+    private function __construct()
+    {
+    }
 
     public static function configurePhpConfigOptions(Command $command): void
     {
