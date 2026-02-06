@@ -65,7 +65,7 @@ final class ShowCommandTest extends TestCase
 
         $installCommand = new CommandTester(Container::testFactory()->get(InstallCommand::class));
         $installCommand->execute([
-            'requested-package-and-version' => self::TEST_PACKAGE . ':2.0.2',
+            'requested-package-and-version' => [self::TEST_PACKAGE . ':2.0.2'],
             '--with-php-config' => $phpConfig,
         ]);
         $installCommand->assertCommandIsSuccessful();
@@ -112,7 +112,7 @@ final class ShowCommandTest extends TestCase
 
         $installCommand = new CommandTester(Container::testFactory()->get(InstallCommand::class));
         $installCommand->execute([
-            'requested-package-and-version' => self::TEST_PACKAGE . ':2.0.2',
+            'requested-package-and-version' => [self::TEST_PACKAGE . ':2.0.2'],
             '--with-php-config' => $phpConfig,
         ]);
         $installCommand->assertCommandIsSuccessful();
@@ -159,7 +159,7 @@ final class ShowCommandTest extends TestCase
 
         $installCommand = new CommandTester(Container::testFactory()->get(InstallCommand::class));
         $installCommand->execute([
-            'requested-package-and-version' => self::TEST_PACKAGE . ':2.0.2',
+            'requested-package-and-version' => [self::TEST_PACKAGE . ':2.0.2'],
             '--with-php-config' => $phpConfig,
         ]);
         $installCommand->assertCommandIsSuccessful();

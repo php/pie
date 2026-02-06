@@ -78,7 +78,7 @@ final class InstallCommand extends Command
 
         $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $this->io);
 
-        // 解析所有待安装的包
+        // Parse all packages to install
         try {
             $requestedPackagesList = CommandHelper::requestedNameAndVersionPairs($input);
         } catch (InvalidPackageName $invalidPackageName) {
@@ -105,7 +105,7 @@ final class InstallCommand extends Command
 
         $totalPackages = count($requestedPackagesList);
 
-        // 如果只有一个包，使用原有的详细输出模式
+        // If only one package, use the original detailed output mode
         if ($totalPackages === 1) {
             return $this->installSinglePackage(
                 $requestedPackagesList[0],
@@ -116,7 +116,7 @@ final class InstallCommand extends Command
             );
         }
 
-        // 多包安装模式
+        // Multiple packages installation mode
         $this->io->write(sprintf(
             '<info>Installing %d extensions...</info>',
             $totalPackages,
@@ -183,7 +183,7 @@ final class InstallCommand extends Command
             $this->io->write('');
         }
 
-        // 输出总结
+        // Output summary
         $this->io->write('<info>=====================================</info>');
         $this->io->write(sprintf(
             '<info>Installation Summary:</info> %d succeeded, %d failed out of %d total',
@@ -205,7 +205,7 @@ final class InstallCommand extends Command
     }
 
     /**
-     * 安装单个扩展包
+     * Install a single extension package
      *
      * @throws UnableToResolveRequirement
      * @throws BundledPhpExtensionRefusal
@@ -256,7 +256,7 @@ final class InstallCommand extends Command
             );
         }
 
-        // 验证配置选项
+        // Validate configure options
         CommandHelper::bindConfigureOptionsFromPackage($this, $package, $input);
         $configureOptionsValues = CommandHelper::processConfigureOptionsFromInput($package, $input);
 
