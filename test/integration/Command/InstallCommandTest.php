@@ -58,13 +58,13 @@ class InstallCommandTest extends TestCase
                 '/usr/bin/php-config8.0',
                 '/usr/bin/php-config7.4',
             ],
-            static fn (string $phpConfigPath) => file_exists($phpConfigPath)
+            static fn(string $phpConfigPath) => file_exists($phpConfigPath)
                 && is_executable($phpConfigPath),
         );
 
         return array_combine(
             $possiblePhpConfigPaths,
-            array_map(static fn (string $phpConfigPath) => [$phpConfigPath], $possiblePhpConfigPaths),
+            array_map(static fn(string $phpConfigPath) => [$phpConfigPath], $possiblePhpConfigPaths),
         );
     }
 
@@ -77,7 +77,7 @@ class InstallCommandTest extends TestCase
 
         $this->commandTester->execute(
             [
-                'requested-package-and-version' => self::TEST_PACKAGE,
+                'requested-package-and-version' => [self::TEST_PACKAGE],
                 '--with-php-config' => $phpConfigPath,
                 '--skip-enable-extension' => true,
             ],
@@ -114,7 +114,7 @@ class InstallCommandTest extends TestCase
     public function testInstallCommandWillInstallCompatibleExtensionWindows(): void
     {
         $this->commandTester->execute([
-            'requested-package-and-version' => self::TEST_PACKAGE,
+            'requested-package-and-version' => [self::TEST_PACKAGE],
             '--skip-enable-extension' => true,
         ]);
 
