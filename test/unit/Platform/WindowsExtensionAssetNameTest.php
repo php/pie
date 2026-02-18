@@ -119,7 +119,7 @@ final class WindowsExtensionAssetNameTest extends TestCase
 
         $names = WindowsExtensionAssetName::zipNames($x86Platform, $this->package);
 
-        // x86 has the same enum name and windowsName(), so no arch duplicates
+        // x86 has only one name in allNames(), so no arch duplicates
         self::assertSame(
             [
                 'php_foo-1.2.3-' . $this->phpVersion . '-ts-vc14-x86.zip',
