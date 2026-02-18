@@ -9,8 +9,11 @@ use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\Downloading\Exception\CouldNotFindReleaseAsset;
 use RuntimeException;
 
+use function array_unique;
+use function array_values;
 use function file_exists;
 use function implode;
+use function ltrim;
 use function sprintf;
 use function strtolower;
 
@@ -31,29 +34,48 @@ final class WindowsExtensionAssetName
         /**
          * During development, we swapped compiler/ts around. It is fairly trivial to support both, so we can check
          * both formats pretty easily, just to avoid confusion for package maintainers...
+         *
+         * Additionally, some distributions (notably downloads.php.net) use the shorter Windows architecture
+         * label "x64" instead of "x86_64", and version strings without the "v" prefix (e.g. "5.1.28" instead
+         * of "v5.1.28"). We generate variants covering all combinations to match either convention.
          */
-        return [
-            strtolower(sprintf(
-                'php_%s-%s-%s-%s-%s-%s.%s',
-                $package->extensionName()->name(),
-                $package->version(),
-                $targetPlatform->phpBinaryPath->majorMinorVersion(),
-                $targetPlatform->threadSafety->asShort(),
-                strtolower($targetPlatform->windowsCompiler->name),
-                $targetPlatform->architecture->name,
-                $fileExtension,
-            )),
-            strtolower(sprintf(
-                'php_%s-%s-%s-%s-%s-%s.%s',
-                $package->extensionName()->name(),
-                $package->version(),
-                $targetPlatform->phpBinaryPath->majorMinorVersion(),
-                strtolower($targetPlatform->windowsCompiler->name),
-                $targetPlatform->threadSafety->asShort(),
-                $targetPlatform->architecture->name,
-                $fileExtension,
-            )),
-        ];
+        $version       = $package->version();
+        $versionNoV    = ltrim($version, 'vV');
+        $versions      = array_unique([$version, $versionNoV]);
+        $architectures = array_unique([
+            $targetPlatform->architecture->name,
+            $targetPlatform->architecture->windowsName(),
+        ]);
+
+        $names = [];
+        foreach ($versions as $ver) {
+            foreach ($architectures as $arch) {
+                // Format: {ts}-{compiler} (e.g. ts-vs17)
+                $names[] = strtolower(sprintf(
+                    'php_%s-%s-%s-%s-%s-%s.%s',
+                    $package->extensionName()->name(),
+                    $ver,
+                    $targetPlatform->phpBinaryPath->majorMinorVersion(),
+                    $targetPlatform->threadSafety->asShort(),
+                    strtolower($targetPlatform->windowsCompiler->name),
+                    $arch,
+                    $fileExtension,
+                ));
+                // Format: {compiler}-{ts} (e.g. vs17-ts) — legacy/swapped ordering
+                $names[] = strtolower(sprintf(
+                    'php_%s-%s-%s-%s-%s-%s.%s',
+                    $package->extensionName()->name(),
+                    $ver,
+                    $targetPlatform->phpBinaryPath->majorMinorVersion(),
+                    strtolower($targetPlatform->windowsCompiler->name),
+                    $targetPlatform->threadSafety->asShort(),
+                    $arch,
+                    $fileExtension,
+                ));
+            }
+        }
+
+        return array_values(array_unique($names));
     }
 
     /** @return non-empty-list<non-empty-string> */
@@ -78,6 +100,16 @@ final class WindowsExtensionAssetName
                 return $fullDllName;
             }
         }
+
+        // Zips from downloads.php.net use a simple naming convention (e.g. "php_apcu.dll")
+        // without version/platform suffixes, so check for that as a fallback.
+        $simpleDllName     = 'php_' . $package->package->extensionName()->name() . '.dll';
+        $fullSimpleDllName = $package->extractedSourcePath . '/' . $simpleDllName;
+        if (file_exists($fullSimpleDllName)) {
+            return $fullSimpleDllName;
+        }
+
+        $possibleDllNames[] = $simpleDllName;
 
         throw new RuntimeException('Unable to find DLL for package, checked: ' . implode(', ', $possibleDllNames));
     }
