@@ -35,17 +35,14 @@ final class WindowsExtensionAssetName
          * During development, we swapped compiler/ts around. It is fairly trivial to support both, so we can check
          * both formats pretty easily, just to avoid confusion for package maintainers...
          *
-         * Additionally, some distributions (notably downloads.php.net) use the shorter Windows architecture
-         * label "x64" instead of "x86_64", and version strings without the "v" prefix (e.g. "5.1.28" instead
+         * Additionally, some distributions (notably downloads.php.net) use alternative architecture labels
+         * (e.g. "x64" instead of "x86_64"), and version strings without the "v" prefix (e.g. "5.1.28" instead
          * of "v5.1.28"). We generate variants covering all combinations to match either convention.
          */
         $version       = $package->version();
         $versionNoV    = ltrim($version, 'vV');
         $versions      = array_unique([$version, $versionNoV]);
-        $architectures = array_unique([
-            $targetPlatform->architecture->name,
-            $targetPlatform->architecture->windowsName(),
-        ]);
+        $architectures = $targetPlatform->architecture->allNames();
 
         $names = [];
         foreach ($versions as $ver) {
