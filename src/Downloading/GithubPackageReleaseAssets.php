@@ -12,6 +12,7 @@ use Webmozart\Assert\Assert;
 
 use function array_map;
 use function in_array;
+use function ltrim;
 use function strtolower;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
@@ -34,15 +35,28 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
         DownloadUrlMethod $downloadUrlMethod,
         array $possibleReleaseAssetNames,
     ): string {
-        $releaseAsset = $this->selectMatchingReleaseAsset(
-            $targetPlatform,
-            $package,
-            $this->getReleaseAssetsForPackage($package, $httpDownloader, $downloadUrlMethod),
-            $downloadUrlMethod,
-            $possibleReleaseAssetNames,
-        );
+        try {
+            $releaseAsset = $this->selectMatchingReleaseAsset(
+                $targetPlatform,
+                $package,
+                $this->getReleaseAssetsForPackage($package, $httpDownloader, $downloadUrlMethod),
+                $downloadUrlMethod,
+                $possibleReleaseAssetNames,
+            );
 
-        return $releaseAsset['browser_download_url'];
+            return $releaseAsset['browser_download_url'];
+        } catch (Exception\CouldNotFindReleaseAsset $githubException) {
+            // GitHub release had no matching asset — try downloads.php.net as a fallback
+            // for Windows binaries, since many PECL extensions publish prebuilt DLLs there.
+            if ($downloadUrlMethod === DownloadUrlMethod::WindowsBinaryDownload) {
+                $fallbackUrl = $this->tryPhpNetWindowsDownload($package, $httpDownloader, $possibleReleaseAssetNames);
+                if ($fallbackUrl !== null) {
+                    return $fallbackUrl;
+                }
+            }
+
+            throw $githubException;
+        }
     }
 
     /** @link https://github.com/squizlabs/PHP_CodeSniffer/issues/3734 */
@@ -113,5 +127,45 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
             },
             $decodedResponse['assets'],
         );
+    }
+
+    /**
+     * Fallback: attempt to find a prebuilt Windows extension archive on
+     * downloads.php.net, which hosts PECL binaries that may not be attached
+     * to GitHub releases.
+     *
+     * URL pattern: https://downloads.php.net/~windows/pecl/releases/{ext}/{version}/{asset}
+     *
+     * @param non-empty-list<non-empty-string> $possibleReleaseAssetNames
+     *
+     * @return non-empty-string|null
+     */
+    private function tryPhpNetWindowsDownload(
+        Package $package,
+        HttpDownloader $httpDownloader,
+        array $possibleReleaseAssetNames,
+    ): string|null {
+        $extName         = $package->extensionName()->name();
+        $versionWithoutV = ltrim($package->version(), 'vV');
+
+        foreach ($possibleReleaseAssetNames as $assetName) {
+            $url = 'https://downloads.php.net/~windows/pecl/releases/'
+                . $extName . '/' . $versionWithoutV . '/' . $assetName;
+
+            try {
+                $response = $httpDownloader->get($url, [
+                    'http' => ['method' => 'HEAD'],
+                ]);
+
+                if ($response->getStatusCode() === 200) {
+                    return $url;
+                }
+            } catch (TransportException) {
+                // Asset not found at this URL, try next variant
+                continue;
+            }
+        }
+
+        return null;
     }
 }

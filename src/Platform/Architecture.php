@@ -24,4 +24,20 @@ enum Architecture
             default => self::x86,
         };
     }
+
+    /**
+     * Returns the conventional Windows architecture label, which may differ
+     * from the PHP enum case name (e.g. "x64" instead of "x86_64").
+     * Used when matching asset filenames from sources like downloads.php.net.
+     *
+     * @return non-empty-string
+     */
+    public function windowsName(): string
+    {
+        return match ($this) {
+            self::x86_64 => 'x64',
+            self::arm64 => 'arm64',
+            self::x86 => 'x86',
+        };
+    }
 }
