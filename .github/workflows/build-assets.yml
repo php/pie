@@ -169,6 +169,8 @@ jobs:
           # Clean and rebuild
           & "$env:GITHUB_WORKSPACE\php-sdk-binary-tools\phpsdk-vs17-x64.bat" -t nmake_clean_wrapper.bat --task-args "clean"
           & "$env:GITHUB_WORKSPACE\php-sdk-binary-tools\phpsdk-vs17-x64.bat" -t nmake_micro_wrapper.bat --task-args micro
+          # Copy micro.sfx to where SPC expects it
+          Copy-Item "x64\Release\micro.sfx" "$env:GITHUB_WORKSPACE\buildroot\bin\micro.sfx" -Force
           Pop-Location
       - name: Bundle pie.phar into executable PIE binary
         run: ${{ env.SPC_BINARY }} micro:combine pie.phar --output=${{ env.PIE_BINARY_OUTPUT }}
