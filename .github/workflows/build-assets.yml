@@ -129,9 +129,41 @@ jobs:
           name: pie-${{ github.sha }}.phar
 
       - name: Build for ${{ runner.os }} ${{ runner.arch }} on ${{ matrix.operating-system }}
+        if: runner.os != 'Windows'
         run: ${{ env.SPC_BINARY }} craft resources/spc/craft.yml --debug
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build for Windows (initial attempt, may fail due to zlib)
+        if: runner.os == 'Windows'
+        continue-on-error: true
+        run: ${{ env.SPC_BINARY }} craft resources/spc/craft.yml --debug
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "Workaround: fix zlib 1.3.2 library naming on Windows"
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          # zlib 1.3.2 changed cmake output file names:
+          #   zlibstatic.lib -> zs.lib, zlib.lib -> z.lib, zlib.dll -> z.dll
+          # SPC expects the old names, so the static lib never gets placed correctly.
+          if (Test-Path "buildroot\lib\zs.lib") {
+            Write-Host "Renaming zlib artifacts to expected names..."
+            Copy-Item "buildroot\lib\zs.lib" "buildroot\lib\zlibstatic.lib" -Force
+            Remove-Item "buildroot\bin\z.dll" -Force -ErrorAction SilentlyContinue
+            Remove-Item "buildroot\lib\z.lib" -Force -ErrorAction SilentlyContinue
+          } else {
+            Write-Host "zs.lib not found, skipping workaround"
+          }
+
+      - name: "Retry nmake micro after zlib fix (Windows)"
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Push-Location source\php-src
+          & "$env:GITHUB_WORKSPACE\php-sdk-binary-tools\phpsdk-vs17-x64.bat" -t nmake_micro_wrapper.bat --task-args micro
+          Pop-Location
       - name: Bundle pie.phar into executable PIE binary
         run: ${{ env.SPC_BINARY }} micro:combine pie.phar --output=${{ env.PIE_BINARY_OUTPUT }}
 
