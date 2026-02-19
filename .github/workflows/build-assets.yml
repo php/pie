@@ -129,9 +129,50 @@ jobs:
           name: pie-${{ github.sha }}.phar
 
       - name: Build for ${{ runner.os }} ${{ runner.arch }} on ${{ matrix.operating-system }}
+        if: runner.os != 'Windows'
         run: ${{ env.SPC_BINARY }} craft resources/spc/craft.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build for ${{ runner.os }} ${{ runner.arch }} on ${{ matrix.operating-system }}
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          # Run craft — may fail at link time due to zlib 1.3.2 renaming its output files.
+          # See workaround below. Exit 0 so the workflow continues either way.
+          & ${{ env.SPC_BINARY }} craft resources/spc/craft.yml
+          $script:craftExitCode = $LASTEXITCODE
+          if ($script:craftExitCode -ne 0) {
+            Write-Host "::warning::craft exited with code $script:craftExitCode, will attempt zlib workaround"
+          }
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Workaround: zlib 1.3.2 changed cmake output file names on Windows
+      # (zlibstatic.lib -> zs.lib, zlib.lib -> z.lib, zlib.dll -> z.dll).
+      # SPC and PHP configure expect the old names, so zlib never gets linked.
+      # This can be removed once static-php-cli updates their zlib builder.
+      # Tracking: https://github.com/crazywhalecc/static-php-cli/issues/1039
+      - name: "Workaround: fix zlib 1.3.2 library naming (Windows)"
+        if: runner.os == 'Windows' && hashFiles('buildroot/lib/zs.lib') != ''
+        shell: pwsh
+        run: |
+          Write-Host "Renaming zlib artifacts to expected names..."
+          Copy-Item "buildroot\lib\zs.lib" "buildroot\lib\zlibstatic.lib" -Force
+          Copy-Item "buildroot\lib\zs.lib" "buildroot\lib\zlib_a.lib" -Force
+          Remove-Item "buildroot\bin\z.dll" -Force -ErrorAction SilentlyContinue
+          Remove-Item "buildroot\lib\z.lib" -Force -ErrorAction SilentlyContinue
+
+      - name: "Workaround: rebuild with zlib fix (Windows)"
+        if: runner.os == 'Windows' && hashFiles('buildroot/lib/zs.lib') != ''
+        shell: pwsh
+        run: |
+          Push-Location source\php-src
+          & "$env:GITHUB_WORKSPACE\php-sdk-binary-tools\phpsdk-vs17-x64.bat" -t configure.bat --task-args "--disable-all --with-php-build=$env:GITHUB_WORKSPACE\buildroot --with-extra-includes=$env:GITHUB_WORKSPACE\buildroot\include --with-extra-libs=$env:GITHUB_WORKSPACE\buildroot\lib --disable-cli --enable-micro --disable-embed --disable-cgi --enable-opcache-jit=yes --enable-zlib --with-openssl --with-openssl-argon2 --with-curl --enable-filter --with-iconv --enable-phar --enable-zts=no"
+          & "$env:GITHUB_WORKSPACE\php-sdk-binary-tools\phpsdk-vs17-x64.bat" -t nmake_clean_wrapper.bat --task-args "clean"
+          & "$env:GITHUB_WORKSPACE\php-sdk-binary-tools\phpsdk-vs17-x64.bat" -t nmake_micro_wrapper.bat --task-args micro
+          Copy-Item "x64\Release\micro.sfx" "$env:GITHUB_WORKSPACE\buildroot\bin\micro.sfx" -Force
+          Pop-Location
       - name: Bundle pie.phar into executable PIE binary
         run: ${{ env.SPC_BINARY }} micro:combine pie.phar --output=${{ env.PIE_BINARY_OUTPUT }}
 
