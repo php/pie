@@ -129,7 +129,7 @@ jobs:
           name: pie-${{ github.sha }}.phar
 
       - name: Build for ${{ runner.os }} ${{ runner.arch }} on ${{ matrix.operating-system }}
-        run: ${{ env.SPC_BINARY }} craft resources/spc/craft.yml
+        run: ${{ env.SPC_BINARY }} craft resources/spc/craft.yml --debug
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Bundle pie.phar into executable PIE binary
