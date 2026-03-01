@@ -124,7 +124,7 @@ jobs:
           echo "PIE_BINARY_OUTPUT=pie-${{ runner.os }}-${{ runner.arch }}.exe" >> $env:GITHUB_ENV
 
       - name: Grab the pie.phar from artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: pie-${{ github.sha }}.phar
 

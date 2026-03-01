@@ -37,11 +37,11 @@ jobs:
       - name: Build documentation
         run: .github/docs/build-docs.sh
       - name: Fetch built PHAR from artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: pie-${{ github.sha }}.phar
       - name: Fetch the executable PIEs from artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           path: executable-pie-binaries
           pattern: pie-${{ github.sha }}-*.bin
