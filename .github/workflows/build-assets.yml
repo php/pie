@@ -59,7 +59,7 @@ jobs:
         uses: actions/attest-build-provenance@v3
         with:
           subject-path: '${{ github.workspace }}/pie.phar'
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: pie-${{ github.sha }}.phar
           path: pie.phar
@@ -155,7 +155,7 @@ jobs:
         with:
           subject-path: '${{ github.workspace }}/${{ env.PIE_BINARY_OUTPUT }}'
 
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: pie-${{ github.sha }}-${{ runner.os }}-${{ runner.arch }}.bin
           path: ${{ env.PIE_BINARY_OUTPUT }}
