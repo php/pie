@@ -62,11 +62,11 @@ RUN --mount=type=bind,from=ghcr.io/php/pie:bin,source=/pie,target=/usr/local/bin
     apt-get update; \
     apt-get install -y --no-install-recommends unzip; \
     # Use PIE to install an extension...
-    pie install asgrim/example-pie-extension; \
+    pie install --no-cache \
+        asgrim/example-pie-extension; \
     # Clean up `unzip`.
     apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false unzip; \
     rm -rf /var/lib/apt/lists/*;
-
 
 CMD ["php", "-r", "example_pie_extension_test();"]
 ```
