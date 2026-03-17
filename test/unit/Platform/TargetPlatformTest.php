@@ -28,7 +28,7 @@ final class TargetPlatformTest extends TestCase
             ->willReturn(OperatingSystemFamily::Windows);
         $phpBinaryPath->expects(self::any())
             ->method('machineType')
-            ->willReturn(Architecture::x86);
+            ->willReturn(Architecture::x86_64);
         $phpBinaryPath->expects(self::any())
             ->method('phpinfo')
             ->willReturn(<<<'TEXT'
