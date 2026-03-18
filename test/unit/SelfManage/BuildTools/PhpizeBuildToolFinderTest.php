@@ -111,7 +111,8 @@ final class PhpizeBuildToolFinderTest extends TestCase
         putenv('PATH=' . realpath(self::GOOD_PHPIZE_PATH));
 
         $mockPhpBinary = $this->createMock(PhpBinaryPath::class);
-        $mockPhpBinary->method('phpApiVersion')->willReturn('20250925');
+        // This should not be any API version of a real PHP, otherwise this test might pick up a wrong phpize and false-positive :D
+        $mockPhpBinary->method('phpApiVersion')->willReturn('30250925');
         (fn () => $this->phpBinaryPath = '/path/to/php')
             ->bindTo($mockPhpBinary, PhpBinaryPath::class)();
 
