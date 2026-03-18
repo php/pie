@@ -115,6 +115,9 @@ final class PhpizeBuildToolFinderTest extends TestCase
         (fn () => $this->phpBinaryPath = '/path/to/php')
             ->bindTo($mockPhpBinary, PhpBinaryPath::class)();
 
+        $goodPhpize = realpath(self::GOOD_PHPIZE_PATH . DIRECTORY_SEPARATOR . 'phpize');
+        self::assertNotFalse($goodPhpize);
+
         self::assertFalse((new PhpizeBuildToolFinder([]))->check(new TargetPlatform(
             OperatingSystem::NonWindows,
             OperatingSystemFamily::Linux,
@@ -123,7 +126,7 @@ final class PhpizeBuildToolFinderTest extends TestCase
             ThreadSafetyMode::NonThreadSafe,
             1,
             null,
-            null,
+            new PhpizePath($goodPhpize),
         )));
 
         putenv('PATH=' . $oldPath);
