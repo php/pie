@@ -29,22 +29,25 @@ use function array_key_exists;
 use function array_map;
 use function array_unique;
 use function assert;
+use function chmod;
 use function count;
 use function defined;
 use function dirname;
 use function file_exists;
+use function file_put_contents;
 use function get_loaded_extensions;
 use function ini_get;
 use function is_dir;
 use function is_executable;
 use function mkdir;
-use function php_uname;
 use function phpversion;
 use function sprintf;
 use function strtolower;
 use function sys_get_temp_dir;
+use function tempnam;
 use function trim;
 use function uniqid;
+use function unlink;
 
 use const DIRECTORY_SEPARATOR;
 use const PHP_INT_SIZE;
@@ -240,15 +243,46 @@ final class PhpBinaryPathTest extends TestCase
         );
     }
 
-    public function testMachineType(): void
+    /** @return list<array{0: OperatingSystem, 1: string, 2: string, 3: int, 4: Architecture}> */
+    public static function machineTypeProvider(): array
     {
-        $myUnameMachineType = php_uname('m');
-        assert($myUnameMachineType !== '');
-        self::assertSame(
-            Architecture::parseArchitecture($myUnameMachineType),
-            PhpBinaryPath::fromCurrentProcess()
-                ->machineType(),
-        );
+        return [
+            // x86 (32-bit)
+            [OperatingSystem::Windows, 'Architecture => x32', '', 4, Architecture::x86],
+            [OperatingSystem::NonWindows, 'Architecture => x86', 'x86', 4, Architecture::x86],
+            [OperatingSystem::NonWindows, '', 'x86', 4, Architecture::x86],
+
+            // x86_64 (64-bit)
+            [OperatingSystem::Windows, 'Architecture => x64', 'AMD64', 8, Architecture::x86_64],
+            [OperatingSystem::Windows, 'Architecture => x64', '', 8, Architecture::x86_64],
+            [OperatingSystem::NonWindows, 'Architecture => x86_64', 'x86_64', 8, Architecture::x86_64],
+            [OperatingSystem::NonWindows, '', 'x86_64', 8, Architecture::x86_64],
+
+            // arm64
+            [OperatingSystem::NonWindows, 'Architecture => arm64', 'arm64', 8, Architecture::arm64],
+            [OperatingSystem::NonWindows, '', 'arm64', 8, Architecture::arm64],
+            [OperatingSystem::NonWindows, 'Architecture => aarch64', 'aarch64', 8, Architecture::arm64],
+            [OperatingSystem::NonWindows, '', 'aarch64', 8, Architecture::arm64],
+        ];
+    }
+
+    #[RequiresOperatingSystemFamily('Linux')]
+    #[DataProvider('machineTypeProvider')]
+    public function testMachineType(OperatingSystem $os, string $phpinfo, string $uname, int $phpIntSize, Architecture $expectedArchitecture): void
+    {
+        $tmpSh = tempnam(sys_get_temp_dir(), uniqid('pie_machine_type_test'));
+        file_put_contents($tmpSh, "#!/usr/bin/env bash\necho \"" . $uname . "\";\n");
+        chmod($tmpSh, 0777);
+
+        $phpBinary = $this->createPartialMock(PhpBinaryPath::class, ['operatingSystem', 'phpinfo', 'phpIntSize']);
+        (new ReflectionMethod($phpBinary, '__construct'))->invoke($phpBinary, $tmpSh, null);
+
+        $phpBinary->method('operatingSystem')->willReturn($os);
+        $phpBinary->method('phpinfo')->willReturn($phpinfo);
+        $phpBinary->method('phpIntSize')->willReturn($phpIntSize);
+
+        self::assertEquals($expectedArchitecture, $phpBinary->machineType());
+        unlink($tmpSh);
     }
 
     public function testPhpIntSize(): void

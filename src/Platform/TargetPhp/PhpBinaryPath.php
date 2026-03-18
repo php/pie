@@ -327,6 +327,20 @@ PHP,
 
     public function machineType(): Architecture
     {
+        /**
+         * On Windows, this will be x32 or x64; should not be used on other platforms
+         *
+         * Based on xdebug.org wizard, copyright Derick Rethans, used under MIT licence
+         *
+         * @link https://github.com/xdebug/xdebug.org/blob/aff649f2c3ca303ad471e6ed9dd29c0db16d3e22/src/XdebugVersion.php#L186-L190
+         */
+        if (
+            $this->operatingSystem() === OperatingSystem::Windows
+            && preg_match('/Architecture([ =>\t]*)(x[0-9]*)/', $this->phpinfo(), $m)
+        ) {
+            return Architecture::parseArchitecture($m[2]);
+        }
+
         $phpMachineType = self::cleanWarningAndDeprecationsFromOutput(Process::run([
             $this->phpBinaryPath,
             '-r',
@@ -334,7 +348,14 @@ PHP,
         ]));
         Assert::stringNotEmpty($phpMachineType, 'Could not determine PHP machine type');
 
-        return Architecture::parseArchitecture($phpMachineType);
+        $unameArchitecture = Architecture::parseArchitecture($phpMachineType);
+
+        // If we're not on ARM, a more reliable way of determining 32-bit/64-bit is to use PHP_INT_SIZE
+        if ($unameArchitecture !== Architecture::arm64) {
+            return $this->phpIntSize() === 4 ? Architecture::x86 : Architecture::x86_64;
+        }
+
+        return $unameArchitecture;
     }
 
     public function phpIntSize(): int

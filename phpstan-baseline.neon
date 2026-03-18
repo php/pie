@@ -313,18 +313,6 @@ parameters:
 			path: src/Platform/TargetPhp/PhpizePath.php
 
 		-
-			message: '#^Call to function array_key_exists\(\) with 2 and array\{non\-falsy\-string, string, non\-falsy\-string\} will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Platform/TargetPlatform.php
-
-		-
-			message: '#^Strict comparison using \!\=\= between non\-falsy\-string and '''' will always evaluate to true\.$#'
-			identifier: notIdentical.alwaysTrue
-			count: 1
-			path: src/Platform/TargetPlatform.php
-
-		-
 			message: '#^Dead catch \- Php\\Pie\\SelfManage\\Verify\\GithubCliNotAvailable is never thrown in the try block\.$#'
 			identifier: catch.neverThrown
 			count: 1

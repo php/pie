@@ -15,7 +15,7 @@ use PHPUnit\Framework\TestCase;
 final class ReleaseIsNewerTest extends TestCase
 {
     /** @return array<non-empty-string, array{0: Channel, 1: non-empty-string, 2: non-empty-string, 3: bool}> */
-    public function provider(): array
+    public static function provider(): array
     {
         return [
             'stable-oldstable-to-newstable'    => [Channel::Stable, '1.0.0', '1.0.1', true],
