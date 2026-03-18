@@ -2,6 +2,7 @@
     "alias": "pie.phar",
     "output": "pie.phar",
     "git": "pie_version",
+    "stub": "phar-stub.php",
     "force-autodiscovery": true,
     "directories": [
         "resources"
