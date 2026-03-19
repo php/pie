@@ -31,6 +31,19 @@ curl -fL --output /tmp/pie.phar https://github.com/php/pie/releases/latest/downl
   && sudo chmod +x /usr/local/bin/pie
 ```
 
+### Distribution packages
+
+**On Fedora and Enterprise Linux 10**
+
+On Enterprise Linux (CentOS, RHEL, AlmaLinux, RockyLinux, and other clones) you
+need to enable the [EPEL](https://docs.fedoraproject.org/en-US/epel/) repository.
+
+```shell
+sudo dnf install pie
+```
+
+Package information: [pie](https://src.fedoraproject.org/rpms/pie)
+
 ### Docker installation
 
 PIE is published as binary-only Docker image, so you can use it easily during your Docker build:
