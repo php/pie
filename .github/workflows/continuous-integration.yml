@@ -217,7 +217,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: ramsey/composer-install@v3
       - name: Run infection
-        run: sudo infection --min-msi=68 --min-covered-msi=68 --threads=4 --show-mutations=max --no-progress
+        run: sudo infection --min-msi=68 --min-covered-msi=68 --threads=max --show-mutations=max --no-progress
 
   build-assets:
     needs:

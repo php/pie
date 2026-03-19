@@ -8,6 +8,7 @@ behat.yml
 box.json
 box.phar
 pie.phar
+infection.phar
 /docs-package/
 CHANGELOG-*.md
 /.idea/
