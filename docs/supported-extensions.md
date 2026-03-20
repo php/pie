@@ -60,6 +60,7 @@ The following extensions have already added support for PIE:
 | intl           | php/intl                                                                                            |
 | jsonpath       | [supermetrics/jsonpath](https://packagist.org/packages/supermetrics/jsonpath)                       |
 | ldap           | php/ldap                                                                                            |
+| lzf            | [pecl/lzf](https://packagist.org/packages/pecl/lzf)                                             |
 | mailparse      | [pecl/mailparse](https://packagist.org/packages/pecl/mailparse)                                     |
 | mbstring       | php/mbstring                                                                                        |
 | mcrypt         | [pecl/mcrypt](https://packagist.org/packages/pecl/mcrypt)                                           |
@@ -207,7 +208,6 @@ The following extensions exist on PECL, but either have not added support for PI
 * libsodium
 * lua
 * LuaSandbox
-* lzf
 * markdown
 * maxminddb
 * mcrypt_filter
