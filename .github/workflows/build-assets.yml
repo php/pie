@@ -123,6 +123,9 @@ jobs:
           echo "SPC_BINARY=.\spc.exe" >> $env:GITHUB_ENV
           echo "PIE_BINARY_OUTPUT=pie-${{ runner.os }}-${{ runner.arch }}.exe" >> $env:GITHUB_ENV
 
+      - name: Check SPC version
+        run: ${{ env.SPC_BINARY }} --version
+
       - name: Grab the pie.phar from artifacts
         uses: actions/download-artifact@v8
         with:
