@@ -76,7 +76,7 @@ jobs:
           - ubuntu-24.04-arm
           - macos-15-intel
           - macos-26
-          # - windows-2025 # disabled - https://github.com/crazywhalecc/static-php-cli/issues/1039
+          - windows-2025
     permissions:
       # id-token:write is required for build provenance attestation.
       id-token: write
@@ -122,6 +122,9 @@ jobs:
           chmod +x spc.exe
           echo "SPC_BINARY=.\spc.exe" >> $env:GITHUB_ENV
           echo "PIE_BINARY_OUTPUT=pie-${{ runner.os }}-${{ runner.arch }}.exe" >> $env:GITHUB_ENV
+
+      - name: Check SPC version
+        run: ${{ env.SPC_BINARY }} --version
 
       - name: Grab the pie.phar from artifacts
         uses: actions/download-artifact@v8
