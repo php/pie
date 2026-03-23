@@ -7,7 +7,7 @@ FROM alpine/git:v2.49.1 AS clone_ext_repo
 
 RUN cd / && git clone https://github.com/asgrim/example-pie-extension.git
 
-FROM boxproject/box:4.6.10 AS build_pie_phar
+FROM boxproject/box:4.7.0 AS build_pie_phar
 
 RUN apk add git
 COPY . /app

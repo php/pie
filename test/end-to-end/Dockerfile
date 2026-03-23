@@ -1,4 +1,4 @@
-FROM boxproject/box:4.6.10 AS build_pie_phar
+FROM boxproject/box:4.7.0 AS build_pie_phar
 RUN apk add git
 COPY . /app
 RUN cd /app && touch creating_this_means_phar_will_never_be_verified && /box.phar compile
