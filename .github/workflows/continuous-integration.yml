@@ -203,6 +203,24 @@ jobs:
       - name: Run phpstan
         run: vendor/bin/phpstan
 
+  mutation-testing:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+          extensions: intl, sodium, zip
+          tools: infection
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v6
+      - uses: ramsey/composer-install@v3
+      - name: Run infection
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: sudo infection --min-msi=68 --min-covered-msi=68 --threads=max --show-mutations=max --no-progress
+
   build-assets:
     needs:
       - unit-tests
