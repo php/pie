@@ -44,7 +44,7 @@ jobs:
       - run: git fetch --tags --force
       # Ensure some kind of previous tag exists, otherwise box fails
       - run: git describe --tags HEAD || git tag 0.0.0
-      - uses: ramsey/composer-install@v3
+      - uses: ramsey/composer-install@v4
       - name: Build PHAR
         run: box compile
       - name: Check the PHAR executes
