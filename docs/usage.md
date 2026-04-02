@@ -44,9 +44,6 @@ need to enable the [EPEL](https://docs.fedoraproject.org/en-US/epel/) repository
 
 ```shell
 sudo dnf install pie
-
-# If you have `gh`, you can verify PIE is authentic:
-gh attestation verify --owner=php $(which pie)
 ```
 
 Package information: [pie](https://src.fedoraproject.org/rpms/pie)
