@@ -33,16 +33,34 @@ curl -fL --output /tmp/pie.phar https://github.com/php/pie/releases/latest/downl
 
 ### Distribution packages
 
-**On Fedora and Enterprise Linux 10**
+> [!WARNING]
+> Distribution packages are not maintained by PIE, so may not have the latest version, may have patches applied, or
+> the instructions here may be out of date. You should verify the distribution packages before using them.
+
+#### Fedora and Enterprise Linux 10
 
 On Enterprise Linux (CentOS, RHEL, AlmaLinux, RockyLinux, and other clones) you
 need to enable the [EPEL](https://docs.fedoraproject.org/en-US/epel/) repository.
 
 ```shell
 sudo dnf install pie
+
+# If you have `gh`, you can verify PIE is authentic:
+gh attestation verify --owner=php $(which pie)
 ```
 
 Package information: [pie](https://src.fedoraproject.org/rpms/pie)
+
+#### Homebrew
+
+PIE can be installed with Homebrew with:
+
+```shell
+brew install pie
+
+# If you have `gh`, you can verify PIE is authentic:
+gh attestation verify --owner=php $(which pie)
+```
 
 ### Docker installation
 
