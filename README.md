@@ -17,7 +17,7 @@ You will need PHP 8.1 or newer to run PIE, but PIE can install an extension to
 any other installed PHP version.
 
 On Linux/OSX, if any build tools needed are missing, PIE will ask if you would
-like to automatically install them first (this is a new feature in 1.4.0).
+like to automatically install them first (as of PIE 1.4.0).
 
 On Windows, you do not need any build toolchain installed, since PHP extensions
 for Windows are distributed as pre-compiled packages containing the extension
@@ -35,6 +35,17 @@ Further installation details can be found in the [usage](./docs/usage.md) docs.
 This documentation assumes you have moved `pie.phar` into your `$PATH`, e.g.
 `/usr/local/bin/pie` on non-Windows systems or created an alias in your shell RC file.
 
+### One-liner
+
+This will install PIE into `/usr/local/bin/pie` on a non-Windows system:
+
+```shell
+curl -fL --output /tmp/pie.phar https://github.com/php/pie/releases/latest/download/pie.phar \
+  && gh attestation verify --owner php /tmp/pie.phar \
+  && sudo mv /tmp/pie.phar /usr/local/bin/pie \
+  && sudo chmod +x /usr/local/bin/pie
+```
+
 ## Using PIE
 
 ### Installing a single extension using PIE
@@ -44,15 +55,17 @@ install the `example_pie_extension` extension, you would run:
 
 ```shell
 $ pie install asgrim/example-pie-extension
+🥧 PHP Installer for Extensions (PIE) 1.4.0, from The PHP Foundation
 This command may need elevated privileges, and may prompt you for your password.
-You are running PHP 8.3.10
-Target PHP installation: 8.3.10 nts, on Linux/OSX/etc x86_64 (from /usr/bin/php8.3)
-Found package: asgrim/example-pie-extension:1.0.1 which provides ext-example_pie_extension
+You are running PHP 8.5.3
+Target PHP installation: 8.5.3 nts, on Linux/OSX/etc x86_64 (from /usr/bin/php8.5)
+Found package: asgrim/example-pie-extension:2.0.9 which provides ext-example_pie_extension
+Extracted asgrim/example-pie-extension:2.0.9 source to: /path/to/example-pie-extension
 phpize complete.
-Configure complete.
-Build complete: /tmp/pie_downloader_66e0b1de73cdb6.04069773/asgrim-example-pie-extension-769f906/modules/example_pie_extension.so
-Install complete: /usr/lib/php/20230831/example_pie_extension.so
-You must now add "extension=example_pie_extension" to your php.ini
+Configure complete with options: --with-php-config=/usr/bin/php-config8.5
+Build complete: /path/to/example-pie-extension/modules/example_pie_extension.so
+Install complete: /usr/lib/php/20250925/example_pie_extension.so
+✅ Extension is enabled and loaded in /usr/bin/php8.5
 $
 ```
 
@@ -62,26 +75,26 @@ When in your PHP project, you can install any missing top-level extensions:
 
 ```
 $ pie install
-🥧 PHP Installer for Extensions (PIE), 0.9.0, from The PHP Foundation
-You are running PHP 8.3.19
-Target PHP installation: 8.3.19 nts, on Linux/OSX/etc x86_64 (from /usr/bin/php8.3)
-Checking extensions for your project your-vendor/your-project
-requires: curl ✅ Already installed
-requires: intl ✅ Already installed
-requires: json ✅ Already installed
-requires: example_pie_extension ⚠️  Missing
+🥧 PHP Installer for Extensions (PIE) 1.4.0, from The PHP Foundation
+You are running PHP 8.5.0
+Target PHP installation: 8.5.0 nts, on Linux/OSX/etc x86_64 (from /usr/local/bin/php)
+Checking extensions for your project asgrim/demo-php-project (path: /demos/demo-php-project)
+requires: ext-curl:* ✅ Already installed
+requires: ext-example_pie_extension:^2.0 🚫 Missing
 
-The following packages may be suitable, which would you like to install:
+The following packages may be suitable, which would you like to install: 
   [0] None
   [1] asgrim/example-pie-extension: Example PIE extension
  > 1
-   > 🥧 PHP Installer for Extensions (PIE), 0.9.0, from The PHP Foundation
-   > This command may need elevated privileges, and may prompt you for your password.
-   > You are running PHP 8.3.19
-   > Target PHP installation: 8.3.19 nts, on Linux/OSX/etc x86_64 (from /usr/bin/php8.3)
-   > Found package: asgrim/example-pie-extension:2.0.2 which provides ext-example_pie_extension
-   ... (snip) ...
-   > ✅ Extension is enabled and loaded in /usr/bin/php8.3
+  example_pie_extension> You are running PHP 8.5.0
+  example_pie_extension> Target PHP installation: 8.5.0 nts, on Linux/OSX/etc x86_64 (from /usr/local/bin/php)
+  example_pie_extension> Found package: asgrim/example-pie-extension:2.0.9 which provides ext-example_pie_extension
+  example_pie_extension> Extracted asgrim/example-pie-extension:2.0.9 source to: /path/to/example-pie-extension
+  example_pie_extension> phpize complete.
+  example_pie_extension> Configure complete with options: --with-php-config=/usr/local/bin/php-config
+  example_pie_extension> Build complete: /path/to/example-pie-extension/modules/example_pie_extension.so
+  example_pie_extension> Install complete: /usr/local/lib/php/extensions/no-debug-non-zts-20250925/example_pie_extension.so
+  example_pie_extension> ✅ Extension is enabled and loaded in /usr/local/bin/php
 
 Finished checking extensions.
 ```

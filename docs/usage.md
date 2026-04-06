@@ -18,19 +18,6 @@ order: 2
 This documentation assumes you have moved `pie.phar` into your `$PATH`, e.g.
 `/usr/local/bin/pie` on non-Windows systems.
 
-### One-liner
-
-Note that this does not verify any signatures, and you assume the risks in
-running this, but this will put PIE into `/usr/local/bin/pie` on a non-Windows
-system:
-
-```shell
-curl -fL --output /tmp/pie.phar https://github.com/php/pie/releases/latest/download/pie.phar \
-  && gh attestation verify --owner php /tmp/pie.phar \
-  && sudo mv /tmp/pie.phar /usr/local/bin/pie \
-  && sudo chmod +x /usr/local/bin/pie
-```
-
 ### Distribution packages
 
 > [!WARNING]
@@ -108,27 +95,37 @@ As of 1.4.0 an **experimental** executable (binary) version of PIE is included.
 The PIE is built using [Static PHP](https://static-php.dev/), which builds a
 self-contained PHP executable with the extensions that PIE needs to run, and
 bundles the PHAR as a single distributable executable. Please keep in mind that
-this is **experimental** and we do not recommend this for production use for
+this is **experimental**, and we do not recommend this for production use for
 the time being. Please also note there are some limitations:
 
- - [php/pie#459](https://github.com/php/pie/discussions/459) - the OSX version
-   is not signed with an Apple Developer account, which means (at your own risk)
-   you would need to tell your system to trust the downloaded executable.
  - [php/pie#460](https://github.com/php/pie/discussions/460) - all the binary
    versions have the `pie self-update` feature disabled for now.
 
 If you find the binary releases useful, please leave feedback or upvote on the
 relevant discussions, so we can gauge interest in improving this functionality.
 
+The stable versions of the executables can be found by navigating to the
+[relevant release](https://github.com/php/pie/releases), and finding the
+appropriate executable for your platform. For your convenience, the "latest"
+stable releases can be downloaded from these links:
+
+| Operating System | Architecture     | Download URL                                                            |
+|------------------|------------------|-------------------------------------------------------------------------|
+| Linux            | amd64 / x86_64   | https://github.com/php/pie/releases/latest/download/pie-Linux-X64       |
+| OS X             | ARM 64 / aarch64 | https://github.com/php/pie/releases/latest/download/pie-macOS-ARM64     |
+| Windows          | x86_64           | https://github.com/php/pie/releases/latest/download/pie-Windows-X64.exe |
+| Linux            | ARM 64 / aarch64 | https://github.com/php/pie/releases/latest/download/pie-Linux-ARM64     |
+| OS X             | Intel / x86_64   | https://github.com/php/pie/releases/latest/download/pie-macOS-X64       |
+
 The "nightly" versions of these can be found here:
 
 | Operating System | Architecture     | Download URL                                  |
 |------------------|------------------|-----------------------------------------------|
-| Linux            | ARM 64 / aarch64 | https://php.github.io/pie/pie-Linux-ARM64     |
 | Linux            | amd64 / x86_64   | https://php.github.io/pie/pie-Linux-X64       |
 | OS X             | ARM 64 / aarch64 | https://php.github.io/pie/pie-macOS-ARM64     |
-| OS X             | Intel / x86_64   | https://php.github.io/pie/pie-macOS-X64       |
 | Windows          | x86_64           | https://php.github.io/pie/pie-Windows-X64.exe |
+| Linux            | ARM 64 / aarch64 | https://php.github.io/pie/pie-Linux-ARM64     |
+| OS X             | Intel / x86_64   | https://php.github.io/pie/pie-macOS-X64       |
 
 We *highly* recommend you verify the file came from the PHP GitHub repository
 before running it, for example:
@@ -139,21 +136,24 @@ $ chmod +x pie-Linux-X64
 $ ./pie-Linux-X64 --version
 ```
 
-## Prerequisites for PIE
+## Prerequisites for PIE (PHAR distribution)
 
 Running PIE requires PHP 8.1 or newer. However, you may still use PIE to install
-an extension for an older version of PHP.
+an extension for an older version of PHP. You also need the `zip` extension
+enabled for the PHP version running PIE, or `git` to download the extension
+source code.
 
-Additionally to PHP, PIE requires the following tools to be available on your
-system in order to download, build and install extensions:
+Additionally to PHP, PIE requires the following build tools to be available on
+your system in order to download, build and install extensions. Note that as of
+PIE 1.4.0, PIE will attempt to detect and install the missing build tools:
 
-- The `zip` extension enabled for the PHP version running PIE, or `git` to
-  download the extension source code
 - `autoconf`, `automake`, `libtool`, `m4`, `make`, and `gcc` to build the extension
 - PHP development tools (such as `php-config` and `phpize`) to prepare the
   extension for building.
 
-Also, each extension may have its own requirements, such as additional libraries.
+Also, each extension may have its own requirements, such as additional
+libraries. As of PIE 1.4.0, for some extensions, PIE will attempt to detect and
+install the missing system libraries.
 
 > [!TIP]
 > If you run PIE without the correct prerequisites installed, you may receive
@@ -392,26 +392,26 @@ like to install one. For example:
 
 ```
 $ pie install
-🥧 PHP Installer for Extensions (PIE), 0.9.0, from The PHP Foundation
-You are running PHP 8.3.19
-Target PHP installation: 8.3.19 nts, on Linux/OSX/etc x86_64 (from /usr/bin/php8.3)
-Checking extensions for your project your-vendor/your-project
-requires: curl ✅ Already installed
-requires: intl ✅ Already installed
-requires: json ✅ Already installed
-requires: example_pie_extension ⚠️  Missing
+🥧 PHP Installer for Extensions (PIE) 1.4.0, from The PHP Foundation
+You are running PHP 8.5.0
+Target PHP installation: 8.5.0 nts, on Linux/OSX/etc x86_64 (from /usr/local/bin/php)
+Checking extensions for your project asgrim/demo-php-project (path: /demos/demo-php-project)
+requires: ext-curl:* ✅ Already installed
+requires: ext-example_pie_extension:^2.0 🚫 Missing
 
-The following packages may be suitable, which would you like to install:
+The following packages may be suitable, which would you like to install: 
   [0] None
   [1] asgrim/example-pie-extension: Example PIE extension
  > 1
-   > 🥧 PHP Installer for Extensions (PIE), 0.9.0, from The PHP Foundation
-   > This command may need elevated privileges, and may prompt you for your password.
-   > You are running PHP 8.3.19
-   > Target PHP installation: 8.3.19 nts, on Linux/OSX/etc x86_64 (from /usr/bin/php8.3)
-   > Found package: asgrim/example-pie-extension:2.0.2 which provides ext-example_pie_extension
-   ... (snip) ...
-   > ✅ Extension is enabled and loaded in /usr/bin/php8.3
+  example_pie_extension> You are running PHP 8.5.0
+  example_pie_extension> Target PHP installation: 8.5.0 nts, on Linux/OSX/etc x86_64 (from /usr/local/bin/php)
+  example_pie_extension> Found package: asgrim/example-pie-extension:2.0.9 which provides ext-example_pie_extension
+  example_pie_extension> Extracted asgrim/example-pie-extension:2.0.9 source to: /path/to/example-pie-extension
+  example_pie_extension> phpize complete.
+  example_pie_extension> Configure complete with options: --with-php-config=/usr/local/bin/php-config
+  example_pie_extension> Build complete: /path/to/example-pie-extension/modules/example_pie_extension.so
+  example_pie_extension> Install complete: /usr/local/lib/php/extensions/no-debug-non-zts-20250925/example_pie_extension.so
+  example_pie_extension> ✅ Extension is enabled and loaded in /usr/local/bin/php
 
 Finished checking extensions.
 ```
