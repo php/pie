@@ -37,6 +37,7 @@
         "symfony/console": "^6.4.34",
         "symfony/event-dispatcher": "^6.4.32",
         "symfony/process": "^6.4.33",
+        "thecodingmachine/safe": "^3.4",
         "thephpf/attestation": "^0.0.5",
         "webmozart/assert": "^1.12.1"
     },

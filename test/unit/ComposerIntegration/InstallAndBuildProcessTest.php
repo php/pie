@@ -8,6 +8,7 @@ use Composer\IO\NullIO;
 use Composer\Package\CompletePackage;
 use Composer\PartialComposer;
 use Php\Pie\Building\Build;
+use Php\Pie\Building\PlaceholderReplacer;
 use Php\Pie\ComposerIntegration\InstallAndBuildProcess;
 use Php\Pie\ComposerIntegration\InstalledJsonMetadata;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
@@ -46,6 +47,7 @@ final class InstallAndBuildProcessTest extends TestCase
             $this->pieBuild,
             $this->pieInstall,
             $this->installedJsonMetadata,
+            $this->createMock(PlaceholderReplacer::class),
         );
     }
 
