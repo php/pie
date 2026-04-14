@@ -186,11 +186,14 @@ final class UnixInstallTest extends TestCase
             $output,
         );
 
+        if (! file_exists(self::TEST_PREBUILT_PATH)) {
+            mkdir(self::TEST_PREBUILT_PATH, 0777, true);
+        }
+
         /**
          * Move the built .so into a new path; this simulates a pre-packaged binary, which would not have Makefile etc
          * so this ensures we're not accidentally relying on any build mechanism (`make install` or otherwise)
          */
-        mkdir(self::TEST_PREBUILT_PATH, 0777, true);
         $prebuiltBinaryFilePath = self::TEST_PREBUILT_PATH . DIRECTORY_SEPARATOR . 'pie_test_ext.so';
         rename($built->filePath, $prebuiltBinaryFilePath);
 
