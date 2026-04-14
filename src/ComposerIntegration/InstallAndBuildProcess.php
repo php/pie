@@ -7,6 +7,7 @@ namespace Php\Pie\ComposerIntegration;
 use Composer\Package\CompletePackageInterface;
 use Composer\PartialComposer;
 use Php\Pie\Building\Build;
+use Php\Pie\Building\PlaceholderReplacer;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\Installing\Install;
@@ -20,6 +21,7 @@ class InstallAndBuildProcess
         private readonly Build $pieBuild,
         private readonly Install $pieInstall,
         private readonly InstalledJsonMetadata $installedJsonMetadata,
+        private readonly PlaceholderReplacer $placeholderReplacer,
     ) {
     }
 
@@ -41,6 +43,12 @@ class InstallAndBuildProcess
             $downloadedPackage->package->prettyNameAndVersion(),
             $downloadedPackage->extractedSourcePath,
         ));
+
+        $this->placeholderReplacer->replacePlaceholdersWithPlaceholderReplacements(
+            $io,
+            $composerRequest->targetPlatform,
+            $downloadedPackage,
+        );
 
         $this->installedJsonMetadata->addDownloadMetadata(
             $composer,
