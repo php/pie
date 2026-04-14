@@ -30,9 +30,9 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 
-use function file_get_contents;
+use function Safe\file_get_contents;
+use function Safe\unlink;
 use function sprintf;
-use function unlink;
 
 #[AsCommand(
     name: 'self-update',

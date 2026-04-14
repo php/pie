@@ -9,12 +9,13 @@ use Composer\Json\JsonFile;
 use Php\Pie\Platform;
 use Php\Pie\Platform\TargetPlatform;
 use RuntimeException;
+use Safe\Exceptions\FilesystemException;
 
 use function file_exists;
-use function file_get_contents;
-use function file_put_contents;
-use function mkdir;
 use function rtrim;
+use function Safe\file_get_contents;
+use function Safe\file_put_contents;
+use function Safe\mkdir;
 use function sprintf;
 use function str_replace;
 
@@ -51,12 +52,17 @@ class PieJsonEditor
             mkdir($this->pieWorkingDirectory, recursive: true);
         }
 
-        if (file_put_contents($this->pieJsonFilename, "{\n}\n") === false) {
-            throw new RuntimeException(sprintf(
-                'Failed to create pie.json in %s (working directory: %s)',
-                $this->pieJsonFilename,
-                $this->pieWorkingDirectory,
-            ));
+        try {
+            file_put_contents($this->pieJsonFilename, "{\n}\n");
+        } catch (FilesystemException $previous) {
+            throw new RuntimeException(
+                sprintf(
+                    'Failed to create pie.json in %s (working directory: %s)',
+                    $this->pieJsonFilename,
+                    $this->pieWorkingDirectory,
+                ),
+                previous: $previous,
+            );
         }
 
         return $this;

@@ -22,8 +22,8 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 
-use function mkdir;
-use function realpath;
+use function Safe\mkdir;
+use function Safe\realpath;
 use function sys_get_temp_dir;
 use function uniqid;
 

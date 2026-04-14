@@ -31,9 +31,9 @@ use function assert;
 use function dirname;
 use function file_exists;
 use function is_dir;
-use function rmdir;
+use function Safe\rmdir;
+use function Safe\unlink;
 use function str_replace;
-use function unlink;
 
 use const DIRECTORY_SEPARATOR;
 

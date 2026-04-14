@@ -7,7 +7,7 @@ namespace Php\Pie\SelfManage\Update;
 use Composer\Semver\Semver;
 use Composer\Semver\VersionParser;
 
-use function preg_match;
+use function Safe\preg_match;
 use function strtolower;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */

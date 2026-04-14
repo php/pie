@@ -15,6 +15,7 @@ use Php\Pie\Platform\OperatingSystemFamily;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Util\Process;
 use RuntimeException;
+use Safe\Exceptions\FilesystemException;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 
 use function array_combine;
@@ -24,7 +25,7 @@ use function array_map;
 use function count;
 use function implode;
 use function in_array;
-use function realpath;
+use function Safe\realpath;
 use function sprintf;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
@@ -289,16 +290,18 @@ class BundledPhpExtensionsRepository extends ArrayRepository
                 'php/dom',
             ])
         ) {
-            $path = (string) realpath($downloadedPackage->extractedSourcePath . '/../..');
-            if ($path !== '') {
-                $extraCflags[] = '-I' . $path;
+            try {
+                $extraCflags[] = '-I' . realpath($downloadedPackage->extractedSourcePath . '/../..');
+            } catch (FilesystemException) {
+                // ignore; the path does not exist
             }
         }
 
         if ($downloadedPackage->package->name() === 'php/dom') {
-            $path = (string) realpath($downloadedPackage->extractedSourcePath . '/../../ext/lexbor');
-            if ($path !== '') {
-                $extraCflags[] = '-I' . $path;
+            try {
+                $extraCflags[] = '-I' . realpath($downloadedPackage->extractedSourcePath . '/../../ext/lexbor');
+            } catch (FilesystemException) {
+                // ignore; the lexbor path does not exist
             }
         }
 

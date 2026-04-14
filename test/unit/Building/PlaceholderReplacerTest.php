@@ -7,7 +7,6 @@ namespace Php\PieUnitTest\Building;
 use Composer\IO\IOInterface;
 use Composer\Package\CompletePackage;
 use Composer\Util\Filesystem;
-use DateTimeImmutable;
 use Php\Pie\Building\PlaceholderReplacer;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\DownloadedPackage;
@@ -19,6 +18,7 @@ use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\ThreadSafetyMode;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use Safe\DateTimeImmutable;
 
 use function Safe\file_get_contents;
 use function Safe\file_put_contents;

@@ -17,8 +17,8 @@ use PHPUnit\Framework\Attributes\RequiresOperatingSystemFamily;
 use PHPUnit\Framework\TestCase;
 
 use function getenv;
-use function putenv;
-use function realpath;
+use function Safe\putenv;
+use function Safe\realpath;
 
 use const DIRECTORY_SEPARATOR;
 
@@ -64,7 +64,6 @@ final class PhpizeBuildToolFinderTest extends TestCase
             ->bindTo($mockPhpBinary, PhpBinaryPath::class)();
 
         $goodPhpize = realpath(self::GOOD_PHPIZE_PATH . DIRECTORY_SEPARATOR . 'phpize');
-        self::assertNotFalse($goodPhpize);
 
         self::assertTrue((new PhpizeBuildToolFinder([]))->check(new TargetPlatform(
             OperatingSystem::NonWindows,
@@ -117,7 +116,6 @@ final class PhpizeBuildToolFinderTest extends TestCase
             ->bindTo($mockPhpBinary, PhpBinaryPath::class)();
 
         $goodPhpize = realpath(self::GOOD_PHPIZE_PATH . DIRECTORY_SEPARATOR . 'phpize');
-        self::assertNotFalse($goodPhpize);
 
         self::assertFalse((new PhpizeBuildToolFinder([]))->check(new TargetPlatform(
             OperatingSystem::NonWindows,

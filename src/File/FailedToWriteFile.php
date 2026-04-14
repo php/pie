@@ -4,31 +4,33 @@ declare(strict_types=1);
 
 namespace Php\Pie\File;
 
-use Php\Pie\Util\CaptureErrors;
 use RuntimeException;
+use Throwable;
 
-use function array_column;
-use function implode;
 use function sprintf;
 
-/** @phpstan-import-type CapturedErrorList from CaptureErrors */
 class FailedToWriteFile extends RuntimeException
 {
-    /** @param CapturedErrorList $recorded */
-    public static function fromFilePutContentErrors(string $filename, array $recorded): self
+    public static function fromFilePutContentError(string $filename, Throwable $previous): self
     {
-        return new self(sprintf(
-            "Failed to write file %s.\n\nErrors:\n - %s",
-            $filename,
-            implode("\n - ", array_column($recorded, 'message')),
-        ));
+        return new self(
+            sprintf(
+                'Failed to write file %s: %s',
+                $filename,
+                $previous->getMessage(),
+            ),
+            previous: $previous,
+        );
     }
 
-    public static function fromNoPermissions(string $filename): self
+    public static function fromNoPermissions(string $filename, Throwable|null $previous): self
     {
-        return new self(sprintf(
-            'Failed to write file %s as PIE does not have enough permissions',
-            $filename,
-        ));
+        return new self(
+            sprintf(
+                'Failed to write file %s as PIE does not have enough permissions',
+                $filename,
+            ),
+            previous: $previous,
+        );
     }
 }

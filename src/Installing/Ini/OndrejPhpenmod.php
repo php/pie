@@ -19,8 +19,8 @@ use function array_unshift;
 use function file_exists;
 use function is_dir;
 use function is_writable;
-use function preg_match;
 use function rtrim;
+use function Safe\preg_match;
 use function sprintf;
 
 use const DIRECTORY_SEPARATOR;

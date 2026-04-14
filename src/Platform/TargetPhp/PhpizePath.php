@@ -10,8 +10,8 @@ use Symfony\Component\Process\Process;
 use function assert;
 use function file_exists;
 use function is_executable;
-use function preg_match;
-use function preg_replace;
+use function Safe\preg_match;
+use function Safe\preg_replace;
 use function trim;
 
 /**
@@ -68,7 +68,6 @@ final class PhpizePath
         $phpizeAttempts[] = preg_replace('((.*)php)', '$1phpize', $phpBinaryPath->phpBinaryPath);
 
         foreach ($phpizeAttempts as $phpizeAttempt) {
-            assert($phpizeAttempt !== null);
             assert($phpizeAttempt !== '');
 
             if (self::looksLikeValidPhpize($phpizeAttempt, $expectedApiVersion)) {

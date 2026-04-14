@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Php\Pie\File;
 
-use Php\Pie\Util\CaptureErrors;
 use Php\Pie\Util\Process;
+use Safe\Exceptions\FilesystemException;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 
 use function dirname;
 use function file_exists;
-use function file_put_contents;
 use function is_writable;
-use function preg_match;
+use function Safe\file_put_contents;
+use function Safe\preg_match;
+use function Safe\tempnam;
 use function sys_get_temp_dir;
-use function tempnam;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class SudoFilePut
@@ -25,21 +25,17 @@ final class SudoFilePut
         $pathWritable = ! file_exists($filename) && file_exists(dirname($filename)) && is_writable(dirname($filename));
 
         if ($fileWritable || $pathWritable) {
-            $capturedErrors  = [];
-            $writeSuccessful = CaptureErrors::for(
-                static fn () => file_put_contents($filename, $content),
-                $capturedErrors,
-            );
-
-            if ($writeSuccessful === false) {
-                throw FailedToWriteFile::fromFilePutContentErrors($filename, $capturedErrors);
+            try {
+                file_put_contents($filename, $content);
+            } catch (FilesystemException $e) {
+                throw FailedToWriteFile::fromFilePutContentError($filename, $e);
             }
 
             return;
         }
 
         if (! Sudo::exists()) {
-            throw FailedToWriteFile::fromNoPermissions($filename);
+            throw FailedToWriteFile::fromNoPermissions($filename, null);
         }
 
         self::writeWithSudo($filename, $content);
@@ -47,19 +43,16 @@ final class SudoFilePut
 
     private static function writeWithSudo(string $filename, string $content): void
     {
-        $tempFilename = tempnam(sys_get_temp_dir(), 'pie_tmp_');
-        if ($tempFilename === false) {
-            throw FailedToWriteFile::fromNoPermissions($filename);
+        try {
+            $tempFilename = tempnam(sys_get_temp_dir(), 'pie_tmp_');
+        } catch (FilesystemException $e) {
+            throw FailedToWriteFile::fromNoPermissions($filename, $e);
         }
 
-        $capturedErrors  = [];
-        $writeSuccessful = CaptureErrors::for(
-            static fn () => file_put_contents($tempFilename, $content),
-            $capturedErrors,
-        );
-
-        if ($writeSuccessful === false) {
-            throw FailedToWriteFile::fromFilePutContentErrors($tempFilename, $capturedErrors);
+        try {
+            file_put_contents($tempFilename, $content);
+        } catch (FilesystemException $e) {
+            throw FailedToWriteFile::fromFilePutContentError($tempFilename, $e);
         }
 
         if (file_exists($filename)) {

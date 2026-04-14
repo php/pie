@@ -17,7 +17,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Webmozart\Assert\Assert;
 
-use function realpath;
+use function Safe\realpath;
 use function str_contains;
 
 #[AsCommand(

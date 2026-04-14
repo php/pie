@@ -9,10 +9,10 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 use function dirname;
-use function file_get_contents;
-use function file_put_contents;
-use function json_decode;
-use function json_encode;
+use function Safe\file_get_contents;
+use function Safe\file_put_contents;
+use function Safe\json_decode;
+use function Safe\json_encode;
 use function sys_get_temp_dir;
 use function uniqid;
 

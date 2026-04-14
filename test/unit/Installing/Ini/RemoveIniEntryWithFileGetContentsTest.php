@@ -23,16 +23,16 @@ use PHPUnit\Framework\Attributes\RequiresOperatingSystemFamily;
 use PHPUnit\Framework\TestCase;
 use Webmozart\Assert\Assert;
 
-use function file_get_contents;
-use function file_put_contents;
 use function is_link;
-use function mkdir;
-use function realpath;
-use function symlink;
+use function Safe\file_get_contents;
+use function Safe\file_put_contents;
+use function Safe\mkdir;
+use function Safe\realpath;
+use function Safe\symlink;
+use function Safe\tempnam;
+use function Safe\unlink;
 use function sys_get_temp_dir;
-use function tempnam;
 use function uniqid;
-use function unlink;
 
 use const DIRECTORY_SEPARATOR;
 

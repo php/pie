@@ -11,6 +11,7 @@ use Php\Pie\Downloading\DownloadUrlMethod;
 use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
 use Php\Pie\Platform\OperatingSystemFamily;
+use Safe\Exceptions\UrlException;
 use Webmozart\Assert\Assert;
 
 use function array_key_exists;
@@ -20,7 +21,8 @@ use function count;
 use function explode;
 use function implode;
 use function is_array;
-use function parse_url;
+use function is_string;
+use function Safe\parse_url;
 use function str_contains;
 use function str_starts_with;
 use function strtolower;
@@ -121,8 +123,13 @@ final class Package
             return $this->name;
         }
 
-        $parsed = parse_url($this->downloadUrl);
-        if ($parsed === false || ! array_key_exists('path', $parsed)) {
+        try {
+            $parsed = parse_url($this->downloadUrl);
+        } catch (UrlException) {
+            return $this->name;
+        }
+
+        if (! is_array($parsed) || ! array_key_exists('path', $parsed) || ! is_string($parsed['path'])) {
             return $this->name;
         }
 

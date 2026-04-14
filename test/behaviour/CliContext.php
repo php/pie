@@ -14,8 +14,8 @@ use Webmozart\Assert\Assert;
 
 use function array_merge;
 use function assert;
-use function copy;
-use function realpath;
+use function Safe\copy;
+use function Safe\realpath;
 use function sprintf;
 use function str_contains;
 
@@ -352,10 +352,7 @@ class CliContext implements Context
         $this->assertCommandSuccessful();
         Assert::notContains($this->output, 'example_pie_extension');
 
-        $examplePhpProject = (string) realpath(__DIR__ . '/../assets/example-php-project');
-        assert($examplePhpProject !== '');
-
-        $this->workingDirectory = $examplePhpProject;
+        $this->workingDirectory = realpath(__DIR__ . '/../assets/example-php-project');
     }
 
     #[When('I run a command to install the extensions')]
@@ -379,10 +376,7 @@ class CliContext implements Context
     #[Given('I am in a PIE project')]
     public function iAmInAPIEProject(): void
     {
-        $examplePieProject = (string) realpath('/example-pie-extension');
-        assert($examplePieProject !== '');
-
-        $this->workingDirectory = $examplePieProject;
+        $this->workingDirectory = realpath('/example-pie-extension');
     }
 
     #[When('I run a command to install the extension')]

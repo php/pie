@@ -8,16 +8,18 @@ use Composer\Package\Version\VersionParser;
 use Composer\Util\HttpDownloader;
 use Php\Pie\File\BinaryFile;
 use RuntimeException;
+use Safe\Exceptions\FilesystemException;
 use Webmozart\Assert\Assert;
 
 use function array_filter;
 use function array_key_exists;
 use function array_map;
 use function count;
-use function file_put_contents;
 use function reset;
+use function Safe\file_put_contents;
+use function Safe\tempnam;
+use function sprintf;
 use function sys_get_temp_dir;
-use function tempnam;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class FetchPieReleaseFromGitHub implements FetchPieRelease
@@ -127,10 +129,18 @@ final class FetchPieReleaseFromGitHub implements FetchPieRelease
         Assert::stringNotEmpty($pharContent);
 
         $tempPharFilename = tempnam(sys_get_temp_dir(), 'pie_self_update_');
-        Assert::stringNotEmpty($tempPharFilename);
 
-        if (file_put_contents($tempPharFilename, $pharContent) === false) {
-            throw new RuntimeException('Failed to write downloaded PHAR to ' . $tempPharFilename);
+        try {
+            file_put_contents($tempPharFilename, $pharContent);
+        } catch (FilesystemException $previous) {
+            throw new RuntimeException(
+                sprintf(
+                    'Failed to write downloaded PHAR to %s: %s',
+                    $tempPharFilename,
+                    $previous->getMessage(),
+                ),
+                previous: $previous,
+            );
         }
 
         return BinaryFile::fromFileWithSha256Checksum($tempPharFilename);

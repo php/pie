@@ -24,6 +24,8 @@ use Php\Pie\Platform;
 use Php\Pie\Platform\InstalledPiePackages;
 use Php\Pie\Util\Emoji;
 use Psr\Container\ContainerInterface;
+use Safe\Exceptions\DirException;
+use Safe\Exceptions\FilesystemException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -38,14 +40,13 @@ use function array_map;
 use function array_merge;
 use function array_walk;
 use function assert;
-use function chdir;
 use function count;
-use function getcwd;
 use function implode;
 use function in_array;
 use function is_dir;
-use function is_string;
-use function realpath;
+use function Safe\chdir;
+use function Safe\getcwd;
+use function Safe\realpath;
 use function sprintf;
 use function strtolower;
 
@@ -104,9 +105,13 @@ final class InstallExtensionsForProjectCommand extends Command
         $rootPackage = $this->composerFactoryForProject->rootPackage($this->io);
 
         if (ExtensionType::isValid($rootPackage->getType())) {
-            $cwd = realpath(getcwd());
-            if (! is_string($cwd) || $cwd === '') {
-                $this->io->writeError('<error>Failed to determine current working directory.</error>');
+            try {
+                $cwd = realpath(getcwd());
+            } catch (FilesystemException | DirException $e) {
+                $this->io->writeError(sprintf(
+                    '<error>Failed to determine current working directory: %s</error>',
+                    $e->getMessage(),
+                ));
 
                 $restoreWorkingDir();
 

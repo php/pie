@@ -15,7 +15,7 @@ use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\ThreadSafetyMode;
 
 use function in_array;
-use function preg_match;
+use function Safe\preg_match;
 use function sprintf;
 use function str_ends_with;
 

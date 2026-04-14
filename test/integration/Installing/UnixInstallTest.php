@@ -34,9 +34,9 @@ use function file_exists;
 use function getenv;
 use function is_executable;
 use function is_writable;
-use function mkdir;
-use function putenv;
-use function rename;
+use function Safe\mkdir;
+use function Safe\putenv;
+use function Safe\rename;
 use function uniqid;
 
 use const DIRECTORY_SEPARATOR;

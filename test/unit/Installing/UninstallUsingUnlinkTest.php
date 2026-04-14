@@ -14,8 +14,8 @@ use Php\Pie\Installing\UninstallUsingUnlink;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-use function file_put_contents;
-use function hash_file;
+use function Safe\file_put_contents;
+use function Safe\hash_file;
 use function sys_get_temp_dir;
 use function uniqid;
 

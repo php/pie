@@ -10,8 +10,8 @@ use PHPUnit\Framework\Attributes\RequiresOperatingSystemFamily;
 use PHPUnit\Framework\TestCase;
 
 use function getenv;
-use function putenv;
-use function realpath;
+use function Safe\putenv;
+use function Safe\realpath;
 
 use const PATH_SEPARATOR;
 

@@ -8,6 +8,8 @@ use Composer\Downloader\TransportException;
 use Composer\IO\BufferIO;
 use Composer\Util\Http\Response;
 use Composer\Util\HttpDownloader;
+use OpenSSLAsymmetricKey;
+use OpenSSLCertificateSigningRequest;
 use Php\Pie\File\BinaryFile;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
 use Php\Pie\SelfManage\Verify\FailedToVerifyRelease;
@@ -20,19 +22,18 @@ use ThePhpFoundation\Attestation\Verification\VerifyAttestationWithOpenSsl;
 use function assert;
 use function base64_encode;
 use function extension_loaded;
-use function file_put_contents;
-use function is_string;
-use function json_encode;
-use function openssl_csr_new;
-use function openssl_csr_sign;
-use function openssl_pkey_new;
-use function openssl_sign;
-use function openssl_x509_export;
+use function Safe\file_put_contents;
+use function Safe\json_encode;
+use function Safe\openssl_csr_new;
+use function Safe\openssl_csr_sign;
+use function Safe\openssl_pkey_new;
+use function Safe\openssl_sign;
+use function Safe\openssl_x509_export;
+use function Safe\tempnam;
 use function sprintf;
 use function str_replace;
 use function strlen;
 use function sys_get_temp_dir;
-use function tempnam;
 use function trim;
 
 use const OPENSSL_ALGO_SHA256;
@@ -61,8 +62,7 @@ final class FallbackVerificationUsingOpenSslTest extends TestCase
         $this->httpDownloader = $this->createMock(HttpDownloader::class);
         $this->io             = new BufferIO();
 
-        $trustedRootFilePath = tempnam(sys_get_temp_dir(), 'pie_test_trusted_root_file_path');
-        assert(is_string($trustedRootFilePath));
+        $trustedRootFilePath       = tempnam(sys_get_temp_dir(), 'pie_test_trusted_root_file_path');
         $this->trustedRootFilePath = $trustedRootFilePath;
 
         $this->verifier = new FallbackVerificationUsingOpenSsl(new VerifyAttestationWithOpenSsl($this->trustedRootFilePath, self::TEST_GITHUB_URL, $this->httpDownloader));
@@ -73,8 +73,11 @@ final class FallbackVerificationUsingOpenSslTest extends TestCase
     {
         $caPrivateKey = openssl_pkey_new();
         $caCsr        = openssl_csr_new(['CN' => 'pie-test-ca'], $caPrivateKey);
-        $caCert       = openssl_csr_sign($caCsr, null, $caPrivateKey, 1);
+        assert($caCsr instanceof OpenSSLCertificateSigningRequest);
+        assert($caPrivateKey instanceof OpenSSLAsymmetricKey);
+        $caCert = openssl_csr_sign($caCsr, null, $caPrivateKey, 1);
         openssl_x509_export($caCert, $caPemCertificate);
+        assert($caPemCertificate !== null);
 
         file_put_contents($this->trustedRootFilePath, json_encode([
             'mediaType' => 'application/vnd.dev.sigstore.trustedroot+json;version=0.1',
@@ -109,13 +112,16 @@ x509_extensions = v3_req
 1.3.6.1.4.1.57264.1.12 = ASN1:UTF8String:https://github.com/php/pie
 1.3.6.1.4.1.57264.1.16 = ASN1:UTF8String:https://github.com/php
 EOF);
-        $privateKey  = openssl_pkey_new();
-        $csr         = openssl_csr_new(['commonName' => 'pie-test'], $privateKey, ['config' => $tempOpensslConfig]);
+        $privateKey = openssl_pkey_new();
+        $csr        = openssl_csr_new(['commonName' => 'pie-test'], $privateKey, ['config' => $tempOpensslConfig]);
+        assert($csr instanceof OpenSSLCertificateSigningRequest);
         $certificate = openssl_csr_sign($csr, $caCert, $caPrivateKey, 1, [
             'config' => $tempOpensslConfig,
             'x509_extensions' => 'v3_req',
         ]);
         openssl_x509_export($certificate, $pemCertificate);
+        assert($pemCertificate !== null);
+        assert($privateKey !== null);
 
         openssl_sign(
             sprintf(
@@ -129,6 +135,7 @@ EOF);
             $privateKey,
             OPENSSL_ALGO_SHA256,
         );
+        assert($signature !== null);
 
         return [$pemCertificate, $signature];
     }
