@@ -579,3 +579,18 @@ jobs:
 ```
 
 Source: [https://github.com/php/php-windows-builder?tab=readme-ov-file#examples](https://github.com/php/php-windows-builder?tab=readme-ov-file#examples)
+
+## Other features
+
+### Placeholder Replacement
+
+To help backwards compatibility with PECL extensions, PIE supports some automatic placeholder replacements within
+all `.c` and .`h` files found within the downloaded source directory. These placeholders are replaced after the
+download step, and before the build step. PIE will automatically replace the following placeholders:
+
+| Placeholder                                           | Description                                                                                                                            | Example                     |
+|-------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|-----------------------------|
+| `@name@`, `@package_name@`, `@package-name@`          | The short, internal name of the PHP extension (e.g., `xdebug`). _Note: this is not the Packagist package name (e.g. `xdebug/xdebug`)_. | `xdebug`                    |
+| `@version@`, `@package_version@`, `@package-version@` | The "pretty" version of the package defined in `composer.json`.                                                                        | `3.3.2`                     |
+| `@release_date@`, `@release-date@`                    | The formatted release date according to Composer package metadata.                                                                     | `2024-01-15T10:00:00+00:00` |
+| `@php_bin@`, `@php-bin@`                              | The full path to the PHP binary executable used during the build.                                                                      | `/usr/bin/php8.4`           |
