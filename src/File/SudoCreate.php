@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Php\Pie\File;
 
-use Php\Pie\Util\CaptureErrors;
 use Php\Pie\Util\Process;
+use Safe\Exceptions\FilesystemException;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 
 use function dirname;
 use function file_exists;
 use function is_writable;
-use function touch;
+use function Safe\touch;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class SudoCreate
@@ -33,14 +33,10 @@ final class SudoCreate
         }
 
         if (is_writable(dirname($filename))) {
-            $capturedErrors  = [];
-            $touchSuccessful = CaptureErrors::for(
-                static fn () => touch($filename),
-                $capturedErrors,
-            );
-
-            if (! $touchSuccessful) {
-                throw FailedToCreateFile::fromTouchErrors($filename, $capturedErrors);
+            try {
+                touch($filename);
+            } catch (FilesystemException $e) {
+                throw FailedToCreateFile::fromTouchError($filename, $e);
             }
 
             return;

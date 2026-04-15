@@ -11,7 +11,7 @@ use Php\Pie\Platform\TargetPhp\PhpizePath;
 use function explode;
 use function function_exists;
 use function posix_getuid;
-use function preg_match;
+use function Safe\preg_match;
 use function trim;
 
 /**

@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace Php\Pie\Installing\Ini;
 
 use Php\Pie\ExtensionName;
+use Webmozart\Assert\Assert;
 
 use function array_key_exists;
 use function array_merge;
-use function file;
 use function in_array;
 use function is_string;
-use function parse_ini_string;
+use function Safe\file;
+use function Safe\parse_ini_string;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 class IsExtensionAlreadyInTheIniFile
@@ -31,6 +32,7 @@ class IsExtensionAlreadyInTheIniFile
         $extensions     = [];
         $zendExtensions = [];
         foreach ($iniFileContentLines as $line) {
+            Assert::string($line);
             $lineIni = parse_ini_string($line);
 
             if (array_key_exists('extension', $lineIni) && is_string($lineIni['extension']) && $lineIni['extension'] !== '') {

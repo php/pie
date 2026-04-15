@@ -9,12 +9,12 @@ use Php\Pie\SelfManage\Update\Channel;
 
 use function array_key_exists;
 use function file_exists;
-use function file_get_contents;
-use function file_put_contents;
 use function json_decode;
 use function json_encode;
-use function mkdir;
 use function rtrim;
+use function Safe\file_get_contents;
+use function Safe\file_put_contents;
+use function Safe\mkdir;
 
 use const DIRECTORY_SEPARATOR;
 use const JSON_PRETTY_PRINT;
@@ -67,7 +67,7 @@ class Settings
         }
 
         $content = file_get_contents($pieSettingsFileName);
-        if ($content === false) {
+        if ($content === '') {
             return [];
         }
 

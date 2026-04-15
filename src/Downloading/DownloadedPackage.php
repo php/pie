@@ -6,14 +6,14 @@ namespace Php\Pie\Downloading;
 
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Platform\PrePackagedSourceAssetName;
+use Safe\Exceptions\FilesystemException;
 
 use function array_map;
 use function array_unique;
 use function file_exists;
 use function is_dir;
-use function is_string;
 use function pathinfo;
-use function realpath;
+use function Safe\realpath;
 use function str_replace;
 
 use const DIRECTORY_SEPARATOR;
@@ -71,13 +71,14 @@ final class DownloadedPackage
             return $extractedSourcePath;
         }
 
-        $extractedSourcePathWithBuildPath = realpath(
-            $extractedSourcePath
-            . DIRECTORY_SEPARATOR
-            . str_replace('{version}', $package->version(), $package->buildPath()),
-        );
-
-        if (! is_string($extractedSourcePathWithBuildPath)) {
+        try {
+            $extractedSourcePathWithBuildPath = realpath(
+                $extractedSourcePath
+                . DIRECTORY_SEPARATOR
+                . str_replace('{version}', $package->version(), $package->buildPath()),
+            );
+        } catch (FilesystemException) {
+            // Build path does not exist; likely a configuration error
             return $extractedSourcePath;
         }
 

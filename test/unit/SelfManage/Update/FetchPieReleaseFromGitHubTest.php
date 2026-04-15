@@ -13,9 +13,9 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
-use function file_get_contents;
 use function hash;
-use function json_encode;
+use function Safe\file_get_contents;
+use function Safe\json_encode;
 use function uniqid;
 
 #[CoversClass(FetchPieReleaseFromGitHub::class)]

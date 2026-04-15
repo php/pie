@@ -19,33 +19,9 @@ parameters:
 			path: src/Command/InstallExtensionsForProjectCommand.php
 
 		-
-			message: '#^Parameter \#1 \$directory of function chdir expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Command/InstallExtensionsForProjectCommand.php
-
-		-
-			message: '#^Parameter \#1 \$path of function realpath expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Command/InstallExtensionsForProjectCommand.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between non\-empty\-string and '''' will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: src/Command/InstallExtensionsForProjectCommand.php
-
-		-
 			message: '#^Cannot cast mixed to string\.$#'
 			identifier: cast.string
 			count: 2
-			path: src/Command/RepositoryAddCommand.php
-
-		-
-			message: '#^Parameter \#1 \$haystack of function str_contains expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
 			path: src/Command/RepositoryAddCommand.php
 
 		-
@@ -53,12 +29,6 @@ parameters:
 			identifier: cast.string
 			count: 1
 			path: src/Command/RepositoryRemoveCommand.php
-
-		-
-			message: '#^Parameter \#2 \$content of static method Php\\Pie\\File\\SudoFilePut\:\:contents\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Command/SelfUpdateCommand.php
 
 		-
 			message: '#^Cannot cast mixed to string\.$#'
@@ -91,36 +61,6 @@ parameters:
 			path: src/ComposerIntegration/PieComposerInstaller.php
 
 		-
-			message: '#^Method Php\\Pie\\ComposerIntegration\\PieJsonEditor\:\:addRepository\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/ComposerIntegration/PieJsonEditor.php
-
-		-
-			message: '#^Method Php\\Pie\\ComposerIntegration\\PieJsonEditor\:\:addRequire\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/ComposerIntegration/PieJsonEditor.php
-
-		-
-			message: '#^Method Php\\Pie\\ComposerIntegration\\PieJsonEditor\:\:excludePackagistOrg\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/ComposerIntegration/PieJsonEditor.php
-
-		-
-			message: '#^Method Php\\Pie\\ComposerIntegration\\PieJsonEditor\:\:removeRepository\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/ComposerIntegration/PieJsonEditor.php
-
-		-
-			message: '#^Method Php\\Pie\\ComposerIntegration\\PieJsonEditor\:\:removeRequire\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/ComposerIntegration/PieJsonEditor.php
-
-		-
 			message: '#^Call to function assert\(\) with true will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1
@@ -137,12 +77,6 @@ parameters:
 			identifier: cast.string
 			count: 1
 			path: src/ComposerIntegration/VendorCleanup.php
-
-		-
-			message: '#^Parameter \#1 \$implementation of method Illuminate\\Contracts\\Container\\ContextualBindingBuilder\:\:give\(\) expects array\|Closure\|string, non\-empty\-string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Container.php
 
 		-
 			message: '#^Call to static method Php\\Pie\\DependencyResolver\\DetermineMinimumStability\:\:assertValidStabilityString\(\) with ''alpha''\|''beta''\|''dev''\|''RC''\|''stable'' will always evaluate to true\.$#'
@@ -217,26 +151,8 @@ parameters:
 			path: src/ExtensionName.php
 
 		-
-			message: '#^Parameter \#2 \$checksum of class Php\\Pie\\File\\BinaryFile constructor expects non\-empty\-string, non\-falsy\-string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/File/BinaryFile.php
-
-		-
 			message: '#^Negated boolean expression is always false\.$#'
 			identifier: booleanNot.alwaysFalse
-			count: 1
-			path: src/File/SudoUnlink.php
-
-		-
-			message: '#^Right side of \|\| is always true\.$#'
-			identifier: booleanOr.rightAlwaysTrue
-			count: 1
-			path: src/File/SudoUnlink.php
-
-		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
 			count: 1
 			path: src/File/SudoUnlink.php
 
@@ -245,18 +161,6 @@ parameters:
 			identifier: if.alwaysTrue
 			count: 1
 			path: src/File/WindowsDelete.php
-
-		-
-			message: '#^Argument of an invalid type list\<string\>\|false supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: src/Installing/Ini/IsExtensionAlreadyInTheIniFile.php
-
-		-
-			message: '#^Parameter \#2 \$array of function array_key_exists expects array, array\|false given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Installing/Ini/IsExtensionAlreadyInTheIniFile.php
 
 		-
 			message: '#^Call to function array_key_exists\(\) with ''downloads'' and array\{name\: string, description\: string\|null, abandoned\?\: string\|true, url\?\: string\} will always evaluate to false\.$#'
@@ -355,12 +259,6 @@ parameters:
 			path: test/integration/Installing/WindowsInstallTest.php
 
 		-
-			message: '#^Parameter \#2 \$extractedSourcePath of static method Php\\Pie\\Downloading\\DownloadedPackage\:\:fromPackageAndExtractedPath\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 2
-			path: test/unit/ComposerIntegration/BundledPhpExtensionsRepositoryTest.php
-
-		-
 			message: '#^Match expression does not handle remaining value\: string$#'
 			identifier: match.unhandled
 			count: 1
@@ -371,12 +269,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: test/unit/ComposerIntegration/VendorCleanupTest.php
-
-		-
-			message: '#^Parameter \#2 \$extractedSourcePath of static method Php\\Pie\\Downloading\\DownloadedPackage\:\:fromPackageAndExtractedPath\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 3
-			path: test/unit/Downloading/DownloadedPackageTest.php
 
 		-
 			message: '#^Parameter \#1 \$phpExt of method Composer\\Package\\Package\:\:setPhpExt\(\) expects array\{extension\-name\?\: string, priority\?\: int, support\-zts\?\: bool, support\-nts\?\: bool, build\-path\?\: string\|null, download\-url\-method\?\: list\<string\>\|string, os\-families\?\: non\-empty\-list\<non\-empty\-string\>, os\-families\-exclude\?\: non\-empty\-list\<non\-empty\-string\>, \.\.\.\}\|null, array\{extension\-name\: null\} given\.$#'
@@ -437,69 +329,3 @@ parameters:
 			identifier: property.notFound
 			count: 4
 			path: test/unit/SelfManage/BuildTools/PhpizeBuildToolFinderTest.php
-
-		-
-			message: '#^Method Php\\PieUnitTest\\SelfManage\\Verify\\FallbackVerificationUsingOpenSslTest\:\:prepareCertificateAndSignature\(\) should return array\{string, string\} but returns array\{mixed, mixed\}\.$#'
-			identifier: return.type
-			count: 1
-			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
-
-		-
-			message: '#^Parameter \#1 \$certificate of function openssl_x509_export expects OpenSSLCertificate\|string, OpenSSLCertificate\|false given\.$#'
-			identifier: argument.type
-			count: 2
-			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
-
-		-
-			message: '#^Parameter \#1 \$csr of function openssl_csr_sign expects OpenSSLCertificateSigningRequest\|string, OpenSSLCertificateSigningRequest\|false given\.$#'
-			identifier: argument.type
-			count: 2
-			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
-
-		-
-			message: '#^Parameter \#1 \$dsseEnvelopePayload of method Php\\PieUnitTest\\SelfManage\\Verify\\FallbackVerificationUsingOpenSslTest\:\:prepareCertificateAndSignature\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 3
-			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
-
-		-
-			message: '#^Parameter \#1 \$string of function trim expects string, array\<string\>\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
-
-		-
-			message: '#^Parameter \#2 \$ca_certificate of function openssl_csr_sign expects OpenSSLCertificate\|string\|null, OpenSSLCertificate\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
-
-		-
-			message: '#^Parameter \#2 \$dsseEnvelopePayload of method Php\\PieUnitTest\\SelfManage\\Verify\\FallbackVerificationUsingOpenSslTest\:\:mockAttestationResponse\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 3
-			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
-
-		-
-			message: '#^Parameter \#3 \$private_key of function openssl_csr_sign expects array\|OpenSSLAsymmetricKey\|OpenSSLCertificate\|string, mixed given\.$#'
-			identifier: argument.type
-			count: 2
-			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
-
-		-
-			message: '#^Parameter \#3 \$private_key of function openssl_sign expects array\|OpenSSLAsymmetricKey\|OpenSSLCertificate\|string, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
-
-		-
-			message: '#^Parameter \#3 \$subject of function str_replace expects array\<string\>\|string, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
-
-		-
-			message: '#^Parameter \#4 \$body of class Composer\\Util\\Http\\Response constructor expects string\|null, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php

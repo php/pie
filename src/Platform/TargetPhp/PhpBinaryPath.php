@@ -15,6 +15,7 @@ use Php\Pie\Platform\OperatingSystemFamily;
 use Php\Pie\Platform\TargetPhp\Exception\ExtensionPathProblem;
 use Php\Pie\Util\Process;
 use RuntimeException;
+use Safe\Exceptions\FilesystemException;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Webmozart\Assert\Assert;
 
@@ -32,10 +33,10 @@ use function in_array;
 use function is_dir;
 use function is_executable;
 use function ltrim;
-use function mkdir;
-use function preg_match;
-use function preg_replace;
 use function rtrim;
+use function Safe\mkdir;
+use function Safe\preg_match;
+use function Safe\preg_replace;
 use function sprintf;
 use function strtolower;
 use function trim;
@@ -139,7 +140,13 @@ class PhpBinaryPath
             }
 
             // if the path is absolute, try to create it
-            if (mkdir($extensionPath, 0777, true) && file_exists($extensionPath) && is_dir($extensionPath)) {
+            try {
+                mkdir($extensionPath, 0777, true);
+            } catch (FilesystemException) {
+                throw ExtensionPathProblem::new($this, $extensionPath);
+            }
+
+            if (file_exists($extensionPath) && is_dir($extensionPath)) {
                 return $extensionPath;
             }
         }
@@ -495,7 +502,6 @@ PHP,
         $phpConfigAttempts[] = preg_replace('((.*)php)', '$1php-config', $phpBinaryPath->phpBinaryPath);
 
         foreach ($phpConfigAttempts as $phpConfigAttempt) {
-            assert($phpConfigAttempt !== null);
             assert($phpConfigAttempt !== '');
             if (! file_exists($phpConfigAttempt) || ! is_executable($phpConfigAttempt)) {
                 continue;

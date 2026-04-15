@@ -10,12 +10,12 @@ use Php\Pie\ExtensionType;
 use Php\Pie\File\Sudo;
 use Php\Pie\File\SudoFilePut;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
+use Safe\Exceptions\FilesystemException;
 use Throwable;
 
-use function file_get_contents;
 use function is_readable;
-use function is_string;
 use function is_writable;
+use function Safe\file_get_contents;
 use function sprintf;
 
 use const PHP_EOL;
@@ -55,13 +55,14 @@ class AddExtensionToTheIniFile
             return false;
         }
 
-        $originalIniContent = file_get_contents($ini);
-
-        if (! is_string($originalIniContent)) {
+        try {
+            $originalIniContent = file_get_contents($ini);
+        } catch (FilesystemException $e) {
             $io->write(
                 sprintf(
-                    'Tried making a backup of %s but could not read it, aborting enablement of extension',
+                    'Tried making a backup of %s but could not read it, aborting enablement of extension: %s',
                     $ini,
+                    $e->getMessage(),
                 ),
                 verbosity: IOInterface::VERBOSE,
             );

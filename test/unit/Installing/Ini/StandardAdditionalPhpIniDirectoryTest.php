@@ -24,12 +24,12 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Output\OutputInterface;
 
-use function mkdir;
-use function rmdir;
+use function Safe\mkdir;
+use function Safe\rmdir;
+use function Safe\tempnam;
+use function Safe\touch;
+use function Safe\unlink;
 use function sys_get_temp_dir;
-use function tempnam;
-use function touch;
-use function unlink;
 
 use const DIRECTORY_SEPARATOR;
 

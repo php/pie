@@ -9,9 +9,9 @@ use Php\Pie\File\SudoUnlink;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-use function chmod;
+use function Safe\chmod;
+use function Safe\touch;
 use function sys_get_temp_dir;
-use function touch;
 use function uniqid;
 
 use const DIRECTORY_SEPARATOR;

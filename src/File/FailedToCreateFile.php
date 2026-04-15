@@ -4,25 +4,24 @@ declare(strict_types=1);
 
 namespace Php\Pie\File;
 
-use Php\Pie\Util\CaptureErrors;
 use RuntimeException;
 use Symfony\Component\Process\Exception\ProcessFailedException;
+use Throwable;
 
-use function array_column;
-use function implode;
 use function sprintf;
 
-/** @phpstan-import-type CapturedErrorList from CaptureErrors */
 class FailedToCreateFile extends RuntimeException
 {
-    /** @param CapturedErrorList $recorded */
-    public static function fromTouchErrors(string $filename, array $recorded): self
+    public static function fromTouchError(string $filename, Throwable $previous): self
     {
-        return new self(sprintf(
-            "Failed to create file %s.\n\nErrors:\n - %s",
-            $filename,
-            implode("\n - ", array_column($recorded, 'message')),
-        ));
+        return new self(
+            sprintf(
+                'Failed to create file %s: %s',
+                $filename,
+                $previous->getMessage(),
+            ),
+            previous: $previous,
+        );
     }
 
     public static function fromNoPermissions(string $filename): self

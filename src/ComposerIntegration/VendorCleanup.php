@@ -7,12 +7,13 @@ namespace Php\Pie\ComposerIntegration;
 use Composer\Composer;
 use Composer\IO\IOInterface;
 use Composer\Util\Filesystem;
+use Safe\Exceptions\DirException;
+use Webmozart\Assert\Assert;
 
 use function array_filter;
 use function array_walk;
 use function in_array;
-use function is_array;
-use function scandir;
+use function Safe\scandir;
 use function sprintf;
 
 use const DIRECTORY_SEPARATOR;
@@ -28,14 +29,18 @@ class VendorCleanup
 
     public function __invoke(Composer $composer): void
     {
-        $vendorDir      = (string) $composer->getConfig()->get('vendor-dir');
-        $vendorContents = scandir($vendorDir);
+        $vendorDir = (string) $composer->getConfig()->get('vendor-dir');
 
-        if (! is_array($vendorContents)) {
+        try {
+            $vendorContents = scandir($vendorDir);
+            Assert::isList($vendorContents);
+            Assert::allString($vendorContents);
+        } catch (DirException $e) {
             $this->io->write(
                 sprintf(
-                    '<comment>Vendor directory (vendor-dir config) %s seemed invalid?</comment>',
+                    '<comment>Vendor directory (vendor-dir config) %s seemed invalid? %s</comment>',
                     $vendorDir,
+                    $e->getMessage(),
                 ),
                 verbosity: IOInterface::VERY_VERBOSE,
             );

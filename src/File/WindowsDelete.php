@@ -8,9 +8,9 @@ use Php\Pie\Util\Process;
 use RuntimeException;
 
 use function file_exists;
+use function Safe\tempnam;
 use function sprintf;
 use function sys_get_temp_dir;
-use function tempnam;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class WindowsDelete
@@ -27,12 +27,6 @@ final class WindowsDelete
         }
 
         $newLockedExtFilename = tempnam(sys_get_temp_dir(), 'pie');
-        if ($newLockedExtFilename === false) {
-            throw new RuntimeException(sprintf(
-                'Failed to create a temporary name for moving %s',
-                $filename,
-            ));
-        }
 
         Process::run(['move', $filename, $newLockedExtFilename]);
 

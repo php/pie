@@ -8,13 +8,14 @@ use Composer\Util\Platform as ComposerPlatform;
 use Composer\Util\Silencer;
 use Php\Pie\Platform\TargetPlatform;
 use RuntimeException;
+use Safe\Exceptions\FilesystemException;
 
 use function array_keys;
 use function defined;
-use function fopen;
 use function implode;
 use function md5;
 use function rtrim;
+use function Safe\fopen;
 use function str_contains;
 use function strpos;
 use function strtr;
@@ -28,7 +29,11 @@ class Platform
 {
     public static function isInteractive(): bool
     {
-        $stdin = defined('STDIN') ? STDIN : fopen('php://stdin', 'r');
+        try {
+            $stdin = defined('STDIN') ? STDIN : fopen('php://stdin', 'r');
+        } catch (FilesystemException) {
+            $stdin = false;
+        }
 
         return ComposerPlatform::getEnv('COMPOSER_NO_INTERACTION') !== '1'
             && $stdin !== false

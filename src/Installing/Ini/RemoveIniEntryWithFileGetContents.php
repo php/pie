@@ -10,18 +10,18 @@ use Php\Pie\ExtensionType;
 use Php\Pie\File\FailedToWriteFile;
 use Php\Pie\File\SudoFilePut;
 use Php\Pie\Platform\TargetPlatform;
+use Webmozart\Assert\Assert;
 
 use function array_filter;
 use function array_map;
 use function array_merge;
 use function array_walk;
 use function file_exists;
-use function file_get_contents;
 use function in_array;
-use function is_array;
 use function is_dir;
-use function preg_replace;
-use function scandir;
+use function Safe\file_get_contents;
+use function Safe\preg_replace;
+use function Safe\scandir;
 use function sprintf;
 
 use const DIRECTORY_SEPARATOR;
@@ -42,26 +42,26 @@ class RemoveIniEntryWithFileGetContents implements RemoveIniEntry
         $additionalIniDirectory = $targetPlatform->phpBinaryPath->additionalIniDirectory();
         if ($additionalIniDirectory !== null && file_exists($additionalIniDirectory) && is_dir($additionalIniDirectory)) {
             $filenames = scandir($additionalIniDirectory);
-            if (is_array($filenames)) {
-                $allIniFiles = array_merge(
-                    array_map(
-                        static function (string $path) use ($additionalIniDirectory): string {
-                            return $additionalIniDirectory . DIRECTORY_SEPARATOR . $path;
-                        },
-                        array_filter(
-                            $filenames,
-                            static function (string $path) use ($additionalIniDirectory): bool {
-                                if (in_array($path, ['.', '..'])) {
-                                    return false;
-                                }
+            Assert::isList($filenames);
+            Assert::allString($filenames);
+            $allIniFiles = array_merge(
+                array_map(
+                    static function (string $path) use ($additionalIniDirectory): string {
+                        return $additionalIniDirectory . DIRECTORY_SEPARATOR . $path;
+                    },
+                    array_filter(
+                        $filenames,
+                        static function (string $path) use ($additionalIniDirectory): bool {
+                            if (in_array($path, ['.', '..'])) {
+                                return false;
+                            }
 
-                                return file_exists($additionalIniDirectory . DIRECTORY_SEPARATOR . $path);
-                            },
-                        ),
+                            return file_exists($additionalIniDirectory . DIRECTORY_SEPARATOR . $path);
+                        },
                     ),
-                    $allIniFiles,
-                );
-            }
+                ),
+                $allIniFiles,
+            );
         }
 
         // Make sure all symlinks are resolved
@@ -79,7 +79,7 @@ class RemoveIniEntryWithFileGetContents implements RemoveIniEntry
             static function (string $iniFile) use (&$updatedIniFiles, $regex, $package, $io): void {
                 $currentContent = file_get_contents($iniFile);
 
-                if ($currentContent === false || $currentContent === '') {
+                if ($currentContent === '') {
                     return;
                 }
 
@@ -89,7 +89,7 @@ class RemoveIniEntryWithFileGetContents implements RemoveIniEntry
                     $currentContent,
                 );
 
-                if ($replacedContent === null || $replacedContent === $currentContent) {
+                if ($replacedContent === $currentContent) {
                     return;
                 }
 

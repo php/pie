@@ -12,7 +12,7 @@ use Php\Pie\ExtensionType;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-use function realpath;
+use function Safe\realpath;
 use function uniqid;
 
 use const DIRECTORY_SEPARATOR;

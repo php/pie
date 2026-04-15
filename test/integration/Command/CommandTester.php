@@ -11,7 +11,7 @@ use Symfony\Component\Console\Output\StreamOutput;
 use Symfony\Component\Console\Tester\CommandTester as SymfonyCommandTester;
 
 use function assert;
-use function ftruncate;
+use function Safe\ftruncate;
 
 class CommandTester extends SymfonyCommandTester
 {

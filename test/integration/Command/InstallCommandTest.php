@@ -25,7 +25,7 @@ use function is_executable;
 use function is_file;
 use function is_string;
 use function is_writable;
-use function preg_match;
+use function Safe\preg_match;
 
 #[CoversClass(InstallCommand::class)]
 class InstallCommandTest extends TestCase

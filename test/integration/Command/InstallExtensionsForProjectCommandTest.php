@@ -37,7 +37,7 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\BufferedOutput;
 
-use function getcwd;
+use function Safe\getcwd;
 
 #[CoversClass(InstallExtensionsForProjectCommand::class)]
 final class InstallExtensionsForProjectCommandTest extends TestCase

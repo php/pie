@@ -11,9 +11,9 @@ use Php\Pie\Settings;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-use function file_get_contents;
-use function file_put_contents;
-use function mkdir;
+use function Safe\file_get_contents;
+use function Safe\file_put_contents;
+use function Safe\mkdir;
 use function sys_get_temp_dir;
 use function uniqid;
 

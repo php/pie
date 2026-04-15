@@ -20,7 +20,7 @@ use Symfony\Component\Process\Process as SymfonyProcess;
 use function count;
 use function file_exists;
 use function implode;
-use function rename;
+use function Safe\rename;
 use function sprintf;
 
 use const DIRECTORY_SEPARATOR;

@@ -20,14 +20,14 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Output\OutputInterface;
 
-use function chmod;
-use function file_get_contents;
-use function file_put_contents;
+use function Safe\chmod;
+use function Safe\file_get_contents;
+use function Safe\file_put_contents;
+use function Safe\tempnam;
+use function Safe\touch;
+use function Safe\unlink;
 use function sprintf;
 use function sys_get_temp_dir;
-use function tempnam;
-use function touch;
-use function unlink;
 
 use const PHP_EOL;
 

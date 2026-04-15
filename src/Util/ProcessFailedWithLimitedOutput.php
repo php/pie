@@ -7,7 +7,7 @@ namespace Php\Pie\Util;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 
-use function file_put_contents;
+use function Safe\file_put_contents;
 use function sprintf;
 use function strlen;
 use function sys_get_temp_dir;

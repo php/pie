@@ -10,8 +10,8 @@ use Php\Pie\File\SudoCreate;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-use function chmod;
-use function mkdir;
+use function Safe\chmod;
+use function Safe\mkdir;
 use function sys_get_temp_dir;
 use function uniqid;
 

@@ -3,6 +3,7 @@ includes:
     - vendor/bnf/phpstan-psr-container/extension.neon
     - vendor/phpstan/phpstan-webmozart-assert/extension.neon
     - vendor/phpstan/phpstan-phpunit/extension.neon
+    - vendor/thecodingmachine/phpstan-safe-rule/phpstan-safe-rule.neon
 
 parameters:
     level: 10

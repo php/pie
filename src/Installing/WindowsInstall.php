@@ -16,11 +16,11 @@ use RuntimeException;
 use SplFileInfo;
 
 use function assert;
-use function copy;
 use function dirname;
 use function file_exists;
 use function is_file;
-use function mkdir;
+use function Safe\copy;
+use function Safe\mkdir;
 use function str_replace;
 use function strlen;
 use function substr;
@@ -117,7 +117,9 @@ final class WindowsInstall implements Install
             WindowsDelete::usingMoveToTemp($destinationDllName);
         }
 
-        if (! copy($sourceDllName, $destinationDllName) || ! file_exists($destinationDllName) && ! is_file($destinationDllName)) {
+        copy($sourceDllName, $destinationDllName);
+
+        if (! file_exists($destinationDllName) && ! is_file($destinationDllName)) {
             throw new RuntimeException('Failed to install DLL to ' . $destinationDllName);
         }
 
@@ -144,7 +146,9 @@ final class WindowsInstall implements Install
         $destinationPdbName = str_replace('.dll', '.pdb', $destinationDllName);
         assert($destinationPdbName !== '');
 
-        if (! copy($sourcePdbName, $destinationPdbName) || ! file_exists($destinationPdbName) && ! is_file($destinationPdbName)) {
+        copy($sourcePdbName, $destinationPdbName);
+
+        if (! file_exists($destinationPdbName) && ! is_file($destinationPdbName)) {
             throw new RuntimeException('Failed to install PDB to ' . $destinationPdbName);
         }
 
@@ -167,7 +171,9 @@ final class WindowsInstall implements Install
 
         $destinationExtraDll = dirname($targetPlatform->phpBinaryPath->phpBinaryPath) . DIRECTORY_SEPARATOR . $file->getFilename();
 
-        if (! copy($file->getPathname(), $destinationExtraDll) || ! file_exists($destinationExtraDll) && ! is_file($destinationExtraDll)) {
+        copy($file->getPathname(), $destinationExtraDll);
+
+        if (! file_exists($destinationExtraDll) && ! is_file($destinationExtraDll)) {
             throw new RuntimeException('Failed to copy to ' . $destinationExtraDll);
         }
 
@@ -192,7 +198,9 @@ final class WindowsInstall implements Install
             mkdir($destinationPath, 0777, true);
         }
 
-        if (! copy($file->getPathname(), $destinationFullFilename) || ! file_exists($destinationFullFilename) && ! is_file($destinationFullFilename)) {
+        copy($file->getPathname(), $destinationFullFilename);
+
+        if (! file_exists($destinationFullFilename) && ! is_file($destinationFullFilename)) {
             throw new RuntimeException('Failed to copy to ' . $destinationFullFilename);
         }
 

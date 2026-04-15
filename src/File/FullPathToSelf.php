@@ -8,8 +8,8 @@ use RuntimeException;
 
 use function array_key_exists;
 use function is_string;
-use function preg_match;
-use function realpath;
+use function Safe\preg_match;
+use function Safe\realpath;
 
 use const DIRECTORY_SEPARATOR;
 
