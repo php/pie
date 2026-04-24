@@ -313,6 +313,11 @@ pie install example/some-extension --with-some-library-name=/path/to/the/lib
 pie install example/some-extension --with-some-library-name=/path/to/the/lib --enable-some-functionality
 ```
 
+> [!TIP]
+> If you specify configure options for a package that uses the
+> `pre-packaged-binary` download method, PIE will fall back to compiling the
+> extension using the configure options you have specified.
+
 ### Build tools check
 
 PIE will attempt to check the presence of build tools (such as gcc, make, etc.)
