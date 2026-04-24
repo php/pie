@@ -500,6 +500,57 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
         self::assertSame('zip', $composerPackage->getDistType());
     }
 
+    public function testPrePackagedBinaryMethodIsIgnoredWhenConfigureOptionsArePassed(): void
+    {
+        $composerPackage = new CompletePackage('foo/bar', '1.2.3.0', '1.2.3');
+        $composerPackage->setDistType('zip');
+        $composerPackage->setDistUrl('https://example.com/git-archive-zip-url');
+        $composerPackage->setPhpExt([
+            'extension-name' => 'foobar',
+            'download-url-method' => ['pre-packaged-binary'],
+        ]);
+
+        $installerEvent = new InstallerEvent(
+            InstallerEvents::PRE_OPERATIONS_EXEC,
+            $this->composer,
+            $this->io,
+            false,
+            true,
+            new Transaction([], [$composerPackage]),
+        );
+
+        $this->container
+            ->expects(self::never())
+            ->method('get');
+
+        $listener = new OverrideDownloadUrlInstallListener(
+            $this->composer,
+            $this->io,
+            $this->container,
+            new PieComposerRequest(
+                $this->createMock(IOInterface::class),
+                new TargetPlatform(
+                    OperatingSystem::NonWindows,
+                    OperatingSystemFamily::Linux,
+                    PhpBinaryPath::fromCurrentProcess(),
+                    Architecture::x86_64,
+                    ThreadSafetyMode::NonThreadSafe,
+                    1,
+                    WindowsCompiler::VC15,
+                    null,
+                ),
+                new RequestedPackageAndVersion('foo/bar', '^1.1'),
+                PieOperation::Install,
+                ['--with-foo'],
+                false,
+            ),
+        );
+
+        $this->expectException(CouldNotDetermineDownloadUrlMethod::class);
+        $this->expectExceptionMessage('Could not download foo/bar using pre-packaged-binary method: Cannot use pre-packaged-binary download method, as configure options were passed.');
+        $listener($installerEvent);
+    }
+
     public function testNoSelectedDownloadUrlMethodWillThrowException(): void
     {
         $composerPackage = new CompletePackage('foo/bar', '1.2.3.0', '1.2.3');
