@@ -80,6 +80,15 @@ class OverrideDownloadUrlInstallListener
                 foreach ($downloadUrlMethods as $downloadUrlMethod) {
                     $this->io->write('Trying to download using: ' . $downloadUrlMethod->value, verbosity: IOInterface::VERY_VERBOSE);
 
+                    if ($downloadUrlMethod === DownloadUrlMethod::PrePackagedBinary && $this->composerRequest->configureOptions !== []) {
+                        $configureOptionsConflictMessage = 'Cannot use pre-packaged-binary download method, as configure options were passed.';
+
+                        $downloadMethodFailures[$downloadUrlMethod->value] = $configureOptionsConflictMessage;
+                        $this->io->write($configureOptionsConflictMessage, verbosity: IOInterface::VERBOSE);
+
+                        continue;
+                    }
+
                     // Exit early if we should just use Composer's normal download
                     if ($downloadUrlMethod === DownloadUrlMethod::ComposerDefaultDownload) {
                         $selectedDownloadUrlMethod = $downloadUrlMethod;
