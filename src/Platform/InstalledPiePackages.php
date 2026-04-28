@@ -11,26 +11,20 @@ use InvalidArgumentException;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\ExtensionName;
 
-use function array_combine;
 use function array_filter;
 use function array_map;
+use function array_values;
 
-/**
- * @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks
- *
- * @phpstan-type ListOfPiePackages = array<non-empty-string, Package>
- */
+/** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 class InstalledPiePackages
 {
     /**
      * Returns a list of PIE packages according to PIE; this does NOT check if
      * the extension is actually enabled in the target PHP.
-     *
-     * @return ListOfPiePackages
      */
-    public function allPiePackages(Composer $composer): array
+    public function allPiePackages(Composer $composer): PiePackageList
     {
-        $composerInstalledPackages = array_map(
+        return new PiePackageList(array_values(array_map(
             static function (CompletePackageInterface $package): Package {
                 return Package::fromComposerCompletePackage($package);
             },
@@ -49,27 +43,6 @@ class InstalledPiePackages
                     return $basePackage instanceof CompletePackageInterface;
                 },
             ),
-        );
-
-        return array_combine(
-            array_map(
-            /** @return non-empty-string */
-                static function (Package $package): string {
-                    return match ($package->extensionName()->name()) {
-                        'core' => 'Core',
-                        'spl' => 'SPL',
-                        'phar' => 'Phar',
-                        'reflection' => 'Reflection',
-                        'pdo' => 'PDO',
-                        'ffi' => 'FFI',
-                        'opcache' => 'Zend OPcache',
-                        'simplexml' => 'SimpleXML',
-                        default => $package->extensionName()->name(),
-                    };
-                },
-                $composerInstalledPackages,
-            ),
-            $composerInstalledPackages,
-        );
+        )));
     }
 }

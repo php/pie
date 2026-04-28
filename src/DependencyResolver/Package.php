@@ -6,11 +6,17 @@ namespace Php\Pie\DependencyResolver;
 
 use Composer\Package\CompletePackageInterface;
 use InvalidArgumentException;
+use Php\Pie\ComposerIntegration\PieInstalledJsonMetadataKeys;
 use Php\Pie\ConfigureOption;
 use Php\Pie\Downloading\DownloadUrlMethod;
 use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
+use Php\Pie\File\BinaryFile;
+use Php\Pie\File\BinaryFileFailedVerification;
+use Php\Pie\Platform\OperatingSystem;
 use Php\Pie\Platform\OperatingSystemFamily;
+use Php\Pie\Platform\TargetPlatform;
+use Php\Pie\Util\PackageVerificationStatus;
 use Webmozart\Assert\Assert;
 
 use function array_key_exists;
@@ -18,12 +24,15 @@ use function array_map;
 use function array_slice;
 use function count;
 use function explode;
+use function file_exists;
 use function implode;
 use function is_array;
 use function parse_url;
 use function str_contains;
 use function str_starts_with;
 use function strtolower;
+
+use const DIRECTORY_SEPARATOR;
 
 /**
  * @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks
@@ -234,5 +243,46 @@ final class Package
     public function supportedDownloadUrlMethods(): array|null
     {
         return $this->supportedDownloadUrlMethods;
+    }
+
+    public function verifyPackageStatus(TargetPlatform $targetPlatform): PackageVerificationStatus
+    {
+        $extensionPath    = $targetPlatform->phpBinaryPath->extensionPath();
+        $extensionEnding  = $targetPlatform->operatingSystem === OperatingSystem::Windows ? '.dll' : '.so';
+        $phpExtensionName = $this->extensionName->name();
+
+        $actualBinaryPathByConvention = $extensionPath . DIRECTORY_SEPARATOR . $phpExtensionName . $extensionEnding;
+
+        // The extension may not be in the usual path (since you can specify a full path to an extension in the INI file)
+        if (! file_exists($actualBinaryPathByConvention)) {
+            return PackageVerificationStatus::ActualBinaryNotFound;
+        }
+
+        $installedJsonMetadata = PieInstalledJsonMetadataKeys::pieMetadataFromComposerPackage($this->composerPackage());
+        $pieExpectedBinaryPath = array_key_exists(PieInstalledJsonMetadataKeys::InstalledBinary->value, $installedJsonMetadata) ? $installedJsonMetadata[PieInstalledJsonMetadataKeys::InstalledBinary->value] : null;
+        $pieExpectedChecksum   = array_key_exists(PieInstalledJsonMetadataKeys::BinaryChecksum->value, $installedJsonMetadata) ? $installedJsonMetadata[PieInstalledJsonMetadataKeys::BinaryChecksum->value] : null;
+
+        if ($pieExpectedBinaryPath === null) {
+            return PackageVerificationStatus::InstalledBinaryMetadataMissing;
+        }
+
+        if ($pieExpectedChecksum === null) {
+            return PackageVerificationStatus::ChecksumMetadataMissing;
+        }
+
+        if ($pieExpectedBinaryPath !== $actualBinaryPathByConvention) {
+            return PackageVerificationStatus::InstalledBinaryPathDoesNotMatchActualBinaryPath;
+        }
+
+        $expectedBinaryFileFromMetadata = new BinaryFile($pieExpectedBinaryPath, $pieExpectedChecksum);
+        $actualBinaryFile               = BinaryFile::fromFileWithSha256Checksum($actualBinaryPathByConvention);
+
+        try {
+            $expectedBinaryFileFromMetadata->verifyAgainstOther($actualBinaryFile);
+        } catch (BinaryFileFailedVerification) {
+            return PackageVerificationStatus::ChecksumMismatch;
+        }
+
+        return PackageVerificationStatus::Verified;
     }
 }
