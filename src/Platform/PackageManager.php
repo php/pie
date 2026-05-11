@@ -12,8 +12,6 @@ use Symfony\Component\Process\ExecutableFinder;
 
 use function array_unshift;
 use function implode;
-use function str_contains;
-use function strtolower;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 enum PackageManager: string
@@ -69,7 +67,7 @@ enum PackageManager: string
 
             return;
         } catch (ProcessFailedException $e) {
-            if (Platform::isInteractive() && self::isProbablyPermissionDenied($e)) {
+            if (Platform::isInteractive() && Process::processProbablyPermissionDenied($e)) {
                 array_unshift($cmd, Sudo::find());
 
                 Process::run($cmd);
@@ -79,25 +77,5 @@ enum PackageManager: string
 
             throw $e;
         }
-    }
-
-    private static function isProbablyPermissionDenied(ProcessFailedException $e): bool
-    {
-        $mergedProcessOutput = strtolower($e->getProcess()->getErrorOutput() . $e->getProcess()->getOutput());
-
-        $needles = [
-            'permission denied',
-            'you must be root',
-            'operation not permitted',
-            'are you root',
-        ];
-
-        foreach ($needles as $needle) {
-            if (str_contains($mergedProcessOutput, $needle)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

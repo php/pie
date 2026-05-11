@@ -7,6 +7,8 @@ namespace Php\Pie\Util;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process as SymfonyProcess;
 
+use function str_contains;
+use function strtolower;
 use function trim;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
@@ -44,5 +46,26 @@ final class Process
         return trim((new SymfonyProcess($command, $workingDirectory, $env, timeout: $timeout))
             ->mustRun($outputCallback)
             ->getOutput());
+    }
+
+    public static function processProbablyPermissionDenied(ProcessFailedException $e): bool
+    {
+        $mergedProcessOutput = strtolower($e->getProcess()->getErrorOutput() . $e->getProcess()->getOutput());
+
+        $needles = [
+            'permission denied',
+            'you must be root',
+            'operation not permitted',
+            'are you root',
+            'has to be run with superuser privileges',
+        ];
+
+        foreach ($needles as $needle) {
+            if (str_contains($mergedProcessOutput, $needle)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
