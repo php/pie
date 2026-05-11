@@ -44,7 +44,7 @@ class PhpBinaryPathBasedPlatformRepository extends PlatformRepository
 
         $piePackages                          = $installedPiePackages->allPiePackages($composer);
         $extensionsBeingReplacedByPiePackages = [];
-        foreach ($piePackages as $piePackage) {
+        foreach ($piePackages->packages() as $piePackage) {
             foreach ($piePackage->composerPackage()->getReplaces() as $replaceLink) {
                 $target = $replaceLink->getTarget();
                 if (
