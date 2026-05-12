@@ -29,15 +29,14 @@ final class InstalledPiePackagesTest extends TestCase
         $composer = $this->createMock(Composer::class);
         $composer->method('getRepositoryManager')->willReturn($repoManager);
 
-        $packages = (new InstalledPiePackages())->allPiePackages($composer);
+        $packages = (new InstalledPiePackages())->allPiePackages($composer)->packages();
 
-        self::assertArrayHasKey('bar1', $packages);
-        self::assertArrayHasKey('bar2', $packages);
+        self::assertCount(2, $packages);
 
-        self::assertSame('bar1', $packages['bar1']->extensionName()->name());
-        self::assertSame('foo/bar1', $packages['bar1']->name());
-        self::assertSame('bar2', $packages['bar2']->extensionName()->name());
-        self::assertSame('foo/bar2', $packages['bar2']->name());
+        self::assertSame('bar1', $packages[0]->extensionName()->name());
+        self::assertSame('foo/bar1', $packages[0]->name());
+        self::assertSame('bar2', $packages[1]->extensionName()->name());
+        self::assertSame('foo/bar2', $packages[1]->name());
     }
 
     public function testInvalidExtensionNamesAreFilteredOut(): void

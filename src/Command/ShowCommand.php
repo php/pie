@@ -10,15 +10,14 @@ use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieInstalledJsonMetadataKeys;
 use Php\Pie\DependencyResolver\BundledPhpExtensionRefusal;
+use Php\Pie\DependencyResolver\Package;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\DependencyResolver\ResolveDependencyWithComposer;
 use Php\Pie\DependencyResolver\UnableToResolveRequirement;
-use Php\Pie\File\BinaryFile;
-use Php\Pie\File\BinaryFileFailedVerification;
 use Php\Pie\Platform as PiePlatform;
 use Php\Pie\Platform\InstalledPiePackages;
-use Php\Pie\Platform\OperatingSystem;
 use Php\Pie\Util\Emoji;
+use Php\Pie\Util\PackageVerificationStatus;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -28,15 +27,11 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Webmozart\Assert\Assert;
 
 use function array_diff;
-use function array_key_exists;
-use function array_keys;
+use function array_map;
 use function array_walk;
 use function count;
-use function file_exists;
+use function rtrim;
 use function sprintf;
-use function substr;
-
-use const DIRECTORY_SEPARATOR;
 
 /** @phpstan-import-type PieMetadata from PieInstalledJsonMetadataKeys */
 #[AsCommand(
@@ -99,8 +94,6 @@ final class ShowCommand extends Command
 
         $piePackages          = $this->installedPiePackages->allPiePackages($composer);
         $phpEnabledExtensions = $targetPlatform->phpBinaryPath->extensions();
-        $extensionPath        = $targetPlatform->phpBinaryPath->extensionPath();
-        $extensionEnding      = $targetPlatform->operatingSystem === OperatingSystem::Windows ? '.dll' : '.so';
         $piePackagesMatched   = [];
         $rootPackageRequires  = $composer->getPackage()->getRequires();
 
@@ -110,8 +103,10 @@ final class ShowCommand extends Command
         ));
         array_walk(
             $phpEnabledExtensions,
-            function (string $version, string $phpExtensionName) use ($composer, $rootPackageRequires, $targetPlatform, $showAll, $piePackages, $extensionPath, $extensionEnding, &$piePackagesMatched): void {
-                if (! array_key_exists($phpExtensionName, $piePackages)) {
+            function (string $version, string $phpExtensionName) use ($composer, $rootPackageRequires, $targetPlatform, $showAll, $piePackages, &$piePackagesMatched): void {
+                $pieMatchesForExtension = $piePackages->findByPhpFormattedExtensionName($phpExtensionName);
+
+                if (! count($pieMatchesForExtension)) {
                     if ($showAll) {
                         $this->io->write(sprintf('  <comment>%s:%s</comment>', $phpExtensionName, $version));
                     }
@@ -119,64 +114,66 @@ final class ShowCommand extends Command
                     return;
                 }
 
-                $piePackage           = $piePackages[$phpExtensionName];
-                $piePackagesMatched[] = $phpExtensionName;
-                $packageName          = $piePackage->name();
-                $packageRequirement   = $rootPackageRequires[$piePackage->name()]->getPrettyConstraint();
+                foreach ($pieMatchesForExtension->packages() as $piePackage) {
+                    $packageName        = $piePackage->name();
+                    $verificationStatus = $piePackage->verifyPackageStatus($targetPlatform);
+                    $packageRequirement = $rootPackageRequires[$packageName]->getPrettyConstraint();
 
-                try {
-                    // Don't check for updates for bundled PHP extensions
-                    if ($piePackage->isBundledPhpExtension()) {
-                        throw new BundledPhpExtensionRefusal();
+                    if ($verificationStatus === PackageVerificationStatus::InstalledBinaryMetadataMissing) {
+                        continue;
                     }
 
-                    Assert::stringNotEmpty($packageName);
-                    Assert::stringNotEmpty($packageRequirement);
+                    $piePackagesMatched[] = $packageName;
 
-                    $latestConstrainedPackage = ($this->resolveDependencyWithComposer)(
-                        $composer,
-                        $targetPlatform,
-                        new RequestedPackageAndVersion($packageName, $packageRequirement),
-                        false,
-                    );
+                    try {
+                        // Don't check for updates for bundled PHP extensions
+                        if ($piePackage->isBundledPhpExtension()) {
+                            throw new BundledPhpExtensionRefusal();
+                        }
 
-                    $latestPackage = ($this->resolveDependencyWithComposer)(
-                        $composer,
-                        $targetPlatform,
-                        new RequestedPackageAndVersion($packageName, '*'),
-                        false,
-                    );
-                } catch (UnableToResolveRequirement | BundledPhpExtensionRefusal) {
-                    $latestConstrainedPackage = null;
-                    $latestPackage            = null;
-                }
+                        Assert::stringNotEmpty($packageName);
+                        Assert::stringNotEmpty($packageRequirement);
 
-                $updateNotice = '';
-                if ($latestConstrainedPackage !== null && $latestConstrainedPackage->version() !== $piePackage->version()) {
-                    $updateNotice = sprintf(
-                        ', upgradable to %s (within %s)',
-                        $latestConstrainedPackage->version(),
-                        $packageRequirement,
-                    );
-                }
+                        $latestConstrainedPackage = ($this->resolveDependencyWithComposer)(
+                            $composer,
+                            $targetPlatform,
+                            new RequestedPackageAndVersion($packageName, $packageRequirement),
+                            false,
+                        );
 
-                if ($latestPackage !== null && $latestPackage->version() !== $latestConstrainedPackage->version()) {
-                    $updateNotice .= sprintf(', latest version is %s', $latestPackage->version());
-                }
+                        $latestPackage = ($this->resolveDependencyWithComposer)(
+                            $composer,
+                            $targetPlatform,
+                            new RequestedPackageAndVersion($packageName, '*'),
+                            false,
+                        );
+                    } catch (UnableToResolveRequirement | BundledPhpExtensionRefusal) {
+                        $latestConstrainedPackage = null;
+                        $latestPackage            = null;
+                    }
 
-                $this->io->write(sprintf(
-                    '  <info>%s:%s</info> (from 🥧 <info>%s</info>%s)%s',
-                    $phpExtensionName,
-                    $version,
-                    $piePackage->prettyNameAndVersion(),
-                    self::verifyChecksumInformation(
-                        $extensionPath,
+                    $updateNotice = '';
+                    if ($latestConstrainedPackage !== null && $latestConstrainedPackage->version() !== $piePackage->version()) {
+                        $updateNotice = sprintf(
+                            ', upgradable to %s (within %s)',
+                            $latestConstrainedPackage->version(),
+                            $packageRequirement,
+                        );
+                    }
+
+                    if ($latestPackage !== null && $latestPackage->version() !== $latestConstrainedPackage->version()) {
+                        $updateNotice .= sprintf(', latest version is %s', $latestPackage->version());
+                    }
+
+                    $this->io->write(sprintf(
+                        '  <info>%s:%s</info> (from 🥧 <info>%s</info> %s)%s',
                         $phpExtensionName,
-                        $extensionEnding,
-                        PieInstalledJsonMetadataKeys::pieMetadataFromComposerPackage($piePackage->composerPackage()),
-                    ),
-                    $updateNotice,
-                ));
+                        $version,
+                        $piePackage->prettyNameAndVersion(),
+                        $verificationStatus->description(),
+                        $updateNotice,
+                    ));
+                }
             },
         );
 
@@ -184,67 +181,28 @@ final class ShowCommand extends Command
             $this->io->write('(none)');
         }
 
-        $unmatchedPiePackages = array_diff(array_keys($piePackages), $piePackagesMatched);
+        $unmatchedPiePackageNames = array_diff(array_map(static fn (Package $piePackage) => $piePackage->name(), $piePackages->packages()), $piePackagesMatched);
 
-        if (count($unmatchedPiePackages)) {
+        if (count($unmatchedPiePackageNames)) {
             $this->io->write(sprintf(
                 '%s %s <options=bold,underscore>PIE packages not loaded:</>',
                 "\n",
                 Emoji::WARNING,
             ));
-            $this->io->write('These extensions were installed with PIE but are not currently enabled.' . "\n");
+            $this->io->write('These extensions were set up with PIE but are not currently enabled.' . "\n");
 
-            foreach ($unmatchedPiePackages as $unmatchedPiePackage) {
-                $this->io->write(sprintf(' - %s', $piePackages[$unmatchedPiePackage]->prettyNameAndVersion()));
+            foreach ($unmatchedPiePackageNames as $unmatchedPiePackageName) {
+                $unmatchedPiePackage = $piePackages->findByPackageName($unmatchedPiePackageName);
+
+                $message = match ($unmatchedPiePackage->verifyPackageStatus($targetPlatform)) {
+                    PackageVerificationStatus::ChecksumMetadataMissing => '- was built but not installed yet.',
+                    PackageVerificationStatus::InstalledBinaryMetadataMissing => '- was downloaded but has not been built yet.',
+                    default => '- installed but not enabled in INI file',
+                };
+                $this->io->write(rtrim(sprintf(' - %s %s', $unmatchedPiePackage->prettyNameAndVersion(), $message)));
             }
         }
 
         return Command::SUCCESS;
-    }
-
-    /**
-     * @param PieMetadata $installedJsonMetadata
-     * @phpstan-param '.dll'|'.so' $extensionEnding
-     */
-    private static function verifyChecksumInformation(
-        string $extensionPath,
-        string $phpExtensionName,
-        string $extensionEnding,
-        array $installedJsonMetadata,
-    ): string {
-        $actualBinaryPathByConvention = $extensionPath . DIRECTORY_SEPARATOR . $phpExtensionName . $extensionEnding;
-
-        // The extension may not be in the usual path (since you can specify a full path to an extension in the INI file)
-        if (! file_exists($actualBinaryPathByConvention)) {
-            return '';
-        }
-
-        $pieExpectedBinaryPath = array_key_exists(PieInstalledJsonMetadataKeys::InstalledBinary->value, $installedJsonMetadata) ? $installedJsonMetadata[PieInstalledJsonMetadataKeys::InstalledBinary->value] : null;
-        $pieExpectedChecksum   = array_key_exists(PieInstalledJsonMetadataKeys::BinaryChecksum->value, $installedJsonMetadata) ? $installedJsonMetadata[PieInstalledJsonMetadataKeys::BinaryChecksum->value] : null;
-
-        // Some other kind of mismatch of file path, or we don't have a stored checksum available
-        if (
-            $pieExpectedBinaryPath === null
-            || $pieExpectedChecksum === null
-            || $pieExpectedBinaryPath !== $actualBinaryPathByConvention
-        ) {
-            return '';
-        }
-
-        $expectedBinaryFileFromMetadata = new BinaryFile($pieExpectedBinaryPath, $pieExpectedChecksum);
-        $actualBinaryFile               = BinaryFile::fromFileWithSha256Checksum($actualBinaryPathByConvention);
-
-        try {
-            $expectedBinaryFileFromMetadata->verifyAgainstOther($actualBinaryFile);
-        } catch (BinaryFileFailedVerification) {
-            return sprintf(
-                ' %s was %s..., expected %s...',
-                Emoji::WARNING,
-                substr($actualBinaryFile->checksum, 0, 8),
-                substr($expectedBinaryFileFromMetadata->checksum, 0, 8),
-            );
-        }
-
-        return ' ' . Emoji::GREEN_CHECKMARK;
     }
 }

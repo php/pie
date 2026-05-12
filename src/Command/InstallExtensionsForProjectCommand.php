@@ -167,13 +167,18 @@ final class InstallExtensionsForProjectCommand extends Command
 
         array_walk(
             $extensionsRequired,
-            function (Link $link) use ($pieComposer, $phpEnabledExtensions, $installedPiePackages, $input, &$anyErrorsHappened): void {
+            function (Link $link) use ($pieComposer, $phpEnabledExtensions, $installedPiePackages, $input, &$anyErrorsHappened, $targetPlatform): void {
                 $extension              = ExtensionName::normaliseFromString($link->getTarget());
                 $linkRequiresConstraint = $link->getPrettyConstraint();
 
+                $piePackagesForExtension = $installedPiePackages
+                    ->findByPhpFormattedExtensionName($extension->phpFormattedExtensionName())
+                    ->onlyVerifiedFor($targetPlatform);
+
                 $piePackageVersion = null;
-                if (in_array($extension->name(), array_keys($installedPiePackages))) {
-                    $piePackageVersion = $installedPiePackages[$extension->name()]->version();
+
+                if (count($piePackagesForExtension) === 1) {
+                    $piePackageVersion = $piePackagesForExtension->onlyOne()->version();
                 }
 
                 $piePackageVersionMatchesLinkConstraint = null;
