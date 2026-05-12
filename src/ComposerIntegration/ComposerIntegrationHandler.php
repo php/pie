@@ -9,10 +9,12 @@ use Composer\Filter\PlatformRequirementFilter\PlatformRequirementFilterFactory;
 use Composer\Installer;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
+use Php\Pie\ExtensionName;
 use Php\Pie\Platform;
 use Php\Pie\Platform\TargetPlatform;
 use Psr\Container\ContainerInterface;
 
+use function array_key_exists;
 use function file_exists;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
@@ -63,9 +65,16 @@ class ComposerIntegrationHandler
         // Refresh the Composer instance so it re-reads the updated pie.json
         $composer = PieComposerFactory::recreatePieComposer($this->container, $composer);
 
-        // Removing the package from the local repository will trick Composer into "re-installing" it :)
-        foreach ($composer->getRepositoryManager()->getLocalRepository()->findPackages($requestedPackageAndVersion->package) as $pkg) {
-            $composer->getRepositoryManager()->getLocalRepository()->removePackage($pkg);
+        $phpEnabledExtensions = $targetPlatform->phpBinaryPath->extensions();
+        foreach ($composer->getRepositoryManager()->getLocalRepository()->getPackages() as $localRepoPackage) {
+            $extName = ExtensionName::determineFromComposerPackage($localRepoPackage);
+
+            // Extension is already enabled in PHP
+            if (array_key_exists($extName->name(), $phpEnabledExtensions)) {
+                continue;
+            }
+
+            $composer->getRepositoryManager()->getLocalRepository()->removePackage($localRepoPackage);
         }
 
         $composerInstaller = PieComposerInstaller::createWithPhpBinary(
