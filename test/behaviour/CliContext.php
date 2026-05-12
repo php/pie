@@ -5,16 +5,18 @@ declare(strict_types=1);
 namespace Php\PieBehaviourTest;
 
 use Behat\Behat\Context\Context;
+use Behat\Hook\AfterScenario;
 use Behat\Step\Given;
 use Behat\Step\Then;
 use Behat\Step\When;
 use Composer\Util\Platform;
+use Safe\Exceptions\PcreException;
 use Symfony\Component\Process\Process;
 use Webmozart\Assert\Assert;
 
 use function array_merge;
-use function assert;
 use function Safe\copy;
+use function Safe\preg_match_all;
 use function Safe\realpath;
 use function sprintf;
 use function str_contains;
@@ -32,6 +34,24 @@ class CliContext implements Context
     private string $theExtension          = 'example_pie_extension';
     private string $thePackage            = 'asgrim/example-pie-extension';
     private string|null $workingDirectory = null;
+
+    /** @throws PcreException */
+    #[AfterScenario]
+    public function removeInstalledExtensions(): void
+    {
+        $this->runPieCommand(['show']);
+        if (! preg_match_all('#from 🥧\s*([^/]+\/[^:]+)#', (string) $this->output, $installedExtensionPackageNames)) {
+            return;
+        }
+
+        foreach ($installedExtensionPackageNames[1] as $extensionPackageName) {
+            if ($extensionPackageName === 'xdebug/xdebug') {
+                continue;
+            }
+
+            $this->runPieCommand(['uninstall', $extensionPackageName]);
+        }
+    }
 
     #[When('I run a command to download the latest version of an extension')]
     public function iRunACommandToDownloadTheLatestVersionOfAnExtension(): void
@@ -181,7 +201,6 @@ class CliContext implements Context
     #[When('I run a command to uninstall an extension')]
     public function iRunACommandToUninstallAnExtension(): void
     {
-        assert($this->thePackage !== '');
         $this->runPieCommand(['uninstall', $this->thePackage]);
     }
 
