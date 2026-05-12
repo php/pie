@@ -94,4 +94,20 @@ final class ExtensionName
     {
         return 'ext-' . $this->normalisedExtensionName;
     }
+
+    /** @return non-empty-string */
+    public function phpFormattedExtensionName(): string
+    {
+        return match ($this->name()) {
+            'core' => 'Core',
+            'spl' => 'SPL',
+            'phar' => 'Phar',
+            'reflection' => 'Reflection',
+            'pdo' => 'PDO',
+            'ffi' => 'FFI',
+            'opcache' => 'Zend OPcache',
+            'simplexml' => 'SimpleXML',
+            default => $this->name(),
+        };
+    }
 }

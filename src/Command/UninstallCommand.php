@@ -109,7 +109,7 @@ final class UninstallCommand extends Command
     {
         $piePackages = $this->installedPiePackages->allPiePackages($composer);
 
-        foreach ($piePackages as $piePackage) {
+        foreach ($piePackages->packages() as $piePackage) {
             if ($piePackage->name() === $packageToRemove) {
                 return $piePackage;
             }
