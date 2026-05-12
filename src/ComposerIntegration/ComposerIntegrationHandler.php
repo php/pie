@@ -7,15 +7,20 @@ namespace Php\Pie\ComposerIntegration;
 use Composer\Composer;
 use Composer\Filter\PlatformRequirementFilter\PlatformRequirementFilterFactory;
 use Composer\Installer;
+use Composer\Package\CompleteAliasPackage;
+use Composer\Package\CompletePackageInterface;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\ExtensionName;
 use Php\Pie\Platform;
+use Php\Pie\Platform\InstalledPiePackages;
 use Php\Pie\Platform\TargetPlatform;
+use Php\Pie\Util\PackageVerificationStatus;
 use Psr\Container\ContainerInterface;
 
-use function array_key_exists;
+use function assert;
 use function file_exists;
+use function sprintf;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 class ComposerIntegrationHandler
@@ -65,12 +70,25 @@ class ComposerIntegrationHandler
         // Refresh the Composer instance so it re-reads the updated pie.json
         $composer = PieComposerFactory::recreatePieComposer($this->container, $composer);
 
-        $phpEnabledExtensions = $targetPlatform->phpBinaryPath->extensions();
         foreach ($composer->getRepositoryManager()->getLocalRepository()->getPackages() as $localRepoPackage) {
             $extName = ExtensionName::determineFromComposerPackage($localRepoPackage);
 
-            // Extension is already enabled in PHP
-            if (array_key_exists($extName->name(), $phpEnabledExtensions)) {
+            if ($localRepoPackage instanceof CompleteAliasPackage) {
+                $localRepoPackage = $localRepoPackage->getAliasOf();
+            }
+
+            assert($localRepoPackage instanceof CompletePackageInterface);
+            $piePackage = Package::fromComposerCompletePackage($localRepoPackage);
+            $status     = $piePackage->verifyPackageStatus($targetPlatform);
+
+            $this->arrayCollectionIo->notice(sprintf(
+                'Install status %s (%s) status=%s',
+                $localRepoPackage->getName(),
+                $extName->name(),
+                $status->description(),
+            ));
+
+            if ($status === PackageVerificationStatus::Verified) {
                 continue;
             }
 
