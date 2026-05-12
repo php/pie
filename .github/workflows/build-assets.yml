@@ -68,6 +68,8 @@ jobs:
     needs:
      - build-phar
     runs-on: ${{ matrix.operating-system }}
+    env:
+      SPC_VERSION: 2.8.5
     strategy:
       fail-fast: false
       matrix:
@@ -76,7 +78,7 @@ jobs:
           - ubuntu-24.04-arm
           - macos-15-intel
           - macos-26
-          - windows-2025
+#          - windows-2025 - disabled for now, seems broken
     permissions:
       # id-token:write is required for build provenance attestation.
       id-token: write
@@ -92,19 +94,19 @@ jobs:
           # Source URL: https://static-php.dev/en/guide/manual-build.html#build-locally-using-spc-binary-recommended
           case "${{ matrix.operating-system }}" in
             ubuntu-24.04)
-              curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-linux-x86_64
+              curl -fsSL -o spc.tgz https://github.com/crazywhalecc/static-php-cli/releases/download/${{ env.SPC_VERSION }}/spc-linux-x86_64.tar.gz
               ;;
 
             ubuntu-24.04-arm)
-              curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-linux-aarch64
+              curl -fsSL -o spc.tgz https://github.com/crazywhalecc/static-php-cli/releases/download/${{ env.SPC_VERSION }}/spc-linux-aarch64.tar.gz
               ;;
 
             macos-15-intel)
-              curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-macos-x86_64
+              curl -fsSL -o spc.tgz https://github.com/crazywhalecc/static-php-cli/releases/download/${{ env.SPC_VERSION }}/spc-macos-x86_64.tar.gz
               ;;
 
             macos-26)
-              curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-macos-aarch64
+              curl -fsSL -o spc.tgz https://github.com/crazywhalecc/static-php-cli/releases/download/${{ env.SPC_VERSION }}/spc-macos-aarch64.tar.gz
               ;;
 
             *)
@@ -112,13 +114,14 @@ jobs:
               exit 1
               ;;
           esac
+          tar zxvf spc.tgz
           chmod +x spc
           echo "SPC_BINARY=./spc" >> $GITHUB_ENV
           echo "PIE_BINARY_OUTPUT=pie-${{ runner.os }}-${{ runner.arch }}" >> $GITHUB_ENV
       - name: Download SPC (Windows)
         if: runner.os == 'Windows'
         run: |
-          curl.exe -fsSL -o spc.exe https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-windows-x64.exe
+          curl.exe -fsSL -o spc.exe https://github.com/crazywhalecc/static-php-cli/releases/download/${{ env.SPC_VERSION }}/spc-windows-x64.exe
           chmod +x spc.exe
           echo "SPC_BINARY=.\spc.exe" >> $env:GITHUB_ENV
           echo "PIE_BINARY_OUTPUT=pie-${{ runner.os }}-${{ runner.arch }}.exe" >> $env:GITHUB_ENV

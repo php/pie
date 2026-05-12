@@ -26,6 +26,7 @@ use Php\Pie\Installing\InstallForPhpProject\FindMatchingPackages;
 use Php\Pie\Installing\InstallForPhpProject\InstallPiePackageFromPath;
 use Php\Pie\Installing\InstallForPhpProject\InstallSelectedPackage;
 use Php\Pie\Platform\InstalledPiePackages;
+use Php\Pie\Platform\PiePackageList;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -135,6 +136,8 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
             )
             ->willReturn(0);
 
+        $this->installedPiePackages->method('allPiePackages')->willReturn(new PiePackageList([]));
+
         $this->commandTester->execute(
             ['--allow-non-interactive-project-install' => true],
             ['verbosity' => BufferedOutput::VERBOSITY_VERY_VERBOSE],
@@ -181,6 +184,8 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
 
         $this->installSelectedPackage->expects(self::never())
             ->method('withSubCommand');
+
+        $this->installedPiePackages->method('allPiePackages')->willReturn(new PiePackageList([]));
 
         $this->commandTester->execute(
             ['--allow-non-interactive-project-install' => true],

@@ -51,26 +51,6 @@ class CheckAllBuildTools
                 ],
             ),
             new BinaryBuildToolFinder(
-                'bison',
-                [
-                    PackageManager::Apt->value => 'bison',
-                    PackageManager::Apk->value => 'bison',
-                    PackageManager::Dnf->value => 'bison',
-                    PackageManager::Yum->value => 'bison',
-                    PackageManager::Brew->value => 'bison',
-                ],
-            ),
-            new BinaryBuildToolFinder(
-                're2c',
-                [
-                    PackageManager::Apt->value => 're2c',
-                    PackageManager::Apk->value => 're2c',
-                    PackageManager::Dnf->value => 're2c',
-                    PackageManager::Yum->value => 're2c',
-                    PackageManager::Brew->value => 're2c',
-                ],
-            ),
-            new BinaryBuildToolFinder(
                 'pkg-config',
                 [
                     PackageManager::Apt->value => 'pkg-config',

@@ -14,6 +14,7 @@ use Php\Pie\ComposerIntegration\PhpBinaryPathBasedPlatformRepository;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\ExtensionName;
 use Php\Pie\Platform\InstalledPiePackages;
+use Php\Pie\Platform\PiePackageList;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Util\Process;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -35,7 +36,7 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
         $composer = $this->createMock(Composer::class);
 
         $installedPiePackages = $this->createMock(InstalledPiePackages::class);
-        $installedPiePackages->method('allPiePackages')->willReturn([]);
+        $installedPiePackages->method('allPiePackages')->willReturn(new PiePackageList([]));
 
         $phpBinaryPath = $this->createMock(PhpBinaryPath::class);
         $phpBinaryPath->expects(self::once())
@@ -75,7 +76,7 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
         $composer = $this->createMock(Composer::class);
 
         $installedPiePackages = $this->createMock(InstalledPiePackages::class);
-        $installedPiePackages->method('allPiePackages')->willReturn([]);
+        $installedPiePackages->method('allPiePackages')->willReturn(new PiePackageList([]));
 
         $extensionBeingInstalled = ExtensionName::normaliseFromString('extension_being_installed');
 
@@ -116,9 +117,9 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
             'ext-replaced_extension' => new Link('myvendor/replaced_extension', 'ext-replaced_extension', new Constraint('==', '*')),
         ]);
         $installedPiePackages = $this->createMock(InstalledPiePackages::class);
-        $installedPiePackages->method('allPiePackages')->willReturn([
+        $installedPiePackages->method('allPiePackages')->willReturn(new PiePackageList([
             Package::fromComposerCompletePackage($composerPackage),
-        ]);
+        ]));
 
         $extensionBeingInstalled = ExtensionName::normaliseFromString('extension_being_installed');
 
@@ -216,6 +217,9 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
             self::markTestSkipped('pkg-config not available on Windows');
         }
 
+        $installedPiePackages = $this->createMock(InstalledPiePackages::class);
+        $installedPiePackages->method('allPiePackages')->willReturn(new PiePackageList([]));
+
         self::assertTrue(in_array(
             'lib-' . $packageName,
             array_map(
@@ -223,7 +227,7 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
                 (new PhpBinaryPathBasedPlatformRepository(
                     PhpBinaryPath::fromCurrentProcess(),
                     $this->createMock(Composer::class),
-                    $this->createMock(InstalledPiePackages::class),
+                    $installedPiePackages,
                     ExtensionName::normaliseFromString('extension_being_installed'),
                 ))->getPackages(),
             ),
