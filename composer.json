@@ -28,14 +28,14 @@
     ],
     "require": {
         "php": "8.1.*||8.2.*||8.3.*||8.4.*||8.5.*",
-        "composer/composer": "^2.9.7",
+        "composer/composer": "^2.9.8",
         "composer/pcre": "^3.3.2",
         "composer/semver": "^3.4.4",
         "fidry/cpu-core-counter": "^1.3.0",
         "illuminate/container": "^10.49.0",
         "psr/container": "^2.0.2",
-        "symfony/console": "^6.4.34",
-        "symfony/event-dispatcher": "^6.4.32",
+        "symfony/console": "^6.4.37",
+        "symfony/event-dispatcher": "^6.4.37",
         "symfony/process": "^6.4.33",
         "thecodingmachine/safe": "^3.4",
         "thephpf/attestation": "^0.0.5",
@@ -46,11 +46,11 @@
         "behat/behat": "^3.29.0",
         "bnf/phpstan-psr-container": "^1.1",
         "doctrine/coding-standard": "^14.0.0",
-        "phpstan/phpstan": "^2.1.46",
+        "phpstan/phpstan": "^2.1.54",
         "phpstan/phpstan-phpunit": "^2.0.16",
         "phpstan/phpstan-webmozart-assert": "^2.0",
         "phpunit/phpunit": "^10.5.63",
-        "thecodingmachine/phpstan-safe-rule": "^1.4"
+        "thecodingmachine/phpstan-safe-rule": "^1.4.3"
     },
     "replace": {
         "symfony/polyfill-php81": "*",
