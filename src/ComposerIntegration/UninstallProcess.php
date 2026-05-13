@@ -33,7 +33,15 @@ class UninstallProcess
 
         $piePackage = Package::fromComposerCompletePackage($composerPackage);
 
-        $affectedIniFiles = ($this->removeIniEntry)($piePackage, $targetPlatform, $io);
+        $status = $piePackage->verifyPackageStatus($composerRequest->targetPlatform);
+
+        if ($status->isInstalled()) {
+            $io->write(sprintf('👋 <info>Removed extension:</info> %s', ($this->uninstall)($targetPlatform, $piePackage)->filePath));
+        } else {
+            $io->writeError(sprintf('<warning>Did not remove extension file:</warning> %s', $status->description()));
+        }
+
+        $affectedIniFiles = ($this->removeIniEntry)($piePackage, $composerRequest->targetPlatform, $io);
 
         if (count($affectedIniFiles) === 1) {
             $io->write(
@@ -52,7 +60,5 @@ class UninstallProcess
             );
             array_walk($affectedIniFiles, static fn (string $ini) => $io->write(' - ' . $ini));
         }
-
-        $io->write(sprintf('👋 <info>Removed extension:</info> %s', ($this->uninstall)($targetPlatform, $piePackage)->filePath));
     }
 }

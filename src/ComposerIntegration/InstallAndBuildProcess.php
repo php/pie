@@ -31,6 +31,7 @@ class InstallAndBuildProcess
         CompletePackageInterface $composerPackage,
         string $installPath,
     ): void {
+        // @todo determine if we should build, determine if we should install etc
         $io = $composerRequest->pieOutput;
 
         $downloadedPackage = DownloadedPackage::fromPackageAndExtractedPath(
