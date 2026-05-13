@@ -10,7 +10,7 @@ use Composer\Package\CompletePackage;
 use Composer\Package\CompletePackageInterface;
 use Composer\Repository\InstalledArrayRepository;
 use Composer\Repository\RepositoryManager;
-use Php\Pie\ComposerIntegration\InstalledJsonMetadata;
+use Php\Pie\ComposerIntegration\AddInstalledJsonMetadata;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieOperation;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
@@ -26,8 +26,8 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
-#[CoversClass(InstalledJsonMetadata::class)]
-final class InstalledJsonMetadataTest extends TestCase
+#[CoversClass(AddInstalledJsonMetadata::class)]
+final class AddInstalledJsonMetadataTest extends TestCase
 {
     private function mockComposerInstalledRepositoryWith(CompletePackageInterface $package): Composer&MockObject
     {
@@ -48,7 +48,7 @@ final class InstalledJsonMetadataTest extends TestCase
 
         $phpBinary = PhpBinaryPath::fromCurrentProcess();
 
-        (new InstalledJsonMetadata())->addDownloadMetadata(
+        (new AddInstalledJsonMetadata())->addDownloadMetadata(
             $this->mockComposerInstalledRepositoryWith($package),
             new PieComposerRequest(
                 $this->createMock(IOInterface::class),
@@ -87,7 +87,7 @@ final class InstalledJsonMetadataTest extends TestCase
     {
         $package = new CompletePackage('foo/bar', '1.2.3.0', '1.2.3');
 
-        (new InstalledJsonMetadata())->addBuildMetadata(
+        (new AddInstalledJsonMetadata())->addBuildMetadata(
             $this->mockComposerInstalledRepositoryWith($package),
             new PieComposerRequest(
                 $this->createMock(IOInterface::class),
@@ -125,7 +125,7 @@ final class InstalledJsonMetadataTest extends TestCase
     {
         $package = new CompletePackage('foo/bar', '1.2.3.0', '1.2.3');
 
-        (new InstalledJsonMetadata())->addInstallMetadata(
+        (new AddInstalledJsonMetadata())->addInstallMetadata(
             $this->mockComposerInstalledRepositoryWith($package),
             clone $package,
             new BinaryFile('/path/to/installed', 'ignore'),

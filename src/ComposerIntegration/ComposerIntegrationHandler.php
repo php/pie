@@ -13,7 +13,6 @@ use Php\Pie\DependencyResolver\Package;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\ExtensionName;
 use Php\Pie\Platform;
-use Php\Pie\Platform\InstalledPiePackages;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Util\PackageVerificationStatus;
 use Psr\Container\ContainerInterface;

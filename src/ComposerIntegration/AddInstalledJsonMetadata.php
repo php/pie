@@ -15,7 +15,7 @@ use function array_merge;
 use function implode;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
-class InstalledJsonMetadata
+class AddInstalledJsonMetadata
 {
     public function addDownloadMetadata(
         PartialComposer $composer,

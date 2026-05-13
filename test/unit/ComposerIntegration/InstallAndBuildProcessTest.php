@@ -9,8 +9,8 @@ use Composer\Package\CompletePackage;
 use Composer\PartialComposer;
 use Php\Pie\Building\Build;
 use Php\Pie\Building\PlaceholderReplacer;
+use Php\Pie\ComposerIntegration\AddInstalledJsonMetadata;
 use Php\Pie\ComposerIntegration\InstallAndBuildProcess;
-use Php\Pie\ComposerIntegration\InstalledJsonMetadata;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieOperation;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
@@ -31,7 +31,7 @@ final class InstallAndBuildProcessTest extends TestCase
 {
     private Build&MockObject $pieBuild;
     private Install&MockObject $pieInstall;
-    private InstalledJsonMetadata&MockObject $installedJsonMetadata;
+    private AddInstalledJsonMetadata&MockObject $addInstalledJsonMetadata;
 
     private InstallAndBuildProcess $installAndBuildProcess;
 
@@ -39,14 +39,14 @@ final class InstallAndBuildProcessTest extends TestCase
     {
         parent::setUp();
 
-        $this->pieBuild              = $this->createMock(Build::class);
-        $this->pieInstall            = $this->createMock(Install::class);
-        $this->installedJsonMetadata = $this->createMock(InstalledJsonMetadata::class);
+        $this->pieBuild                 = $this->createMock(Build::class);
+        $this->pieInstall               = $this->createMock(Install::class);
+        $this->addInstalledJsonMetadata = $this->createMock(AddInstalledJsonMetadata::class);
 
         $this->installAndBuildProcess = new InstallAndBuildProcess(
             $this->pieBuild,
             $this->pieInstall,
-            $this->installedJsonMetadata,
+            $this->addInstalledJsonMetadata,
             $this->createMock(PlaceholderReplacer::class),
         );
     }
@@ -74,11 +74,11 @@ final class InstallAndBuildProcessTest extends TestCase
         $composerPackage = new CompletePackage('foo/bar', '1.2.3.0', '1.2.3');
         $installPath     = '/path/to/install';
 
-        $this->installedJsonMetadata->expects(self::once())->method('addDownloadMetadata');
+        $this->addInstalledJsonMetadata->expects(self::once())->method('addDownloadMetadata');
 
-        $this->installedJsonMetadata->expects(self::never())->method('addBuildMetadata');
+        $this->addInstalledJsonMetadata->expects(self::never())->method('addBuildMetadata');
 
-        $this->installedJsonMetadata->expects(self::never())->method('addInstallMetadata');
+        $this->addInstalledJsonMetadata->expects(self::never())->method('addInstallMetadata');
 
         $this->pieBuild->expects(self::never())->method('__invoke');
 
@@ -115,11 +115,11 @@ final class InstallAndBuildProcessTest extends TestCase
         $composerPackage = new CompletePackage('foo/bar', '1.2.3.0', '1.2.3');
         $installPath     = '/path/to/install';
 
-        $this->installedJsonMetadata->expects(self::once())->method('addDownloadMetadata');
+        $this->addInstalledJsonMetadata->expects(self::once())->method('addDownloadMetadata');
 
-        $this->installedJsonMetadata->expects(self::once())->method('addBuildMetadata');
+        $this->addInstalledJsonMetadata->expects(self::once())->method('addBuildMetadata');
 
-        $this->installedJsonMetadata->expects(self::never())->method('addInstallMetadata');
+        $this->addInstalledJsonMetadata->expects(self::never())->method('addInstallMetadata');
 
         $this->pieBuild
             ->expects(self::once())
@@ -159,11 +159,11 @@ final class InstallAndBuildProcessTest extends TestCase
         $composerPackage = new CompletePackage('foo/bar', '1.2.3.0', '1.2.3');
         $installPath     = '/path/to/install';
 
-        $this->installedJsonMetadata->expects(self::once())->method('addDownloadMetadata');
+        $this->addInstalledJsonMetadata->expects(self::once())->method('addDownloadMetadata');
 
-        $this->installedJsonMetadata->expects(self::once())->method('addBuildMetadata');
+        $this->addInstalledJsonMetadata->expects(self::once())->method('addBuildMetadata');
 
-        $this->installedJsonMetadata->expects(self::once())->method('addInstallMetadata');
+        $this->addInstalledJsonMetadata->expects(self::once())->method('addInstallMetadata');
 
         $this->pieBuild
             ->expects(self::once())

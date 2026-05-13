@@ -13,7 +13,6 @@ use Composer\Repository\InstalledRepositoryInterface;
 use Composer\Util\Filesystem;
 use Composer\Util\ProcessExecutor;
 use Php\Pie\ComposerIntegration\Listeners\OverrideDownloadUrlInstallListener;
-use Php\Pie\ComposerIntegration\Listeners\RemoveUnrelatedInstallOperations;
 use Php\Pie\ExtensionType;
 use Php\Pie\Platform;
 use Psr\Container\ContainerInterface;
