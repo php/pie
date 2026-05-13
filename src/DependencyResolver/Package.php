@@ -6,7 +6,7 @@ namespace Php\Pie\DependencyResolver;
 
 use Composer\Package\CompletePackageInterface;
 use InvalidArgumentException;
-use Php\Pie\ComposerIntegration\PieInstalledJsonMetadataKeys;
+use Php\Pie\ComposerIntegration\InstalledJsonMetadata;
 use Php\Pie\ConfigureOption;
 use Php\Pie\Downloading\DownloadUrlMethod;
 use Php\Pie\ExtensionName;
@@ -56,6 +56,7 @@ final class Package
     private bool $supportNts                   = true;
     /** @var non-empty-list<DownloadUrlMethod>|null */
     private array|null $supportedDownloadUrlMethods = null;
+    private readonly InstalledJsonMetadata $installedJsonMetadata;
 
     public function __construct(
         private readonly CompletePackageInterface $composerPackage,
@@ -65,6 +66,7 @@ final class Package
         private readonly string $version,
         private readonly string|null $downloadUrl,
     ) {
+        $this->installedJsonMetadata = InstalledJsonMetadata::fromComposerPackage($this->composerPackage);
     }
 
     public static function fromComposerCompletePackage(CompletePackageInterface $completePackage): self
@@ -269,6 +271,11 @@ final class Package
         return $this->supportedDownloadUrlMethods;
     }
 
+    public function installedJsonMetadata(): InstalledJsonMetadata
+    {
+        return $this->installedJsonMetadata;
+    }
+
     public function verifyPackageStatus(TargetPlatform $targetPlatform): PackageVerificationStatus
     {
         $extensionPath    = $targetPlatform->phpBinaryPath->extensionPath();
@@ -282,9 +289,8 @@ final class Package
             return PackageVerificationStatus::ActualBinaryNotFound;
         }
 
-        $installedJsonMetadata = PieInstalledJsonMetadataKeys::pieMetadataFromComposerPackage($this->composerPackage());
-        $pieExpectedBinaryPath = array_key_exists(PieInstalledJsonMetadataKeys::InstalledBinary->value, $installedJsonMetadata) ? $installedJsonMetadata[PieInstalledJsonMetadataKeys::InstalledBinary->value] : null;
-        $pieExpectedChecksum   = array_key_exists(PieInstalledJsonMetadataKeys::BinaryChecksum->value, $installedJsonMetadata) ? $installedJsonMetadata[PieInstalledJsonMetadataKeys::BinaryChecksum->value] : null;
+        $pieExpectedBinaryPath = $this->installedJsonMetadata()->installedBinary();
+        $pieExpectedChecksum   = $this->installedJsonMetadata()->binaryChecksum();
 
         if ($pieExpectedBinaryPath === null) {
             return PackageVerificationStatus::InstalledBinaryMetadataMissing;

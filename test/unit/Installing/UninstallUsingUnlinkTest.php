@@ -6,7 +6,7 @@ namespace Php\PieUnitTest\Installing;
 
 use Composer\Package\CompletePackageInterface;
 use Composer\Util\Filesystem;
-use Php\Pie\ComposerIntegration\PieInstalledJsonMetadataKeys;
+use Php\Pie\ComposerIntegration\InstalledJsonMetadata;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
@@ -100,8 +100,8 @@ final class UninstallUsingUnlinkTest extends TestCase
         $composerPackage
             ->method('getExtra')
             ->willReturn([
-                PieInstalledJsonMetadataKeys::InstalledBinary->value => $extensionFile,
-                PieInstalledJsonMetadataKeys::BinaryChecksum->value => $testHash,
+                InstalledJsonMetadata::KEY_INSTALLED_BINARY => $extensionFile,
+                InstalledJsonMetadata::KEY_BINARY_CHECKSUM => $testHash,
             ]);
 
         $package = new Package(
@@ -148,8 +148,8 @@ final class UninstallUsingUnlinkTest extends TestCase
         $composerPackage
             ->method('getExtra')
             ->willReturn([
-                PieInstalledJsonMetadataKeys::InstalledBinary->value => $extensionFile,
-                PieInstalledJsonMetadataKeys::BinaryChecksum->value => $testHash,
+                InstalledJsonMetadata::KEY_INSTALLED_BINARY => $extensionFile,
+                InstalledJsonMetadata::KEY_BINARY_CHECKSUM => $testHash,
             ]);
 
         $package = new Package(
@@ -200,8 +200,8 @@ final class UninstallUsingUnlinkTest extends TestCase
         $composerPackage
             ->method('getExtra')
             ->willReturn([
-                PieInstalledJsonMetadataKeys::InstalledBinary->value => $extensionFile,
-                PieInstalledJsonMetadataKeys::BinaryChecksum->value => $testHash,
+                InstalledJsonMetadata::KEY_INSTALLED_BINARY => $extensionFile,
+                InstalledJsonMetadata::KEY_BINARY_CHECKSUM => $testHash,
             ]);
 
         $package = new Package(
@@ -251,8 +251,8 @@ final class UninstallUsingUnlinkTest extends TestCase
         $composerPackage
             ->method('getExtra')
             ->willReturn([
-                PieInstalledJsonMetadataKeys::InstalledBinary->value => $extensionFile,
-                PieInstalledJsonMetadataKeys::BinaryChecksum->value => $testHash,
+                InstalledJsonMetadata::KEY_INSTALLED_BINARY => $extensionFile,
+                InstalledJsonMetadata::KEY_BINARY_CHECKSUM => $testHash,
             ]);
 
         $package = new Package(

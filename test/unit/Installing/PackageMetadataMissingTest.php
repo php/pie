@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\PieUnitTest\Installing;
 
 use Composer\Package\CompletePackageInterface;
+use Php\Pie\ComposerIntegration\InstalledJsonMetadata;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
@@ -28,10 +29,10 @@ final class PackageMetadataMissingTest extends TestCase
 
         $exception = PackageMetadataMissing::duringUninstall(
             $package,
-            [
+            InstalledJsonMetadata::fromArray([
                 'a' => 'something',
                 'b' => 'something else',
-            ],
+            ]),
             ['b', 'c', 'd'],
         );
 

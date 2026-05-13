@@ -30,8 +30,9 @@ class CliContext implements Context
     private string|null $errorOutput = null;
     private int|null $exitCode       = null;
     /** @var list<string> */
-    private array $phpArguments           = [];
-    private string $theExtension          = 'example_pie_extension';
+    private array $phpArguments  = [];
+    private string $theExtension = 'example_pie_extension';
+    /** @var non-empty-string */
     private string $thePackage            = 'asgrim/example-pie-extension';
     private string|null $workingDirectory = null;
 

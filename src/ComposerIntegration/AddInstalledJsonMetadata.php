@@ -7,7 +7,6 @@ namespace Php\Pie\ComposerIntegration;
 use Composer\Package\CompleteAliasPackage;
 use Composer\Package\CompletePackageInterface;
 use Composer\PartialComposer;
-use Php\Pie\ComposerIntegration\PieInstalledJsonMetadataKeys as MetadataKey;
 use Php\Pie\File\BinaryFile;
 use Webmozart\Assert\Assert;
 
@@ -25,37 +24,37 @@ class AddInstalledJsonMetadata
         $this->addPieMetadata(
             $composer,
             $composerPackage,
-            MetadataKey::TargetPlatformPhpPath,
+            InstalledJsonMetadata::KEY_TARGET_PLATFORM_PHP_PATH,
             $composerRequest->targetPlatform->phpBinaryPath->phpBinaryPath,
         );
         $this->addPieMetadata(
             $composer,
             $composerPackage,
-            MetadataKey::TargetPlatformPhpConfigPath,
+            InstalledJsonMetadata::KEY_TARGET_PLATFORM_PHP_CONFIG_PATH,
             $composerRequest->targetPlatform->phpBinaryPath->phpConfigPath(),
         );
         $this->addPieMetadata(
             $composer,
             $composerPackage,
-            MetadataKey::TargetPlatformPhpVersion,
+            InstalledJsonMetadata::KEY_TARGET_PLATFORM_PHP_VERSION,
             $composerRequest->targetPlatform->phpBinaryPath->version(),
         );
         $this->addPieMetadata(
             $composer,
             $composerPackage,
-            MetadataKey::TargetPlatformPhpThreadSafety,
+            InstalledJsonMetadata::KEY_TARGET_PLATFORM_PHP_THREAD_SAFETY,
             $composerRequest->targetPlatform->threadSafety->name,
         );
         $this->addPieMetadata(
             $composer,
             $composerPackage,
-            MetadataKey::TargetPlatformPhpWindowsCompiler,
+            InstalledJsonMetadata::KEY_TARGET_PLATFORM_PHP_WINDOWS_COMPILER,
             $composerRequest->targetPlatform->windowsCompiler?->name,
         );
         $this->addPieMetadata(
             $composer,
             $composerPackage,
-            MetadataKey::TargetPlatformArchitecture,
+            InstalledJsonMetadata::KEY_TARGET_PLATFORM_ARCHITECTURE,
             $composerRequest->targetPlatform->architecture->name,
         );
     }
@@ -69,28 +68,28 @@ class AddInstalledJsonMetadata
         $this->addPieMetadata(
             $composer,
             $composerPackage,
-            MetadataKey::ConfigureOptions,
+            InstalledJsonMetadata::KEY_CONFIGURE_OPTIONS,
             implode(' ', $composerRequest->configureOptions),
         );
 
         $this->addPieMetadata(
             $composer,
             $composerPackage,
-            MetadataKey::PhpizeBinary,
+            InstalledJsonMetadata::KEY_PHPIZE_BINARY,
             $composerRequest->targetPlatform->phpizePath->phpizeBinaryPath ?? null,
         );
 
         $this->addPieMetadata(
             $composer,
             $composerPackage,
-            MetadataKey::BuiltBinary,
+            InstalledJsonMetadata::KEY_BUILT_BINARY,
             $builtBinary->filePath,
         );
 
         $this->addPieMetadata(
             $composer,
             $composerPackage,
-            MetadataKey::BinaryChecksum,
+            InstalledJsonMetadata::KEY_BINARY_CHECKSUM,
             $builtBinary->checksum,
         );
     }
@@ -103,15 +102,16 @@ class AddInstalledJsonMetadata
         $this->addPieMetadata(
             $composer,
             $composerPackage,
-            MetadataKey::InstalledBinary,
+            InstalledJsonMetadata::KEY_INSTALLED_BINARY,
             $installedBinary->filePath,
         );
     }
 
+    /** @param InstalledJsonMetadata::KEY_* $key */
     private function addPieMetadata(
         PartialComposer $composer,
         CompletePackageInterface $composerPackage,
-        MetadataKey $key,
+        string $key,
         string|null $value,
     ): void {
         $localRepositoryPackage = $composer
@@ -125,6 +125,6 @@ class AddInstalledJsonMetadata
 
         Assert::methodExists($localRepositoryPackage, 'setExtra');
 
-        $localRepositoryPackage->setExtra(array_merge($localRepositoryPackage->getExtra(), [$key->value => $value]));
+        $localRepositoryPackage->setExtra(array_merge($localRepositoryPackage->getExtra(), [$key => $value]));
     }
 }

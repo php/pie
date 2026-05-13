@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\Pie\Installing;
 
+use Php\Pie\ComposerIntegration\InstalledJsonMetadata;
 use Php\Pie\DependencyResolver\Package;
 use RuntimeException;
 
@@ -15,13 +16,10 @@ use function sprintf;
 
 class PackageMetadataMissing extends RuntimeException
 {
-    /**
-     * @param array<string, mixed> $actualMetadata
-     * @param list<string>         $wantedKeys
-     */
-    public static function duringUninstall(Package $package, array $actualMetadata, array $wantedKeys): self
+    /** @param list<string> $wantedKeys */
+    public static function duringUninstall(Package $package, InstalledJsonMetadata $actualMetadata, array $wantedKeys): self
     {
-        $missingKeys = array_diff($wantedKeys, array_keys($actualMetadata));
+        $missingKeys = array_diff($wantedKeys, array_keys($actualMetadata->all()));
 
         return new self(sprintf(
             'PIE metadata was missing for package %s. Missing metadata key%s: %s',
