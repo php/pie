@@ -10,7 +10,6 @@ use Php\Pie\Container;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\RequiresOperatingSystemFamily;
-use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Process\Process;
 
@@ -19,24 +18,37 @@ use function array_filter;
 use function array_key_exists;
 use function array_map;
 use function array_unshift;
-use function assert;
 use function file_exists;
 use function is_executable;
-use function is_file;
-use function is_string;
 use function is_writable;
 use function Safe\preg_match;
 
 #[CoversClass(InstallCommand::class)]
-class InstallCommandTest extends TestCase
+class InstallCommandTest extends IsolatedWorkingDirectoryTestCase
 {
     private const TEST_PACKAGE = 'asgrim/example-pie-extension';
 
     private CommandTester $commandTester;
+    private string|null $lastInstalledBinary = null;
 
     public function setUp(): void
     {
+        parent::setUp();
+
         $this->commandTester = new CommandTester(Container::testFactory()->get(InstallCommand::class));
+    }
+
+    protected function tearDown(): void
+    {
+        if ($this->lastInstalledBinary !== null && file_exists($this->lastInstalledBinary)) {
+            $rmCommand = ['rm', $this->lastInstalledBinary];
+            if (! is_writable($this->lastInstalledBinary)) {
+                array_unshift($rmCommand, 'sudo');
+            }
+            (new Process($rmCommand))->run();
+        }
+
+        parent::tearDown();
     }
 
     /** @return array<string, array{0: string}> */
@@ -87,27 +99,16 @@ class InstallCommandTest extends TestCase
         $this->commandTester->assertCommandIsSuccessful();
 
         $outputString = $this->commandTester->getDisplay();
+
+        if (preg_match('#^Install complete: (.*)$#m', $outputString, $matches)
+            && array_key_exists(1, $matches)
+            && $matches[1] !== ''
+        ) {
+            $this->lastInstalledBinary = $matches[1];
+        }
+
         self::assertStringContainsString('Install complete: ', $outputString);
         self::assertStringContainsString('You must now add "extension=example_pie_extension" to your php.ini', $outputString);
-
-        if (
-            ! preg_match('#^Install complete: (.*)$#m', $outputString, $matches)
-            || ! array_key_exists(1, $matches)
-            || $matches[1] === ''
-            || ! file_exists($matches[1])
-            || ! is_file($matches[1])
-        ) {
-            return;
-        }
-
-        $fileToRemove = $matches[1];
-        assert(is_string($fileToRemove));
-        $rmCommand = ['rm', $fileToRemove];
-        if (! is_writable($fileToRemove)) {
-            array_unshift($rmCommand, 'sudo');
-        }
-
-        (new Process($rmCommand))->mustRun();
     }
 
     #[RequiresOperatingSystemFamily('Windows')]
@@ -121,19 +122,15 @@ class InstallCommandTest extends TestCase
         $this->commandTester->assertCommandIsSuccessful();
 
         $outputString = $this->commandTester->getDisplay();
-        self::assertStringContainsString('Copied DLL to: ', $outputString);
-        self::assertStringContainsString('You must now add "extension=example_pie_extension" to your php.ini', $outputString);
 
-        if (
-            ! preg_match('#^Copied DLL to: (.*)$#m', $outputString, $matches)
-            || ! array_key_exists(1, $matches)
-            || $matches[1] === ''
-            || ! file_exists($matches[1])
-            || ! is_file($matches[1])
+        if (preg_match('#^Copied DLL to: (.*)$#m', $outputString, $matches)
+            && array_key_exists(1, $matches)
+            && $matches[1] !== ''
         ) {
-            return;
+            $this->lastInstalledBinary = $matches[1];
         }
 
-        (new Process(['rm', $matches[1]]))->mustRun();
+        self::assertStringContainsString('Copied DLL to: ', $outputString);
+        self::assertStringContainsString('You must now add "extension=example_pie_extension" to your php.ini', $outputString);
     }
 }

@@ -11,7 +11,6 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\RequiresOperatingSystemFamily;
 use PHPUnit\Framework\Attributes\RequiresPhp;
-use PHPUnit\Framework\TestCase;
 
 use function array_combine;
 use function array_map;
@@ -21,7 +20,7 @@ use function is_executable;
 use const PHP_VERSION_ID;
 
 #[CoversClass(DownloadCommand::class)]
-class DownloadCommandTest extends TestCase
+class DownloadCommandTest extends IsolatedWorkingDirectoryTestCase
 {
     private const TEST_PACKAGE_LATEST = '2.0.9';
     private const TEST_PACKAGE        = 'asgrim/example-pie-extension';
@@ -30,6 +29,8 @@ class DownloadCommandTest extends TestCase
 
     public function setUp(): void
     {
+        parent::setUp();
+
         $this->commandTester = new CommandTester(Container::testFactory()->get(DownloadCommand::class));
     }
 
