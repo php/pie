@@ -25,18 +25,8 @@ enum PackageVerificationStatus
         };
     }
 
-    public function isInstalled(): bool
+    public function isVerified(): bool
     {
         return $this === self::Verified;
-    }
-
-    public function isBuilt(): bool
-    {
-        return $this->isInstalled()
-            || $this === self::ChecksumMismatch
-            || $this === self::ActualBinaryNotFound
-            || $this === self::InstalledBinaryMetadataMissing
-            || $this === self::ChecksumMetadataMissing
-            || $this === self::InstalledBinaryPathDoesNotMatchActualBinaryPath;
     }
 }

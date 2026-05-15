@@ -11,4 +11,5 @@ final class Emoji
     public const WARNING         = '⚠️ ';
     public const PROHIBITED      = '🚫';
     public const CROSS           = '❌';
+    public const INFO            = 'ℹ️';
 }

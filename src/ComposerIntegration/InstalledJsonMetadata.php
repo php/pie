@@ -165,4 +165,22 @@ final class InstalledJsonMetadata
     {
         return $this->nonEmptyStringOrNull(self::KEY_PHPIZE_BINARY);
     }
+
+    /** Has this package been downloaded, according to the metadata? (note: does not verifiy it is STILL downloaded - especially if vendor cleanup happened!) */
+    public function isDownloaded(): bool
+    {
+        return $this->targetPlatformPhpVersion() !== null;
+    }
+
+    /** Has this package been built, according to the metadata? (note: does not verify it is STILL built) */
+    public function isBuilt(): bool
+    {
+        return $this->isDownloaded() && $this->builtBinary() !== null;
+    }
+
+    /** Has this package been installed, according to the metadata (note: not verify it is STILL installed/verified) */
+    public function isInstalled(): bool
+    {
+        return $this->isBuilt() && $this->installedBinary() !== null;
+    }
 }

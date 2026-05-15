@@ -7,6 +7,7 @@ namespace Php\Pie\ComposerIntegration;
 use Composer\Composer;
 use Composer\Filter\PlatformRequirementFilter\PlatformRequirementFilterFactory;
 use Composer\Installer;
+use Composer\IO\IOInterface;
 use Composer\Package\CompleteAliasPackage;
 use Composer\Package\CompletePackageInterface;
 use Php\Pie\DependencyResolver\Package;
@@ -14,6 +15,7 @@ use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\ExtensionName;
 use Php\Pie\Platform;
 use Php\Pie\Platform\TargetPlatform;
+use Php\Pie\Util\Emoji;
 use Php\Pie\Util\PackageVerificationStatus;
 use Psr\Container\ContainerInterface;
 
@@ -77,20 +79,54 @@ class ComposerIntegrationHandler
             }
 
             assert($localRepoPackage instanceof CompletePackageInterface);
-            $piePackage = Package::fromComposerCompletePackage($localRepoPackage);
-            $status     = $piePackage->verifyPackageStatus($targetPlatform);
+            $piePackage            = Package::fromComposerCompletePackage($localRepoPackage);
+            $installedJsonMetadata = $piePackage->installedJsonMetadata();
+            $status                = $piePackage->verifyPackageStatus($targetPlatform);
 
-            $this->arrayCollectionIo->notice(sprintf(
+            $this->arrayCollectionIo->write(sprintf(
                 'Install status %s (%s) status=%s',
                 $localRepoPackage->getName(),
                 $extName->name(),
                 $status->description(),
-            ));
+            ), verbosity: IOInterface::VERY_VERBOSE);
 
-            if ($status === PackageVerificationStatus::Verified) {
+            if ($status->isVerified()) {
+                $this->arrayCollectionIo->write(sprintf(
+                    '%s PIE package %s (%s) is already installed and verified.',
+                    Emoji::GREEN_CHECKMARK,
+                    $localRepoPackage->getName(),
+                    $extName->name(),
+                ), verbosity: IOInterface::QUIET);
                 continue;
             }
 
+            if (! $installedJsonMetadata->isInstalled() && $installedJsonMetadata->isBuilt()) {
+                $this->arrayCollectionIo->write(sprintf(
+                    '%s PIE package %s (%s) was previously built but not installed.',
+                    Emoji::INFO,
+                    $localRepoPackage->getName(),
+                    $extName->name(),
+                ), verbosity: IOInterface::VERBOSE);
+                continue;
+            }
+
+            if (! $installedJsonMetadata->isInstalled() && ! $installedJsonMetadata->isBuilt() && $installedJsonMetadata->isDownloaded()) {
+                $this->arrayCollectionIo->write(sprintf(
+                    '%s PIE package %s (%s) was previously downloaded but not built.',
+                    Emoji::INFO,
+                    $localRepoPackage->getName(),
+                    $extName->name(),
+                ), verbosity: IOInterface::VERBOSE);
+                continue;
+            }
+
+            $this->arrayCollectionIo->write(sprintf(
+                '%s Package status of %s (%s) is not yet verified, adding to install candidates: %s',
+                Emoji::WARNING,
+                $localRepoPackage->getName(),
+                $extName->name(),
+                $status->description(),
+            ));
             $composer->getRepositoryManager()->getLocalRepository()->removePackage($localRepoPackage);
         }
 
