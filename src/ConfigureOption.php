@@ -28,6 +28,14 @@ final class ConfigureOption
     {
         Assert::keyExists($configureOptionDefinition, 'name');
         Assert::stringNotEmpty($configureOptionDefinition['name']);
+        // Restrict to identifier characters that match real ./configure flag
+        // conventions. Whitespace and shell metacharacters in this field flow
+        // verbatim into argv, log output, and installed.json metadata.
+        Assert::regex(
+            $configureOptionDefinition['name'],
+            '/^[a-zA-Z][a-zA-Z0-9_-]*$/',
+            'php-ext.configure-options[].name must be a configure-flag identifier (got %s)',
+        );
 
         $needsValue = false;
         if (array_key_exists('needs-value', $configureOptionDefinition)) {

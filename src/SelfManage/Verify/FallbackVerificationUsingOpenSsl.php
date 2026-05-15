@@ -36,9 +36,12 @@ final class FallbackVerificationUsingOpenSsl implements VerifyPiePhar
 
     public function verify(ReleaseMetadata $releaseMetadata, BinaryFile $pharFilename, IOInterface $io): void
     {
-        $io->write(
-            'Falling back to basic verification. To use full verification, install the `gh` CLI tool.',
-            verbosity: IOInterface::VERBOSE,
+        // The fallback verifier checks cert chain, cert extension claims, DSSE
+        // subject digest, and DSSE signature, but does NOT validate Rekor
+        // transparency-log inclusion. `gh attestation verify` does. Surface the
+        // reduced guarantees so users on shared / air-gapped hosts know.
+        $io->writeError(
+            '<warning>Falling back to OpenSSL verification (no Rekor inclusion check). Install `gh` for full attestation verification.</warning>',
         );
 
         try {

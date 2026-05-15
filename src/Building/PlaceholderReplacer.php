@@ -57,6 +57,13 @@ class PlaceholderReplacer
         foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($downloadedPackage->extractedSourcePath)) as $file) {
             assert($file instanceof SplFileInfo);
 
+            // Refuse to follow symlinks into files the package author did not
+            // legitimately own at build time (e.g., an archive entry that points
+            // at the invoking user's $HOME).
+            if ($file->isLink()) {
+                continue;
+            }
+
             if (! $file->isFile() || ! in_array($file->getExtension(), self::FILE_EXTENSIONS)) {
                 continue;
             }
