@@ -61,12 +61,6 @@ parameters:
 			path: src/Command/RepositoryRemoveCommand.php
 
 		-
-			message: '#^Parameter \#2 \$content of static method Php\\Pie\\File\\SudoFilePut\:\:contents\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Command/SelfUpdateCommand.php
-
-		-
 			message: '#^Cannot cast mixed to string\.$#'
 			identifier: cast.string
 			count: 1
