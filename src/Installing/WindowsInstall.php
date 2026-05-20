@@ -58,10 +58,13 @@ final class WindowsInstall implements Install
             assert($file instanceof SplFileInfo);
 
             /**
-             * Skip directories, the main DLL, PDB
+             * Skip directories, the main DLL, PDB, and any symlinks the archive
+             * may have shipped (symlink-followed targets fall outside the source
+             * dir's containment guarantees).
              */
             if (
                 $file->isDir()
+                || $file->isLink()
                 || $this->normalisedPathsMatch($file->getPathname(), $sourceDllName)
                 || $this->normalisedPathsMatch($file->getPathname(), $sourcePdbName)
             ) {

@@ -19,6 +19,7 @@ use function array_walk;
 use function file_exists;
 use function in_array;
 use function is_dir;
+use function preg_quote;
 use function Safe\file_get_contents;
 use function Safe\preg_replace;
 use function Safe\scandir;
@@ -67,10 +68,14 @@ class RemoveIniEntryWithFileGetContents implements RemoveIniEntry
         // Make sure all symlinks are resolved
         $allIniFiles = array_filter(array_map('realpath', $allIniFiles));
 
+        // Anchor on the right with \b so uninstalling `foo` doesn't also
+        // rewrite the prefix of `extension=foo_other`. preg_quote on the
+        // extension name is defence-in-depth in case future ExtensionName
+        // validation ever loosens past `^[A-Za-z][a-zA-Z0-9_]+$`.
         $regex = sprintf(
-            '/^(%s\s*=\s*%s)/m',
+            '/^(%s\s*=\s*%s)\b/m',
             $package->extensionType() === ExtensionType::PhpModule ? 'extension' : 'zend_extension',
-            $package->extensionName()->name(),
+            preg_quote($package->extensionName()->name(), '/'),
         );
 
         $updatedIniFiles = [];

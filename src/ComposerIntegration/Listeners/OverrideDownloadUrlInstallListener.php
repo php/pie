@@ -129,6 +129,15 @@ class OverrideDownloadUrlInstallListener
                     $this->composerRequest->pieOutput->write('Found prebuilt archive: ' . $url);
                     $composerPackage->setDistUrl($url);
 
+                    // Composer's dist-sha was computed against the original
+                    // Packagist URL; once we swap to a release-asset URL the
+                    // FileDownloader has nothing to validate the new bytes
+                    // against. Surface that so the caller knows HTTPS-to-origin
+                    // is the only integrity guarantee left.
+                    $this->composerRequest->pieOutput->write(
+                        '<warning>Note: dist-sha integrity check is not available for prebuilt-binary URLs; HTTPS to the release-asset origin is the only integrity guarantee.</warning>',
+                    );
+
                     if (pathinfo($url, PATHINFO_EXTENSION) === 'tgz') {
                         $composerPackage->setDistType('tar');
                     }
