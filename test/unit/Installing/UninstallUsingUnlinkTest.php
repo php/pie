@@ -116,6 +116,53 @@ final class UninstallUsingUnlinkTest extends TestCase
         (new Filesystem())->remove($fakeExtensionPath);
     }
 
+    public function testBinaryFileIsRemovedOnWindows(): void
+    {
+        $fakeExtensionPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('pie_uninstall_binary_test_', true);
+        mkdir($fakeExtensionPath, recursive: true);
+        $extensionFile = $fakeExtensionPath . DIRECTORY_SEPARATOR . 'php_foobar.dll';
+        file_put_contents($extensionFile, 'test content');
+        $testHash = hash_file('sha256', $extensionFile);
+
+        $phpBinaryPath = $this->createMock(PhpBinaryPath::class);
+        $phpBinaryPath->expects(self::any())
+            ->method('extensionPath')
+            ->willReturn($fakeExtensionPath);
+
+        $targetPlatform = new TargetPlatform(
+            OperatingSystem::Windows,
+            OperatingSystemFamily::Windows,
+            $phpBinaryPath,
+            Architecture::x86_64,
+            ThreadSafetyMode::ThreadSafe,
+            1,
+            null,
+        );
+
+        $composerPackage = $this->createMock(CompletePackageInterface::class);
+        $composerPackage
+            ->method('getExtra')
+            ->willReturn([
+                PieInstalledJsonMetadataKeys::InstalledBinary->value => $extensionFile,
+                PieInstalledJsonMetadataKeys::BinaryChecksum->value => $testHash,
+            ]);
+
+        $package = new Package(
+            $composerPackage,
+            ExtensionType::PhpModule,
+            ExtensionName::normaliseFromString('foobar'),
+            'foobar/foobar',
+            '1.2.3',
+            null,
+        );
+
+        $uninstalled = (new UninstallUsingUnlink())($targetPlatform, $package);
+
+        self::assertSame($extensionFile, $uninstalled->filePath);
+        self::assertFileDoesNotExist($extensionFile);
+        (new Filesystem())->remove($fakeExtensionPath);
+    }
+
     public function testExtensionPathInMetadataNotMatchingConventionWillThrowException(): void
     {
         $fakeExtensionPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('pie_uninstall_binary_test_', true);

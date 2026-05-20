@@ -44,7 +44,11 @@ class UninstallUsingUnlink implements Uninstall
         }
 
         // Sanity check the extension metadata points to the correct expected location
-        $extensionPathByConvention = $targetPlatform->phpBinaryPath->extensionPath() . DIRECTORY_SEPARATOR . $package->extensionName()->name() . ($targetPlatform->operatingSystem === OperatingSystem::Windows ? '.dll' : '.so');
+        $extensionPathByConvention = $targetPlatform->phpBinaryPath->extensionPath()
+            . DIRECTORY_SEPARATOR
+            . ($targetPlatform->operatingSystem === OperatingSystem::Windows ? 'php_' : '')
+            . $package->extensionName()->name()
+            . ($targetPlatform->operatingSystem === OperatingSystem::Windows ? '.dll' : '.so');
         if ($extensionPathByConvention !== $pieMetadata[PieInstalledJsonMetadataKeys::InstalledBinary->value]) {
             throw new RuntimeException(sprintf(
                 'Stored metadata path "%s" did not match expected path "%s"',
