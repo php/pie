@@ -50,8 +50,15 @@ final class GithubCliAttestationVerification implements VerifyPiePhar
             self::GH_ATTESTATION_COMMAND,
             'verify',
             '--owner=php',
-            $pharFilename->filePath,
         ];
+
+        if ($releaseMetadata->tag === 'nightly') {
+            $verificationCommand[] = '--signer-workflow=php/pie/.github/workflows/build-phar.yml';
+        } else {
+            $verificationCommand[] = '--source-ref=refs/tags/' . $releaseMetadata->tag;
+        }
+
+        $verificationCommand[] = $pharFilename->filePath;
 
         $io->write(
             'Verifying using: ' . implode(' ', $verificationCommand),

@@ -29,6 +29,12 @@ final class FallbackVerificationUsingOpenSsl implements VerifyPiePhar
 
     private const ARTIFACT_FILENAME = 'pie.phar';
 
+    /** @link https://github.com/sigstore/fulcio/blob/main/docs/oid-info.md#13614157264114--source-repository-ref */
+    private const SOURCE_REPOSITORY_REF = '1.3.6.1.4.1.57264.1.14';
+
+    /** @link https://github.com/sigstore/fulcio/blob/main/docs/oid-info.md#1361415726419--build-signer-uri */
+    private const BUILD_SIGNER_URI = '1.3.6.1.4.1.57264.1.9';
+
     public function __construct(
         private readonly VerifyAttestation $verifyAttestation,
     ) {
@@ -41,13 +47,21 @@ final class FallbackVerificationUsingOpenSsl implements VerifyPiePhar
             verbosity: IOInterface::VERBOSE,
         );
 
+        $expectedExtensions = self::ATTESTATION_CERTIFICATE_EXPECTED_EXTENSION_VALUES;
+
+        if ($releaseMetadata->tag === 'nightly') {
+            $expectedExtensions[self::BUILD_SIGNER_URI] = 'https://github.com/php/pie/.github/workflows/build-phar.yml@refs/heads/main';
+        } else {
+            $expectedExtensions[self::SOURCE_REPOSITORY_REF] = 'refs/tags/' . $releaseMetadata->tag;
+        }
+
         try {
             /** @psalm-suppress InvalidArgument */
             $this->verifyAttestation->verify(
                 FilenameWithChecksum::fromFilenameAndChecksum($pharFilename->filePath, $pharFilename->checksum),
                 self::ORGANISATION,
                 self::ARTIFACT_FILENAME,
-                self::ATTESTATION_CERTIFICATE_EXPECTED_EXTENSION_VALUES,
+                $expectedExtensions,
             );
         } catch (FailedToVerifyArtifact $failedToVerifyArtifact) {
             throw FailedToVerifyRelease::fromAttestationException($failedToVerifyArtifact);

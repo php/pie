@@ -107,6 +107,7 @@ x509_extensions = v3_req
 [ v3_req ]
 1.3.6.1.4.1.57264.1.8 = ASN1:UTF8String:https://token.actions.githubusercontent.com
 1.3.6.1.4.1.57264.1.12 = ASN1:UTF8String:https://github.com/php/pie
+1.3.6.1.4.1.57264.1.14 = ASN1:UTF8String:refs/tags/1.2.3
 1.3.6.1.4.1.57264.1.16 = ASN1:UTF8String:https://github.com/php
 EOF);
         $privateKey  = openssl_pkey_new();
@@ -193,6 +194,91 @@ EOF);
         $this->mockAttestationResponse($this->downloadedPhar->checksum, $dsseEnvelopePayload, $signature, $pemCertificate);
 
         $this->verifier->verify($this->release, $this->downloadedPhar, $this->io);
+
+        self::assertStringContainsString('Verified the new PIE version (using fallback verification)', $this->io->getOutput());
+    }
+
+    public function testSuccessfulVerifyForNightly(): void
+    {
+        if (! extension_loaded('openssl')) {
+            self::markTestSkipped('Cannot run tests without openssl extension');
+        }
+
+        $nightlyRelease = new ReleaseMetadata('nightly', self::TEST_GITHUB_URL . '/pie-nightly.phar');
+
+        $dsseEnvelopePayload = json_encode([
+            'subject' => [
+                [
+                    'name' => 'pie.phar',
+                    'digest' => ['sha256' => $this->downloadedPhar->checksum],
+                ],
+            ],
+        ]);
+
+        $tempOpensslConfig = tempnam(sys_get_temp_dir(), 'pie_openssl_test_config');
+        file_put_contents($tempOpensslConfig, <<<'EOF'
+
+[ req ]
+default_bits = 2048
+prompt = no
+encrypt_key = no
+default_md = sha1
+distinguished_name = dn
+x509_extensions = v3_req
+
+[ dn ]
+
+[ v3_req ]
+1.3.6.1.4.1.57264.1.8 = ASN1:UTF8String:https://token.actions.githubusercontent.com
+1.3.6.1.4.1.57264.1.9 = ASN1:UTF8String:https://github.com/php/pie/.github/workflows/build-phar.yml@refs/heads/main
+1.3.6.1.4.1.57264.1.12 = ASN1:UTF8String:https://github.com/php/pie
+1.3.6.1.4.1.57264.1.16 = ASN1:UTF8String:https://github.com/php
+EOF);
+
+        $caPrivateKey = openssl_pkey_new();
+        $caCsr        = openssl_csr_new(['CN' => 'pie-test-ca'], $caPrivateKey);
+        $caCert       = openssl_csr_sign($caCsr, null, $caPrivateKey, 1);
+        openssl_x509_export($caCert, $caPemCertificate);
+
+        file_put_contents($this->trustedRootFilePath, json_encode([
+            'mediaType' => 'application/vnd.dev.sigstore.trustedroot+json;version=0.1',
+            'certificateAuthorities' => [
+                [
+                    'certChain' => [
+                        'certificates' => [
+                            [
+                                'rawBytes' => trim(str_replace('-----BEGIN CERTIFICATE-----', '', str_replace('-----END CERTIFICATE-----', '', $caPemCertificate))),
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ]));
+
+        $privateKey  = openssl_pkey_new();
+        $csr         = openssl_csr_new(['commonName' => 'pie-test'], $privateKey, ['config' => $tempOpensslConfig]);
+        $certificate = openssl_csr_sign($csr, $caCert, $caPrivateKey, 1, [
+            'config' => $tempOpensslConfig,
+            'x509_extensions' => 'v3_req',
+        ]);
+        openssl_x509_export($certificate, $pemCertificate);
+
+        openssl_sign(
+            sprintf(
+                'DSSEv1 %d %s %d %s',
+                strlen(self::DSSE_PAYLOAD_TYPE),
+                self::DSSE_PAYLOAD_TYPE,
+                strlen($dsseEnvelopePayload),
+                $dsseEnvelopePayload,
+            ),
+            $signature,
+            $privateKey,
+            OPENSSL_ALGO_SHA256,
+        );
+
+        $this->mockAttestationResponse($this->downloadedPhar->checksum, $dsseEnvelopePayload, $signature, $pemCertificate);
+
+        $this->verifier->verify($nightlyRelease, $this->downloadedPhar, $this->io);
 
         self::assertStringContainsString('Verified the new PIE version (using fallback verification)', $this->io->getOutput());
     }
