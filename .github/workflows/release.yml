@@ -88,9 +88,8 @@ jobs:
       packages: write
     uses: ./.github/workflows/build-and-push-docker-image.yml
     with:
-      # @TODO v1.0 Consider introducing more granular tags (major and major.minor)
-      # @see https://github.com/php/pie/pull/122#pullrequestreview-2477496308
-      # @see https://github.com/php/pie/pull/122#discussion_r1867331273
       tags: |
         ${{ ((!contains(github.ref, 'alpha') && !contains(github.ref, 'beta') && !contains(github.ref, 'rc')) && 'type=raw,value=bin') || '' }}
         type=semver,pattern={{version}},suffix=-bin
+        type=semver,pattern={{major}}.{{minor}},suffix=-bin
+        type=semver,pattern={{major}},suffix=-bin
