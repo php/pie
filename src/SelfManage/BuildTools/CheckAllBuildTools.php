@@ -70,6 +70,25 @@ class CheckAllBuildTools
                     PackageManager::Brew->value => 'libtool',
                 ],
             ),
+            // Composer's archive downloader uses /usr/bin/unzip first
+            // and falls back to git-source-cloning when it isn't
+            // present (not to PHP's ZipArchive). Without unzip, a
+            // pre-packaged-binary dist URL is silently swapped for a
+            // git clone of the source tree and the .so the user paid
+            // for in download time is never extracted, surfacing as
+            // ExtensionBinaryNotFound when PIE's prePackagedBinary
+            // check looks for it in the vendor dir. Bare php:X.Y-cli
+            // Debian images do not ship /usr/bin/unzip.
+            new BinaryBuildToolFinder(
+                'unzip',
+                [
+                    PackageManager::Apt->value => 'unzip',
+                    PackageManager::Apk->value => 'unzip',
+                    PackageManager::Dnf->value => 'unzip',
+                    PackageManager::Yum->value => 'unzip',
+                    PackageManager::Brew->value => 'unzip',
+                ],
+            ),
             new PhpizeBuildToolFinder(
                 [
                     PackageManager::Apt->value => 'php-dev',
