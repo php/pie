@@ -9,6 +9,7 @@ use Composer\IO\BufferIO;
 use Composer\Util\Http\Response;
 use Composer\Util\HttpDownloader;
 use Php\Pie\File\BinaryFile;
+use Php\Pie\SelfManage\Update\FetchPieRelease;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
 use Php\Pie\SelfManage\Verify\FailedToVerifyRelease;
 use Php\Pie\SelfManage\Verify\FallbackVerificationUsingOpenSsl;
@@ -48,6 +49,7 @@ final class FallbackVerificationUsingOpenSslTest extends TestCase
     private HttpDownloader&MockObject $httpDownloader;
     private BufferIO $io;
     private FallbackVerificationUsingOpenSsl $verifier;
+    private FetchPieRelease&MockObject $fetchPieRelease;
     /** @var non-empty-string */
     private string $trustedRootFilePath;
 
@@ -58,14 +60,18 @@ final class FallbackVerificationUsingOpenSslTest extends TestCase
         $this->release        = new ReleaseMetadata('1.2.3', self::TEST_GITHUB_URL . '/pie.phar');
         $this->downloadedPhar = new BinaryFile('/path/to/pie.phar', 'fake-checksum');
 
-        $this->httpDownloader = $this->createMock(HttpDownloader::class);
-        $this->io             = new BufferIO();
+        $this->httpDownloader  = $this->createMock(HttpDownloader::class);
+        $this->io              = new BufferIO();
+        $this->fetchPieRelease = $this->createMock(FetchPieRelease::class);
 
         $trustedRootFilePath = tempnam(sys_get_temp_dir(), 'pie_test_trusted_root_file_path');
         assert(is_string($trustedRootFilePath));
         $this->trustedRootFilePath = $trustedRootFilePath;
 
-        $this->verifier = new FallbackVerificationUsingOpenSsl(new VerifyAttestationWithOpenSsl($this->trustedRootFilePath, self::TEST_GITHUB_URL, $this->httpDownloader));
+        $this->verifier = new FallbackVerificationUsingOpenSsl(
+            new VerifyAttestationWithOpenSsl($this->trustedRootFilePath, self::TEST_GITHUB_URL, $this->httpDownloader),
+            $this->fetchPieRelease,
+        );
     }
 
     /** @return array{0: string, 1: string} */
@@ -204,7 +210,10 @@ EOF);
             self::markTestSkipped('Cannot run tests without openssl extension');
         }
 
-        $nightlyRelease = new ReleaseMetadata('nightly', self::TEST_GITHUB_URL . '/pie-nightly.phar');
+        $nightlyRelease = new ReleaseMetadata(
+            'nightly',
+            self::TEST_GITHUB_URL . '/pie-nightly.phar',
+        );
 
         $dsseEnvelopePayload = json_encode([
             'subject' => [
@@ -230,7 +239,7 @@ x509_extensions = v3_req
 
 [ v3_req ]
 1.3.6.1.4.1.57264.1.8 = ASN1:UTF8String:https://token.actions.githubusercontent.com
-1.3.6.1.4.1.57264.1.9 = ASN1:UTF8String:https://github.com/php/pie/.github/workflows/build-phar.yml@refs/heads/main
+1.3.6.1.4.1.57264.1.9 = ASN1:UTF8String:https://github.com/php/pie/.github/workflows/build-assets.yml@refs/heads/main
 1.3.6.1.4.1.57264.1.12 = ASN1:UTF8String:https://github.com/php/pie
 1.3.6.1.4.1.57264.1.16 = ASN1:UTF8String:https://github.com/php
 EOF);
@@ -277,6 +286,8 @@ EOF);
         );
 
         $this->mockAttestationResponse($this->downloadedPhar->checksum, $dsseEnvelopePayload, $signature, $pemCertificate);
+
+        $this->fetchPieRelease->method('trunkBranch')->willReturn('main');
 
         $this->verifier->verify($nightlyRelease, $this->downloadedPhar, $this->io);
 

@@ -6,7 +6,6 @@ namespace Php\Pie\Command;
 
 use Composer\IO\IOInterface;
 use Composer\IO\NullIO;
-use Composer\Util\HttpDownloader;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\QuieterConsoleIO;
@@ -116,9 +115,12 @@ final class SelfUpdateCommand extends Command
             ),
         );
 
-        $httpDownloader        = new HttpDownloader($this->quieterConsoleIo, $composer->getConfig());
-        $fetchLatestPieRelease = new FetchPieReleaseFromGitHub($this->githubApiBaseUrl, $httpDownloader);
-        $verifyPiePhar         = VerifyPieReleaseUsingAttestation::factory();
+        $fetchLatestPieRelease = FetchPieReleaseFromGitHub::factory(
+            $this->quieterConsoleIo,
+            $composer->getConfig(),
+            $this->githubApiBaseUrl,
+        );
+        $verifyPiePhar         = VerifyPieReleaseUsingAttestation::factory($fetchLatestPieRelease);
 
         if ($updateChannel === Channel::Nightly) {
             $latestRelease = new ReleaseMetadata(

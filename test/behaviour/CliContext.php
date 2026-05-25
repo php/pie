@@ -418,6 +418,6 @@ class CliContext implements Context
         Assert::same($this->exitCode, 1);
 
         Assert::notNull($this->errorOutput);
-        Assert::contains($this->errorOutput, '❌ Failed to verify the pie.phar release');
+        Assert::contains($this->errorOutput, '❌ Failed to verify that this PIE binary is the authentic release');
     }
 }

@@ -6,6 +6,7 @@ namespace Php\Pie\SelfManage\Verify;
 
 use Composer\IO\IOInterface;
 use Php\Pie\File\BinaryFile;
+use Php\Pie\SelfManage\Update\FetchPieRelease;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
 use Php\Pie\Util\Emoji;
 use Php\Pie\Util\Process;
@@ -22,8 +23,10 @@ final class GithubCliAttestationVerification implements VerifyPiePhar
     private const GH_CLI_NAME            = 'gh';
     private const GH_ATTESTATION_COMMAND = 'attestation';
 
-    public function __construct(private readonly ExecutableFinder $executableFinder)
-    {
+    public function __construct(
+        private readonly ExecutableFinder $executableFinder,
+        private readonly FetchPieRelease $fetchPieRelease,
+    ) {
     }
 
     public function verify(ReleaseMetadata $releaseMetadata, BinaryFile $pharFilename, IOInterface $io): void
@@ -53,7 +56,8 @@ final class GithubCliAttestationVerification implements VerifyPiePhar
         ];
 
         if ($releaseMetadata->tag === 'nightly') {
-            $verificationCommand[] = '--signer-workflow=php/pie/.github/workflows/build-phar.yml';
+            $verificationCommand[] = '--signer-workflow=php/pie/.github/workflows/build-assets.yml';
+            $verificationCommand[] = '--source-ref=refs/heads/' . $this->fetchPieRelease->trunkBranch();
         } else {
             $verificationCommand[] = '--source-ref=refs/tags/' . $releaseMetadata->tag;
         }

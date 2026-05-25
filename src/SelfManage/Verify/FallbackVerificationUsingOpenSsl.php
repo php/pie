@@ -6,6 +6,7 @@ namespace Php\Pie\SelfManage\Verify;
 
 use Composer\IO\IOInterface;
 use Php\Pie\File\BinaryFile;
+use Php\Pie\SelfManage\Update\FetchPieRelease;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
 use Php\Pie\Util\Emoji;
 use ThePhpFoundation\Attestation\FilenameWithChecksum;
@@ -37,6 +38,7 @@ final class FallbackVerificationUsingOpenSsl implements VerifyPiePhar
 
     public function __construct(
         private readonly VerifyAttestation $verifyAttestation,
+        private readonly FetchPieRelease $fetchPieRelease,
     ) {
     }
 
@@ -50,7 +52,10 @@ final class FallbackVerificationUsingOpenSsl implements VerifyPiePhar
         $expectedExtensions = self::ATTESTATION_CERTIFICATE_EXPECTED_EXTENSION_VALUES;
 
         if ($releaseMetadata->tag === 'nightly') {
-            $expectedExtensions[self::BUILD_SIGNER_URI] = 'https://github.com/php/pie/.github/workflows/build-phar.yml@refs/heads/main';
+            $expectedExtensions[self::BUILD_SIGNER_URI] = sprintf(
+                'https://github.com/php/pie/.github/workflows/build-assets.yml@refs/heads/%s',
+                $this->fetchPieRelease->trunkBranch(),
+            );
         } else {
             $expectedExtensions[self::SOURCE_REPOSITORY_REF] = 'refs/tags/' . $releaseMetadata->tag;
         }

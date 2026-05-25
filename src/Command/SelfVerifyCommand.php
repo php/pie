@@ -5,13 +5,19 @@ declare(strict_types=1);
 namespace Php\Pie\Command;
 
 use Composer\IO\IOInterface;
+use Composer\IO\NullIO;
+use Php\Pie\ComposerIntegration\PieComposerFactory;
+use Php\Pie\ComposerIntegration\PieComposerRequest;
+use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use Php\Pie\File\BinaryFile;
 use Php\Pie\File\FullPathToSelf;
+use Php\Pie\SelfManage\Update\FetchPieReleaseFromGitHub;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
 use Php\Pie\SelfManage\Verify\FailedToVerifyRelease;
 use Php\Pie\SelfManage\Verify\VerifyPieReleaseUsingAttestation;
 use Php\Pie\Util\Emoji;
 use Php\Pie\Util\PieVersion;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -28,9 +34,13 @@ final class SelfVerifyCommand extends Command
 {
     private const ARGUMENT_VERSION = 'version';
 
+    /** @param non-empty-string $githubApiBaseUrl */
     public function __construct(
+        private readonly string $githubApiBaseUrl,
         private readonly FullPathToSelf $fullPathToSelf,
         private readonly IOInterface $io,
+        private readonly QuieterConsoleIO $quieterConsoleIo,
+        private readonly ContainerInterface $container,
     ) {
         parent::__construct();
     }
@@ -62,9 +72,27 @@ final class SelfVerifyCommand extends Command
             $this->io->write(sprintf('<comment>No version specified, verifying against the version this PHAR claims to be (%s).</comment>', $expectedVersion));
         }
 
+        $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $this->io);
+
+        CommandHelper::applyNoCacheOptionIfSet($input, $this->io);
+
+        $composer = PieComposerFactory::createPieComposer(
+            $this->container,
+            PieComposerRequest::noOperation(
+                new NullIO(),
+                $targetPlatform,
+            ),
+        );
+
+        $fetchLatestPieRelease = FetchPieReleaseFromGitHub::factory(
+            $this->quieterConsoleIo,
+            $composer->getConfig(),
+            $this->githubApiBaseUrl,
+        );
+
         $latestRelease = new ReleaseMetadata($expectedVersion, 'blah');
         $pharFilename  = BinaryFile::fromFileWithSha256Checksum(($this->fullPathToSelf)());
-        $verifyPiePhar = VerifyPieReleaseUsingAttestation::factory();
+        $verifyPiePhar = VerifyPieReleaseUsingAttestation::factory($fetchLatestPieRelease);
 
         try {
             $verifyPiePhar->verify($latestRelease, $pharFilename, $this->io);
