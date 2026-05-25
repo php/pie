@@ -208,7 +208,7 @@ final class UninstallUsingUnlinkTest extends TestCase
             self::fail('Expected exception was NOT thrown');
         } catch (RuntimeException $e) {
             self::assertSame(
-                'Stored metadata path "' . $extensionFile . '" did not match expected path "/different/expected/ext/path/foobar.so"',
+                'Stored metadata path "' . $extensionFile . '" did not match expected path "/different/expected/ext/path' . DIRECTORY_SEPARATOR . 'foobar.so"',
                 $e->getMessage(),
             );
         }
