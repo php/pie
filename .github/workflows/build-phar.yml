@@ -26,6 +26,7 @@ jobs:
         php-versions:
           - '8.1'
     permissions:
+      contents: read
       # id-token:write is required for build provenance attestation.
       id-token: write
       # attestations:write is required for build provenance attestation.
@@ -55,7 +56,7 @@ jobs:
         # unprivileged context, otherwise anyone could send a PR with malicious
         # code, which would store attestation that `php/pie` built the PHAR, and
         # it would look genuine. So this should NOT run for PR builds.
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && github.event.repository.visibility == 'public'
         uses: actions/attest-build-provenance@v3
         with:
           subject-path: '${{ github.workspace }}/pie.phar'
