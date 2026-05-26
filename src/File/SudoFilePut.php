@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\Pie\File;
 
+use Php\Pie\Platform;
 use Php\Pie\Util\CaptureErrors;
 use Php\Pie\Util\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
@@ -11,9 +12,10 @@ use Symfony\Component\Process\Exception\ProcessFailedException;
 use function dirname;
 use function file_exists;
 use function file_put_contents;
+use function is_dir;
 use function is_writable;
+use function mkdir;
 use function preg_match;
-use function sys_get_temp_dir;
 use function tempnam;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
@@ -47,7 +49,12 @@ final class SudoFilePut
 
     private static function writeWithSudo(string $filename, string $content): void
     {
-        $tempFilename = tempnam(sys_get_temp_dir(), 'pie_tmp_');
+        $tempDir = Platform::getPieBaseWorkingDirectory() . '/tmp';
+        if (! is_dir($tempDir)) {
+            @mkdir($tempDir, 0700, true);
+        }
+
+        $tempFilename = tempnam($tempDir, 'pie_tmp_');
         if ($tempFilename === false) {
             throw FailedToWriteFile::fromNoPermissions($filename);
         }
