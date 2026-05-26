@@ -49,7 +49,7 @@ final class GithubCliAttestationVerification implements VerifyPiePhar
             $gh,
             self::GH_ATTESTATION_COMMAND,
             'verify',
-            '--owner=php',
+            '--repo=php/pie',
             $pharFilename->filePath,
         ];
 
