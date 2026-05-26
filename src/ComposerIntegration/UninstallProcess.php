@@ -28,11 +28,12 @@ class UninstallProcess
         PieComposerRequest $composerRequest,
         CompletePackageInterface $composerPackage,
     ): void {
-        $io = $composerRequest->pieOutput;
+        $io             = $composerRequest->pieOutput;
+        $targetPlatform = $composerRequest->targetPlatform;
 
         $piePackage = Package::fromComposerCompletePackage($composerPackage);
 
-        $affectedIniFiles = ($this->removeIniEntry)($piePackage, $composerRequest->targetPlatform, $io);
+        $affectedIniFiles = ($this->removeIniEntry)($piePackage, $targetPlatform, $io);
 
         if (count($affectedIniFiles) === 1) {
             $io->write(
@@ -52,6 +53,6 @@ class UninstallProcess
             array_walk($affectedIniFiles, static fn (string $ini) => $io->write(' - ' . $ini));
         }
 
-        $io->write(sprintf('👋 <info>Removed extension:</info> %s', ($this->uninstall)($piePackage)->filePath));
+        $io->write(sprintf('👋 <info>Removed extension:</info> %s', ($this->uninstall)($targetPlatform, $piePackage)->filePath));
     }
 }

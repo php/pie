@@ -10,16 +10,22 @@ use Php\Pie\File\BinaryFile;
 use Php\Pie\File\FailedToUnlinkFile;
 use Php\Pie\File\Sudo;
 use Php\Pie\File\SudoUnlink;
+use Php\Pie\Platform\OperatingSystem;
+use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Util\Process;
+use RuntimeException;
 
 use function array_key_exists;
 use function file_exists;
 use function is_writable;
+use function sprintf;
+
+use const DIRECTORY_SEPARATOR;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 class UninstallUsingUnlink implements Uninstall
 {
-    public function __invoke(Package $package): BinaryFile
+    public function __invoke(TargetPlatform $targetPlatform, Package $package): BinaryFile
     {
         $pieMetadata = PieInstalledJsonMetadataKeys::pieMetadataFromComposerPackage($package->composerPackage());
 
@@ -37,6 +43,20 @@ class UninstallUsingUnlink implements Uninstall
             );
         }
 
+        // Sanity check the extension metadata points to the correct expected location
+        $extensionPathByConvention = $targetPlatform->phpBinaryPath->extensionPath()
+            . DIRECTORY_SEPARATOR
+            . ($targetPlatform->operatingSystem === OperatingSystem::Windows ? 'php_' : '')
+            . $package->extensionName()->name()
+            . ($targetPlatform->operatingSystem === OperatingSystem::Windows ? '.dll' : '.so');
+        if ($extensionPathByConvention !== $pieMetadata[PieInstalledJsonMetadataKeys::InstalledBinary->value]) {
+            throw new RuntimeException(sprintf(
+                'Stored metadata path "%s" did not match expected path "%s"',
+                $pieMetadata[PieInstalledJsonMetadataKeys::InstalledBinary->value],
+                $extensionPathByConvention,
+            ));
+        }
+
         $expectedBinaryFile = new BinaryFile(
             $pieMetadata[PieInstalledJsonMetadataKeys::InstalledBinary->value],
             $pieMetadata[PieInstalledJsonMetadataKeys::BinaryChecksum->value],
@@ -46,7 +66,7 @@ class UninstallUsingUnlink implements Uninstall
 
         // If the target directory isn't writable, or a .so file already exists and isn't writable, try to use sudo
         if (file_exists($expectedBinaryFile->filePath) && ! is_writable($expectedBinaryFile->filePath) && Sudo::exists()) {
-            Process::run([Sudo::find(), 'rm', $expectedBinaryFile->filePath], timeout: Process::SHORT_TIMEOUT);
+            Process::run([Sudo::find(), 'rm', '--', $expectedBinaryFile->filePath], timeout: Process::SHORT_TIMEOUT);
 
             // Removal worked, bail out
             if (! file_exists($expectedBinaryFile->filePath)) {
