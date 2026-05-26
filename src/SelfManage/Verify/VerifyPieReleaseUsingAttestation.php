@@ -6,6 +6,7 @@ namespace Php\Pie\SelfManage\Verify;
 
 use Composer\IO\IOInterface;
 use Php\Pie\File\BinaryFile;
+use Php\Pie\SelfManage\Update\FetchPieRelease;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
 use Symfony\Component\Process\ExecutableFinder;
 use ThePhpFoundation\Attestation\Verification\VerifyAttestationWithOpenSsl;
@@ -21,11 +22,11 @@ final class VerifyPieReleaseUsingAttestation implements VerifyPiePhar
     ) {
     }
 
-    public static function factory(): self
+    public static function factory(FetchPieRelease $fetchPieRelease): self
     {
         return new VerifyPieReleaseUsingAttestation(
-            new GithubCliAttestationVerification(new ExecutableFinder()),
-            new FallbackVerificationUsingOpenSsl(VerifyAttestationWithOpenSsl::factory()),
+            new GithubCliAttestationVerification(new ExecutableFinder(), $fetchPieRelease),
+            new FallbackVerificationUsingOpenSsl(VerifyAttestationWithOpenSsl::factory(), $fetchPieRelease),
         );
     }
 
