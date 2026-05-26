@@ -6,6 +6,7 @@ namespace Php\Pie\Downloading;
 
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Platform\PrePackagedSourceAssetName;
+use RuntimeException;
 use Safe\Exceptions\FilesystemException;
 
 use function array_map;
@@ -14,7 +15,9 @@ use function file_exists;
 use function is_dir;
 use function pathinfo;
 use function Safe\realpath;
+use function sprintf;
 use function str_replace;
+use function str_starts_with;
 
 use const DIRECTORY_SEPARATOR;
 use const PATHINFO_FILENAME;
@@ -72,7 +75,7 @@ final class DownloadedPackage
         }
 
         try {
-            $extractedSourcePathWithBuildPath = realpath(
+            $candidate = realpath(
                 $extractedSourcePath
                 . DIRECTORY_SEPARATOR
                 . str_replace('{version}', $package->version(), $package->buildPath()),
@@ -82,7 +85,17 @@ final class DownloadedPackage
             return $extractedSourcePath;
         }
 
-        return $extractedSourcePathWithBuildPath;
+        $extractedReal = realpath($extractedSourcePath);
+        if (! str_starts_with($candidate . DIRECTORY_SEPARATOR, $extractedReal . DIRECTORY_SEPARATOR)) {
+            throw new RuntimeException(sprintf(
+                'php-ext.build-path %s resolved to %s, which is outside the extract directory %s',
+                $package->buildPath(),
+                $candidate,
+                $extractedReal,
+            ));
+        }
+
+        return $candidate;
     }
 
     public static function fromPackageAndExtractedPath(Package $package, string $extractedSourcePath): self

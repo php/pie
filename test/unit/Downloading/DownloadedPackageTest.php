@@ -11,6 +11,8 @@ use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
+use RuntimeException;
 
 use function Safe\realpath;
 use function uniqid;
@@ -90,5 +92,28 @@ final class DownloadedPackageTest extends TestCase
 
         self::assertSame($extractedSourcePath . DIRECTORY_SEPARATOR . 'php_bar-1.2.3-src', $downloadedPackage->extractedSourcePath);
         self::assertSame($package, $downloadedPackage->package);
+    }
+
+    public function testFromPackageAndExtractedPathWithEscapingBuildPathThrows(): void
+    {
+        $package = new Package(
+            $this->createMock(CompletePackageInterface::class),
+            ExtensionType::PhpModule,
+            ExtensionName::normaliseFromString('foo'),
+            'foo/bar',
+            '1.2.3',
+            null,
+        );
+
+        $reflection = new ReflectionClass($package);
+        $property   = $reflection->getProperty('buildPath');
+        $property->setValue($package, '../../../test');
+
+        $extractedSourcePath = realpath(__DIR__);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('outside the extract directory');
+
+        DownloadedPackage::fromPackageAndExtractedPath($package, $extractedSourcePath);
     }
 }

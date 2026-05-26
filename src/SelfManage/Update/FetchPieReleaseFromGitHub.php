@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Php\Pie\SelfManage\Update;
 
+use Composer\Config;
 use Composer\Package\Version\VersionParser;
 use Composer\Util\HttpDownloader;
+use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use Php\Pie\File\BinaryFile;
 use RuntimeException;
 use Safe\Exceptions\FilesystemException;
@@ -17,6 +19,7 @@ use function array_map;
 use function count;
 use function reset;
 use function Safe\file_put_contents;
+use function Safe\preg_match;
 use function Safe\tempnam;
 use function sprintf;
 use function sys_get_temp_dir;
@@ -25,12 +28,50 @@ use function sys_get_temp_dir;
 final class FetchPieReleaseFromGitHub implements FetchPieRelease
 {
     private const PIE_PHAR_NAME    = 'pie.phar';
+    private const PIE_REPO_URL     = '/repos/php/pie';
     private const PIE_RELEASES_URL = '/repos/php/pie/releases';
 
     public function __construct(
         private readonly string $githubApiBaseUrl,
         private readonly HttpDownloader $httpDownloader,
     ) {
+    }
+
+    public static function factory(QuieterConsoleIO $io, Config $config, string $githubApiBaseUrl): self
+    {
+        return new self($githubApiBaseUrl, new HttpDownloader($io, $config));
+    }
+
+    public function trunkBranch(): string
+    {
+        $url = $this->githubApiBaseUrl . self::PIE_REPO_URL;
+
+        $decodedResponse = $this->httpDownloader->get(
+            $url,
+            [
+                'retry-auth-failure' => true,
+                'http' => [
+                    'method' => 'GET',
+                    'header' => [],
+                ],
+            ],
+        )->decodeJson();
+
+        Assert::isArray($decodedResponse);
+        Assert::keyExists($decodedResponse, 'default_branch');
+        Assert::stringNotEmpty($decodedResponse['default_branch']);
+
+        $branch = $decodedResponse['default_branch'];
+
+        // Branch MUST match the N.N.x format
+        if (preg_match('/^\d+\.\d+\.x$/', $branch) !== 1) {
+            throw new RuntimeException(sprintf(
+                'The default branch "%s" returned by GitHub is not in an expected format.',
+                $branch,
+            ));
+        }
+
+        return $branch;
     }
 
     public function latestReleaseMetadata(Channel $updateChannel): ReleaseMetadata

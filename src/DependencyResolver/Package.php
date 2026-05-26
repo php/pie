@@ -32,6 +32,7 @@ use function is_string;
 use function Safe\parse_url;
 use function str_contains;
 use function str_starts_with;
+use function strlen;
 use function strtolower;
 
 use const DIRECTORY_SEPARATOR;
@@ -88,7 +89,23 @@ final class Package
 
         $package->supportZts = $phpExtOptions['support-zts'] ?? true;
         $package->supportNts = $phpExtOptions['support-nts'] ?? true;
-        $package->buildPath  = $phpExtOptions['build-path'] ?? null;
+
+        $buildPath = $phpExtOptions['build-path'] ?? null;
+        if ($buildPath !== null) {
+            if (
+                str_starts_with($buildPath, '/')
+                || str_starts_with($buildPath, '\\')
+                || (strlen($buildPath) > 1 && $buildPath[1] === ':')
+            ) {
+                throw new InvalidArgumentException('php-ext.build-path must be a relative path.');
+            }
+
+            if (str_contains($buildPath, '..')) {
+                throw new InvalidArgumentException('php-ext.build-path cannot contain ".." segments.');
+            }
+        }
+
+        $package->buildPath = $buildPath;
 
         $compatibleOsFamilies   = $phpExtOptions['os-families'] ?? null;
         $incompatibleOsFamilies = $phpExtOptions['os-families-exclude'] ?? null;

@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace Php\Pie\File;
 
+use Php\Pie\Platform;
 use Php\Pie\Util\Process;
 use Safe\Exceptions\FilesystemException;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 
 use function dirname;
 use function file_exists;
+use function is_dir;
 use function is_writable;
 use function Safe\file_put_contents;
+use function Safe\mkdir;
 use function Safe\preg_match;
 use function Safe\tempnam;
 use function sys_get_temp_dir;
@@ -43,6 +46,11 @@ final class SudoFilePut
 
     private static function writeWithSudo(string $filename, string $content): void
     {
+        $tempDir = Platform::getPieBaseWorkingDirectory() . '/tmp';
+        if (! is_dir($tempDir)) {
+            mkdir($tempDir, 0700, true);
+        }
+
         try {
             $tempFilename = tempnam(sys_get_temp_dir(), 'pie_tmp_');
         } catch (FilesystemException $e) {
