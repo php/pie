@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\Pie\Installing;
 
 use Composer\IO\IOInterface;
+use FilesystemIterator;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\File\BinaryFile;
 use Php\Pie\File\WindowsDelete;
@@ -21,7 +22,11 @@ use function dirname;
 use function file_exists;
 use function is_file;
 use function mkdir;
+use function realpath;
+use function sprintf;
+use function str_contains;
 use function str_replace;
+use function str_starts_with;
 use function strlen;
 use function substr;
 
@@ -53,14 +58,19 @@ final class WindowsInstall implements Install
             $io->write('<info>Copied PDB to:</info> ' . $destinationPdbName);
         }
 
-        foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($extractedSourcePath)) as $file) {
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($extractedSourcePath, FilesystemIterator::SKIP_DOTS),
+        );
+
+        foreach ($iterator as $file) {
             assert($file instanceof SplFileInfo);
 
             /**
-             * Skip directories, the main DLL, PDB
+             * Skip directories, the main DLL, PDB and symlinks
              */
             if (
                 $file->isDir()
+                || $file->isLink()
                 || $this->normalisedPathsMatch($file->getPathname(), $sourceDllName)
                 || $this->normalisedPathsMatch($file->getPathname(), $sourcePdbName)
             ) {
@@ -180,15 +190,40 @@ final class WindowsInstall implements Install
      */
     private function copyExtraFile(TargetPlatform $targetPlatform, DownloadedPackage $downloadedPackage, SplFileInfo $file): string
     {
-        $destinationFullFilename = dirname($targetPlatform->phpBinaryPath->phpBinaryPath) . DIRECTORY_SEPARATOR
+        $extrasRoot = dirname($targetPlatform->phpBinaryPath->phpBinaryPath) . DIRECTORY_SEPARATOR
             . 'extras' . DIRECTORY_SEPARATOR
-            . $downloadedPackage->package->extensionName()->name() . DIRECTORY_SEPARATOR
-            . substr($file->getPathname(), strlen($downloadedPackage->extractedSourcePath) + 1);
+            . $downloadedPackage->package->extensionName()->name();
+
+        $relativeName = substr($file->getPathname(), strlen($downloadedPackage->extractedSourcePath) + 1);
+
+        if (str_contains($relativeName, '..' . DIRECTORY_SEPARATOR) || str_starts_with($relativeName, '..')) {
+            throw new RuntimeException(sprintf(
+                'Refusing to copy extra file with traversal segment: %s',
+                $relativeName,
+            ));
+        }
+
+        $destinationFullFilename = $extrasRoot . DIRECTORY_SEPARATOR . $relativeName;
 
         $destinationPath = dirname($destinationFullFilename);
 
         if (! file_exists($destinationPath)) {
             mkdir($destinationPath, 0777, true);
+        }
+
+        $destinationReal = realpath($destinationPath);
+        $extrasReal      = realpath($extrasRoot);
+
+        if (
+            $destinationReal === false
+            || $extrasReal === false
+            || ! str_starts_with($destinationReal . DIRECTORY_SEPARATOR, $extrasReal . DIRECTORY_SEPARATOR)
+        ) {
+            throw new RuntimeException(sprintf(
+                'Refusing to copy extra file: destination %s escapes extras root %s',
+                $destinationPath,
+                $extrasRoot,
+            ));
         }
 
         if (! copy($file->getPathname(), $destinationFullFilename) || ! file_exists($destinationFullFilename) && ! is_file($destinationFullFilename)) {
