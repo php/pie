@@ -10,6 +10,9 @@ use Php\Pie\Util\FileNotFound;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
+use function assert;
+use function file_get_contents;
+
 #[CoversClass(BinaryFile::class)]
 final class BinaryFileTest extends TestCase
 {
@@ -63,5 +66,30 @@ final class BinaryFileTest extends TestCase
             __FILE__,
             self::TEST_FILE_HASH,
         ));
+    }
+
+    public function testVerifyContentSucceedsWithGoodContent(): void
+    {
+        $expectation = new BinaryFile(
+            self::TEST_FILE,
+            self::TEST_FILE_HASH,
+        );
+
+        $this->expectNotToPerformAssertions();
+        $actualContent = file_get_contents(self::TEST_FILE);
+        assert($actualContent !== false);
+        $expectation->verifyContent($actualContent);
+    }
+
+    public function testVerifyContentFailsWithWrongContent(): void
+    {
+        $expectation = new BinaryFile(
+            self::TEST_FILE,
+            self::TEST_FILE_HASH,
+        );
+
+        $this->expectException(BinaryFileFailedVerification::class);
+        $this->expectExceptionMessageMatches('/File "[^"]+" failed checksum verification\. Expected [^\.]+\.\.\., was [^\.]+\.\.\./');
+        $expectation->verifyContent('wrong content');
     }
 }

@@ -55,10 +55,10 @@ parameters:
 			path: src/Command/RepositoryRemoveCommand.php
 
 		-
-			message: '#^Parameter \#2 \$content of static method Php\\Pie\\File\\SudoFilePut\:\:contents\(\) expects string, string\|false given\.$#'
+			message: '#^Parameter \#1 \$tag of class Php\\Pie\\SelfManage\\Update\\ReleaseMetadata constructor expects non\-empty\-string, mixed given\.$#'
 			identifier: argument.type
 			count: 1
-			path: src/Command/SelfUpdateCommand.php
+			path: src/Command/SelfVerifyCommand.php
 
 		-
 			message: '#^Cannot cast mixed to string\.$#'
@@ -447,13 +447,13 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$certificate of function openssl_x509_export expects OpenSSLCertificate\|string, OpenSSLCertificate\|false given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 4
 			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
 
 		-
 			message: '#^Parameter \#1 \$csr of function openssl_csr_sign expects OpenSSLCertificateSigningRequest\|string, OpenSSLCertificateSigningRequest\|false given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 4
 			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
 
 		-
@@ -463,31 +463,43 @@ parameters:
 			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
 
 		-
+			message: '#^Parameter \#1 \$string of function strlen expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
+
+		-
 			message: '#^Parameter \#1 \$string of function trim expects string, array\<string\>\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
-
-		-
-			message: '#^Parameter \#2 \$ca_certificate of function openssl_csr_sign expects OpenSSLCertificate\|string\|null, OpenSSLCertificate\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
-
-		-
-			message: '#^Parameter \#2 \$dsseEnvelopePayload of method Php\\PieUnitTest\\SelfManage\\Verify\\FallbackVerificationUsingOpenSslTest\:\:mockAttestationResponse\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 3
-			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
-
-		-
-			message: '#^Parameter \#3 \$private_key of function openssl_csr_sign expects array\|OpenSSLAsymmetricKey\|OpenSSLCertificate\|string, mixed given\.$#'
 			identifier: argument.type
 			count: 2
 			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
 
 		-
+			message: '#^Parameter \#2 \$ca_certificate of function openssl_csr_sign expects OpenSSLCertificate\|string\|null, OpenSSLCertificate\|false given\.$#'
+			identifier: argument.type
+			count: 2
+			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
+
+		-
+			message: '#^Parameter \#2 \$dsseEnvelopePayload of method Php\\PieUnitTest\\SelfManage\\Verify\\FallbackVerificationUsingOpenSslTest\:\:mockAttestationResponse\(\) expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 4
+			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
+
+		-
+			message: '#^Parameter \#3 \$private_key of function openssl_csr_sign expects array\|OpenSSLAsymmetricKey\|OpenSSLCertificate\|string, mixed given\.$#'
+			identifier: argument.type
+			count: 4
+			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
+
+		-
 			message: '#^Parameter \#3 \$private_key of function openssl_sign expects array\|OpenSSLAsymmetricKey\|OpenSSLCertificate\|string, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
+
+		-
+			message: '#^Parameter \#3 \$signature of method Php\\PieUnitTest\\SelfManage\\Verify\\FallbackVerificationUsingOpenSslTest\:\:mockAttestationResponse\(\) expects string, mixed given\.$#'
 			identifier: argument.type
 			count: 1
 			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
@@ -495,11 +507,17 @@ parameters:
 		-
 			message: '#^Parameter \#3 \$subject of function str_replace expects array\<string\>\|string, mixed given\.$#'
 			identifier: argument.type
-			count: 1
+			count: 2
 			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
 
 		-
 			message: '#^Parameter \#4 \$body of class Composer\\Util\\Http\\Response constructor expects string\|null, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
+
+		-
+			message: '#^Parameter \#4 \$pemCertificate of method Php\\PieUnitTest\\SelfManage\\Verify\\FallbackVerificationUsingOpenSslTest\:\:mockAttestationResponse\(\) expects string, mixed given\.$#'
 			identifier: argument.type
 			count: 1
 			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php

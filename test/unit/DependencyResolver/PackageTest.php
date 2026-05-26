@@ -148,7 +148,40 @@ final class PackageTest extends TestCase
         self::assertSame('some/subdirectory/path/', $package->buildPath());
     }
 
-    public function testFromComposerCompletePackageWithStringDownloadUrlMethod(): void
+    public function testFromComposerCompletePackageWithAbsoluteBuildPathUnixThrows(): void
+    {
+        $composerCompletePackage = new CompletePackage('vendor/foo', '1.2.3.0', '1.2.3');
+        $composerCompletePackage->setPhpExt(['build-path' => '/absolute/path']);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('php-ext.build-path must be a relative path.');
+
+        Package::fromComposerCompletePackage($composerCompletePackage);
+    }
+
+    public function testFromComposerCompletePackageWithAbsoluteBuildPathWindowsThrows(): void
+    {
+        $composerCompletePackage = new CompletePackage('vendor/foo', '1.2.3.0', '1.2.3');
+        $composerCompletePackage->setPhpExt(['build-path' => 'C:\absolute\path']);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('php-ext.build-path must be a relative path.');
+
+        Package::fromComposerCompletePackage($composerCompletePackage);
+    }
+
+    public function testFromComposerCompletePackageWithTraversalBuildPathThrows(): void
+    {
+        $composerCompletePackage = new CompletePackage('vendor/foo', '1.2.3.0', '1.2.3');
+        $composerCompletePackage->setPhpExt(['build-path' => '../traversal']);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('php-ext.build-path cannot contain ".." segments.');
+
+        Package::fromComposerCompletePackage($composerCompletePackage);
+    }
+
+    public function testDownloadUrlMethodWithStringHasValidDownloadUrlMethod(): void
     {
         $composerCompletePackage = new CompletePackage('vendor/foo', '1.2.3.0', '1.2.3');
         $composerCompletePackage->setPhpExt(['download-url-method' => 'pre-packaged-binary']);

@@ -10,4 +10,5 @@ final class Emoji
     public const GREEN_CHECKMARK = '✅';
     public const WARNING         = '⚠️ ';
     public const PROHIBITED      = '🚫';
+    public const CROSS           = '❌';
 }

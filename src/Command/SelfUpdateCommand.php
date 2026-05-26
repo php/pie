@@ -6,7 +6,6 @@ namespace Php\Pie\Command;
 
 use Composer\IO\IOInterface;
 use Composer\IO\NullIO;
-use Composer\Util\HttpDownloader;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\QuieterConsoleIO;
@@ -116,9 +115,12 @@ final class SelfUpdateCommand extends Command
             ),
         );
 
-        $httpDownloader        = new HttpDownloader($this->quieterConsoleIo, $composer->getConfig());
-        $fetchLatestPieRelease = new FetchPieReleaseFromGitHub($this->githubApiBaseUrl, $httpDownloader);
-        $verifyPiePhar         = VerifyPieReleaseUsingAttestation::factory();
+        $fetchLatestPieRelease = FetchPieReleaseFromGitHub::factory(
+            $this->quieterConsoleIo,
+            $composer->getConfig(),
+            $this->githubApiBaseUrl,
+        );
+        $verifyPiePhar         = VerifyPieReleaseUsingAttestation::factory($fetchLatestPieRelease);
 
         if ($updateChannel === Channel::Nightly) {
             $latestRelease = new ReleaseMetadata(
@@ -177,12 +179,30 @@ final class SelfUpdateCommand extends Command
             return Command::FAILURE;
         }
 
+        $pharContents = file_get_contents($pharFilename->filePath);
+
+        if ($pharContents === false) {
+            $this->io->writeError(sprintf('<error>%s Failed to read the downloaded PHAR file %s</error>', Emoji::CROSS, $pharFilename->filePath));
+            unlink($pharFilename->filePath);
+
+            return Command::FAILURE;
+        }
+
+        try {
+            $pharFilename->verifyContent($pharContents);
+        } catch (Throwable) {
+            $this->io->writeError(sprintf('<error>%s PHAR contents changed after verification; aborting self-update</error>', Emoji::CROSS));
+            unlink($pharFilename->filePath);
+
+            return Command::FAILURE;
+        }
+
         $fullPathToSelf = ($this->fullPathToSelf)();
         $this->io->write(
             sprintf('Writing new version to %s', $fullPathToSelf),
             verbosity: IOInterface::VERBOSE,
         );
-        SudoFilePut::contents($fullPathToSelf, file_get_contents($pharFilename->filePath));
+        SudoFilePut::contents($fullPathToSelf, $pharContents);
         unlink($pharFilename->filePath);
 
         $this->io->write(sprintf(
