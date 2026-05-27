@@ -91,5 +91,5 @@ jobs:
       tags: |
         ${{ ((!contains(github.ref, 'alpha') && !contains(github.ref, 'beta') && !contains(github.ref, 'rc')) && 'type=raw,value=bin') || '' }}
         type=semver,pattern={{version}},suffix=-bin
-        type=semver,pattern={{major}}.{{minor}},suffix=-bin
-        type=semver,pattern={{major}},suffix=-bin
+        ${{ ((!contains(github.ref, 'alpha') && !contains(github.ref, 'beta') && !contains(github.ref, 'rc')) && 'type=semver,pattern={{major}}.{{minor}},suffix=-bin') || '' }}
+        ${{ ((!contains(github.ref, 'alpha') && !contains(github.ref, 'beta') && !contains(github.ref, 'rc')) && 'type=semver,pattern={{major}},suffix=-bin') || '' }}
