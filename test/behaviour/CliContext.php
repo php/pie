@@ -41,7 +41,7 @@ class CliContext implements Context
     public function removeInstalledExtensions(): void
     {
         $this->runPieCommand(['show']);
-        if (! preg_match_all('#from 🥧\s*([^/]+\/[^:]+)#', (string) $this->output, $installedExtensionPackageNames)) {
+        if (! preg_match_all('#([a-zA-Z0-9-_]+/[a-zA-Z0-9-_]+):#', (string) $this->output, $installedExtensionPackageNames)) {
             return;
         }
 
