@@ -45,6 +45,7 @@ class InstallCommandTest extends IsolatedWorkingDirectoryTestCase
             if (! is_writable($this->lastInstalledBinary)) {
                 array_unshift($rmCommand, 'sudo');
             }
+
             (new Process($rmCommand))->run();
         }
 
@@ -100,7 +101,8 @@ class InstallCommandTest extends IsolatedWorkingDirectoryTestCase
 
         $outputString = $this->commandTester->getDisplay();
 
-        if (preg_match('#^Install complete: (.*)$#m', $outputString, $matches)
+        if (
+            preg_match('#^Install complete: (.*)$#m', $outputString, $matches)
             && array_key_exists(1, $matches)
             && $matches[1] !== ''
         ) {
@@ -123,7 +125,8 @@ class InstallCommandTest extends IsolatedWorkingDirectoryTestCase
 
         $outputString = $this->commandTester->getDisplay();
 
-        if (preg_match('#^Copied DLL to: (.*)$#m', $outputString, $matches)
+        if (
+            preg_match('#^Copied DLL to: (.*)$#m', $outputString, $matches)
             && array_key_exists(1, $matches)
             && $matches[1] !== ''
         ) {

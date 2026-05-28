@@ -16,7 +16,6 @@ use Php\Pie\ExtensionName;
 use Php\Pie\Platform;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Util\Emoji;
-use Php\Pie\Util\PackageVerificationStatus;
 use Psr\Container\ContainerInterface;
 
 use function assert;

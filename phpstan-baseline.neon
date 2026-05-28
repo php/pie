@@ -244,18 +244,6 @@ parameters:
 			message: '#^Call to function assert\(\) with true will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1
-			path: test/integration/Command/InstallCommandTest.php
-
-		-
-			message: '#^Call to function is_string\(\) with non\-empty\-string will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: test/integration/Command/InstallCommandTest.php
-
-		-
-			message: '#^Call to function assert\(\) with true will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
 			path: test/integration/Installing/WindowsInstallTest.php
 
 		-
