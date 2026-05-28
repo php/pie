@@ -89,7 +89,7 @@ class ComposerIntegrationHandler
                 $status->description(),
             ), verbosity: IOInterface::VERY_VERBOSE);
 
-            if ($status->isVerified()) {
+            if ($status->isVerified() && ! $forceInstallPackageVersion) {
                 $this->arrayCollectionIo->write(sprintf(
                     '%s PIE package %s (%s) is already installed and verified.',
                     Emoji::GREEN_CHECKMARK,

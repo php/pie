@@ -191,6 +191,14 @@ class CliContext implements Context
         $this->runPieCommand(['install', $this->thePackage]);
     }
 
+    #[When('I run a command to forcefully install an extension')]
+    public function iRunACommandToForcefullyInstallAnExtension(): void
+    {
+        $this->theExtension = 'example_pie_extension';
+        $this->thePackage   = 'asgrim/example-pie-extension';
+        $this->runPieCommand(['install', '--force', $this->thePackage]);
+    }
+
     #[When('I run a command to install an extension without enabling it')]
     public function iRunACommandToInstallAnExtensionWithoutEnabling(): void
     {
@@ -257,6 +265,20 @@ class CliContext implements Context
         }
 
         Assert::regex($this->output, '#Install complete: [-_.a-zA-Z0-9/]+/' . $this->theExtension . '.so#');
+
+        $isExtEnabled = (new Process([self::PHP_BINARY, '-r', 'echo extension_loaded("' . $this->theExtension . '")?"yes":"no";']))
+            ->mustRun()
+            ->getOutput();
+
+        Assert::same($isExtEnabled, 'yes');
+    }
+
+    #[Then('the extension should not have been re-installed')]
+    public function theExtensionShouldNotHaveBeenReinstalled(): void
+    {
+        $this->assertCommandSuccessful();
+
+        Assert::contains($this->output, 'PIE package asgrim/example-pie-extension (example_pie_extension) is already installed and verified.');
 
         $isExtEnabled = (new Process([self::PHP_BINARY, '-r', 'echo extension_loaded("' . $this->theExtension . '")?"yes":"no";']))
             ->mustRun()
