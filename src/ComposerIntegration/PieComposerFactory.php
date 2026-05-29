@@ -13,6 +13,7 @@ use Composer\Repository\InstalledRepositoryInterface;
 use Composer\Util\Filesystem;
 use Composer\Util\ProcessExecutor;
 use Php\Pie\ComposerIntegration\Listeners\OverrideDownloadUrlInstallListener;
+use Php\Pie\ComposerIntegration\Listeners\RemoveUnrelatedInstallOperations;
 use Php\Pie\ExtensionType;
 use Php\Pie\Platform;
 use Psr\Container\ContainerInterface;
@@ -69,7 +70,7 @@ class PieComposerFactory extends Factory
             ));
 
         OverrideDownloadUrlInstallListener::selfRegister($composer, $io, $container, $composerRequest);
-//        RemoveUnrelatedInstallOperations::selfRegister($composer, $composerRequest);
+        RemoveUnrelatedInstallOperations::selfRegister($composer, $composerRequest);
 
         $composer->getConfig()->merge(['config' => ['__PIE_REQUEST__' => $composerRequest]]);
         $io->loadConfiguration($composer->getConfig());

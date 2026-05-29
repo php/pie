@@ -66,9 +66,9 @@ class OverrideDownloadUrlInstallListener
                 }
 
                 // Install requests for other packages than the one we want should be ignored
-            //                if ($this->composerRequest->requestedPackage->package !== $composerPackage->getName()) {
-            //                    return;
-            //                }
+                if ($this->composerRequest->requestedPackage->package !== $composerPackage->getName()) {
+                    return;
+                }
 
                 $piePackage         = Package::fromComposerCompletePackage($composerPackage);
                 $targetPlatform     = $this->composerRequest->targetPlatform;

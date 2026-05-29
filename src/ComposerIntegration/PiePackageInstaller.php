@@ -39,18 +39,18 @@ class PiePackageInstaller extends LibraryInstaller
             ?->then(function () use ($composerPackage) {
                 $io = $this->composerRequest->pieOutput;
 
-//                if ($this->composerRequest->requestedPackage->package !== $composerPackage->getName()) {
-//                    $io->write(
-//                        sprintf(
-//                            '<comment>Skipping %s install request from Composer as it was not the expected PIE package %s</comment>',
-//                            $composerPackage->getName(),
-//                            $this->composerRequest->requestedPackage->package,
-//                        ),
-//                        verbosity: IOInterface::VERY_VERBOSE,
-//                    );
-//
-//                    return null;
-//                }
+                if ($this->composerRequest->requestedPackage->package !== $composerPackage->getName()) {
+                    $io->write(
+                        sprintf(
+                            '<comment>Skipping %s install request from Composer as it was not the expected PIE package %s</comment>',
+                            $composerPackage->getName(),
+                            $this->composerRequest->requestedPackage->package,
+                        ),
+                        verbosity: IOInterface::VERY_VERBOSE,
+                    );
+
+                    return null;
+                }
 
                 if (! $composerPackage instanceof CompletePackageInterface) {
                     $io->writeError(sprintf(
@@ -81,18 +81,18 @@ class PiePackageInstaller extends LibraryInstaller
             ?->then(function () use ($composerPackage) {
                 $io = $this->composerRequest->pieOutput;
 
-//                if ($this->composerRequest->requestedPackage->package !== $composerPackage->getName()) {
-//                    $io->write(
-//                        sprintf(
-//                            '<comment>Skipping %s uninstall request from Composer as it was not the expected PIE package %s</comment>',
-//                            $composerPackage->getName(),
-//                            $this->composerRequest->requestedPackage->package,
-//                        ),
-//                        verbosity: IOInterface::VERY_VERBOSE,
-//                    );
-//
-//                    return null;
-//                }
+                if ($this->composerRequest->requestedPackage->package !== $composerPackage->getName()) {
+                    $io->write(
+                        sprintf(
+                            '<comment>Skipping %s uninstall request from Composer as it was not the expected PIE package %s</comment>',
+                            $composerPackage->getName(),
+                            $this->composerRequest->requestedPackage->package,
+                        ),
+                        verbosity: IOInterface::VERY_VERBOSE,
+                    );
+
+                    return null;
+                }
 
                 if (! $composerPackage instanceof CompletePackageInterface) {
                     $io->writeError(sprintf(
