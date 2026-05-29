@@ -55,6 +55,7 @@ class CliContext implements Context
     }
 
     #[When('I run a command to download the latest version of an extension')]
+    #[Given('an extension was previously downloaded but not built')]
     public function iRunACommandToDownloadTheLatestVersionOfAnExtension(): void
     {
         $this->runPieCommand(['download', 'asgrim/example-pie-extension']);
@@ -125,6 +126,7 @@ class CliContext implements Context
     }
 
     #[When('I run a command to build an extension')]
+    #[Given('an extension was previously built but not installed')]
     public function iRunACommandToBuildAnExtension(): void
     {
         $this->runPieCommand(['build', 'asgrim/example-pie-extension']);

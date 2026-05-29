@@ -106,7 +106,6 @@ class ComposerIntegrationHandler
                     $localRepoPackage->getName(),
                     $extName->name(),
                 ), verbosity: IOInterface::VERBOSE);
-                continue;
             }
 
             if (! $installedJsonMetadata->isInstalled() && ! $installedJsonMetadata->isBuilt() && $installedJsonMetadata->isDownloaded()) {
@@ -116,7 +115,6 @@ class ComposerIntegrationHandler
                     $localRepoPackage->getName(),
                     $extName->name(),
                 ), verbosity: IOInterface::VERBOSE);
-                continue;
             }
 
             $this->arrayCollectionIo->write(sprintf(
