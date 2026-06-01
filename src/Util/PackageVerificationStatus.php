@@ -24,4 +24,9 @@ enum PackageVerificationStatus
             self::InstalledBinaryPathDoesNotMatchActualBinaryPath => Emoji::WARNING . ' - binary path mismatch',
         };
     }
+
+    public function isVerified(): bool
+    {
+        return $this === self::Verified;
+    }
 }

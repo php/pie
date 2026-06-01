@@ -9,7 +9,6 @@ use Php\Pie\Command\RepositoryListCommand;
 use Php\Pie\Command\RepositoryRemoveCommand;
 use Php\Pie\Container;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\TestCase;
 
 use function array_filter;
 use function array_map;
@@ -23,7 +22,7 @@ use const PHP_EOL;
 #[CoversClass(RepositoryListCommand::class)]
 #[CoversClass(RepositoryAddCommand::class)]
 #[CoversClass(RepositoryRemoveCommand::class)]
-final class RepositoryManagementCommandsTest extends TestCase
+final class RepositoryManagementCommandsTest extends IsolatedWorkingDirectoryTestCase
 {
     private const EXAMPLE_PATH_REPOSITORY_URL = __DIR__;
     private const EXAMPLE_VCS_REPOSITORY_URL  = 'https://github.com/asgrim/example-pie-extension';
@@ -35,6 +34,8 @@ final class RepositoryManagementCommandsTest extends TestCase
 
     public function setUp(): void
     {
+        parent::setUp();
+
         $this->listCommand   = new CommandTester(Container::testFactory()->get(RepositoryListCommand::class));
         $this->addCommand    = new CommandTester(Container::testFactory()->get(RepositoryAddCommand::class));
         $this->removeCommand = new CommandTester(Container::testFactory()->get(RepositoryRemoveCommand::class));

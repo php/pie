@@ -7,15 +7,16 @@ namespace Php\PieIntegrationTest\Command;
 use Php\Pie\Command\InfoCommand;
 use Php\Pie\Container;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\TestCase;
 
 #[CoversClass(InfoCommand::class)]
-final class InfoCommandTest extends TestCase
+final class InfoCommandTest extends IsolatedWorkingDirectoryTestCase
 {
     private CommandTester $commandTester;
 
     public function setUp(): void
     {
+        parent::setUp();
+
         $this->commandTester = new CommandTester(Container::testFactory()->get(InfoCommand::class));
     }
 

@@ -8,7 +8,6 @@ use Composer\IO\IOInterface;
 use Composer\IO\NullIO;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
-use Php\Pie\ComposerIntegration\PieInstalledJsonMetadataKeys;
 use Php\Pie\DependencyResolver\BundledPhpExtensionRefusal;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
@@ -33,7 +32,6 @@ use function count;
 use function rtrim;
 use function sprintf;
 
-/** @phpstan-import-type PieMetadata from PieInstalledJsonMetadataKeys */
 #[AsCommand(
     name: 'show',
     description: 'List the installed modules and their versions.',

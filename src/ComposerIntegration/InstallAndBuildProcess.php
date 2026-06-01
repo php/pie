@@ -20,7 +20,7 @@ class InstallAndBuildProcess
     public function __construct(
         private readonly Build $pieBuild,
         private readonly Install $pieInstall,
-        private readonly InstalledJsonMetadata $installedJsonMetadata,
+        private readonly AddInstalledJsonMetadata $addInstalledJsonMetadata,
         private readonly PlaceholderReplacer $placeholderReplacer,
     ) {
     }
@@ -50,7 +50,7 @@ class InstallAndBuildProcess
             $downloadedPackage,
         );
 
-        $this->installedJsonMetadata->addDownloadMetadata(
+        $this->addInstalledJsonMetadata->addDownloadMetadata(
             $composer,
             $composerRequest,
             $composerPackage,
@@ -65,7 +65,7 @@ class InstallAndBuildProcess
                 $io,
             );
 
-            $this->installedJsonMetadata->addBuildMetadata(
+            $this->addInstalledJsonMetadata->addBuildMetadata(
                 $composer,
                 $composerRequest,
                 $composerPackage,
@@ -77,7 +77,7 @@ class InstallAndBuildProcess
             return;
         }
 
-        $this->installedJsonMetadata->addInstallMetadata(
+        $this->addInstalledJsonMetadata->addInstallMetadata(
             $composer,
             $composerPackage,
             ($this->pieInstall)(

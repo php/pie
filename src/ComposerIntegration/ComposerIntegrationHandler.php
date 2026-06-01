@@ -7,13 +7,20 @@ namespace Php\Pie\ComposerIntegration;
 use Composer\Composer;
 use Composer\Filter\PlatformRequirementFilter\PlatformRequirementFilterFactory;
 use Composer\Installer;
+use Composer\IO\IOInterface;
+use Composer\Package\CompleteAliasPackage;
+use Composer\Package\CompletePackageInterface;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
+use Php\Pie\ExtensionName;
 use Php\Pie\Platform;
 use Php\Pie\Platform\TargetPlatform;
+use Php\Pie\Util\Emoji;
 use Psr\Container\ContainerInterface;
 
+use function assert;
 use function file_exists;
+use function sprintf;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 class ComposerIntegrationHandler
@@ -63,9 +70,61 @@ class ComposerIntegrationHandler
         // Refresh the Composer instance so it re-reads the updated pie.json
         $composer = PieComposerFactory::recreatePieComposer($this->container, $composer);
 
-        // Removing the package from the local repository will trick Composer into "re-installing" it :)
-        foreach ($composer->getRepositoryManager()->getLocalRepository()->findPackages($requestedPackageAndVersion->package) as $pkg) {
-            $composer->getRepositoryManager()->getLocalRepository()->removePackage($pkg);
+        foreach ($composer->getRepositoryManager()->getLocalRepository()->getPackages() as $localRepoPackage) {
+            $extName = ExtensionName::determineFromComposerPackage($localRepoPackage);
+
+            if ($localRepoPackage instanceof CompleteAliasPackage) {
+                $localRepoPackage = $localRepoPackage->getAliasOf();
+            }
+
+            assert($localRepoPackage instanceof CompletePackageInterface);
+            $piePackage            = Package::fromComposerCompletePackage($localRepoPackage);
+            $installedJsonMetadata = $piePackage->installedJsonMetadata();
+            $status                = $piePackage->verifyPackageStatus($targetPlatform);
+
+            $this->arrayCollectionIo->write(sprintf(
+                'Install status %s (%s) status=%s',
+                $localRepoPackage->getName(),
+                $extName->name(),
+                $status->description(),
+            ), verbosity: IOInterface::VERY_VERBOSE);
+
+            if ($status->isVerified() && ! $forceInstallPackageVersion) {
+                $this->arrayCollectionIo->write(sprintf(
+                    '%s PIE package %s (%s) is already installed and verified.',
+                    Emoji::GREEN_CHECKMARK,
+                    $localRepoPackage->getName(),
+                    $extName->name(),
+                ), verbosity: IOInterface::QUIET);
+                continue;
+            }
+
+            if (! $installedJsonMetadata->isInstalled() && $installedJsonMetadata->isBuilt()) {
+                $this->arrayCollectionIo->write(sprintf(
+                    '%s PIE package %s (%s) was previously built but not installed.',
+                    Emoji::INFO,
+                    $localRepoPackage->getName(),
+                    $extName->name(),
+                ), verbosity: IOInterface::VERBOSE);
+            }
+
+            if (! $installedJsonMetadata->isInstalled() && ! $installedJsonMetadata->isBuilt() && $installedJsonMetadata->isDownloaded()) {
+                $this->arrayCollectionIo->write(sprintf(
+                    '%s PIE package %s (%s) was previously downloaded but not built.',
+                    Emoji::INFO,
+                    $localRepoPackage->getName(),
+                    $extName->name(),
+                ), verbosity: IOInterface::VERBOSE);
+            }
+
+            $this->arrayCollectionIo->write(sprintf(
+                '%s Package status of %s (%s) is not yet verified, adding to install candidates: %s',
+                Emoji::WARNING,
+                $localRepoPackage->getName(),
+                $extName->name(),
+                $status->description(),
+            ));
+            $composer->getRepositoryManager()->getLocalRepository()->removePackage($localRepoPackage);
         }
 
         $composerInstaller = PieComposerInstaller::createWithPhpBinary(

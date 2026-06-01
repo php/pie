@@ -8,12 +8,11 @@ use Composer\Util\Platform;
 use Php\Pie\Command\BuildCommand;
 use Php\Pie\Container;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\TestCase;
 
 use function str_contains;
 
 #[CoversClass(BuildCommand::class)]
-class BuildCommandTest extends TestCase
+class BuildCommandTest extends IsolatedWorkingDirectoryTestCase
 {
     private const TEST_PACKAGE = 'asgrim/example-pie-extension';
 
@@ -21,6 +20,8 @@ class BuildCommandTest extends TestCase
 
     public function setUp(): void
     {
+        parent::setUp();
+
         $this->commandTester = new CommandTester(Container::testFactory()->get(BuildCommand::class));
     }
 

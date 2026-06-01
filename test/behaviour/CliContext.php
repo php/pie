@@ -5,16 +5,18 @@ declare(strict_types=1);
 namespace Php\PieBehaviourTest;
 
 use Behat\Behat\Context\Context;
+use Behat\Hook\AfterScenario;
 use Behat\Step\Given;
 use Behat\Step\Then;
 use Behat\Step\When;
 use Composer\Util\Platform;
+use Safe\Exceptions\PcreException;
 use Symfony\Component\Process\Process;
 use Webmozart\Assert\Assert;
 
 use function array_merge;
-use function assert;
 use function Safe\copy;
+use function Safe\preg_match_all;
 use function Safe\realpath;
 use function sprintf;
 use function str_contains;
@@ -28,12 +30,32 @@ class CliContext implements Context
     private string|null $errorOutput = null;
     private int|null $exitCode       = null;
     /** @var list<string> */
-    private array $phpArguments           = [];
-    private string $theExtension          = 'example_pie_extension';
+    private array $phpArguments  = [];
+    private string $theExtension = 'example_pie_extension';
+    /** @var non-empty-string */
     private string $thePackage            = 'asgrim/example-pie-extension';
     private string|null $workingDirectory = null;
 
+    /** @throws PcreException */
+    #[AfterScenario]
+    public function removeInstalledExtensions(): void
+    {
+        $this->runPieCommand(['show']);
+        if (! preg_match_all('#([a-zA-Z0-9-_]+/[a-zA-Z0-9-_]+):#', (string) $this->output, $installedExtensionPackageNames)) {
+            return;
+        }
+
+        foreach ($installedExtensionPackageNames[1] as $extensionPackageName) {
+            if ($extensionPackageName === 'xdebug/xdebug') {
+                continue;
+            }
+
+            $this->runPieCommand(['uninstall', $extensionPackageName]);
+        }
+    }
+
     #[When('I run a command to download the latest version of an extension')]
+    #[Given('an extension was previously downloaded but not built')]
     public function iRunACommandToDownloadTheLatestVersionOfAnExtension(): void
     {
         $this->runPieCommand(['download', 'asgrim/example-pie-extension']);
@@ -104,6 +126,7 @@ class CliContext implements Context
     }
 
     #[When('I run a command to build an extension')]
+    #[Given('an extension was previously built but not installed')]
     public function iRunACommandToBuildAnExtension(): void
     {
         $this->runPieCommand(['build', 'asgrim/example-pie-extension']);
@@ -170,6 +193,14 @@ class CliContext implements Context
         $this->runPieCommand(['install', $this->thePackage]);
     }
 
+    #[When('I run a command to forcefully install an extension')]
+    public function iRunACommandToForcefullyInstallAnExtension(): void
+    {
+        $this->theExtension = 'example_pie_extension';
+        $this->thePackage   = 'asgrim/example-pie-extension';
+        $this->runPieCommand(['install', '--force', $this->thePackage]);
+    }
+
     #[When('I run a command to install an extension without enabling it')]
     public function iRunACommandToInstallAnExtensionWithoutEnabling(): void
     {
@@ -181,7 +212,6 @@ class CliContext implements Context
     #[When('I run a command to uninstall an extension')]
     public function iRunACommandToUninstallAnExtension(): void
     {
-        assert($this->thePackage !== '');
         $this->runPieCommand(['uninstall', $this->thePackage]);
     }
 
@@ -237,6 +267,20 @@ class CliContext implements Context
         }
 
         Assert::regex($this->output, '#Install complete: [-_.a-zA-Z0-9/]+/' . $this->theExtension . '.so#');
+
+        $isExtEnabled = (new Process([self::PHP_BINARY, '-r', 'echo extension_loaded("' . $this->theExtension . '")?"yes":"no";']))
+            ->mustRun()
+            ->getOutput();
+
+        Assert::same($isExtEnabled, 'yes');
+    }
+
+    #[Then('the extension should not have been re-installed')]
+    public function theExtensionShouldNotHaveBeenReinstalled(): void
+    {
+        $this->assertCommandSuccessful();
+
+        Assert::contains($this->output, 'PIE package asgrim/example-pie-extension (example_pie_extension) is already installed and verified.');
 
         $isExtEnabled = (new Process([self::PHP_BINARY, '-r', 'echo extension_loaded("' . $this->theExtension . '")?"yes":"no";']))
             ->mustRun()
