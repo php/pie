@@ -36,6 +36,7 @@ use Webmozart\Assert\Assert;
 
 use function array_key_exists;
 use function array_map;
+use function assert;
 use function count;
 use function is_array;
 use function is_string;
@@ -430,6 +431,8 @@ final class CommandHelper
             $requestedPackageName = substr($requestedPackageName, 4);
         }
 
+        assert($requestedPackageName !== '');
+
         $io->writeError('');
         $io->writeError(sprintf('<error>Could not install package: %s</error>', $requestedPackageName));
         $io->writeError($exception->getMessage());
@@ -460,7 +463,7 @@ final class CommandHelper
 
                     return $match;
                 },
-                $findMatchingPackages->for($pieComposer, $requestedPackageName),
+                $findMatchingPackages->bySearching($pieComposer, $requestedPackageName),
             );
 
             if (count($matches)) {

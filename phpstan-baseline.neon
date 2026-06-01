@@ -169,9 +169,9 @@ parameters:
 			path: src/File/WindowsDelete.php
 
 		-
-			message: '#^Call to function array_key_exists\(\) with ''downloads'' and array\{name\: string, description\: string\|null, abandoned\?\: string\|true, url\?\: string\} will always evaluate to false\.$#'
-			identifier: function.impossibleType
-			count: 2
+			message: '#^Call to static method Php\\Pie\\ExtensionName\:\:isValidExtensionName\(\) with non\-empty\-string will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
 			path: src/Installing/InstallForPhpProject/FindMatchingPackages.php
 
 		-

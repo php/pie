@@ -119,7 +119,7 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
 
         $this->composerFactoryForProject->method('composer')->willReturn($composer);
 
-        $this->findMatchingPackages->method('for')->willReturn([
+        $this->findMatchingPackages->method('byProvider')->willReturn([
             ['name' => 'vendor1/foobar', 'description' => 'The official foobar implementation'],
         ]);
 
@@ -175,7 +175,7 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
 
         $this->composerFactoryForProject->method('composer')->willReturn($composer);
 
-        $this->findMatchingPackages->method('for')->willReturn([
+        $this->findMatchingPackages->method('byProvider')->willReturn([
             ['name' => 'vendor1/foobar', 'description' => 'The official foobar implementation'],
             ['name' => 'vendor2/afoobar', 'description' => 'An improved async foobar extension'],
         ]);

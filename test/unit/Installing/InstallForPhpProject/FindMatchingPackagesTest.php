@@ -66,7 +66,7 @@ final class FindMatchingPackagesTest extends TestCase
                     'description' => 'The best extension there is',
                 ],
             ],
-            (new FindMatchingPackages())->for($composer, 'bar'),
+            (new FindMatchingPackages())->bySearching($composer, 'bar'),
         );
     }
 }
