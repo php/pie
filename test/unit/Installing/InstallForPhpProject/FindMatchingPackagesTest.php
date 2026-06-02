@@ -12,6 +12,7 @@ use Composer\Package\CompletePackageInterface;
 use Composer\Repository\ArrayRepository;
 use Composer\Repository\RepositoryManager;
 use Composer\Util\HttpDownloader;
+use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
 use Php\Pie\Installing\InstallForPhpProject\FindMatchingPackages;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -67,6 +68,54 @@ final class FindMatchingPackagesTest extends TestCase
                 ],
             ],
             (new FindMatchingPackages())->bySearching($composer, 'bar'),
+        );
+    }
+
+    public function testByProvider(): void
+    {
+        $package = new CompletePackage('foo/bar', '2.0.0.0', '2.0.0');
+        $package->setDescription('The best extension there is');
+        $package->setType(ExtensionType::PhpModule->value);
+
+        $repository = $this->createPartialMock(ArrayRepository::class, ['getProviders']);
+        $repository->addPackage($package);
+        $repository->expects(self::once())
+            ->method('getProviders')
+            ->with('ext-bar')
+            ->willReturn([
+                'foo1/bar' => [
+                    'name' => 'foo1/bar',
+                    'description' => 'This is foo1/bar, not quite what you are looking for',
+                    'type' => 'library',
+                ],
+                'foo/bar' => [
+                    'name' => 'foo/bar',
+                    'description' => 'The best extension there is',
+                    'type' => 'php-ext',
+                ],
+            ]);
+
+        $repoManager = new RepositoryManager(
+            $this->createMock(IOInterface::class),
+            $this->createMock(Config::class),
+            $this->createMock(HttpDownloader::class),
+            null,
+            null,
+        );
+        $repoManager->addRepository($repository);
+
+        $composer = $this->createMock(Composer::class);
+        $composer->method('getRepositoryManager')->willReturn($repoManager);
+
+        self::assertSame(
+            [
+                [
+                    'name' => 'foo/bar',
+                    'description' => 'The best extension there is',
+                    'type' => 'php-ext',
+                ],
+            ],
+            (new FindMatchingPackages())->byProvider($composer, ExtensionName::normaliseFromString('bar')),
         );
     }
 }
