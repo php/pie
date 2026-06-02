@@ -10,10 +10,12 @@ use Composer\Repository\RepositoryInterface;
 use OutOfRangeException;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\ExtensionName;
+use Php\Pie\ExtensionType;
 
 use function array_filter;
 use function array_key_exists;
 use function array_merge;
+use function array_values;
 use function count;
 use function usort;
 
@@ -24,15 +26,14 @@ use function usort;
  */
 class FindMatchingPackages
 {
-    /** @return MatchingPackages */
-    public function for(Composer $pieComposer, string $searchTerm): array
+    /**
+     * @param list<array{name: string, description: ?string, downloads?: int}> $matches
+     * @param non-empty-string                                                 $searchTerm
+     *
+     * @return MatchingPackages
+     */
+    private function filterToCompatible(Composer $pieComposer, array $matches, string $searchTerm): array
     {
-        $matches = [];
-        foreach ($pieComposer->getRepositoryManager()->getRepositories() as $repo) {
-            $matches = array_merge($matches, $repo->search($searchTerm, RepositoryInterface::SEARCH_FULLTEXT, 'php-ext'));
-            $matches = array_merge($matches, $repo->search($searchTerm, RepositoryInterface::SEARCH_FULLTEXT, 'php-ext-zend'));
-        }
-
         if (ExtensionName::isValidExtensionName($searchTerm)) {
             $extensionName = ExtensionName::normaliseFromString($searchTerm);
 
@@ -41,7 +42,7 @@ class FindMatchingPackages
                 static function (array $match) use ($pieComposer, $extensionName): bool {
                     $package = $pieComposer->getRepositoryManager()->findPackage($match['name'], '*');
 
-                    if (! $package instanceof CompletePackageInterface) {
+                    if (! $package instanceof CompletePackageInterface || ! ExtensionType::isValid($package->getType())) {
                         return false;
                     }
 
@@ -60,5 +61,32 @@ class FindMatchingPackages
         });
 
         return $matches;
+    }
+
+    /** @return MatchingPackages */
+    public function byProvider(Composer $pieComposer, ExtensionName $extensionName): array
+    {
+        $matches = [];
+        foreach ($pieComposer->getRepositoryManager()->getRepositories() as $repo) {
+            $matches = array_merge($matches, $repo->getProviders($extensionName->nameWithExtPrefix()));
+        }
+
+        return $this->filterToCompatible($pieComposer, array_values($matches), $extensionName->name());
+    }
+
+    /**
+     * @param non-empty-string $searchTerm
+     *
+     * @return MatchingPackages
+     */
+    public function bySearching(Composer $pieComposer, string $searchTerm): array
+    {
+        $matches = [];
+        foreach ($pieComposer->getRepositoryManager()->getRepositories() as $repo) {
+            $matches = array_merge($matches, $repo->search($searchTerm, RepositoryInterface::SEARCH_FULLTEXT, 'php-ext'));
+            $matches = array_merge($matches, $repo->search($searchTerm, RepositoryInterface::SEARCH_FULLTEXT, 'php-ext-zend'));
+        }
+
+        return $this->filterToCompatible($pieComposer, $matches, $searchTerm);
     }
 }
