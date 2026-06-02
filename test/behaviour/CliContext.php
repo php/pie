@@ -399,22 +399,40 @@ class CliContext implements Context
         $this->workingDirectory = realpath(__DIR__ . '/../assets/example-php-project');
     }
 
-    #[When('I run a command to install the extensions')]
+    #[When('I run a command to install the extensions with package selections')]
     public function iRunACommandToInstallTheExtensions(): void
     {
-        $this->runPieCommand(['install', '--allow-non-interactive-project-install']);
-
-        $this->assertCommandSuccessful();
+        $this->runPieCommand([
+            'install',
+            '--select',
+            'example_pie_extension=asgrim/example-pie-extension',
+            '--select',
+            'redis=phpredis/phpredis',
+        ]);
     }
 
     #[Then('I should see all the extensions are now installed')]
     public function iShouldSeeAllTheExtensionsAreNowInstalled(): void
     {
         $this->workingDirectory = null;
+        $this->assertCommandSuccessful();
 
         $this->runPieCommand(['show']);
         $this->assertCommandSuccessful();
-        Assert::contains($this->output, 'example_pie_extension');
+
+        Assert::contains($this->output, 'asgrim/example-pie-extension');
+        Assert::contains($this->output, 'phpredis/phpredis');
+    }
+
+    #[Then('I should see information on how to select packages for install')]
+    public function iShouldSeeInformationOnHowToSelectPackagesForInstall(): void
+    {
+        Assert::same($this->exitCode, 1);
+
+        Assert::notNull($this->errorOutput);
+        Assert::contains($this->errorOutput, 'No package selections were made for ext-redis; you MUST specify a package selection in non-interactive mode');
+        Assert::contains($this->errorOutput, '--select=example_pie_extension=asgrim/example-pie-extension');
+        Assert::contains($this->errorOutput, '--select=redis=phpredis/phpredis');
     }
 
     #[Given('I am in a PIE project')]
@@ -424,6 +442,7 @@ class CliContext implements Context
     }
 
     #[When('I run a command to install the extension')]
+    #[When('I run a command to install the extensions without package selections')]
     public function iRunACommandToInstallTheExtension(): void
     {
         $this->theExtension = 'example_pie_extension';
