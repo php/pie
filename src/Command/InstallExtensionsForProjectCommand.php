@@ -33,7 +33,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 use Webmozart\Assert\Assert;
 
-use function array_column;
 use function array_key_exists;
 use function array_keys;
 use function array_map;
@@ -41,9 +40,12 @@ use function array_merge;
 use function array_walk;
 use function assert;
 use function count;
+use function explode;
 use function implode;
 use function in_array;
+use function is_array;
 use function is_dir;
+use function is_string;
 use function Safe\chdir;
 use function Safe\getcwd;
 use function Safe\realpath;
@@ -132,17 +134,27 @@ final class InstallExtensionsForProjectCommand extends Command
             return $exit;
         }
 
-        $allowNonInteractive = $input->hasOption(CommandHelper::OPTION_ALLOW_NON_INTERACTIVE_PROJECT_INSTALL) && $input->getOption(CommandHelper::OPTION_ALLOW_NON_INTERACTIVE_PROJECT_INSTALL);
-        if (! Platform::isInteractive() && ! $allowNonInteractive) {
-            $this->io->writeError(sprintf(
-                '<warning>Aborting! You are not running in interactive mode, and --%s was not specified.</warning>',
-                CommandHelper::OPTION_ALLOW_NON_INTERACTIVE_PROJECT_INSTALL,
-            ));
+        /** @var array<non-empty-string, RequestedPackageAndVersion> $extensionToPackageSelections */
+        $extensionToPackageSelections = [];
+        $selectionOptions             = $input->getOption(CommandHelper::OPTION_PACKAGE_SELECTION);
+        assert(is_array($selectionOptions));
 
-            return Command::FAILURE;
+        foreach ($selectionOptions as $selection) {
+            assert(is_string($selection) && $selection !== '');
+            [$extNameString, $packageSelectionString] = explode('=', $selection);
+            Assert::stringNotEmpty($packageSelectionString);
+            $extensionToPackageSelections[ExtensionName::normaliseFromString($extNameString)->name()] = new RequestedPackageAndVersion($packageSelectionString, null);
         }
 
         $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $this->io);
+
+        $allowNonInteractive = $input->hasOption(CommandHelper::OPTION_ALLOW_NON_INTERACTIVE_PROJECT_INSTALL) && $input->getOption(CommandHelper::OPTION_ALLOW_NON_INTERACTIVE_PROJECT_INSTALL);
+        if ($allowNonInteractive) {
+            $this->io->writeError(sprintf(
+                '<warning>The --%s is now deprecated and has no effect.</warning>',
+                CommandHelper::OPTION_ALLOW_NON_INTERACTIVE_PROJECT_INSTALL,
+            ));
+        }
 
         $this->io->write(sprintf(
             'Checking extensions for your project <info>%s</info> (path: %s)',
@@ -167,7 +179,7 @@ final class InstallExtensionsForProjectCommand extends Command
 
         array_walk(
             $extensionsRequired,
-            function (Link $link) use ($pieComposer, $phpEnabledExtensions, $installedPiePackages, $input, &$anyErrorsHappened, $targetPlatform): void {
+            function (Link $link) use ($pieComposer, $phpEnabledExtensions, $installedPiePackages, $input, &$anyErrorsHappened, $targetPlatform, $extensionToPackageSelections): void {
                 $extension              = ExtensionName::normaliseFromString($link->getTarget());
                 $linkRequiresConstraint = $link->getPrettyConstraint();
 
@@ -195,7 +207,7 @@ final class InstallExtensionsForProjectCommand extends Command
                         $this->io->write(sprintf(
                             '%s: <comment>%s:%s</comment> %s Version %s is installed, but does not meet the version requirement %s',
                             $link->getDescription(),
-                            $link->getTarget(),
+                            $extension->nameWithExtPrefix(),
                             $linkRequiresConstraint,
                             Emoji::WARNING,
                             $piePackageVersion,
@@ -208,7 +220,7 @@ final class InstallExtensionsForProjectCommand extends Command
                     $this->io->write(sprintf(
                         '%s: <info>%s:%s</info> %s Already installed',
                         $link->getDescription(),
-                        $link->getTarget(),
+                        $extension->nameWithExtPrefix(),
                         $linkRequiresConstraint,
                         Emoji::GREEN_CHECKMARK,
                     ));
@@ -219,72 +231,93 @@ final class InstallExtensionsForProjectCommand extends Command
                 $this->io->write(sprintf(
                     '%s: <comment>%s:%s</comment> %s Missing',
                     $link->getDescription(),
-                    $link->getTarget(),
+                    $extension->nameWithExtPrefix(),
                     $linkRequiresConstraint,
                     Emoji::PROHIBITED,
                 ));
 
-                try {
-                    $matches = $this->findMatchingPackages->byProvider($pieComposer, $extension);
-                } catch (OutOfRangeException) {
-                    $anyErrorsHappened = true;
-
-                    $this->io->writeError(sprintf(
-                        '<error>No packages were found for %s</error>',
-                        $extension->nameWithExtPrefix(),
-                    ));
-
-                    return;
-                }
-
-                if (! Platform::isInteractive() && count($matches) > 1) {
-                    $anyErrorsHappened = true;
-
-                    // @todo Figure out if there is a way to improve this, safely
-                    $this->io->writeError(sprintf(
-                        "<warning>Multiple packages were found for %s:</warning>\n  %s\n\n<warning>This means you cannot `pie install` this project interactively for now.</warning>",
-                        $extension->nameWithExtPrefix(),
-                        implode("\n  ", array_column($matches, 'name')),
-                    ));
-
-                    return;
-                }
-
-                if (Platform::isInteractive()) {
-                    $selectedPackageAnswer = (int) $this->io->select(
-                        "\nThe following packages may be suitable, which would you like to install: ",
-                        array_merge(
-                            ['None'],
-                            array_map(
-                                static function (array $match): string {
-                                    return sprintf('%s: %s', $match['name'], $match['description'] ?? 'no description available');
-                                },
-                                $matches,
-                            ),
-                        ),
-                        '0',
+                // If a `--select` was made, use it as it was explicitly requested
+                if (array_key_exists($extension->name(), $extensionToPackageSelections)) {
+                    $requestedPackageAndVersion = new RequestedPackageAndVersion(
+                        $extensionToPackageSelections[$extension->name()]->package,
+                        $linkRequiresConstraint === '*' || $linkRequiresConstraint === '' ? null : $linkRequiresConstraint,
                     );
+                } else {
+                    try {
+                        $matches = $this->findMatchingPackages->byProvider($pieComposer, $extension);
+                    } catch (OutOfRangeException) {
+                        $matches = [];
+                    }
 
-                    if ($selectedPackageAnswer === 0) {
-                        $this->io->write('Okay I won\'t install anything for ' . $extension->name());
+                    if (Platform::isInteractive()) {
+                        if (! count($matches)) {
+                            $this->io->write(sprintf(
+                                'PIE could not find any potential matches for %s; if you know which package to use, specify --select=vendor/package in the `pie install` options.',
+                                $extension->nameWithExtPrefix(),
+                            ));
+                            $anyErrorsHappened = true;
+
+                            return;
+                        }
+
+                        // If we're in interactive mode, prompt the user to select which package they want
+                        $selectedPackageAnswer = (int) $this->io->select(
+                            "\nThe following packages may be suitable, which would you like to install: ",
+                            array_merge(
+                                ['None'],
+                                array_map(
+                                    static function (array $match): string {
+                                        return sprintf('%s: %s', $match['name'], $match['description'] ?? 'no description available');
+                                    },
+                                    $matches,
+                                ),
+                            ),
+                            '0',
+                        );
+
+                        if ($selectedPackageAnswer === 0) {
+                            $this->io->write('Okay I won\'t install anything for ' . $extension->name());
+                            $anyErrorsHappened = true;
+
+                            return;
+                        }
+
+                        $matchesKey = $selectedPackageAnswer - 1;
+                        assert(array_key_exists($matchesKey, $matches));
+
+                        assert($matches[$matchesKey]['name'] !== '');
+                        $requestedPackageAndVersion = new RequestedPackageAndVersion(
+                            $matches[$matchesKey]['name'],
+                            $linkRequiresConstraint === '*' || $linkRequiresConstraint === '' ? null : $linkRequiresConstraint,
+                        );
+                    } else {
+                        // In non-interactive mode, the user MUST specify a --select definition
                         $anyErrorsHappened = true;
+
+                        if (! count($matches)) {
+                            $this->io->writeError(sprintf(
+                                '<error>No package selections were made for %s; and PIE could not find any potential packages; you must specify --select=vendor/package to resolve the missing dependency</error>',
+                                $extension->nameWithExtPrefix(),
+                            ));
+
+                            return;
+                        }
+
+                        // @todo https://github.com/php/pie/issues/592
+                        $options = array_map(
+                            static fn (array $match) => sprintf('  --select=%s=%s', $extension->name(), $match['name']),
+                            $matches,
+                        );
+
+                        $this->io->writeError(sprintf(
+                            '<warning>No package selections were made for %s; you MUST specify a package selection in non-interactive mode, by adding one of the following parameters to the `pie install` command:</warning>%s',
+                            $extension->nameWithExtPrefix(),
+                            "\n" . implode("\n", $options),
+                        ));
 
                         return;
                     }
-
-                    $matchesKey = $selectedPackageAnswer - 1;
-                    assert(array_key_exists($matchesKey, $matches));
-
-                    $selectedPackageName = $matches[$matchesKey]['name'];
-                } else {
-                    $selectedPackageName = $matches[0]['name'];
                 }
-
-                assert($selectedPackageName !== '');
-                $requestedPackageAndVersion = new RequestedPackageAndVersion(
-                    $selectedPackageName,
-                    $linkRequiresConstraint === '*' || $linkRequiresConstraint === '' ? null : $linkRequiresConstraint,
-                );
 
                 try {
                     $this->io->write(
@@ -294,7 +327,7 @@ final class InstallExtensionsForProjectCommand extends Command
                     Assert::same(
                         0,
                         $this->installSelectedPackage->withSubCommand(
-                            ExtensionName::normaliseFromString($link->getTarget()),
+                            $extension,
                             $requestedPackageAndVersion,
                             $this,
                             $input,

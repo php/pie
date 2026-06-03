@@ -58,6 +58,7 @@ final class CommandHelper
     public const OPTION_WITH_PHPIZE_PATH                      = 'with-phpize-path';
     public const OPTION_WORKING_DIRECTORY                     = 'working-dir';
     public const OPTION_ALLOW_NON_INTERACTIVE_PROJECT_INSTALL = 'allow-non-interactive-project-install';
+    public const OPTION_PACKAGE_SELECTION                     = 'select';
     private const OPTION_MAKE_PARALLEL_JOBS                   = 'make-parallel-jobs';
     private const OPTION_SKIP_ENABLE_EXTENSION                = 'skip-enable-extension';
     private const OPTION_FORCE                                = 'force';
@@ -141,7 +142,14 @@ final class CommandHelper
             self::OPTION_ALLOW_NON_INTERACTIVE_PROJECT_INSTALL,
             null,
             InputOption::VALUE_NONE,
-            'When installing a PHP project, allow non-interactive project installations. Only used in certain contexts.',
+            'Deprecated and ignored. Will emit a warning if used.',
+        );
+
+        $command->addOption(
+            self::OPTION_PACKAGE_SELECTION,
+            null,
+            InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
+            'Select a PIE package for a given extension name, e.g. `--select=foo=myvendor/foo` to resolve the `ext-foo` extension to `myvendor/foo` PIE package.',
         );
 
         $command->addOption(
