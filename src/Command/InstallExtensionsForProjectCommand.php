@@ -44,9 +44,7 @@ use function explode;
 use function implode;
 use function in_array;
 use function is_array;
-use function is_dir;
 use function is_string;
-use function Safe\chdir;
 use function Safe\getcwd;
 use function Safe\realpath;
 use function sprintf;
@@ -82,26 +80,7 @@ final class InstallExtensionsForProjectCommand extends Command
 
     public function execute(InputInterface $input, OutputInterface $output): int
     {
-        $workingDirOption  = (string) $input->getOption(CommandHelper::OPTION_WORKING_DIRECTORY);
-        $restoreWorkingDir = static function (): void {
-        };
-        if ($workingDirOption !== '' && is_dir($workingDirOption)) {
-            $currentWorkingDir = getcwd();
-            $restoreWorkingDir = function () use ($currentWorkingDir): void {
-                chdir($currentWorkingDir);
-                $this->io->write(
-                    sprintf('Restored working directory to: %s', $currentWorkingDir),
-                    verbosity: IOInterface::VERBOSE,
-                );
-            };
-
-            chdir($workingDirOption);
-            $this->io->write(
-                sprintf('Changed working directory to: %s', $workingDirOption),
-                verbosity: IOInterface::VERBOSE,
-            );
-        }
-
+        $restoreWorkingDir = CommandHelper::handleWorkingDirectory($input, $this->io);
         CommandHelper::applyNoCacheOptionIfSet($input, $this->io);
 
         $rootPackage = $this->composerFactoryForProject->rootPackage($this->io);

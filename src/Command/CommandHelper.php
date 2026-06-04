@@ -39,8 +39,11 @@ use function array_map;
 use function assert;
 use function count;
 use function is_array;
+use function is_dir;
 use function is_string;
 use function reset;
+use function Safe\chdir;
+use function Safe\getcwd;
 use function sprintf;
 use function str_starts_with;
 use function strtolower;
@@ -56,9 +59,9 @@ final class CommandHelper
     public const OPTION_WITH_PHP_CONFIG                       = 'with-php-config';
     public const OPTION_WITH_PHP_PATH                         = 'with-php-path';
     public const OPTION_WITH_PHPIZE_PATH                      = 'with-phpize-path';
-    public const OPTION_WORKING_DIRECTORY                     = 'working-dir';
     public const OPTION_ALLOW_NON_INTERACTIVE_PROJECT_INSTALL = 'allow-non-interactive-project-install';
     public const OPTION_PACKAGE_SELECTION                     = 'select';
+    private const OPTION_WORKING_DIRECTORY                    = 'working-dir';
     private const OPTION_MAKE_PARALLEL_JOBS                   = 'make-parallel-jobs';
     private const OPTION_SKIP_ENABLE_EXTENSION                = 'skip-enable-extension';
     private const OPTION_FORCE                                = 'force';
@@ -517,5 +520,39 @@ final class CommandHelper
 
         $io->writeError('Disabling cache usage', verbosity: IOInterface::DEBUG);
         Platform::putEnv('COMPOSER_CACHE_DIR', Platform::isWindows() ? 'nul' : '/dev/null');
+    }
+
+    /**
+     * If the working directory option is set in the `$input`, change the working directory, and return a callable
+     * that will restore the working directory.
+     *
+     * @return callable(): void
+     */
+    public static function handleWorkingDirectory(InputInterface $input, IOInterface $io): callable
+    {
+        $workingDirOption = (string) $input->getOption(self::OPTION_WORKING_DIRECTORY);
+
+        // No working directory option used, or isn't a real path; this (and the returned callable) should be a no-op
+        if ($workingDirOption === '' || ! is_dir($workingDirOption)) {
+            return static function (): void {
+            };
+        }
+
+        $currentWorkingDir = getcwd();
+        $restoreWorkingDir = static function () use ($currentWorkingDir, $io): void {
+            chdir($currentWorkingDir);
+            $io->write(
+                sprintf('Restored working directory to: %s', $currentWorkingDir),
+                verbosity: IOInterface::VERBOSE,
+            );
+        };
+
+        chdir($workingDirOption);
+        $io->write(
+            sprintf('Changed working directory to: %s', $workingDirOption),
+            verbosity: IOInterface::VERBOSE,
+        );
+
+        return $restoreWorkingDir;
     }
 }
