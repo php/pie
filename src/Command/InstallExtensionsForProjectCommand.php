@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\Pie\Command;
 
+use Composer\Composer;
 use Composer\IO\IOInterface;
 use Composer\IO\NullIO;
 use Composer\Package\Link;
@@ -23,6 +24,8 @@ use Php\Pie\Installing\InstallForPhpProject\InstallPiePackageFromPath;
 use Php\Pie\Installing\InstallForPhpProject\InstallSelectedPackage;
 use Php\Pie\Platform;
 use Php\Pie\Platform\InstalledPiePackages;
+use Php\Pie\Platform\PiePackageList;
+use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Util\Emoji;
 use Psr\Container\ContainerInterface;
 use Safe\Exceptions\DirException;
@@ -142,164 +145,21 @@ final class InstallExtensionsForProjectCommand extends Command
         array_walk(
             $extensionsRequired,
             function (Link $link) use ($pieComposer, $phpEnabledExtensions, $installedPiePackages, $input, &$anyErrorsHappened, $targetPlatform, $extensionToPackageSelections): void {
-                $extension              = ExtensionName::normaliseFromString($link->getTarget());
-                $linkRequiresConstraint = $link->getPrettyConstraint();
-
-                $piePackagesForExtension = $installedPiePackages
-                    ->findByPhpFormattedExtensionName($extension->phpFormattedExtensionName())
-                    ->onlyVerifiedFor($targetPlatform);
-
-                $piePackageVersion = null;
-
-                if (count($piePackagesForExtension) === 1) {
-                    $piePackageVersion = $piePackagesForExtension->onlyOne()->version();
-                }
-
-                $piePackageVersionMatchesLinkConstraint = null;
-                if ($piePackageVersion !== null) {
-                    $piePackageVersionMatchesLinkConstraint = $link
-                        ->getConstraint()
-                        ->matches(
-                            (new VersionParser())->parseConstraints($piePackageVersion),
-                        );
-                }
-
-                if (in_array(strtolower($extension->name()), $phpEnabledExtensions)) {
-                    if ($piePackageVersion !== null && $piePackageVersionMatchesLinkConstraint === false) {
-                        $this->io->write(sprintf(
-                            '%s: <comment>%s:%s</comment> %s Version %s is installed, but does not meet the version requirement',
-                            $link->getDescription(),
-                            $extension->nameWithExtPrefix(),
-                            $linkRequiresConstraint,
-                            Emoji::WARNING,
-                            $piePackageVersion,
-                        ));
-
-                        return;
-                    }
-
-                    $this->io->write(sprintf(
-                        '%s: <info>%s:%s</info> %s Already installed',
-                        $link->getDescription(),
-                        $extension->nameWithExtPrefix(),
-                        $linkRequiresConstraint,
-                        Emoji::GREEN_CHECKMARK,
-                    ));
-
+                if (
+                    $this->handleSingleExtensionRequiredByPhpProject(
+                        $input,
+                        $pieComposer,
+                        $link,
+                        $installedPiePackages,
+                        $targetPlatform,
+                        $phpEnabledExtensions,
+                        $extensionToPackageSelections,
+                    )
+                ) {
                     return;
                 }
 
-                $this->io->write(sprintf(
-                    '%s: <comment>%s:%s</comment> %s Missing',
-                    $link->getDescription(),
-                    $extension->nameWithExtPrefix(),
-                    $linkRequiresConstraint,
-                    Emoji::PROHIBITED,
-                ));
-
-                // If a `--select` was made, use it as it was explicitly requested
-                if (array_key_exists($extension->name(), $extensionToPackageSelections)) {
-                    $requestedPackageAndVersion = new RequestedPackageAndVersion(
-                        $extensionToPackageSelections[$extension->name()],
-                        $linkRequiresConstraint === '*' || $linkRequiresConstraint === '' ? null : $linkRequiresConstraint,
-                    );
-                } else {
-                    try {
-                        $matches = $this->findMatchingPackages->byProvider($pieComposer, $extension);
-                    } catch (OutOfRangeException) {
-                        $matches = [];
-                    }
-
-                    if (! Platform::isInteractive()) {
-                        // In non-interactive mode, the user MUST specify a --select definition
-                        $anyErrorsHappened = true;
-
-                        if (! count($matches)) {
-                            $this->io->writeError(sprintf(
-                                '<error>No package selections were made for %s; and PIE could not find any potential packages; you must specify --select=vendor/package to resolve the missing dependency</error>',
-                                $extension->nameWithExtPrefix(),
-                            ));
-
-                            return;
-                        }
-
-                        // @todo https://github.com/php/pie/issues/592
-                        $options = array_map(
-                            static fn (array $match) => sprintf('  --select=%s=%s', $extension->name(), $match['name']),
-                            $matches,
-                        );
-
-                        $this->io->writeError(sprintf(
-                            '<warning>No package selections were made for %s; you MUST specify a package selection in non-interactive mode, by adding one of the following parameters to the `pie install` command:</warning>%s',
-                            $extension->nameWithExtPrefix(),
-                            "\n" . implode("\n", $options),
-                        ));
-
-                        return;
-                    }
-
-                    if (! count($matches)) {
-                        $this->io->write(sprintf(
-                            'PIE could not find any potential matches for %s; if you know which package to use, specify --select=vendor/package in the `pie install` options.',
-                            $extension->nameWithExtPrefix(),
-                        ));
-                        $anyErrorsHappened = true;
-
-                        return;
-                    }
-
-                    // If we're in interactive mode, prompt the user to select which package they want
-                    $selectedPackageAnswer = (int) $this->io->select(
-                        "\nThe following packages may be suitable, which would you like to install: ",
-                        array_merge(
-                            ['None'],
-                            array_map(
-                                static function (array $match): string {
-                                    return sprintf('%s: %s', $match['name'], $match['description'] ?? 'no description available');
-                                },
-                                $matches,
-                            ),
-                        ),
-                        '0',
-                    );
-
-                    if ($selectedPackageAnswer === 0) {
-                        $this->io->write('Okay I won\'t install anything for ' . $extension->name());
-                        $anyErrorsHappened = true;
-
-                        return;
-                    }
-
-                    $matchesKey = $selectedPackageAnswer - 1;
-                    assert(array_key_exists($matchesKey, $matches));
-
-                    assert($matches[$matchesKey]['name'] !== '');
-                    $requestedPackageAndVersion = new RequestedPackageAndVersion(
-                        $matches[$matchesKey]['name'],
-                        $linkRequiresConstraint === '*' || $linkRequiresConstraint === '' ? null : $linkRequiresConstraint,
-                    );
-                }
-
-                try {
-                    $this->io->write(
-                        sprintf('Invoking pie install of %s', $requestedPackageAndVersion->prettyNameAndVersion()),
-                        verbosity: IOInterface::VERBOSE,
-                    );
-                    Assert::same(
-                        0,
-                        $this->installSelectedPackage->withSubCommand(
-                            $extension,
-                            $requestedPackageAndVersion,
-                            $this,
-                            $input,
-                        ),
-                        'Non-zero exit code %s whilst installing ' . $requestedPackageAndVersion->package,
-                    );
-                } catch (Throwable $t) {
-                    $anyErrorsHappened = true;
-
-                    $this->io->writeError('<error>' . $t->getMessage() . '</error>');
-                }
+                $anyErrorsHappened = true;
             },
         );
 
@@ -308,6 +168,181 @@ final class InstallExtensionsForProjectCommand extends Command
         $restoreWorkingDir();
 
         return $anyErrorsHappened ? self::FAILURE : self::SUCCESS;
+    }
+
+    /**
+     * Returns false if any error happened whilst trying to install the extension; returns true if was already
+     * installed, or it was successfully installed if needed.
+     *
+     * @param list<string>                              $phpEnabledExtensions
+     * @param array<non-empty-string, non-empty-string> $extensionToPackageSelections
+     */
+    private function handleSingleExtensionRequiredByPhpProject(
+        InputInterface $input,
+        Composer $pieComposer,
+        Link $link,
+        PiePackageList $installedPiePackages,
+        TargetPlatform $targetPlatform,
+        array $phpEnabledExtensions,
+        array $extensionToPackageSelections,
+    ): bool {
+        $extension              = ExtensionName::normaliseFromString($link->getTarget());
+        $linkRequiresConstraint = $link->getPrettyConstraint();
+
+        $piePackagesForExtension = $installedPiePackages
+            ->findByPhpFormattedExtensionName($extension->phpFormattedExtensionName())
+            ->onlyVerifiedFor($targetPlatform);
+
+        $piePackageVersion = null;
+
+        if (count($piePackagesForExtension) === 1) {
+            $piePackageVersion = $piePackagesForExtension->onlyOne()->version();
+        }
+
+        $piePackageVersionMatchesLinkConstraint = null;
+        if ($piePackageVersion !== null) {
+            $piePackageVersionMatchesLinkConstraint = $link
+                ->getConstraint()
+                ->matches(
+                    (new VersionParser())->parseConstraints($piePackageVersion),
+                );
+        }
+
+        // Extension is already installed; but check if it matches the constraint
+        if (in_array(strtolower($extension->name()), $phpEnabledExtensions)) {
+            if ($piePackageVersion !== null && $piePackageVersionMatchesLinkConstraint === false) {
+                $this->io->write(sprintf(
+                    '%s: <comment>%s:%s</comment> %s Version %s is installed, but does not meet the version requirement',
+                    $link->getDescription(),
+                    $extension->nameWithExtPrefix(),
+                    $linkRequiresConstraint,
+                    Emoji::WARNING,
+                    $piePackageVersion,
+                ));
+
+                return true;
+            }
+
+            $this->io->write(sprintf(
+                '%s: <info>%s:%s</info> %s Already installed',
+                $link->getDescription(),
+                $extension->nameWithExtPrefix(),
+                $linkRequiresConstraint,
+                Emoji::GREEN_CHECKMARK,
+            ));
+
+            return true;
+        }
+
+        $this->io->write(sprintf(
+            '%s: <comment>%s:%s</comment> %s Missing',
+            $link->getDescription(),
+            $extension->nameWithExtPrefix(),
+            $linkRequiresConstraint,
+            Emoji::PROHIBITED,
+        ));
+
+        // If a `--select` was made, use it as it was explicitly requested
+        if (array_key_exists($extension->name(), $extensionToPackageSelections)) {
+            $requestedPackageAndVersion = new RequestedPackageAndVersion(
+                $extensionToPackageSelections[$extension->name()],
+                $linkRequiresConstraint === '*' || $linkRequiresConstraint === '' ? null : $linkRequiresConstraint,
+            );
+        } else {
+            try {
+                $matches = $this->findMatchingPackages->byProvider($pieComposer, $extension);
+            } catch (OutOfRangeException) {
+                $matches = [];
+            }
+
+            if (! Platform::isInteractive()) {
+                // In non-interactive mode, the user MUST specify a --select definition
+                if (! count($matches)) {
+                    $this->io->writeError(sprintf(
+                        '<error>No package selections were made for %s; and PIE could not find any potential packages; you must specify --select=vendor/package to resolve the missing dependency</error>',
+                        $extension->nameWithExtPrefix(),
+                    ));
+
+                    return false;
+                }
+
+                // @todo https://github.com/php/pie/issues/592
+                $options = array_map(
+                    static fn (array $match) => sprintf('  --select=%s=%s', $extension->name(), $match['name']),
+                    $matches,
+                );
+
+                $this->io->writeError(sprintf(
+                    '<warning>No package selections were made for %s; you MUST specify a package selection in non-interactive mode, by adding one of the following parameters to the `pie install` command:</warning>%s',
+                    $extension->nameWithExtPrefix(),
+                    "\n" . implode("\n", $options),
+                ));
+
+                return false;
+            }
+
+            if (! count($matches)) {
+                $this->io->write(sprintf(
+                    'PIE could not find any potential matches for %s; if you know which package to use, specify --select=vendor/package in the `pie install` options.',
+                    $extension->nameWithExtPrefix(),
+                ));
+
+                return false;
+            }
+
+            // If we're in interactive mode, prompt the user to select which package they want
+            $selectedPackageAnswer = (int) $this->io->select(
+                "\nThe following packages may be suitable, which would you like to install: ",
+                array_merge(
+                    ['None'],
+                    array_map(
+                        static function (array $match): string {
+                            return sprintf('%s: %s', $match['name'], $match['description'] ?? 'no description available');
+                        },
+                        $matches,
+                    ),
+                ),
+                '0',
+            );
+
+            if ($selectedPackageAnswer === 0) {
+                $this->io->write('Okay I won\'t install anything for ' . $extension->name());
+
+                return false;
+            }
+
+            $matchesKey = $selectedPackageAnswer - 1;
+            assert(array_key_exists($matchesKey, $matches));
+
+            assert($matches[$matchesKey]['name'] !== '');
+            $requestedPackageAndVersion = new RequestedPackageAndVersion(
+                $matches[$matchesKey]['name'],
+                $linkRequiresConstraint === '*' || $linkRequiresConstraint === '' ? null : $linkRequiresConstraint,
+            );
+        }
+
+        try {
+            $this->io->write(
+                sprintf('Invoking pie install of %s', $requestedPackageAndVersion->prettyNameAndVersion()),
+                verbosity: IOInterface::VERBOSE,
+            );
+            Assert::same(
+                0,
+                $this->installSelectedPackage->withSubCommand(
+                    $extension,
+                    $requestedPackageAndVersion,
+                    $this,
+                    $input,
+                ),
+                'Non-zero exit code %s whilst installing ' . $requestedPackageAndVersion->package,
+            );
+
+            return true;
+        } catch (Throwable $t) {
+            $this->io->writeError('<error>' . $t->getMessage() . '</error>');
+
+            return false;
+        }
     }
 
     public function execute(InputInterface $input, OutputInterface $output): int
