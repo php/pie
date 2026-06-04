@@ -22,6 +22,7 @@ use Php\Pie\Installing\InstallForPhpProject\InstallPiePackageFromPath;
 use Php\Pie\Installing\InstallForPhpProject\InstallSelectedPackage;
 use Php\Pie\Platform;
 use Php\Pie\Platform\InstalledPiePackages;
+use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Util\Emoji;
 use Psr\Container\ContainerInterface;
 use Safe\Exceptions\DirException;
@@ -103,6 +104,8 @@ final class InstallExtensionsForProjectCommand extends Command
         CommandHelper::applyNoCacheOptionIfSet($input, $this->io);
 
         $rootPackage = $this->composerFactoryForProject->rootPackage($this->io);
+        $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $this->io);
+        self::warnIfTargetPhpDoesNotSatisfyComposerRequirement($rootPackage->getRequires()['php'] ?? null, $targetPlatform, $this->io);
 
         if (ExtensionType::isValid($rootPackage->getType())) {
             try {
@@ -122,7 +125,7 @@ final class InstallExtensionsForProjectCommand extends Command
                 $this,
                 $cwd,
                 $rootPackage,
-                PieJsonEditor::fromTargetPlatform(CommandHelper::determineTargetPlatformFromInputs($input, new NullIO())),
+                PieJsonEditor::fromTargetPlatform($targetPlatform),
                 $input,
                 $this->io,
             );
@@ -141,8 +144,6 @@ final class InstallExtensionsForProjectCommand extends Command
 
             return Command::FAILURE;
         }
-
-        $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $this->io);
 
         $this->io->write(sprintf(
             'Checking extensions for your project <info>%s</info> (path: %s)',
@@ -314,5 +315,23 @@ final class InstallExtensionsForProjectCommand extends Command
         $restoreWorkingDir();
 
         return $anyErrorsHappened ? self::FAILURE : self::SUCCESS;
+    }
+
+    private static function warnIfTargetPhpDoesNotSatisfyComposerRequirement(Link|null $phpRequirement, TargetPlatform $targetPlatform, IOInterface $io): void
+    {
+        if ($phpRequirement === null) {
+            return;
+        }
+
+        $targetPhpVersion = $targetPlatform->phpBinaryPath->version();
+        if ($phpRequirement->getConstraint()->matches((new VersionParser())->parseConstraints($targetPhpVersion))) {
+            return;
+        }
+
+        $io->writeError(sprintf(
+            '<warning>Target PHP %s does not satisfy composer.json requirement php:%s.</warning>',
+            $targetPhpVersion,
+            $phpRequirement->getPrettyConstraint(),
+        ));
     }
 }

@@ -201,6 +201,40 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
         self::assertStringContainsString('Multiple packages were found for ext-foobar', $outputString);
     }
 
+    public function testWarnsWhenTargetPhpDoesNotSatisfyProjectPhpRequirement(): void
+    {
+        $rootPackage = new RootPackage('my/project', '1.2.3.0', '1.2.3');
+        $rootPackage->setRequires([
+            'php' => new Link('my/project', 'php', new Constraint('>=', '999.0.0.0-dev'), Link::TYPE_REQUIRE, '^999.0'),
+        ]);
+        $this->composerFactoryForProject->method('rootPackage')->willReturn($rootPackage);
+
+        $installedRepository = new InstalledArrayRepository([$rootPackage]);
+
+        $repositoryManager = $this->createMock(RepositoryManager::class);
+        $repositoryManager->method('getLocalRepository')->willReturn($installedRepository);
+
+        $composer = $this->createMock(Composer::class);
+        $composer->method('getPackage')->willReturn($rootPackage);
+        $composer->method('getRepositoryManager')->willReturn($repositoryManager);
+
+        $this->composerFactoryForProject->method('composer')->willReturn($composer);
+        $this->installedPiePackages->method('allPiePackages')->willReturn(new PiePackageList([]));
+
+        $this->commandTester->execute(
+            ['--allow-non-interactive-project-install' => true],
+            ['verbosity' => BufferedOutput::VERBOSITY_VERY_VERBOSE],
+        );
+
+        $outputString = $this->commandTester->getDisplay();
+
+        $this->commandTester->assertCommandIsSuccessful($outputString);
+        self::assertStringContainsString(
+            'does not satisfy composer.json requirement php:^999.0.',
+            $outputString,
+        );
+    }
+
     public function testInstallingExtensionsForPieProject(): void
     {
         $rootPackage = new RootPackage('my/project', '1.2.3.0', '1.2.3');
