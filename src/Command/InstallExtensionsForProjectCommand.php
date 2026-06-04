@@ -7,6 +7,7 @@ namespace Php\Pie\Command;
 use Composer\IO\IOInterface;
 use Composer\IO\NullIO;
 use Composer\Package\Link;
+use Composer\Package\RootPackageInterface;
 use Composer\Package\Version\VersionParser;
 use OutOfRangeException;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
@@ -78,6 +79,35 @@ final class InstallExtensionsForProjectCommand extends Command
         CommandHelper::configureDownloadBuildInstallOptions($this, false);
     }
 
+    private function handlePieProject(InputInterface $input, RootPackageInterface $rootPackage, callable $restoreWorkingDir): int
+    {
+        try {
+            $cwd = realpath(getcwd());
+        } catch (FilesystemException | DirException $e) {
+            $this->io->writeError(sprintf(
+                '<error>Failed to determine current working directory: %s</error>',
+                $e->getMessage(),
+            ));
+
+            $restoreWorkingDir();
+
+            return Command::FAILURE;
+        }
+
+        $exit = ($this->installPiePackageFromPath)(
+            $this,
+            $cwd,
+            $rootPackage,
+            PieJsonEditor::fromTargetPlatform(CommandHelper::determineTargetPlatformFromInputs($input, new NullIO())),
+            $input,
+            $this->io,
+        );
+
+        $restoreWorkingDir();
+
+        return $exit;
+    }
+
     public function execute(InputInterface $input, OutputInterface $output): int
     {
         $restoreWorkingDir = CommandHelper::handleWorkingDirectory($input, $this->io);
@@ -86,31 +116,7 @@ final class InstallExtensionsForProjectCommand extends Command
         $rootPackage = $this->composerFactoryForProject->rootPackage($this->io);
 
         if (ExtensionType::isValid($rootPackage->getType())) {
-            try {
-                $cwd = realpath(getcwd());
-            } catch (FilesystemException | DirException $e) {
-                $this->io->writeError(sprintf(
-                    '<error>Failed to determine current working directory: %s</error>',
-                    $e->getMessage(),
-                ));
-
-                $restoreWorkingDir();
-
-                return Command::FAILURE;
-            }
-
-            $exit = ($this->installPiePackageFromPath)(
-                $this,
-                $cwd,
-                $rootPackage,
-                PieJsonEditor::fromTargetPlatform(CommandHelper::determineTargetPlatformFromInputs($input, new NullIO())),
-                $input,
-                $this->io,
-            );
-
-            $restoreWorkingDir();
-
-            return $exit;
+            return $this->handlePieProject($input, $rootPackage, $restoreWorkingDir);
         }
 
         /** @var array<non-empty-string, RequestedPackageAndVersion> $extensionToPackageSelections */
