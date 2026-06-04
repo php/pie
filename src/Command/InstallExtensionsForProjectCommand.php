@@ -41,11 +41,8 @@ use function array_merge;
 use function array_walk;
 use function assert;
 use function count;
-use function explode;
 use function implode;
 use function in_array;
-use function is_array;
-use function is_string;
 use function Safe\getcwd;
 use function Safe\realpath;
 use function sprintf;
@@ -110,19 +107,8 @@ final class InstallExtensionsForProjectCommand extends Command
 
     private function handlePhpProject(InputInterface $input, RootPackageInterface $rootPackage, callable $restoreWorkingDir): int
     {
-        /** @var array<non-empty-string, RequestedPackageAndVersion> $extensionToPackageSelections */
-        $extensionToPackageSelections = [];
-        $selectionOptions             = $input->getOption(CommandHelper::OPTION_PACKAGE_SELECTION);
-        assert(is_array($selectionOptions));
-
-        foreach ($selectionOptions as $selection) {
-            assert(is_string($selection) && $selection !== '');
-            [$extNameString, $packageSelectionString] = explode('=', $selection);
-            Assert::stringNotEmpty($packageSelectionString);
-            $extensionToPackageSelections[ExtensionName::normaliseFromString($extNameString)->name()] = new RequestedPackageAndVersion($packageSelectionString, null);
-        }
-
-        $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $this->io);
+        $extensionToPackageSelections = CommandHelper::determineExtensionToPackageSelections($input);
+        $targetPlatform               = CommandHelper::determineTargetPlatformFromInputs($input, $this->io);
 
         $allowNonInteractive = $input->hasOption(CommandHelper::OPTION_ALLOW_NON_INTERACTIVE_PROJECT_INSTALL) && $input->getOption(CommandHelper::OPTION_ALLOW_NON_INTERACTIVE_PROJECT_INSTALL);
         if ($allowNonInteractive) {
@@ -181,13 +167,12 @@ final class InstallExtensionsForProjectCommand extends Command
                 if (in_array(strtolower($extension->name()), $phpEnabledExtensions)) {
                     if ($piePackageVersion !== null && $piePackageVersionMatchesLinkConstraint === false) {
                         $this->io->write(sprintf(
-                            '%s: <comment>%s:%s</comment> %s Version %s is installed, but does not meet the version requirement %s',
+                            '%s: <comment>%s:%s</comment> %s Version %s is installed, but does not meet the version requirement',
                             $link->getDescription(),
                             $extension->nameWithExtPrefix(),
                             $linkRequiresConstraint,
                             Emoji::WARNING,
                             $piePackageVersion,
-                            $link->getConstraint()->getPrettyString(),
                         ));
 
                         return;
@@ -215,7 +200,7 @@ final class InstallExtensionsForProjectCommand extends Command
                 // If a `--select` was made, use it as it was explicitly requested
                 if (array_key_exists($extension->name(), $extensionToPackageSelections)) {
                     $requestedPackageAndVersion = new RequestedPackageAndVersion(
-                        $extensionToPackageSelections[$extension->name()]->package,
+                        $extensionToPackageSelections[$extension->name()],
                         $linkRequiresConstraint === '*' || $linkRequiresConstraint === '' ? null : $linkRequiresConstraint,
                     );
                 } else {

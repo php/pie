@@ -20,6 +20,7 @@ use Php\Pie\DependencyResolver\InvalidPackageName;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\DependencyResolver\UnableToResolveRequirement;
+use Php\Pie\ExtensionName;
 use Php\Pie\Installing\InstallForPhpProject\FindMatchingPackages;
 use Php\Pie\Platform as PiePlatform;
 use Php\Pie\Platform\OperatingSystem;
@@ -38,6 +39,7 @@ use function array_key_exists;
 use function array_map;
 use function assert;
 use function count;
+use function explode;
 use function is_array;
 use function is_dir;
 use function is_string;
@@ -60,7 +62,7 @@ final class CommandHelper
     public const OPTION_WITH_PHP_PATH                         = 'with-php-path';
     public const OPTION_WITH_PHPIZE_PATH                      = 'with-phpize-path';
     public const OPTION_ALLOW_NON_INTERACTIVE_PROJECT_INSTALL = 'allow-non-interactive-project-install';
-    public const OPTION_PACKAGE_SELECTION                     = 'select';
+    private const OPTION_PACKAGE_SELECTION                    = 'select';
     private const OPTION_WORKING_DIRECTORY                    = 'working-dir';
     private const OPTION_MAKE_PARALLEL_JOBS                   = 'make-parallel-jobs';
     private const OPTION_SKIP_ENABLE_EXTENSION                = 'skip-enable-extension';
@@ -554,5 +556,22 @@ final class CommandHelper
         );
 
         return $restoreWorkingDir;
+    }
+
+    /** @return array<non-empty-string, non-empty-string> */
+    public static function determineExtensionToPackageSelections(InputInterface $input): array
+    {
+        $extensionToPackageSelections = [];
+        $selectionOptions             = $input->getOption(self::OPTION_PACKAGE_SELECTION);
+        assert(is_array($selectionOptions));
+
+        foreach ($selectionOptions as $selection) {
+            assert(is_string($selection) && $selection !== '');
+            [$extNameString, $packageSelectionString] = explode('=', $selection);
+            Assert::stringNotEmpty($packageSelectionString);
+            $extensionToPackageSelections[ExtensionName::normaliseFromString($extNameString)->name()] = (new RequestedPackageAndVersion($packageSelectionString, null))->package;
+        }
+
+        return $extensionToPackageSelections;
     }
 }
