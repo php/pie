@@ -108,17 +108,8 @@ final class InstallExtensionsForProjectCommand extends Command
         return $exit;
     }
 
-    public function execute(InputInterface $input, OutputInterface $output): int
+    private function handlePhpProject(InputInterface $input, RootPackageInterface $rootPackage, callable $restoreWorkingDir): int
     {
-        $restoreWorkingDir = CommandHelper::handleWorkingDirectory($input, $this->io);
-        CommandHelper::applyNoCacheOptionIfSet($input, $this->io);
-
-        $rootPackage = $this->composerFactoryForProject->rootPackage($this->io);
-
-        if (ExtensionType::isValid($rootPackage->getType())) {
-            return $this->handlePieProject($input, $rootPackage, $restoreWorkingDir);
-        }
-
         /** @var array<non-empty-string, RequestedPackageAndVersion> $extensionToPackageSelections */
         $extensionToPackageSelections = [];
         $selectionOptions             = $input->getOption(CommandHelper::OPTION_PACKAGE_SELECTION);
@@ -332,5 +323,19 @@ final class InstallExtensionsForProjectCommand extends Command
         $restoreWorkingDir();
 
         return $anyErrorsHappened ? self::FAILURE : self::SUCCESS;
+    }
+
+    public function execute(InputInterface $input, OutputInterface $output): int
+    {
+        $restoreWorkingDir = CommandHelper::handleWorkingDirectory($input, $this->io);
+        CommandHelper::applyNoCacheOptionIfSet($input, $this->io);
+
+        $rootPackage = $this->composerFactoryForProject->rootPackage($this->io);
+
+        if (ExtensionType::isValid($rootPackage->getType())) {
+            return $this->handlePieProject($input, $rootPackage, $restoreWorkingDir);
+        }
+
+        return $this->handlePhpProject($input, $rootPackage, $restoreWorkingDir);
     }
 }
