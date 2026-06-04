@@ -210,48 +210,7 @@ final class InstallExtensionsForProjectCommand extends Command
                         $matches = [];
                     }
 
-                    if (Platform::isInteractive()) {
-                        if (! count($matches)) {
-                            $this->io->write(sprintf(
-                                'PIE could not find any potential matches for %s; if you know which package to use, specify --select=vendor/package in the `pie install` options.',
-                                $extension->nameWithExtPrefix(),
-                            ));
-                            $anyErrorsHappened = true;
-
-                            return;
-                        }
-
-                        // If we're in interactive mode, prompt the user to select which package they want
-                        $selectedPackageAnswer = (int) $this->io->select(
-                            "\nThe following packages may be suitable, which would you like to install: ",
-                            array_merge(
-                                ['None'],
-                                array_map(
-                                    static function (array $match): string {
-                                        return sprintf('%s: %s', $match['name'], $match['description'] ?? 'no description available');
-                                    },
-                                    $matches,
-                                ),
-                            ),
-                            '0',
-                        );
-
-                        if ($selectedPackageAnswer === 0) {
-                            $this->io->write('Okay I won\'t install anything for ' . $extension->name());
-                            $anyErrorsHappened = true;
-
-                            return;
-                        }
-
-                        $matchesKey = $selectedPackageAnswer - 1;
-                        assert(array_key_exists($matchesKey, $matches));
-
-                        assert($matches[$matchesKey]['name'] !== '');
-                        $requestedPackageAndVersion = new RequestedPackageAndVersion(
-                            $matches[$matchesKey]['name'],
-                            $linkRequiresConstraint === '*' || $linkRequiresConstraint === '' ? null : $linkRequiresConstraint,
-                        );
-                    } else {
+                    if (! Platform::isInteractive()) {
                         // In non-interactive mode, the user MUST specify a --select definition
                         $anyErrorsHappened = true;
 
@@ -278,6 +237,47 @@ final class InstallExtensionsForProjectCommand extends Command
 
                         return;
                     }
+
+                    if (! count($matches)) {
+                        $this->io->write(sprintf(
+                            'PIE could not find any potential matches for %s; if you know which package to use, specify --select=vendor/package in the `pie install` options.',
+                            $extension->nameWithExtPrefix(),
+                        ));
+                        $anyErrorsHappened = true;
+
+                        return;
+                    }
+
+                    // If we're in interactive mode, prompt the user to select which package they want
+                    $selectedPackageAnswer = (int) $this->io->select(
+                        "\nThe following packages may be suitable, which would you like to install: ",
+                        array_merge(
+                            ['None'],
+                            array_map(
+                                static function (array $match): string {
+                                    return sprintf('%s: %s', $match['name'], $match['description'] ?? 'no description available');
+                                },
+                                $matches,
+                            ),
+                        ),
+                        '0',
+                    );
+
+                    if ($selectedPackageAnswer === 0) {
+                        $this->io->write('Okay I won\'t install anything for ' . $extension->name());
+                        $anyErrorsHappened = true;
+
+                        return;
+                    }
+
+                    $matchesKey = $selectedPackageAnswer - 1;
+                    assert(array_key_exists($matchesKey, $matches));
+
+                    assert($matches[$matchesKey]['name'] !== '');
+                    $requestedPackageAndVersion = new RequestedPackageAndVersion(
+                        $matches[$matchesKey]['name'],
+                        $linkRequiresConstraint === '*' || $linkRequiresConstraint === '' ? null : $linkRequiresConstraint,
+                    );
                 }
 
                 try {
