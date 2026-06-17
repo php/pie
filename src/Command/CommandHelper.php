@@ -20,6 +20,7 @@ use Php\Pie\DependencyResolver\InvalidPackageName;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\DependencyResolver\UnableToResolveRequirement;
+use Php\Pie\ExtensionName;
 use Php\Pie\Installing\InstallForPhpProject\FindMatchingPackages;
 use Php\Pie\Platform as PiePlatform;
 use Php\Pie\Platform\OperatingSystem;
@@ -38,9 +39,13 @@ use function array_key_exists;
 use function array_map;
 use function assert;
 use function count;
+use function explode;
 use function is_array;
+use function is_dir;
 use function is_string;
 use function reset;
+use function Safe\chdir;
+use function Safe\getcwd;
 use function sprintf;
 use function str_starts_with;
 use function strtolower;
@@ -56,8 +61,9 @@ final class CommandHelper
     public const OPTION_WITH_PHP_CONFIG                       = 'with-php-config';
     public const OPTION_WITH_PHP_PATH                         = 'with-php-path';
     public const OPTION_WITH_PHPIZE_PATH                      = 'with-phpize-path';
-    public const OPTION_WORKING_DIRECTORY                     = 'working-dir';
     public const OPTION_ALLOW_NON_INTERACTIVE_PROJECT_INSTALL = 'allow-non-interactive-project-install';
+    private const OPTION_PACKAGE_SELECTION                    = 'select';
+    private const OPTION_WORKING_DIRECTORY                    = 'working-dir';
     private const OPTION_MAKE_PARALLEL_JOBS                   = 'make-parallel-jobs';
     private const OPTION_SKIP_ENABLE_EXTENSION                = 'skip-enable-extension';
     private const OPTION_FORCE                                = 'force';
@@ -141,7 +147,14 @@ final class CommandHelper
             self::OPTION_ALLOW_NON_INTERACTIVE_PROJECT_INSTALL,
             null,
             InputOption::VALUE_NONE,
-            'When installing a PHP project, allow non-interactive project installations. Only used in certain contexts.',
+            'Deprecated and ignored. Will emit a warning if used.',
+        );
+
+        $command->addOption(
+            self::OPTION_PACKAGE_SELECTION,
+            null,
+            InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
+            'Select a PIE package for a given extension name, e.g. `--select=foo=myvendor/foo` to resolve the `ext-foo` extension to `myvendor/foo` PIE package.',
         );
 
         $command->addOption(
@@ -509,5 +522,56 @@ final class CommandHelper
 
         $io->writeError('Disabling cache usage', verbosity: IOInterface::DEBUG);
         Platform::putEnv('COMPOSER_CACHE_DIR', Platform::isWindows() ? 'nul' : '/dev/null');
+    }
+
+    /**
+     * If the working directory option is set in the `$input`, change the working directory, and return a callable
+     * that will restore the working directory.
+     *
+     * @return callable(): void
+     */
+    public static function handleWorkingDirectory(InputInterface $input, IOInterface $io): callable
+    {
+        $workingDirOption = (string) $input->getOption(self::OPTION_WORKING_DIRECTORY);
+
+        // No working directory option used, or isn't a real path; this (and the returned callable) should be a no-op
+        if ($workingDirOption === '' || ! is_dir($workingDirOption)) {
+            return static function (): void {
+            };
+        }
+
+        $currentWorkingDir = getcwd();
+        $restoreWorkingDir = static function () use ($currentWorkingDir, $io): void {
+            chdir($currentWorkingDir);
+            $io->write(
+                sprintf('Restored working directory to: %s', $currentWorkingDir),
+                verbosity: IOInterface::VERBOSE,
+            );
+        };
+
+        chdir($workingDirOption);
+        $io->write(
+            sprintf('Changed working directory to: %s', $workingDirOption),
+            verbosity: IOInterface::VERBOSE,
+        );
+
+        return $restoreWorkingDir;
+    }
+
+    /** @return array<non-empty-string, non-empty-string> */
+    public static function determineExtensionToPackageSelections(InputInterface $input): array
+    {
+        $extensionToPackageSelections = [];
+        $selectionOptions             = $input->getOption(self::OPTION_PACKAGE_SELECTION);
+        assert(is_array($selectionOptions));
+
+        foreach ($selectionOptions as $selection) {
+            assert(is_string($selection) && $selection !== '');
+            [$extNameString, $packageSelectionString] = explode('=', $selection);
+            Assert::stringNotEmpty($packageSelectionString);
+            $extensionToPackageSelections[ExtensionName::normaliseFromString($extNameString)->name()] = (new RequestedPackageAndVersion($packageSelectionString, null))->package;
+        }
+
+        return $extensionToPackageSelections;
     }
 }

@@ -4,6 +4,7 @@
     "type": "project",
     "require": {
         "php": "^8.0",
+        "ext-redis": "*",
         "ext-example_pie_extension": "^2.0"
     }
 }

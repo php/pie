@@ -20,11 +20,13 @@ use Php\Pie\Container;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
+use Php\Pie\Installing\InstallForPhpProject\CheckExtensionStatus;
 use Php\Pie\Installing\InstallForPhpProject\ComposerFactoryForProject;
 use Php\Pie\Installing\InstallForPhpProject\DetermineExtensionsRequired;
 use Php\Pie\Installing\InstallForPhpProject\FindMatchingPackages;
 use Php\Pie\Installing\InstallForPhpProject\InstallPiePackageFromPath;
 use Php\Pie\Installing\InstallForPhpProject\InstallSelectedPackage;
+use Php\Pie\Installing\InstallForPhpProject\SelectPackageForExtension;
 use Php\Pie\Platform\InstalledPiePackages;
 use Php\Pie\Platform\PiePackageList;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -83,7 +85,8 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
             $this->composerFactoryForProject,
             new DetermineExtensionsRequired(),
             $this->installedPiePackages,
-            $this->findMatchingPackages,
+            new CheckExtensionStatus(Container::testBuffer()),
+            new SelectPackageForExtension($this->findMatchingPackages, Container::testBuffer()),
             $this->installSelectedPackage,
             $this->installPiePackage,
             $container,
@@ -139,7 +142,7 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
         $this->installedPiePackages->method('allPiePackages')->willReturn(new PiePackageList([]));
 
         $this->commandTester->execute(
-            ['--allow-non-interactive-project-install' => true],
+            ['--select' => ['foobar=vendor1/foobar']],
             ['verbosity' => BufferedOutput::VERBOSITY_VERY_VERBOSE],
         );
 
@@ -188,7 +191,7 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
         $this->installedPiePackages->method('allPiePackages')->willReturn(new PiePackageList([]));
 
         $this->commandTester->execute(
-            ['--allow-non-interactive-project-install' => true],
+            [],
             ['verbosity' => BufferedOutput::VERBOSITY_VERY_VERBOSE],
         );
 
@@ -198,7 +201,9 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
         self::assertStringContainsString('Checking extensions for your project my/project', $outputString);
         self::assertStringContainsString('requires: ext-standard:* ✅ Already installed', $outputString);
         self::assertStringContainsString('requires: ext-foobar:^1.2 🚫 Missing', $outputString);
-        self::assertStringContainsString('Multiple packages were found for ext-foobar', $outputString);
+        self::assertStringContainsString('No package selections were made for ext-foobar; you MUST specify a package selection', $outputString);
+        self::assertStringContainsString('--select=foobar=vendor1/foobar', $outputString);
+        self::assertStringContainsString('--select=foobar=vendor2/afoobar', $outputString);
     }
 
     public function testInstallingExtensionsForPieProject(): void

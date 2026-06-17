@@ -4,25 +4,28 @@ declare(strict_types=1);
 
 namespace Php\Pie\Command;
 
+use Composer\Composer;
 use Composer\IO\IOInterface;
 use Composer\IO\NullIO;
 use Composer\Package\Link;
-use Composer\Package\Version\VersionParser;
-use OutOfRangeException;
+use Composer\Package\RootPackageInterface;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieJsonEditor;
-use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
+use Php\Pie\Installing\InstallForPhpProject\CheckExtensionStatus;
 use Php\Pie\Installing\InstallForPhpProject\ComposerFactoryForProject;
 use Php\Pie\Installing\InstallForPhpProject\DetermineExtensionsRequired;
-use Php\Pie\Installing\InstallForPhpProject\FindMatchingPackages;
 use Php\Pie\Installing\InstallForPhpProject\InstallPiePackageFromPath;
 use Php\Pie\Installing\InstallForPhpProject\InstallSelectedPackage;
+use Php\Pie\Installing\InstallForPhpProject\NoMatchingPackagesFound;
+use Php\Pie\Installing\InstallForPhpProject\PackageSelectionRequired;
+use Php\Pie\Installing\InstallForPhpProject\SelectPackageForExtension;
 use Php\Pie\Platform;
 use Php\Pie\Platform\InstalledPiePackages;
-use Php\Pie\Util\Emoji;
+use Php\Pie\Platform\PiePackageList;
+use Php\Pie\Platform\TargetPlatform;
 use Psr\Container\ContainerInterface;
 use Safe\Exceptions\DirException;
 use Safe\Exceptions\FilesystemException;
@@ -33,22 +36,13 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 use Webmozart\Assert\Assert;
 
-use function array_column;
-use function array_key_exists;
 use function array_keys;
 use function array_map;
-use function array_merge;
 use function array_walk;
-use function assert;
-use function count;
 use function implode;
-use function in_array;
-use function is_dir;
-use function Safe\chdir;
 use function Safe\getcwd;
 use function Safe\realpath;
 use function sprintf;
-use function strtolower;
 
 use const PHP_EOL;
 
@@ -62,7 +56,8 @@ final class InstallExtensionsForProjectCommand extends Command
         private readonly ComposerFactoryForProject $composerFactoryForProject,
         private readonly DetermineExtensionsRequired $determineExtensionsRequired,
         private readonly InstalledPiePackages $installedPiePackages,
-        private readonly FindMatchingPackages $findMatchingPackages,
+        private readonly CheckExtensionStatus $checkExtensionStatus,
+        private readonly SelectPackageForExtension $selectPackageForExtension,
         private readonly InstallSelectedPackage $installSelectedPackage,
         private readonly InstallPiePackageFromPath $installPiePackageFromPath,
         private readonly ContainerInterface $container,
@@ -78,71 +73,47 @@ final class InstallExtensionsForProjectCommand extends Command
         CommandHelper::configureDownloadBuildInstallOptions($this, false);
     }
 
-    public function execute(InputInterface $input, OutputInterface $output): int
+    private function handlePieProject(InputInterface $input, RootPackageInterface $rootPackage, callable $restoreWorkingDir): int
     {
-        $workingDirOption  = (string) $input->getOption(CommandHelper::OPTION_WORKING_DIRECTORY);
-        $restoreWorkingDir = static function (): void {
-        };
-        if ($workingDirOption !== '' && is_dir($workingDirOption)) {
-            $currentWorkingDir = getcwd();
-            $restoreWorkingDir = function () use ($currentWorkingDir): void {
-                chdir($currentWorkingDir);
-                $this->io->write(
-                    sprintf('Restored working directory to: %s', $currentWorkingDir),
-                    verbosity: IOInterface::VERBOSE,
-                );
-            };
-
-            chdir($workingDirOption);
-            $this->io->write(
-                sprintf('Changed working directory to: %s', $workingDirOption),
-                verbosity: IOInterface::VERBOSE,
-            );
-        }
-
-        CommandHelper::applyNoCacheOptionIfSet($input, $this->io);
-
-        $rootPackage = $this->composerFactoryForProject->rootPackage($this->io);
-
-        if (ExtensionType::isValid($rootPackage->getType())) {
-            try {
-                $cwd = realpath(getcwd());
-            } catch (FilesystemException | DirException $e) {
-                $this->io->writeError(sprintf(
-                    '<error>Failed to determine current working directory: %s</error>',
-                    $e->getMessage(),
-                ));
-
-                $restoreWorkingDir();
-
-                return Command::FAILURE;
-            }
-
-            $exit = ($this->installPiePackageFromPath)(
-                $this,
-                $cwd,
-                $rootPackage,
-                PieJsonEditor::fromTargetPlatform(CommandHelper::determineTargetPlatformFromInputs($input, new NullIO())),
-                $input,
-                $this->io,
-            );
+        try {
+            $cwd = realpath(getcwd());
+        } catch (FilesystemException | DirException $e) {
+            $this->io->writeError(sprintf(
+                '<error>Failed to determine current working directory: %s</error>',
+                $e->getMessage(),
+            ));
 
             $restoreWorkingDir();
-
-            return $exit;
-        }
-
-        $allowNonInteractive = $input->hasOption(CommandHelper::OPTION_ALLOW_NON_INTERACTIVE_PROJECT_INSTALL) && $input->getOption(CommandHelper::OPTION_ALLOW_NON_INTERACTIVE_PROJECT_INSTALL);
-        if (! Platform::isInteractive() && ! $allowNonInteractive) {
-            $this->io->writeError(sprintf(
-                '<warning>Aborting! You are not running in interactive mode, and --%s was not specified.</warning>',
-                CommandHelper::OPTION_ALLOW_NON_INTERACTIVE_PROJECT_INSTALL,
-            ));
 
             return Command::FAILURE;
         }
 
-        $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $this->io);
+        $exit = ($this->installPiePackageFromPath)(
+            $this,
+            $cwd,
+            $rootPackage,
+            PieJsonEditor::fromTargetPlatform(CommandHelper::determineTargetPlatformFromInputs($input, new NullIO())),
+            $input,
+            $this->io,
+        );
+
+        $restoreWorkingDir();
+
+        return $exit;
+    }
+
+    private function handlePhpProject(InputInterface $input, RootPackageInterface $rootPackage, callable $restoreWorkingDir): int
+    {
+        $extensionToPackageSelections = CommandHelper::determineExtensionToPackageSelections($input);
+        $targetPlatform               = CommandHelper::determineTargetPlatformFromInputs($input, $this->io);
+
+        $allowNonInteractive = $input->hasOption(CommandHelper::OPTION_ALLOW_NON_INTERACTIVE_PROJECT_INSTALL) && $input->getOption(CommandHelper::OPTION_ALLOW_NON_INTERACTIVE_PROJECT_INSTALL);
+        if ($allowNonInteractive) {
+            $this->io->writeError(sprintf(
+                '<warning>The --%s is now deprecated and has no effect.</warning>',
+                CommandHelper::OPTION_ALLOW_NON_INTERACTIVE_PROJECT_INSTALL,
+            ));
+        }
 
         $this->io->write(sprintf(
             'Checking extensions for your project <info>%s</info> (path: %s)',
@@ -167,145 +138,22 @@ final class InstallExtensionsForProjectCommand extends Command
 
         array_walk(
             $extensionsRequired,
-            function (Link $link) use ($pieComposer, $phpEnabledExtensions, $installedPiePackages, $input, &$anyErrorsHappened, $targetPlatform): void {
-                $extension              = ExtensionName::normaliseFromString($link->getTarget());
-                $linkRequiresConstraint = $link->getPrettyConstraint();
-
-                $piePackagesForExtension = $installedPiePackages
-                    ->findByPhpFormattedExtensionName($extension->phpFormattedExtensionName())
-                    ->onlyVerifiedFor($targetPlatform);
-
-                $piePackageVersion = null;
-
-                if (count($piePackagesForExtension) === 1) {
-                    $piePackageVersion = $piePackagesForExtension->onlyOne()->version();
-                }
-
-                $piePackageVersionMatchesLinkConstraint = null;
-                if ($piePackageVersion !== null) {
-                    $piePackageVersionMatchesLinkConstraint = $link
-                        ->getConstraint()
-                        ->matches(
-                            (new VersionParser())->parseConstraints($piePackageVersion),
-                        );
-                }
-
-                if (in_array(strtolower($extension->name()), $phpEnabledExtensions)) {
-                    if ($piePackageVersion !== null && $piePackageVersionMatchesLinkConstraint === false) {
-                        $this->io->write(sprintf(
-                            '%s: <comment>%s:%s</comment> %s Version %s is installed, but does not meet the version requirement %s',
-                            $link->getDescription(),
-                            $link->getTarget(),
-                            $linkRequiresConstraint,
-                            Emoji::WARNING,
-                            $piePackageVersion,
-                            $link->getConstraint()->getPrettyString(),
-                        ));
-
-                        return;
-                    }
-
-                    $this->io->write(sprintf(
-                        '%s: <info>%s:%s</info> %s Already installed',
-                        $link->getDescription(),
-                        $link->getTarget(),
-                        $linkRequiresConstraint,
-                        Emoji::GREEN_CHECKMARK,
-                    ));
-
+            function (Link $link) use ($pieComposer, $phpEnabledExtensions, $installedPiePackages, $input, &$anyErrorsHappened, $targetPlatform, $extensionToPackageSelections): void {
+                if (
+                    $this->handleSingleExtensionRequiredByPhpProject(
+                        $input,
+                        $pieComposer,
+                        $link,
+                        $installedPiePackages,
+                        $targetPlatform,
+                        $phpEnabledExtensions,
+                        $extensionToPackageSelections,
+                    )
+                ) {
                     return;
                 }
 
-                $this->io->write(sprintf(
-                    '%s: <comment>%s:%s</comment> %s Missing',
-                    $link->getDescription(),
-                    $link->getTarget(),
-                    $linkRequiresConstraint,
-                    Emoji::PROHIBITED,
-                ));
-
-                try {
-                    $matches = $this->findMatchingPackages->byProvider($pieComposer, $extension);
-                } catch (OutOfRangeException) {
-                    $anyErrorsHappened = true;
-
-                    $this->io->writeError(sprintf(
-                        '<error>No packages were found for %s</error>',
-                        $extension->nameWithExtPrefix(),
-                    ));
-
-                    return;
-                }
-
-                if (! Platform::isInteractive() && count($matches) > 1) {
-                    $anyErrorsHappened = true;
-
-                    // @todo Figure out if there is a way to improve this, safely
-                    $this->io->writeError(sprintf(
-                        "<warning>Multiple packages were found for %s:</warning>\n  %s\n\n<warning>This means you cannot `pie install` this project interactively for now.</warning>",
-                        $extension->nameWithExtPrefix(),
-                        implode("\n  ", array_column($matches, 'name')),
-                    ));
-
-                    return;
-                }
-
-                if (Platform::isInteractive()) {
-                    $selectedPackageAnswer = (int) $this->io->select(
-                        "\nThe following packages may be suitable, which would you like to install: ",
-                        array_merge(
-                            ['None'],
-                            array_map(
-                                static function (array $match): string {
-                                    return sprintf('%s: %s', $match['name'], $match['description'] ?? 'no description available');
-                                },
-                                $matches,
-                            ),
-                        ),
-                        '0',
-                    );
-
-                    if ($selectedPackageAnswer === 0) {
-                        $this->io->write('Okay I won\'t install anything for ' . $extension->name());
-                        $anyErrorsHappened = true;
-
-                        return;
-                    }
-
-                    $matchesKey = $selectedPackageAnswer - 1;
-                    assert(array_key_exists($matchesKey, $matches));
-
-                    $selectedPackageName = $matches[$matchesKey]['name'];
-                } else {
-                    $selectedPackageName = $matches[0]['name'];
-                }
-
-                assert($selectedPackageName !== '');
-                $requestedPackageAndVersion = new RequestedPackageAndVersion(
-                    $selectedPackageName,
-                    $linkRequiresConstraint === '*' || $linkRequiresConstraint === '' ? null : $linkRequiresConstraint,
-                );
-
-                try {
-                    $this->io->write(
-                        sprintf('Invoking pie install of %s', $requestedPackageAndVersion->prettyNameAndVersion()),
-                        verbosity: IOInterface::VERBOSE,
-                    );
-                    Assert::same(
-                        0,
-                        $this->installSelectedPackage->withSubCommand(
-                            ExtensionName::normaliseFromString($link->getTarget()),
-                            $requestedPackageAndVersion,
-                            $this,
-                            $input,
-                        ),
-                        'Non-zero exit code %s whilst installing ' . $requestedPackageAndVersion->package,
-                    );
-                } catch (Throwable $t) {
-                    $anyErrorsHappened = true;
-
-                    $this->io->writeError('<error>' . $t->getMessage() . '</error>');
-                }
+                $anyErrorsHappened = true;
             },
         );
 
@@ -314,5 +162,102 @@ final class InstallExtensionsForProjectCommand extends Command
         $restoreWorkingDir();
 
         return $anyErrorsHappened ? self::FAILURE : self::SUCCESS;
+    }
+
+    /**
+     * Returns false if any error happened whilst trying to install the extension; returns true if was already
+     * installed, or it was successfully installed if needed.
+     *
+     * @param list<string>                              $phpEnabledExtensions
+     * @param array<non-empty-string, non-empty-string> $extensionToPackageSelections
+     */
+    private function handleSingleExtensionRequiredByPhpProject(
+        InputInterface $input,
+        Composer $pieComposer,
+        Link $link,
+        PiePackageList $installedPiePackages,
+        TargetPlatform $targetPlatform,
+        array $phpEnabledExtensions,
+        array $extensionToPackageSelections,
+    ): bool {
+        $extension               = ExtensionName::normaliseFromString($link->getTarget());
+        $piePackagesForExtension = $installedPiePackages
+            ->findByPhpFormattedExtensionName($extension->phpFormattedExtensionName())
+            ->onlyVerifiedFor($targetPlatform);
+
+        // Check if the extension is already installed, if it is, return early.
+        if (($this->checkExtensionStatus)($link, $piePackagesForExtension, $phpEnabledExtensions)) {
+            return true;
+        }
+
+        try {
+            $requestedPackageAndVersion = ($this->selectPackageForExtension)(
+                $extension,
+                $link->getPrettyConstraint(),
+                $extensionToPackageSelections,
+                $pieComposer,
+                Platform::isInteractive(),
+            );
+        } catch (NoMatchingPackagesFound $e) {
+            $this->io->write($e->getMessage());
+
+            return false;
+        } catch (PackageSelectionRequired $e) {
+            // @todo https://github.com/php/pie/issues/592
+            $options = array_map(
+                static fn (array $match) => sprintf('  --select=%s=%s', $e->extensionName->name(), $match['name']),
+                $e->matches,
+            );
+
+            $this->io->writeError(sprintf(
+                '<warning>No package selections were made for %s; you MUST specify a package selection in non-interactive mode, by adding one of the following parameters to the `pie install` command:</warning>%s',
+                $e->extensionName->nameWithExtPrefix(),
+                "\n" . implode("\n", $options),
+            ));
+
+            return false;
+        }
+
+        // Interactive user did not select a package to install
+        if ($requestedPackageAndVersion === null) {
+            return false;
+        }
+
+        try {
+            $this->io->write(
+                sprintf('Invoking pie install of %s', $requestedPackageAndVersion->prettyNameAndVersion()),
+                verbosity: IOInterface::VERBOSE,
+            );
+            Assert::same(
+                0,
+                $this->installSelectedPackage->withSubCommand(
+                    $extension,
+                    $requestedPackageAndVersion,
+                    $this,
+                    $input,
+                ),
+                'Non-zero exit code %s whilst installing ' . $requestedPackageAndVersion->package,
+            );
+
+            return true;
+        } catch (Throwable $t) {
+            $this->io->writeError('<error>' . $t->getMessage() . '</error>');
+
+            return false;
+        }
+    }
+
+    public function execute(InputInterface $input, OutputInterface $output): int
+    {
+        $restoreWorkingDir = CommandHelper::handleWorkingDirectory($input, $this->io);
+        CommandHelper::applyNoCacheOptionIfSet($input, $this->io);
+
+        $rootPackage = $this->composerFactoryForProject->rootPackage($this->io);
+
+        if (ExtensionType::isValid($rootPackage->getType())) {
+            return $this->handlePieProject($input, $rootPackage, $restoreWorkingDir);
+        }
+
+        return $this->handlePhpProject($input, $rootPackage, $restoreWorkingDir);
     }
 }
