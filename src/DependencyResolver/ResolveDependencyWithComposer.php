@@ -138,7 +138,15 @@ final class ResolveDependencyWithComposer implements DependencyResolver
             ));
         }
 
-        if ($buildProvider === 'Remi\'s RPM repository <https://rpms.remirepo.net/> #StandWithUkraine') {
+        $rpmProviders = [
+            'AlmaLinux',
+            'CentOS',
+            'Fedora Project',
+            'Red Hat, Inc.',
+            'Remi\'s RPM repository <https://rpms.remirepo.net/> #StandWithUkraine',
+            'Rocky Enterprise Software Foundation',
+        ];
+        if (in_array($buildProvider, $rpmProviders)) {
             $identifiedBuildProvider = true;
             $this->io->write(sprintf(
                 '<comment>%sYou should probably use "dnf install php-%s" instead</comment>',
