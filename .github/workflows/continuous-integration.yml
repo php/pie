@@ -221,6 +221,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: sudo infection --min-msi=68 --min-covered-msi=68 --threads=max --show-mutations=max --no-progress
 
+  zizmor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: zizmorcore/zizmor-action@v0.5.6
+        with:
+          advanced-security: false
+
   build-assets:
     needs:
       - unit-tests
