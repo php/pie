@@ -25,10 +25,11 @@ jobs:
       # contents:write is required to create the draft release
       contents: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 #v6.0.3
         with:
           fetch-tags: 'true'
           ref: ${{ github.ref }}
+          persist-credentials: false
       # The changelog is generated locally using jwage/changelog-generator and
       # that forms the signed tag body. The `--notes-from-tag` option below
       # will copy the release notes from the tag so it will contain the changelog
@@ -37,7 +38,7 @@ jobs:
       - name: Create draft release from tag
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${{ github.ref_name }}" --title "${{ github.ref_name }}" --draft --notes-from-tag
+        run: gh release create "${GITHUB_REF_NAME}" --title "${GITHUB_REF_NAME}" --draft --notes-from-tag
 
   attach-release-assets:
     runs-on: ubuntu-latest
@@ -47,13 +48,15 @@ jobs:
       # contents:write is required to upload the binaries to the release.
       contents: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 #v6.0.3
+        with:
+          persist-credentials: false
       - name: Fetch built PHAR from artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c #v8.0.1
         with:
           name: pie-${{ github.sha }}.phar
       - name: Fetch the executable PIEs from artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c #v8.0.1
         with:
           path: executable-pie-binaries
           pattern: pie-${{ github.sha }}-*.bin
@@ -73,8 +76,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release upload "${{ github.ref_name }}" "pie.phar" --clobber ;
-          find executable-pie-binaries -type f -exec gh release upload "${{ github.ref_name }}" {} --clobber \;
+          gh release upload "${GITHUB_REF_NAME}" "pie.phar" --clobber ;
+          find executable-pie-binaries -type f -exec gh release upload "${GITHUB_REF_NAME}" {} --clobber \;
 
   build-and-push-docker-image:
     if: ${{ startsWith(github.ref, 'refs/tags/') }}

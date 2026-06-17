@@ -23,14 +23,16 @@ jobs:
           - '8.5'
     steps:
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 #2.37.2
         with:
           php-version: ${{ matrix.php-versions }}
           extensions: intl, sodium, zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/checkout@v6
-      - uses: ramsey/composer-install@v4
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 #v6.0.3
+        with:
+          persist-credentials: false
+      - uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda #4.0.0
       - name: GH token (non-Windows)
         if: matrix.operating-system != 'windows-latest'
         run: sudo composer config --global --auth github-oauth.github.com ${{ secrets.GITHUB_TOKEN }}
@@ -102,12 +104,14 @@ jobs:
           DIST_URL=`curl -fsSL "https://www.php.net/releases/index.php?json&max=1&version=${{ matrix.php-versions }}" | jq -r '.[].source[]|select(.filename|endswith(".gz")).filename'`
           echo "php_src_download_url=https://www.php.net/distributions/$DIST_URL" >> $GITHUB_ENV
       - name: "Install PHP ${{ matrix.php-versions }}"
+        env:
+          php_src_download_url: ${{ env.php_src_download_url }}
         run: |
           mkdir -p /tmp/php
           mkdir -p /tmp/php.ini.d
           cd /tmp/php
-          echo "Downloading release from ${{ env.php_src_download_url }} ..."
-          wget -O php.tgz ${{ env.php_src_download_url }}
+          echo "Downloading release from ${php_src_download_url} ..."
+          wget -O php.tgz ${php_src_download_url}
           tar zxf php.tgz
           rm php.tgz
           ls -l
@@ -118,7 +122,9 @@ jobs:
           make -j$(nproc)
           sudo make install
           cd $GITHUB_WORKSPACE
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 #v6.0.3
+        with:
+          persist-credentials: false
       - name: Composer Install
         run: composer install --ignore-platform-reqs
       - name: Run bundled PHP install test
@@ -129,14 +135,15 @@ jobs:
   end-to-end-tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 #v6.0.3
         with:
           fetch-depth: 0
+          persist-credentials: false
       # Fixes `git describe` picking the wrong tag - see https://github.com/php/pie/issues/307
       - run: git fetch --tags --force
       # Ensure some kind of previous tag exists, otherwise box fails
       - run: git describe --tags HEAD || git tag 0.0.0
-      - uses: ramsey/composer-install@v4
+      - uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda #4.0.0
       - name: Run the tests
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -154,14 +161,15 @@ jobs:
           - '8.3'
           - '8.4'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 #v6.0.3
         with:
           fetch-depth: 0
+          persist-credentials: false
       # Fixes `git describe` picking the wrong tag - see https://github.com/php/pie/issues/307
       - run: git fetch --tags --force
       # Ensure some kind of previous tag exists, otherwise box fails
       - run: git describe --tags HEAD || git tag 0.0.0
-      - uses: ramsey/composer-install@v4
+      - uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda #4.0.0
       - name: Build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -175,14 +183,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 #2.37.2
         with:
           php-version: 8.1
           extensions: intl, sodium, zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/checkout@v6
-      - uses: ramsey/composer-install@v4
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 #v6.0.3
+        with:
+          persist-credentials: false
+      - uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda #4.0.0
       - name: Run PHPCS
         run: vendor/bin/phpcs
 
@@ -190,14 +200,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 #2.37.2
         with:
           php-version: 8.5
           extensions: intl, sodium, zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/checkout@v6
-      - uses: ramsey/composer-install@v4
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 #v6.0.3
+        with:
+          persist-credentials: false
+      - uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda #4.0.0
       - name: Validate the composer configuration
         run: composer validate --strict
       - name: Run phpstan
@@ -207,19 +219,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 #2.37.2
         with:
           php-version: 8.4
           extensions: intl, sodium, zip
           tools: infection
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/checkout@v6
-      - uses: ramsey/composer-install@v4
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 #v6.0.3
+        with:
+          persist-credentials: false
+      - uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda #4.0.0
       - name: Run infection
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: sudo infection --min-msi=68 --min-covered-msi=68 --threads=max --show-mutations=max --no-progress
+
+  zizmor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 #v6.0.3
+        with:
+          persist-credentials: false
+      - uses: zizmorcore/zizmor-action@5f14fd08f7cf1cb1609c1e344975f152c7ee938d #v0.5.6
+        with:
+          advanced-security: false
 
   build-assets:
     needs:

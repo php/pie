@@ -33,19 +33,20 @@ jobs:
       attestations: write
     steps:
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 #2.37.2
         with:
           coverage: none
           tools: composer, box:4.7.x
           php-version: "${{ matrix.php-version }}"
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 #v6.0.3
         with:
           fetch-depth: 0
+          persist-credentials: false
       # Fixes `git describe` picking the wrong tag - see https://github.com/php/pie/issues/307
       - run: git fetch --tags --force
       # Ensure some kind of previous tag exists, otherwise box fails
       - run: git describe --tags HEAD || git tag 0.0.0
-      - uses: ramsey/composer-install@v4
+      - uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda #4.0.0
       - name: Build PHAR
         run: box compile
       - name: Check the PHAR executes
@@ -57,10 +58,10 @@ jobs:
         # code, which would store attestation that `php/pie` built the PHAR, and
         # it would look genuine. So this should NOT run for PR builds.
         if: github.event_name != 'pull_request' && github.event.repository.visibility == 'public'
-        uses: actions/attest@v4
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 #v4.1.0
         with:
           subject-path: '${{ github.workspace }}/pie.phar'
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
         with:
           name: pie-${{ github.sha }}.phar
           path: pie.phar
@@ -87,7 +88,9 @@ jobs:
       # attestations:write is required for build provenance attestation.
       attestations: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 #v6.0.3
+        with:
+          persist-credentials: false
 
       - name: Download SPC (non-Windows)
         if: runner.os != 'Windows'
@@ -129,28 +132,37 @@ jobs:
           echo "PIE_BINARY_OUTPUT=pie-${{ runner.os }}-${{ runner.arch }}.exe" >> $env:GITHUB_ENV
 
       - name: Check SPC version
-        run: ${{ env.SPC_BINARY }} --version
+        env:
+          SPC_BINARY: ${{ env.SPC_BINARY }}
+        run: ${SPC_BINARY} --version
 
       - name: Grab the pie.phar from artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c #v8.0.1
         with:
           name: pie-${{ github.sha }}.phar
 
       - name: Build for ${{ runner.os }} ${{ runner.arch }} on ${{ matrix.operating-system }}
-        run: ${{ env.SPC_BINARY }} craft resources/spc/craft.yml
+        run: ${SPC_BINARY} craft resources/spc/craft.yml
         env:
+          SPC_BINARY: ${{ env.SPC_BINARY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Bundle pie.phar into executable PIE binary
-        run: ${{ env.SPC_BINARY }} micro:combine pie.phar --output=${{ env.PIE_BINARY_OUTPUT }}
+        env:
+          PIE_BINARY_OUTPUT: ${{ env.PIE_BINARY_OUTPUT }}
+          SPC_BINARY: ${{ env.SPC_BINARY }}
+        run: ${SPC_BINARY} micro:combine pie.phar --output=${PIE_BINARY_OUTPUT}
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 #2.37.2
         with:
           coverage: none
           tools: composer
           php-version: "7.4"
       - name: Quick validation that the binary runs
-        run: ./${{ env.PIE_BINARY_OUTPUT }} show --all
+        env:
+          PIE_BINARY_OUTPUT: ${{ env.PIE_BINARY_OUTPUT }}
+        run: ./${PIE_BINARY_OUTPUT} show --all
 
       - name: Generate build provenance attestation
         # It does not make sense to do this for PR builds, nor do contributors
@@ -159,11 +171,11 @@ jobs:
         # code, which would store attestation that `php/pie` built the binaries,
         # and it would look genuine. So this should NOT run for PR builds.
         if: github.event_name != 'pull_request' && github.event.repository.visibility == 'public'
-        uses: actions/attest@v4
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 #v4.1.0
         with:
-          subject-path: '${{ github.workspace }}/${{ env.PIE_BINARY_OUTPUT }}'
+          subject-path: ${{ github.workspace }}/${{ env.PIE_BINARY_OUTPUT }}
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
         with:
           name: pie-${{ github.sha }}-${{ runner.os }}-${{ runner.arch }}.bin
           path: ${{ env.PIE_BINARY_OUTPUT }}
