@@ -14,6 +14,7 @@ use Php\Pie\File\SudoFilePut;
 use Php\Pie\Platform;
 use Php\Pie\SelfManage\Update\Channel;
 use Php\Pie\SelfManage\Update\FetchPieReleaseFromGitHub;
+use Php\Pie\SelfManage\Update\IsBrewInstallation;
 use Php\Pie\SelfManage\Update\ReleaseIsNewer;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
 use Php\Pie\SelfManage\Verify\FailedToVerifyRelease;
@@ -30,7 +31,9 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 
+use function is_link;
 use function Safe\file_get_contents;
+use function Safe\realpath;
 use function Safe\unlink;
 use function sprintf;
 
@@ -84,6 +87,15 @@ final class SelfUpdateCommand extends Command
     {
         if (! PieVersion::isPharBuild() || Platform::isRunningStaticPhp()) {
             $this->io->writeError('<comment>Aborting! You are not running a PHAR, cannot self-update.</comment>');
+
+            return Command::FAILURE;
+        }
+
+        $originalPathToSelf = ($this->fullPathToSelf)();
+        $fullPathToSelf     = is_link($originalPathToSelf) ? (realpath($originalPathToSelf) ?: $originalPathToSelf) : $originalPathToSelf;
+
+        if ((new IsBrewInstallation())($fullPathToSelf, $originalPathToSelf)) {
+            $this->io->writeError('<comment>Aborting! PIE was installed with Brew, you should upgrade with `brew upgrade pie`.</comment>');
 
             return Command::FAILURE;
         }
@@ -198,7 +210,6 @@ final class SelfUpdateCommand extends Command
             return Command::FAILURE;
         }
 
-        $fullPathToSelf = ($this->fullPathToSelf)();
         $this->io->write(
             sprintf('Writing new version to %s', $fullPathToSelf),
             verbosity: IOInterface::VERBOSE,
