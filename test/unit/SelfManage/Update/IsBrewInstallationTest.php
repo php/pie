@@ -8,6 +8,7 @@ use Composer\Util\Filesystem;
 use Php\Pie\SelfManage\Update\IsBrewInstallation;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\RequiresOperatingSystemFamily;
 use PHPUnit\Framework\TestCase;
 
 use function mkdir;
@@ -44,6 +45,7 @@ final class IsBrewInstallationTest extends TestCase
         self::assertSame($expected, (new IsBrewInstallation())($resolvedPath, $originalPath));
     }
 
+    #[RequiresOperatingSystemFamily('Linux')]
     public function testSymlinkAtRegularPathPointingIntoBrewCellarIsDetected(): void
     {
         $tmpDir      = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('pie_brew_test_', true);
@@ -63,6 +65,7 @@ final class IsBrewInstallationTest extends TestCase
         }
     }
 
+    #[RequiresOperatingSystemFamily('Linux')]
     public function testSymlinkAtRegularPathPointingToNonBrewPathIsNotDetected(): void
     {
         $tmpDir      = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('pie_brew_test_', true);
@@ -82,6 +85,7 @@ final class IsBrewInstallationTest extends TestCase
         }
     }
 
+    #[RequiresOperatingSystemFamily('Linux')]
     public function testSymlinkInCellarPointingToRegularPathIsDetectedViaOriginalPath(): void
     {
         $tmpDir      = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('pie_brew_test_', true);
