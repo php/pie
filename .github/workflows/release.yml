@@ -29,6 +29,7 @@ jobs:
         with:
           fetch-tags: 'true'
           ref: ${{ github.ref }}
+          persist-credentials: false
       # The changelog is generated locally using jwage/changelog-generator and
       # that forms the signed tag body. The `--notes-from-tag` option below
       # will copy the release notes from the tag so it will contain the changelog
@@ -48,6 +49,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - name: Fetch built PHAR from artifacts
         uses: actions/download-artifact@v8
         with:
