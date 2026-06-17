@@ -38,7 +38,7 @@ jobs:
       - name: Create draft release from tag
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${{ github.ref_name }}" --title "${{ github.ref_name }}" --draft --notes-from-tag
+        run: gh release create "${GITHUB_REF_NAME}" --title "${GITHUB_REF_NAME}" --draft --notes-from-tag
 
   attach-release-assets:
     runs-on: ubuntu-latest
@@ -76,8 +76,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release upload "${{ github.ref_name }}" "pie.phar" --clobber ;
-          find executable-pie-binaries -type f -exec gh release upload "${{ github.ref_name }}" {} --clobber \;
+          gh release upload "${GITHUB_REF_NAME}" "pie.phar" --clobber ;
+          find executable-pie-binaries -type f -exec gh release upload "${GITHUB_REF_NAME}" {} --clobber \;
 
   build-and-push-docker-image:
     if: ${{ startsWith(github.ref, 'refs/tags/') }}
