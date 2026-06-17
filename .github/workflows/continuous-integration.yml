@@ -104,12 +104,14 @@ jobs:
           DIST_URL=`curl -fsSL "https://www.php.net/releases/index.php?json&max=1&version=${{ matrix.php-versions }}" | jq -r '.[].source[]|select(.filename|endswith(".gz")).filename'`
           echo "php_src_download_url=https://www.php.net/distributions/$DIST_URL" >> $GITHUB_ENV
       - name: "Install PHP ${{ matrix.php-versions }}"
+        env:
+          php_src_download_url: ${{ env.php_src_download_url }}
         run: |
           mkdir -p /tmp/php
           mkdir -p /tmp/php.ini.d
           cd /tmp/php
-          echo "Downloading release from ${{ env.php_src_download_url }} ..."
-          wget -O php.tgz ${{ env.php_src_download_url }}
+          echo "Downloading release from ${php_src_download_url} ..."
+          wget -O php.tgz ${php_src_download_url}
           tar zxf php.tgz
           rm php.tgz
           ls -l
