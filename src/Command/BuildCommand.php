@@ -149,10 +149,9 @@ final class BuildCommand extends Command
 
         try {
             $this->composerIntegrationHandler->runInstall(
-                $package,
+                $resolvedPackages,
                 $composer,
                 $targetPlatform,
-                $requestedNamesAndVersions,
                 $forceInstallPackageVersion,
                 false,
             );

@@ -35,7 +35,7 @@ final class VersionSelectorFactory
     ): VersionSelector {
         return new VersionSelector(
             self::factoryRepositorySet($composer, $requestedPackageAndVersion),
-            new PhpBinaryPathBasedPlatformRepository($targetPlatform->phpBinaryPath, $composer, new InstalledPiePackages(), null),
+            new PhpBinaryPathBasedPlatformRepository($targetPlatform->phpBinaryPath, $composer, new InstalledPiePackages(), []),
         );
     }
 }

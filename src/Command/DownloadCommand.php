@@ -102,10 +102,9 @@ final class DownloadCommand extends Command
 
         try {
             $this->composerIntegrationHandler->runInstall(
-                $package,
+                $resolvedPackages,
                 $composer,
                 $targetPlatform,
-                $requestedNamesAndVersions,
                 $forceInstallPackageVersion,
                 false,
             );

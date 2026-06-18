@@ -163,10 +163,9 @@ final class InstallCommand extends Command
 
         try {
             $this->composerIntegrationHandler->runInstall(
-                $package,
+                $resolvedPackages,
                 $composer,
                 $targetPlatform,
-                $requestedNamesAndVersions,
                 $forceInstallPackageVersion,
                 true,
             );

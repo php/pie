@@ -12,12 +12,14 @@ use Composer\Package\CompleteAliasPackage;
 use Composer\Package\CompletePackageInterface;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
+use Php\Pie\DependencyResolver\ResolvedPackageRequest;
 use Php\Pie\ExtensionName;
 use Php\Pie\Platform;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Util\Emoji;
 use Psr\Container\ContainerInterface;
 
+use function array_map;
 use function assert;
 use function file_exists;
 use function sprintf;
@@ -32,25 +34,23 @@ class ComposerIntegrationHandler
     ) {
     }
 
-    public function runInstall(
-        Package $package,
+    private function addPackageIntoPieJson(
+        ResolvedPackageRequest $resolvedPackageRequest,
         Composer $composer,
         TargetPlatform $targetPlatform,
-        RequestedPackageAndVersion $requestedPackageAndVersion,
-        bool $forceInstallPackageVersion,
-        bool $runCleanup,
+        PieJsonEditor $pieJsonEditor,
     ): void {
-        $versionSelector = VersionSelectorFactory::make($composer, $requestedPackageAndVersion, $targetPlatform);
+        $versionSelector = VersionSelectorFactory::make($composer, $resolvedPackageRequest->requestedPackageAndVersion, $targetPlatform);
 
-        $recommendedRequireVersion = $requestedPackageAndVersion->version;
+        $recommendedRequireVersion = $resolvedPackageRequest->requestedPackageAndVersion->version;
 
         // If user did not request a specific require version, use Composer to recommend one for the pie.json
         if ($recommendedRequireVersion === null) {
-            $recommendedRequireVersion = $versionSelector->findRecommendedRequireVersion($package->composerPackage());
+            $recommendedRequireVersion = $versionSelector->findRecommendedRequireVersion($resolvedPackageRequest->piePackage->composerPackage());
         }
 
-        if ($package->isBundledPhpExtension()) {
-            $stability       = $package->composerPackage()->getStability();
+        if ($resolvedPackageRequest->piePackage->isBundledPhpExtension()) {
+            $stability       = $resolvedPackageRequest->piePackage->composerPackage()->getStability();
             $stabilitySuffix = '';
             if ($stability !== 'stable') {
                 $stabilitySuffix = '@' . $stability;
@@ -60,11 +60,32 @@ class ComposerIntegrationHandler
         }
 
         // Write the new requirement to pie.json; because we later essentially just do a `composer install` using that file
+        $pieJsonEditor->addRequire(
+            $resolvedPackageRequest->requestedPackageAndVersion->package,
+            $recommendedRequireVersion !== '' ? $recommendedRequireVersion : '*',
+        );
+    }
+
+    /** @param list<ResolvedPackageRequest> $resolvedRequestedPackages */
+    public function runInstall(
+        array $resolvedRequestedPackages,
+        Composer $composer,
+        TargetPlatform $targetPlatform,
+        bool $forceInstallPackageVersion,
+        bool $runCleanup,
+    ): void {
         $pieComposerJson        = Platform::getPieJsonFilename($targetPlatform);
         $pieJsonEditor          = PieJsonEditor::fromTargetPlatform($targetPlatform);
-        $originalPieJsonContent = $pieJsonEditor->addRequire(
-            $requestedPackageAndVersion->package,
-            $recommendedRequireVersion !== '' ? $recommendedRequireVersion : '*',
+        $originalPieJsonContent = $pieJsonEditor->currentContent();
+
+        array_map(
+            fn (ResolvedPackageRequest $resolvedPackageRequest) => $this->addPackageIntoPieJson(
+                $resolvedPackageRequest,
+                $composer,
+                $targetPlatform,
+                $pieJsonEditor,
+            ),
+            $resolvedRequestedPackages,
         );
 
         // Refresh the Composer instance so it re-reads the updated pie.json
@@ -129,7 +150,10 @@ class ComposerIntegrationHandler
 
         $composerInstaller = PieComposerInstaller::createWithPhpBinary(
             $targetPlatform->phpBinaryPath,
-            $package->extensionName(),
+            array_map(
+                static fn (ResolvedPackageRequest $resolvedPackageRequest) => $resolvedPackageRequest->piePackage->extensionName(),
+                $resolvedRequestedPackages,
+            ),
             $this->arrayCollectionIo,
             $composer,
         );
@@ -143,7 +167,10 @@ class ComposerIntegrationHandler
 
         if (file_exists(PieComposerFactory::getLockFile($pieComposerJson))) {
             $composerInstaller->setUpdate(true);
-            $composerInstaller->setUpdateAllowList([$requestedPackageAndVersion->package]);
+            $composerInstaller->setUpdateAllowList(array_map(
+                static fn (ResolvedPackageRequest $resolvedPackageRequest) => $resolvedPackageRequest->requestedPackageAndVersion->package,
+                $resolvedRequestedPackages,
+            ));
         }
 
         $resultCode = $composerInstaller->run();

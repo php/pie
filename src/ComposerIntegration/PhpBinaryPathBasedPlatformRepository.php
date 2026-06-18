@@ -17,6 +17,7 @@ use Php\Pie\Util\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use UnexpectedValueException;
 
+use function array_map;
 use function explode;
 use function in_array;
 use function str_replace;
@@ -30,7 +31,8 @@ class PhpBinaryPathBasedPlatformRepository extends PlatformRepository
 {
     private VersionParser $versionParser;
 
-    public function __construct(PhpBinaryPath $phpBinaryPath, Composer $composer, InstalledPiePackages $installedPiePackages, ExtensionName|null $extensionBeingInstalled)
+    /** @param list<ExtensionName> $extensionsBeingInstalled */
+    public function __construct(PhpBinaryPath $phpBinaryPath, Composer $composer, InstalledPiePackages $installedPiePackages, array $extensionsBeingInstalled)
     {
         $this->versionParser = new VersionParser();
         $this->packages      = [];
@@ -58,6 +60,8 @@ class PhpBinaryPathBasedPlatformRepository extends PlatformRepository
             }
         }
 
+        $extensionNamesBeingInstalled = array_map(static fn (ExtensionName $ext) => $ext->name(), $extensionsBeingInstalled);
+
         foreach ($extVersions as $extension => $extensionVersion) {
             /**
              * If the extension we're trying to exclude is not excluded from this list if it is already installed
@@ -65,7 +69,7 @@ class PhpBinaryPathBasedPlatformRepository extends PlatformRepository
              *
              * @link https://github.com/php/pie/issues/150
              */
-            if ($extensionBeingInstalled !== null && $extension === $extensionBeingInstalled->name()) {
+            if (in_array($extension, $extensionNamesBeingInstalled, true)) {
                 continue;
             }
 
