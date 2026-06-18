@@ -70,7 +70,7 @@ final class InstallCommand extends Command
 
         $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $this->io);
         try {
-            $requestedNameAndVersion = CommandHelper::requestedNameAndVersionPair($input);
+            $requestedNamesAndVersions = CommandHelper::requestedNameAndVersionPairs($input);
         } catch (InvalidPackageName $invalidPackageName) {
             return CommandHelper::handlePackageNotFound(
                 $invalidPackageName,
@@ -98,7 +98,7 @@ final class InstallCommand extends Command
             new PieComposerRequest(
                 $this->io,
                 $targetPlatform,
-                $requestedNameAndVersion,
+                $requestedNamesAndVersions,
                 PieOperation::Resolve,
                 [], // Configure options are not needed for resolve only
                 false, // setting up INI not needed for resolve step
@@ -110,7 +110,7 @@ final class InstallCommand extends Command
                 ($this->prescanSystemDependencies)(
                     $composer,
                     $targetPlatform,
-                    $requestedNameAndVersion,
+                    $requestedNamesAndVersions,
                     CommandHelper::autoInstallSystemDependencies($input),
                 );
             } catch (Throwable $anything) {
@@ -125,7 +125,7 @@ final class InstallCommand extends Command
             $package = ($this->dependencyResolver)(
                 $composer,
                 $targetPlatform,
-                $requestedNameAndVersion,
+                $requestedNamesAndVersions,
                 $forceInstallPackageVersion,
             );
         } catch (UnableToResolveRequirement $unableToResolveRequirement) {
@@ -155,7 +155,7 @@ final class InstallCommand extends Command
             new PieComposerRequest(
                 $this->io,
                 $targetPlatform,
-                $requestedNameAndVersion,
+                $requestedNamesAndVersions,
                 PieOperation::Install,
                 $configureOptionsValues,
                 CommandHelper::determineAttemptToSetupIniFile($input),
@@ -167,7 +167,7 @@ final class InstallCommand extends Command
                 $package,
                 $composer,
                 $targetPlatform,
-                $requestedNameAndVersion,
+                $requestedNamesAndVersions,
                 $forceInstallPackageVersion,
                 true,
             );

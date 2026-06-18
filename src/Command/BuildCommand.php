@@ -56,7 +56,7 @@ final class BuildCommand extends Command
     {
         $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $this->io);
         try {
-            $requestedNameAndVersion = CommandHelper::requestedNameAndVersionPair($input);
+            $requestedNamesAndVersions = CommandHelper::requestedNameAndVersionPairs($input);
         } catch (InvalidPackageName $invalidPackageName) {
             return CommandHelper::handlePackageNotFound(
                 $invalidPackageName,
@@ -84,7 +84,7 @@ final class BuildCommand extends Command
             new PieComposerRequest(
                 $this->io,
                 $targetPlatform,
-                $requestedNameAndVersion,
+                $requestedNamesAndVersions,
                 PieOperation::Resolve,
                 [], // Configure options are not needed for resolve only
                 false, // setting up INI not needed for build
@@ -96,7 +96,7 @@ final class BuildCommand extends Command
                 ($this->prescanSystemDependencies)(
                     $composer,
                     $targetPlatform,
-                    $requestedNameAndVersion,
+                    $requestedNamesAndVersions,
                     CommandHelper::autoInstallSystemDependencies($input),
                 );
             } catch (Throwable $anything) {
@@ -111,7 +111,7 @@ final class BuildCommand extends Command
             $package = ($this->dependencyResolver)(
                 $composer,
                 $targetPlatform,
-                $requestedNameAndVersion,
+                $requestedNamesAndVersions,
                 $forceInstallPackageVersion,
             );
         } catch (UnableToResolveRequirement $unableToResolveRequirement) {
@@ -141,7 +141,7 @@ final class BuildCommand extends Command
             new PieComposerRequest(
                 $this->io,
                 $targetPlatform,
-                $requestedNameAndVersion,
+                $requestedNamesAndVersions,
                 PieOperation::Build,
                 $configureOptionsValues,
                 false, // setting up INI not needed for build
@@ -153,7 +153,7 @@ final class BuildCommand extends Command
                 $package,
                 $composer,
                 $targetPlatform,
-                $requestedNameAndVersion,
+                $requestedNamesAndVersions,
                 $forceInstallPackageVersion,
                 false,
             );

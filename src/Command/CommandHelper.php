@@ -37,6 +37,7 @@ use Webmozart\Assert\Assert;
 
 use function array_key_exists;
 use function array_map;
+use function array_values;
 use function assert;
 use function count;
 use function explode;
@@ -110,8 +111,8 @@ final class CommandHelper
         if ($withRequestedPackageAndVersion) {
             $command->addArgument(
                 self::ARG_REQUESTED_PACKAGE_AND_VERSION,
-                InputArgument::OPTIONAL,
-                'The PIE package name and version constraint to use, in the format {vendor/package}{?:{?version-constraint}{?@stability}}, for example `xdebug/xdebug:^3.4@alpha`, `xdebug/xdebug:@alpha`, `xdebug/xdebug:^3.4`, etc.',
+                InputArgument::OPTIONAL | InputArgument::IS_ARRAY,
+                'The PIE package names and versions constraint to use, in the format {vendor/package}{?:{?version-constraint}{?@stability}}, for example `xdebug/xdebug:^3.4@alpha`, `xdebug/xdebug:@alpha`, `xdebug/xdebug:^3.4`, etc.',
             );
         }
 
@@ -312,33 +313,41 @@ final class CommandHelper
             || ! $input->getOption(self::OPTION_SUPPRESS_SYSTEM_DEPENDENCIES_CHECK);
     }
 
-    public static function requestedNameAndVersionPair(InputInterface $input): RequestedPackageAndVersion
+    /** @return non-empty-list<RequestedPackageAndVersion> */
+    public static function requestedNameAndVersionPairs(InputInterface $input): array
     {
-        $requestedPackageString = $input->getArgument(self::ARG_REQUESTED_PACKAGE_AND_VERSION);
+        $requestedPackageStrings = $input->getArgument(self::ARG_REQUESTED_PACKAGE_AND_VERSION);
 
-        if (! is_string($requestedPackageString) || $requestedPackageString === '') {
+        if (! is_array($requestedPackageStrings) || ! count($requestedPackageStrings)) {
             throw new InvalidArgumentException('No package was requested for installation');
         }
 
-        $nameAndVersionPairs         = (new VersionParser())
-            ->parseNameVersionPairs([$requestedPackageString]);
-        $requestedNameAndVersionPair = reset($nameAndVersionPairs);
+        Assert::allStringNotEmpty($requestedPackageStrings);
 
-        if (! is_array($requestedNameAndVersionPair)) {
-            throw new InvalidArgumentException('Failed to parse the name/version pair');
-        }
+        return array_values(array_map(
+            static function (string $requestedPackageString): RequestedPackageAndVersion {
+                $nameAndVersionPairs         = (new VersionParser())
+                    ->parseNameVersionPairs([$requestedPackageString]);
+                $requestedNameAndVersionPair = reset($nameAndVersionPairs);
 
-        if (! array_key_exists('version', $requestedNameAndVersionPair)) {
-            $requestedNameAndVersionPair['version'] = null;
-        }
+                if (! is_array($requestedNameAndVersionPair)) {
+                    throw new InvalidArgumentException('Failed to parse the name/version pair');
+                }
 
-        Assert::stringNotEmpty($requestedNameAndVersionPair['name']);
-        Assert::nullOrStringNotEmpty($requestedNameAndVersionPair['version']);
+                if (! array_key_exists('version', $requestedNameAndVersionPair)) {
+                    $requestedNameAndVersionPair['version'] = null;
+                }
 
-        return new RequestedPackageAndVersion(
-            $requestedNameAndVersionPair['name'],
-            $requestedNameAndVersionPair['version'],
-        );
+                Assert::stringNotEmpty($requestedNameAndVersionPair['name']);
+                Assert::nullOrStringNotEmpty($requestedNameAndVersionPair['version']);
+
+                return new RequestedPackageAndVersion(
+                    $requestedNameAndVersionPair['name'],
+                    $requestedNameAndVersionPair['version'],
+                );
+            },
+            $requestedPackageStrings,
+        ));
     }
 
     public static function bindConfigureOptionsFromPackage(Command $command, Package $package, InputInterface $input): void

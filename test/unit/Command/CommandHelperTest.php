@@ -66,11 +66,38 @@ final class CommandHelperTest extends TestCase
         $input->expects(self::once())
             ->method('getArgument')
             ->with('requested-package-and-version')
-            ->willReturn($requestedPackageAndVersion);
+            ->willReturn([$requestedPackageAndVersion]);
 
         self::assertEquals(
-            new RequestedPackageAndVersion($expectedPackage, $expectedVersion),
-            CommandHelper::requestedNameAndVersionPair($input),
+            [new RequestedPackageAndVersion($expectedPackage, $expectedVersion)],
+            CommandHelper::requestedNameAndVersionPairs($input),
+        );
+    }
+
+    public function testRequestedNameAndVersionPairSupportsMultiple(): void
+    {
+        $input = $this->createMock(InputInterface::class);
+
+        $input->expects(self::once())
+            ->method('getArgument')
+            ->with('requested-package-and-version')
+            ->willReturn([
+                'a/ext',
+                'b/ext:^1.2',
+                'c/ext:*',
+                'd/ext:@alpha',
+                'e/ext:1.2.3',
+            ]);
+
+        self::assertEquals(
+            [
+                new RequestedPackageAndVersion('a/ext', null),
+                new RequestedPackageAndVersion('b/ext', '^1.2'),
+                new RequestedPackageAndVersion('c/ext', '*'),
+                new RequestedPackageAndVersion('d/ext', '@alpha'),
+                new RequestedPackageAndVersion('e/ext', '1.2.3'),
+            ],
+            CommandHelper::requestedNameAndVersionPairs($input),
         );
     }
 
@@ -85,7 +112,7 @@ final class CommandHelperTest extends TestCase
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('No package was requested for installation');
-        CommandHelper::requestedNameAndVersionPair($input);
+        CommandHelper::requestedNameAndVersionPairs($input);
     }
 
     public function testBindingConfigurationOptionsFromPackage(): void

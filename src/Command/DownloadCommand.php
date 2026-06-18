@@ -52,7 +52,7 @@ final class DownloadCommand extends Command
 
         $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $this->io);
         try {
-            $requestedNameAndVersion = CommandHelper::requestedNameAndVersionPair($input);
+            $requestedNamesAndVersions = CommandHelper::requestedNameAndVersionPairs($input);
         } catch (InvalidPackageName $invalidPackageName) {
             return CommandHelper::handlePackageNotFound(
                 $invalidPackageName,
@@ -71,7 +71,7 @@ final class DownloadCommand extends Command
             new PieComposerRequest(
                 $this->io,
                 $targetPlatform,
-                $requestedNameAndVersion,
+                $requestedNamesAndVersions,
                 PieOperation::Download,
                 [], // Configure options are not needed for download only
                 false, // setting up INI not needed for download
@@ -82,7 +82,7 @@ final class DownloadCommand extends Command
             $package = ($this->dependencyResolver)(
                 $composer,
                 $targetPlatform,
-                $requestedNameAndVersion,
+                $requestedNamesAndVersions,
                 $forceInstallPackageVersion,
             );
         } catch (UnableToResolveRequirement $unableToResolveRequirement) {
@@ -107,7 +107,7 @@ final class DownloadCommand extends Command
                 $package,
                 $composer,
                 $targetPlatform,
-                $requestedNameAndVersion,
+                $requestedNamesAndVersions,
                 $forceInstallPackageVersion,
                 false,
             );

@@ -56,7 +56,7 @@ final class InfoCommand extends Command
         $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $this->io);
 
         try {
-            $requestedNameAndVersion = CommandHelper::requestedNameAndVersionPair($input);
+            $requestedNamesAndVersions = CommandHelper::requestedNameAndVersionPairs($input);
         } catch (InvalidPackageName $invalidPackageName) {
             return CommandHelper::handlePackageNotFound(
                 $invalidPackageName,
@@ -74,7 +74,7 @@ final class InfoCommand extends Command
             new PieComposerRequest(
                 $this->io,
                 $targetPlatform,
-                $requestedNameAndVersion,
+                $requestedNamesAndVersions,
                 PieOperation::Resolve,
                 [], // Configure options are not needed for resolve only
                 false, // setting up INI not needed for info
@@ -85,7 +85,7 @@ final class InfoCommand extends Command
             $package = ($this->dependencyResolver)(
                 $composer,
                 $targetPlatform,
-                $requestedNameAndVersion,
+                $requestedNamesAndVersions,
                 true,
             );
         } catch (UnableToResolveRequirement $unableToResolveRequirement) {
