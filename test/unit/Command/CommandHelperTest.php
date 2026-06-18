@@ -16,8 +16,13 @@ use Composer\Repository\VcsRepository;
 use Composer\Util\Platform;
 use InvalidArgumentException;
 use Php\Pie\Command\CommandHelper;
+use Php\Pie\DependencyResolver\BundledPhpExtensionRefusal;
+use Php\Pie\DependencyResolver\DependencyResolver;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
+use Php\Pie\DependencyResolver\ResolvedPackageRequest;
+use Php\Pie\DependencyResolver\UnableToResolveRequirement;
+use Php\Pie\Platform\TargetPlatform;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\RequiresOperatingSystemFamily;
@@ -118,6 +123,106 @@ final class CommandHelperTest extends TestCase
     public function testBindingConfigurationOptionsFromPackage(): void
     {
         self::markTestIncomplete(__METHOD__);
+    }
+
+    private static function packageNamed(string $prettyName, string $prettyVersion): Package
+    {
+        $composerPackage = self::createStub(CompletePackageInterface::class);
+        $composerPackage->method('getPrettyName')->willReturn($prettyName);
+        $composerPackage->method('getPrettyVersion')->willReturn($prettyVersion);
+        $composerPackage->method('getType')->willReturn('php-ext');
+
+        return Package::fromComposerCompletePackage($composerPackage);
+    }
+
+    public function testResolveRequestedPackagesResolvesEachRequestedPackageAndWritesOutput(): void
+    {
+        $requestedA = new RequestedPackageAndVersion('foo/bar', null);
+        $requestedB = new RequestedPackageAndVersion('baz/qux', '^1.0');
+
+        $resolvedA = new ResolvedPackageRequest(self::packageNamed('foo/bar', '1.0.0'), $requestedA);
+        $resolvedB = new ResolvedPackageRequest(self::packageNamed('baz/qux', '2.0.0'), $requestedB);
+
+        $composer       = $this->createMock(Composer::class);
+        $targetPlatform = $this->createMock(TargetPlatform::class);
+
+        $dependencyResolver = $this->createMock(DependencyResolver::class);
+        $dependencyResolver->expects(self::exactly(2))
+            ->method('__invoke')
+            ->willReturnCallback(
+                static function (Composer $givenComposer, TargetPlatform $givenTargetPlatform, RequestedPackageAndVersion $requested, bool $force) use ($composer, $targetPlatform, $requestedA, $requestedB, $resolvedA, $resolvedB): ResolvedPackageRequest {
+                    self::assertSame($composer, $givenComposer);
+                    self::assertSame($targetPlatform, $givenTargetPlatform);
+                    self::assertTrue($force);
+
+                    if ($requested === $requestedA) {
+                        return $resolvedA;
+                    }
+
+                    self::assertSame($requestedB, $requested);
+
+                    return $resolvedB;
+                },
+            );
+
+        $io = new BufferIO();
+
+        $resolvedPackages = CommandHelper::resolveRequestedPackages(
+            $dependencyResolver,
+            $io,
+            $composer,
+            $targetPlatform,
+            [$requestedA, $requestedB],
+            true,
+        );
+
+        self::assertSame([$resolvedA, $resolvedB], $resolvedPackages);
+        self::assertSame(
+            "Found package: foo/bar:1.0.0 which provides ext-bar\nFound package: baz/qux:2.0.0 which provides ext-qux",
+            str_replace("\r\n", "\n", trim($io->getOutput())),
+        );
+    }
+
+    public function testResolveRequestedPackagesPropagatesUnableToResolveRequirement(): void
+    {
+        $requested = new RequestedPackageAndVersion('foo/bar', null);
+
+        $exception = new UnableToResolveRequirement('Could not resolve foo/bar', $requested);
+
+        $dependencyResolver = $this->createMock(DependencyResolver::class);
+        $dependencyResolver->method('__invoke')->willThrowException($exception);
+
+        $this->expectExceptionObject($exception);
+
+        CommandHelper::resolveRequestedPackages(
+            $dependencyResolver,
+            new NullIO(),
+            $this->createMock(Composer::class),
+            $this->createMock(TargetPlatform::class),
+            [$requested],
+            false,
+        );
+    }
+
+    public function testResolveRequestedPackagesPropagatesBundledPhpExtensionRefusal(): void
+    {
+        $requested = new RequestedPackageAndVersion('foo/bar', null);
+
+        $exception = BundledPhpExtensionRefusal::forPackage(self::packageNamed('foo/bar', '1.0.0'));
+
+        $dependencyResolver = $this->createMock(DependencyResolver::class);
+        $dependencyResolver->method('__invoke')->willThrowException($exception);
+
+        $this->expectExceptionObject($exception);
+
+        CommandHelper::resolveRequestedPackages(
+            $dependencyResolver,
+            new NullIO(),
+            $this->createMock(Composer::class),
+            $this->createMock(TargetPlatform::class),
+            [$requested],
+            false,
+        );
     }
 
     public function testProcessingConfigureOptionsFromInput(): void

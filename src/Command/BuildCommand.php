@@ -23,9 +23,6 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Throwable;
-
-use function sprintf;
 
 #[AsCommand(
     name: 'build',
@@ -91,24 +88,27 @@ final class BuildCommand extends Command
             ),
         );
 
-        if (CommandHelper::shouldCheckSystemDependencies($input)) {
-            try {
-                ($this->prescanSystemDependencies)(
-                    $composer,
-                    $targetPlatform,
-                    $requestedNamesAndVersions,
-                    CommandHelper::autoInstallSystemDependencies($input),
-                );
-            } catch (Throwable $anything) {
-                $this->io->writeError(
-                    '<comment>Skipping system dependency pre-scan due to exception:</comment> ' . $anything->getMessage(),
-                    verbosity: IOInterface::VERBOSE,
-                );
-            }
-        }
+        // @todo fix this
+//        if (CommandHelper::shouldCheckSystemDependencies($input)) {
+//            try {
+//                ($this->prescanSystemDependencies)(
+//                    $composer,
+//                    $targetPlatform,
+//                    $requestedNamesAndVersions,
+//                    CommandHelper::autoInstallSystemDependencies($input),
+//                );
+//            } catch (Throwable $anything) {
+//                $this->io->writeError(
+//                    '<comment>Skipping system dependency pre-scan due to exception:</comment> ' . $anything->getMessage(),
+//                    verbosity: IOInterface::VERBOSE,
+//                );
+//            }
+//        }
 
         try {
-            $package = ($this->dependencyResolver)(
+            $resolvedPackages = CommandHelper::resolveRequestedPackages(
+                $this->dependencyResolver,
+                $this->io,
                 $composer,
                 $targetPlatform,
                 $requestedNamesAndVersions,
@@ -129,12 +129,11 @@ final class BuildCommand extends Command
             return self::INVALID;
         }
 
-        $this->io->write(sprintf('<info>Found package:</info> %s which provides <info>%s</info>', $package->prettyNameAndVersion(), $package->extensionName()->nameWithExtPrefix()));
-
         // Now we know what package we have, we can validate the configure options for the command and re-create the
         // Composer instance with the populated configure options
-        CommandHelper::bindConfigureOptionsFromPackage($this, $package, $input);
-        $configureOptionsValues = CommandHelper::processConfigureOptionsFromInput($package, $input);
+        // @todo handle this; CommandHelper::bindConfigureOptionsFromPackage($this, $package, $input);
+        // @todo handle this; $configureOptionsValues = CommandHelper::processConfigureOptionsFromInput($package, $input);
+        $configureOptionsValues = []; // @todo handle this
 
         $composer = PieComposerFactory::createPieComposer(
             $this->container,

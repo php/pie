@@ -33,7 +33,7 @@ final class ResolveDependencyWithComposer implements DependencyResolver
         TargetPlatform $targetPlatform,
         RequestedPackageAndVersion $requestedPackageAndVersion,
         bool $forceInstallPackageVersion,
-    ): Package {
+    ): ResolvedPackageRequest {
         $versionSelector = VersionSelectorFactory::make($composer, $requestedPackageAndVersion, $targetPlatform);
 
         $package = $versionSelector->findBestCandidate(
@@ -73,7 +73,7 @@ final class ResolveDependencyWithComposer implements DependencyResolver
             $this->assertCompatibleThreadSafetyMode($targetPlatform->threadSafety, $piePackage);
         }
 
-        return $piePackage;
+        return new ResolvedPackageRequest($piePackage, $requestedPackageAndVersion);
     }
 
     private function assertCompatibleThreadSafetyMode(ThreadSafetyMode $threadSafetyMode, Package $resolvedPackage): void

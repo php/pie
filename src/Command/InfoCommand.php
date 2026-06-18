@@ -82,7 +82,9 @@ final class InfoCommand extends Command
         );
 
         try {
-            $package = ($this->dependencyResolver)(
+            $resolvedPackages = CommandHelper::resolveRequestedPackages(
+                $this->dependencyResolver,
+                $this->io,
                 $composer,
                 $targetPlatform,
                 $requestedNamesAndVersions,
@@ -103,7 +105,7 @@ final class InfoCommand extends Command
             return self::INVALID;
         }
 
-        $this->io->write(sprintf('<info>Found package:</info> %s which provides <info>%s</info>', $package->prettyNameAndVersion(), $package->extensionName()->nameWithExtPrefix()));
+        $package = $resolvedPackages[0]->piePackage;
 
         $this->io->write(sprintf('Extension name: %s', $package->extensionName()->name()));
         $this->io->write(sprintf('Extension type: %s (%s)', $package->extensionType()->value, $package->extensionType()->name));

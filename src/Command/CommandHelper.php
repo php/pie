@@ -16,9 +16,12 @@ use InvalidArgumentException;
 use OutOfRangeException;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
+use Php\Pie\DependencyResolver\BundledPhpExtensionRefusal;
+use Php\Pie\DependencyResolver\DependencyResolver;
 use Php\Pie\DependencyResolver\InvalidPackageName;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
+use Php\Pie\DependencyResolver\ResolvedPackageRequest;
 use Php\Pie\DependencyResolver\UnableToResolveRequirement;
 use Php\Pie\ExtensionName;
 use Php\Pie\Installing\InstallForPhpProject\FindMatchingPackages;
@@ -348,6 +351,43 @@ final class CommandHelper
             },
             $requestedPackageStrings,
         ));
+    }
+
+    /**
+     * @param non-empty-list<RequestedPackageAndVersion> $requestedNamesAndVersions
+     *
+     * @return non-empty-list<ResolvedPackageRequest>
+     *
+     * @throws UnableToResolveRequirement
+     * @throws BundledPhpExtensionRefusal
+     */
+    public static function resolveRequestedPackages(
+        DependencyResolver $dependencyResolver,
+        IOInterface $io,
+        Composer $composer,
+        TargetPlatform $targetPlatform,
+        array $requestedNamesAndVersions,
+        bool $forceInstallPackageVersion,
+    ): array {
+        return array_map(
+            static function (RequestedPackageAndVersion $requestedNameAndVersion) use ($dependencyResolver, $io, $composer, $targetPlatform, $forceInstallPackageVersion): ResolvedPackageRequest {
+                $resolvedPackage = $dependencyResolver(
+                    $composer,
+                    $targetPlatform,
+                    $requestedNameAndVersion,
+                    $forceInstallPackageVersion,
+                );
+
+                $io->write(sprintf(
+                    '<info>Found package:</info> %s which provides <info>%s</info>',
+                    $resolvedPackage->piePackage->prettyNameAndVersion(),
+                    $resolvedPackage->piePackage->extensionName()->nameWithExtPrefix(),
+                ));
+
+                return $resolvedPackage;
+            },
+            $requestedNamesAndVersions,
+        );
     }
 
     public static function bindConfigureOptionsFromPackage(Command $command, Package $package, InputInterface $input): void

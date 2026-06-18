@@ -21,8 +21,6 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-use function sprintf;
-
 #[AsCommand(
     name: 'download',
     description: 'Same behaviour as build, but puts the files in a local directory for manual building and installation.',
@@ -79,7 +77,9 @@ final class DownloadCommand extends Command
         );
 
         try {
-            $package = ($this->dependencyResolver)(
+            $resolvedPackages = CommandHelper::resolveRequestedPackages(
+                $this->dependencyResolver,
+                $this->io,
                 $composer,
                 $targetPlatform,
                 $requestedNamesAndVersions,
@@ -99,8 +99,6 @@ final class DownloadCommand extends Command
 
             return self::INVALID;
         }
-
-        $this->io->write(sprintf('<info>Found package:</info> %s which provides <info>%s</info>', $package->prettyNameAndVersion(), $package->extensionName()->nameWithExtPrefix()));
 
         try {
             $this->composerIntegrationHandler->runInstall(
