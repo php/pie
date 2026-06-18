@@ -68,6 +68,11 @@ class PieJsonEditor
         return $this;
     }
 
+    public function currentContent(): string
+    {
+        return file_get_contents($this->pieJsonFilename);
+    }
+
     /**
      * Add a package to the `require` section of the given `pie.json`. Returns
      * the original `pie.json` content, in case it needs to be restored later.
@@ -77,7 +82,7 @@ class PieJsonEditor
      */
     public function addRequire(string $package, string $version): string
     {
-        $originalPieJsonContent = file_get_contents($this->pieJsonFilename);
+        $originalPieJsonContent = $this->currentContent();
 
         (new JsonConfigSource(
             new JsonFile(
@@ -97,7 +102,7 @@ class PieJsonEditor
      */
     public function removeRequire(string $package): string
     {
-        $originalPieJsonContent = file_get_contents($this->pieJsonFilename);
+        $originalPieJsonContent = $this->currentContent();
 
         (new JsonConfigSource(
             new JsonFile(
@@ -115,7 +120,7 @@ class PieJsonEditor
 
     public function excludePackagistOrg(): string
     {
-        $originalPieJsonContent = file_get_contents($this->pieJsonFilename);
+        $originalPieJsonContent = $this->currentContent();
 
         (new JsonConfigSource(
             new JsonFile(
@@ -138,7 +143,7 @@ class PieJsonEditor
         string $type,
         string $url,
     ): string {
-        $originalPieJsonContent = file_get_contents($this->pieJsonFilename);
+        $originalPieJsonContent = $this->currentContent();
 
         (new JsonConfigSource(
             new JsonFile(
@@ -162,7 +167,7 @@ class PieJsonEditor
     public function removeRepository(
         string $name,
     ): string {
-        $originalPieJsonContent = file_get_contents($this->pieJsonFilename);
+        $originalPieJsonContent = $this->currentContent();
 
         (new JsonConfigSource(
             new JsonFile(
