@@ -15,11 +15,14 @@ use Php\Pie\Platform\TargetPlatform;
  */
 final class PieComposerRequest
 {
-    /** @param list<non-empty-string> $configureOptions */
+    /**
+     * @param list<RequestedPackageAndVersion> $requestedPackages
+     * @param list<non-empty-string>           $configureOptions
+     */
     public function __construct(
         public readonly IOInterface $pieOutput,
         public readonly TargetPlatform $targetPlatform,
-        public readonly RequestedPackageAndVersion $requestedPackage,
+        public readonly array $requestedPackages,
         public readonly PieOperation $operation,
         public readonly array $configureOptions,
         public readonly bool $attemptToSetupIniFile,
@@ -37,7 +40,7 @@ final class PieComposerRequest
         return new PieComposerRequest(
             $pieOutput,
             $targetPlatform,
-            new RequestedPackageAndVersion('null/null', null),
+            [],
             PieOperation::Resolve,
             [],
             false,
