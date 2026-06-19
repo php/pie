@@ -9,3 +9,8 @@ Feature: Extensions can be installed with PIE
   Example: An extension can be installed and enabled
     When I run a command to install an extension
     Then the extension should have been installed and enabled
+
+  # pie install <ext1> <ext2>
+  Example: Multiple extensions can be installed at once
+    When I run a command to install multiple extensions
+    Then the extensions should have been installed and enabled

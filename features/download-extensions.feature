@@ -20,3 +20,8 @@ Feature: Extensions can be downloaded with PIE
   Example: An in-development version can be downloaded on non-Windows systems
     When I run a command to download version "dev-main" of an extension
     Then version "dev-main" should have been downloaded
+
+  # pie download <ext1> <ext2>
+  Example: Multiple extensions can be downloaded at once
+    When I run a command to download multiple extensions
+    Then the extensions should have been downloaded

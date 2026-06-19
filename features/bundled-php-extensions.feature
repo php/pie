@@ -6,6 +6,7 @@ Feature: Bundled PHP extensions can be installed
     When I install the sodium extension with PIE
     Then the extension should have been installed and enabled
 
+  # pie uninstall php/sodium
   Example: A bundled extension installed with PIE can be uninstalled
     Given I have the sodium extension installed with PIE
     When I run a command to uninstall an extension
