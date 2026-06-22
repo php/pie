@@ -66,7 +66,7 @@ class OverrideDownloadUrlInstallListener
                 }
 
                 // Install requests for other packages than the one we want should be ignored
-                if ($this->composerRequest->requestedPackage->package !== $composerPackage->getName()) {
+                if (! $this->composerRequest->isFor($composerPackage->getName())) {
                     return;
                 }
 
