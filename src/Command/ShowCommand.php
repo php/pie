@@ -151,16 +151,16 @@ final class ShowCommand extends Command
                     }
 
                     $updateNotice = '';
-                    if ($latestConstrainedPackage !== null && $latestConstrainedPackage->version() !== $piePackage->version()) {
+                    if ($latestConstrainedPackage !== null && $latestConstrainedPackage->piePackage->version() !== $piePackage->version()) {
                         $updateNotice = sprintf(
                             ', upgradable to %s (within %s)',
-                            $latestConstrainedPackage->version(),
+                            $latestConstrainedPackage->piePackage->version(),
                             $packageRequirement,
                         );
                     }
 
-                    if ($latestPackage !== null && $latestPackage->version() !== $latestConstrainedPackage->version()) {
-                        $updateNotice .= sprintf(', latest version is %s', $latestPackage->version());
+                    if ($latestPackage !== null && $latestPackage->piePackage->version() !== $latestConstrainedPackage->piePackage->version()) {
+                        $updateNotice .= sprintf(', latest version is %s', $latestPackage->piePackage->version());
                     }
 
                     $this->io->write(sprintf(
