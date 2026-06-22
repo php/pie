@@ -39,7 +39,7 @@ class InstallPiePackageFromPath
                 $invokeContext,
                 [
                     'command' => 'install',
-                    'requested-package-and-version' => $pieRootPackage->getName() . ':*@dev',
+                    'requested-package-and-version' => [$pieRootPackage->getName() . ':*@dev'],
                 ],
                 $input,
             );

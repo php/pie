@@ -224,6 +224,7 @@ final class InstallExtensionsForProjectCommand extends Command
         }
 
         try {
+            // @todo instead of individually installing them, we can now do `pie install <a> <b> ...`
             $this->io->write(
                 sprintf('Invoking pie install of %s', $requestedPackageAndVersion->prettyNameAndVersion()),
                 verbosity: IOInterface::VERBOSE,

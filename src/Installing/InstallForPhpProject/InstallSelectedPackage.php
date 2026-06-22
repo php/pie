@@ -27,7 +27,7 @@ class InstallSelectedPackage
     ): int {
         $params = [
             'command' => 'install',
-            'requested-package-and-version' => $selectedPackage->prettyNameAndVersion(),
+            'requested-package-and-version' => [$selectedPackage->prettyNameAndVersion()],
         ];
 
         return ($this->invokeSubCommand)(
