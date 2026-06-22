@@ -14,6 +14,7 @@ use Safe\Exceptions\PcreException;
 use Symfony\Component\Process\Process;
 use Webmozart\Assert\Assert;
 
+use function array_map;
 use function array_merge;
 use function Safe\copy;
 use function Safe\preg_match_all;
@@ -241,8 +242,7 @@ class CliContext implements Context
     #[When('I run a command to uninstall an extension')]
     public function iRunACommandToUninstallAnExtension(): void
     {
-        $this->interactions[] = ['extension' => 'example_pie_extension', 'package' => 'asgrim/example-pie-extension'];
-        $this->runPieCommand(['uninstall', 'asgrim/example-pie-extension']);
+        $this->runPieCommand(['uninstall', ...array_map(static fn (array $interaction) => $interaction['package'], $this->interactions)]);
     }
 
     #[When('I run a command to uninstall multiple extensions')]

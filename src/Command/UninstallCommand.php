@@ -7,12 +7,14 @@ namespace Php\Pie\Command;
 use Composer\Composer;
 use Composer\IO\IOInterface;
 use Composer\IO\NullIO;
+use OutOfRangeException;
 use Php\Pie\ComposerIntegration\ComposerIntegrationHandler;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieOperation;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
+use Php\Pie\DependencyResolver\ResolvedPackageRequest;
 use Php\Pie\Platform\InstalledPiePackages;
 use Php\Pie\Platform\TargetPlatform;
 use Psr\Container\ContainerInterface;
@@ -23,13 +25,15 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Webmozart\Assert\Assert;
 
+use function array_map;
+
 #[AsCommand(
     name: 'uninstall',
     description: 'Disable and remove an extension that has been installed with PIE',
 )]
 final class UninstallCommand extends Command
 {
-    private const ARG_PACKAGE_NAME = 'package-name';
+    private const ARG_PACKAGE_NAMES = 'package-name';
 
     public function __construct(
         private readonly InstalledPiePackages $installedPiePackages,
@@ -45,9 +49,9 @@ final class UninstallCommand extends Command
         parent::configure();
 
         $this->addArgument(
-            self::ARG_PACKAGE_NAME,
-            InputArgument::REQUIRED,
-            'The package name to remove, in the format {vendor/package}, for example `xdebug/xdebug`',
+            self::ARG_PACKAGE_NAMES,
+            InputArgument::REQUIRED | InputArgument::IS_ARRAY,
+            'The package names to remove, in the format {vendor/package}, for example `xdebug/xdebug`',
         );
 
         CommandHelper::configurePhpConfigOptions($this);
@@ -59,9 +63,13 @@ final class UninstallCommand extends Command
             $this->io->write('This command may need elevated privileges, and may prompt you for your password.');
         }
 
-        $packageToRemove = (string) $input->getArgument(self::ARG_PACKAGE_NAME);
-        Assert::stringNotEmpty($packageToRemove);
-        $requestedPackageAndVersionToRemove = new RequestedPackageAndVersion($packageToRemove, null);
+        $packagesToRemove = $input->getArgument(self::ARG_PACKAGE_NAMES);
+        Assert::isList($packagesToRemove);
+        Assert::allStringNotEmpty($packagesToRemove);
+        $requestedPackageAndVersionsToRemove = array_map(
+            static fn (string $packageName) => new RequestedPackageAndVersion($packageName, null),
+            $packagesToRemove,
+        );
 
         $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $this->io);
 
@@ -75,10 +83,18 @@ final class UninstallCommand extends Command
             ),
         );
 
-        $piePackage = $this->findPiePackageByPackageName($packageToRemove, $composer);
+        $piePackages = $this->installedPiePackages->allPiePackages($composer);
 
-        if ($piePackage === null) {
-            $this->io->writeError('<error>No package found: ' . $packageToRemove . '</error>');
+        try {
+            $resolvedPackages = array_map(
+                static fn (RequestedPackageAndVersion $req) => new ResolvedPackageRequest(
+                    $piePackages->findByPackageName($req->package),
+                    $req,
+                ),
+                $requestedPackageAndVersionsToRemove,
+            );
+        } catch (OutOfRangeException $exception) {
+            $this->io->writeError('<error>No package found: ' . $exception->getMessage() . '</error>');
 
             return 1;
         }
@@ -88,7 +104,7 @@ final class UninstallCommand extends Command
             new PieComposerRequest(
                 $this->io,
                 $targetPlatform,
-                $requestedPackageAndVersionToRemove,
+                $requestedPackageAndVersionsToRemove,
                 PieOperation::Uninstall,
                 [], // Configure options are not needed for uninstall
                 true,
@@ -96,25 +112,11 @@ final class UninstallCommand extends Command
         );
 
         $this->composerIntegrationHandler->runUninstall(
-            $piePackage,
+            $resolvedPackages,
             $composer,
             $targetPlatform,
-            $requestedPackageAndVersionToRemove,
         );
 
         return 0;
-    }
-
-    private function findPiePackageByPackageName(string $packageToRemove, Composer $composer): Package|null
-    {
-        $piePackages = $this->installedPiePackages->allPiePackages($composer);
-
-        foreach ($piePackages->packages() as $piePackage) {
-            if ($piePackage->name() === $packageToRemove) {
-                return $piePackage;
-            }
-        }
-
-        return null;
     }
 }

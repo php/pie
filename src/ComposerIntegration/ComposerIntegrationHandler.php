@@ -11,7 +11,6 @@ use Composer\IO\IOInterface;
 use Composer\Package\CompleteAliasPackage;
 use Composer\Package\CompletePackageInterface;
 use Php\Pie\DependencyResolver\Package;
-use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\DependencyResolver\ResolvedPackageRequest;
 use Php\Pie\ExtensionName;
 use Php\Pie\Platform;
@@ -189,23 +188,30 @@ class ComposerIntegrationHandler
         ($this->vendorCleanup)($composer);
     }
 
+    /** @param list<ResolvedPackageRequest> $resolvedPackagesToRemove */
     public function runUninstall(
-        Package $packageToRemove,
+        array $resolvedPackagesToRemove,
         Composer $composer,
         TargetPlatform $targetPlatform,
-        RequestedPackageAndVersion $requestedPackageAndVersionToRemove,
     ): void {
         // Write the new requirement to pie.json; because we later essentially just do a `composer install` using that file
         $pieComposerJson        = Platform::getPieJsonFilename($targetPlatform);
         $pieJsonEditor          = PieJsonEditor::fromTargetPlatform($targetPlatform);
-        $originalPieJsonContent = $pieJsonEditor->removeRequire($requestedPackageAndVersionToRemove->package);
+        $originalPieJsonContent = $pieJsonEditor->currentContent();
+
+        foreach ($resolvedPackagesToRemove as $resolvedPackageRequest) {
+            $pieJsonEditor->removeRequire($resolvedPackageRequest->requestedPackageAndVersion->package);
+        }
 
         // Refresh the Composer instance so it re-reads the updated pie.json
         $composer = PieComposerFactory::recreatePieComposer($this->container, $composer);
 
         $composerInstaller = PieComposerInstaller::createWithPhpBinary(
             $targetPlatform->phpBinaryPath,
-            $packageToRemove->extensionName(),
+            array_map(
+                static fn (ResolvedPackageRequest $resolvedPackageRequest) => $resolvedPackageRequest->piePackage->extensionName(),
+                $resolvedPackagesToRemove,
+            ),
             $this->arrayCollectionIo,
             $composer,
         );
@@ -218,7 +224,10 @@ class ComposerIntegrationHandler
 
         if (file_exists(PieComposerFactory::getLockFile($pieComposerJson))) {
             $composerInstaller->setUpdate(true);
-            $composerInstaller->setUpdateAllowList([$requestedPackageAndVersionToRemove->package]);
+            $composerInstaller->setUpdateAllowList(array_map(
+                static fn (ResolvedPackageRequest $resolvedPackageRequest) => $resolvedPackageRequest->requestedPackageAndVersion->package,
+                $resolvedPackagesToRemove,
+            ));
         }
 
         $resultCode = $composerInstaller->run();
