@@ -32,7 +32,7 @@ class CliContext implements Context
     private int|null $exitCode       = null;
     /** @var list<string> */
     private array $phpArguments = [];
-    /** @var list<array{extension: string, package: string}> */
+    /** @var list<array{extension: string, package: non-empty-string}> */
     private array $interactions           = [];
     private string|null $workingDirectory = null;
 

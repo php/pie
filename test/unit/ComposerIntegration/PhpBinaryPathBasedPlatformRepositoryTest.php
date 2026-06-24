@@ -51,7 +51,7 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
                 'another' => '1.2.3-alpha.34',
             ]);
 
-        $platformRepository = new PhpBinaryPathBasedPlatformRepository($phpBinaryPath, $composer, $installedPiePackages, null);
+        $platformRepository = new PhpBinaryPathBasedPlatformRepository($phpBinaryPath, $composer, $installedPiePackages, []);
 
         self::assertSame(
             [
@@ -91,7 +91,7 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
                 'extension_being_installed' => '1.2.3',
             ]);
 
-        $platformRepository = new PhpBinaryPathBasedPlatformRepository($phpBinaryPath, $composer, $installedPiePackages, $extensionBeingInstalled);
+        $platformRepository = new PhpBinaryPathBasedPlatformRepository($phpBinaryPath, $composer, $installedPiePackages, [$extensionBeingInstalled]);
 
         self::assertSame(
             [
@@ -134,7 +134,7 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
                 'replaced_extension' => '3.0.0',
             ]);
 
-        $platformRepository = new PhpBinaryPathBasedPlatformRepository($phpBinaryPath, $composer, $installedPiePackages, $extensionBeingInstalled);
+        $platformRepository = new PhpBinaryPathBasedPlatformRepository($phpBinaryPath, $composer, $installedPiePackages, [$extensionBeingInstalled]);
 
         self::assertSame(
             [
@@ -228,7 +228,7 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
                     PhpBinaryPath::fromCurrentProcess(),
                     $this->createMock(Composer::class),
                     $installedPiePackages,
-                    ExtensionName::normaliseFromString('extension_being_installed'),
+                    [ExtensionName::normaliseFromString('extension_being_installed')],
                 ))->getPackages(),
             ),
         ));

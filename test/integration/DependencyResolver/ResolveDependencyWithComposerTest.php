@@ -83,7 +83,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
                 new PieComposerRequest(
                     $this->createMock(IOInterface::class),
                     $targetPlatform,
-                    $requestedPackageAndVersion,
+                    [$requestedPackageAndVersion],
                     PieOperation::Resolve,
                     [],
                     false,
