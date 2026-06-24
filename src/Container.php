@@ -49,6 +49,7 @@ use Symfony\Component\Console\Formatter\OutputFormatter;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
+use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
@@ -237,6 +238,21 @@ final class Container
 
         $container->singleton(IOInterface::class, static function () {
             return self::$testBuffer;
+        });
+
+        // QuieterConsoleIO is wired separately from IOInterface in self::factory(), and writes
+        // directly to a real ConsoleOutput; override it here only, so tests don't leak its output
+        // to the terminal.
+        $container->singleton(QuieterConsoleIO::class, static function (ContainerInterface $container): QuieterConsoleIO {
+            return new QuieterConsoleIO(
+                $container->get(InputInterface::class),
+                new NullOutput(),
+                new MinimalHelperSet(
+                    [
+                        'question' => new QuestionHelper(),
+                    ],
+                ),
+            );
         });
 
         return $container;
