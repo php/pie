@@ -390,14 +390,27 @@ final class CommandHelper
         );
     }
 
-    /** @param non-empty-list<Package> $packages */
+    /**
+     * @param non-empty-list<Package> $packages
+     *
+     * @throws ConfigureOptionCollision if two of the requested packages declare a configure option with the same name.
+     */
     public static function bindConfigureOptionsFromPackage(Command $command, array $packages, InputInterface $input): void
     {
+        /** @var array<string, Package> $optionOwners */
+        $optionOwners = [];
+
         foreach ($packages as $package) {
             foreach ($package->configureOptions() as $configureOption) {
-                if ($command->getDefinition()->hasOption($configureOption->name)) {
-                    continue;
+                if (array_key_exists($configureOption->name, $optionOwners)) {
+                    throw ConfigureOptionCollision::forOptionName(
+                        $configureOption->name,
+                        $optionOwners[$configureOption->name],
+                        $package,
+                    );
                 }
+
+                $optionOwners[$configureOption->name] = $package;
 
                 $command->addOption(
                     $configureOption->name,

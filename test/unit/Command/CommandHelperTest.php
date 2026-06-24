@@ -16,6 +16,7 @@ use Composer\Repository\VcsRepository;
 use Composer\Util\Platform;
 use InvalidArgumentException;
 use Php\Pie\Command\CommandHelper;
+use Php\Pie\Command\ConfigureOptionCollision;
 use Php\Pie\DependencyResolver\BundledPhpExtensionRefusal;
 use Php\Pie\DependencyResolver\DependencyResolver;
 use Php\Pie\DependencyResolver\Package;
@@ -259,6 +260,39 @@ final class CommandHelperTest extends TestCase
             ],
             $options,
         );
+    }
+
+    public function testBindConfigureOptionsFromPackageThrowsWhenTwoPackagesDeclareSameOptionName(): void
+    {
+        $composerPackageA = $this->createMock(CompletePackageInterface::class);
+        $composerPackageA->method('getPrettyName')->willReturn('foo/bar');
+        $composerPackageA->method('getPrettyVersion')->willReturn('1.0.0');
+        $composerPackageA->method('getType')->willReturn('php-ext');
+        $composerPackageA->method('getPhpExt')->willReturn([
+            'configure-options' => [
+                ['name' => 'with-stuff', 'needs-value' => true],
+            ],
+        ]);
+        $packageA = Package::fromComposerCompletePackage($composerPackageA);
+
+        $composerPackageB = $this->createMock(CompletePackageInterface::class);
+        $composerPackageB->method('getPrettyName')->willReturn('baz/qux');
+        $composerPackageB->method('getPrettyVersion')->willReturn('2.0.0');
+        $composerPackageB->method('getType')->willReturn('php-ext');
+        $composerPackageB->method('getPhpExt')->willReturn([
+            'configure-options' => [
+                ['name' => 'with-stuff'],
+            ],
+        ]);
+        $packageB = Package::fromComposerCompletePackage($composerPackageB);
+
+        $command = new Command();
+        $input   = new ArrayInput([]);
+
+        $this->expectException(ConfigureOptionCollision::class);
+        $this->expectExceptionMessage('Both foo/bar and baz/qux declare a configure option named --with-stuff');
+
+        CommandHelper::bindConfigureOptionsFromPackage($command, [$packageA, $packageB], $input);
     }
 
     #[RequiresOperatingSystemFamily('Windows')]
