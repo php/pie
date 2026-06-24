@@ -70,6 +70,7 @@ The following extensions have already added support for PIE:
 | mysqlnd        | php/mysqlnd                                                                                         |
 | mysqli         | php/mysqli                                                                                          |
 | opcache        | php/opcache                                                                                         |
+| operator       | [jblo/operator](https://packagist.org/packages/jblo/operator)                                       |
 | opentelemetry  | [open-telemetry/ext-opentelemetry](https://packagist.org/packages/open-telemetry/ext-opentelemetry) |
 | parallel       | [pecl/parallel](https://packagist.org/packages/pecl/parallel)                                       |
 | pcov           | [pecl/pcov](https://packagist.org/packages/pecl/pcov)                                               |
@@ -412,7 +413,6 @@ The following extensions are believed to be abandoned:
 * odbtp
 * oggvorbis
 * opendirectory
-* operator
 * optimizer
 * orng
 * panda
