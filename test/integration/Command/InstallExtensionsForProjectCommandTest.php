@@ -18,7 +18,6 @@ use Php\Pie\ComposerIntegration\PieJsonEditor;
 use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use Php\Pie\Container;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
-use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
 use Php\Pie\Installing\InstallForPhpProject\CheckExtensionStatus;
 use Php\Pie\Installing\InstallForPhpProject\ComposerFactoryForProject;
@@ -131,11 +130,14 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
         $this->installSelectedPackage->expects(self::once())
             ->method('withSubCommand')
             ->with(
-                ExtensionName::normaliseFromString('foobar'),
-                new RequestedPackageAndVersion(
-                    'vendor1/foobar',
-                    '^1.2',
-                ),
+                [
+                    new RequestedPackageAndVersion(
+                        'vendor1/foobar',
+                        '^1.2',
+                    ),
+                ],
+                self::isInstanceOf(Command::class),
+                self::isInstanceOf(InputInterface::class),
             )
             ->willReturn(0);
 
