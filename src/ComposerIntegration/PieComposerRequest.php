@@ -22,8 +22,8 @@ final class PieComposerRequest
     private readonly array $requestedPackageNames;
 
     /**
-     * @param list<RequestedPackageAndVersion> $requestedPackages
-     * @param list<non-empty-string>           $configureOptions
+     * @param list<RequestedPackageAndVersion>      $requestedPackages
+     * @param array<string, list<non-empty-string>> $configureOptions  Keyed by package name
      */
     public function __construct(
         public readonly IOInterface $pieOutput,
@@ -34,6 +34,12 @@ final class PieComposerRequest
         public readonly bool $attemptToSetupIniFile,
     ) {
         $this->requestedPackageNames = array_map(static fn (RequestedPackageAndVersion $request) => $request->package, $this->requestedPackages);
+    }
+
+    /** @return list<non-empty-string> */
+    public function configureOptionsFor(string $packageName): array
+    {
+        return $this->configureOptions[$packageName] ?? [];
     }
 
     /**

@@ -390,45 +390,61 @@ final class CommandHelper
         );
     }
 
-    public static function bindConfigureOptionsFromPackage(Command $command, Package $package, InputInterface $input): void
+    /** @param non-empty-list<Package> $packages */
+    public static function bindConfigureOptionsFromPackage(Command $command, array $packages, InputInterface $input): void
     {
-        foreach ($package->configureOptions() as $configureOption) {
-            $command->addOption(
-                $configureOption->name,
-                null,
-                $configureOption->needsValue ? InputOption::VALUE_REQUIRED : InputOption::VALUE_NONE,
-                $configureOption->description,
-            );
+        foreach ($packages as $package) {
+            foreach ($package->configureOptions() as $configureOption) {
+                if ($command->getDefinition()->hasOption($configureOption->name)) {
+                    continue;
+                }
+
+                $command->addOption(
+                    $configureOption->name,
+                    null,
+                    $configureOption->needsValue ? InputOption::VALUE_REQUIRED : InputOption::VALUE_NONE,
+                    $configureOption->description,
+                );
+            }
         }
 
         self::validateInput($input, $command);
     }
 
-    /** @return list<non-empty-string> */
-    public static function processConfigureOptionsFromInput(Package $package, InputInterface $input): array
+    /**
+     * @param non-empty-list<Package> $packages
+     *
+     * @return array<string, list<non-empty-string>> Keyed by package name
+     */
+    public static function processConfigureOptionsFromInput(array $packages, InputInterface $input): array
     {
         $configureOptionsValues = [];
-        foreach ($package->configureOptions() as $configureOption) {
-            if (! $input->hasOption($configureOption->name)) {
-                continue;
-            }
-
-            $value = $input->getOption($configureOption->name);
-
-            if ($configureOption->needsValue) {
-                if (is_string($value) && $value !== '') {
-                    $configureOptionsValues[] = '--' . $configureOption->name . '=' . $value;
+        foreach ($packages as $package) {
+            $optionsForPackage = [];
+            foreach ($package->configureOptions() as $configureOption) {
+                if (! $input->hasOption($configureOption->name)) {
+                    continue;
                 }
 
-                continue;
+                $value = $input->getOption($configureOption->name);
+
+                if ($configureOption->needsValue) {
+                    if (is_string($value) && $value !== '') {
+                        $optionsForPackage[] = '--' . $configureOption->name . '=' . $value;
+                    }
+
+                    continue;
+                }
+
+                Assert::boolean($value);
+                if ($value !== true) {
+                    continue;
+                }
+
+                $optionsForPackage[] = '--' . $configureOption->name;
             }
 
-            Assert::boolean($value);
-            if ($value !== true) {
-                continue;
-            }
-
-            $configureOptionsValues[] = '--' . $configureOption->name;
+            $configureOptionsValues[$package->name()] = $optionsForPackage;
         }
 
         return $configureOptionsValues;

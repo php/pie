@@ -248,12 +248,14 @@ final class CommandHelperTest extends TestCase
 
         $input = new ArrayInput(['--with-stuff' => 'lolz', '--enable-thing' => true], $inputDefinition);
 
-        $options = CommandHelper::processConfigureOptionsFromInput($package, $input);
+        $options = CommandHelper::processConfigureOptionsFromInput([$package], $input);
 
         self::assertSame(
             [
-                '--with-stuff=lolz',
-                '--enable-thing',
+                'foo/bar' => [
+                    '--with-stuff=lolz',
+                    '--enable-thing',
+                ],
             ],
             $options,
         );

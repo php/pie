@@ -14,6 +14,7 @@ use Php\Pie\DependencyResolver\BundledPhpExtensionRefusal;
 use Php\Pie\DependencyResolver\DependencyInstaller\PrescanSystemDependencies;
 use Php\Pie\DependencyResolver\DependencyResolver;
 use Php\Pie\DependencyResolver\InvalidPackageName;
+use Php\Pie\DependencyResolver\ResolvedPackageRequest;
 use Php\Pie\DependencyResolver\UnableToResolveRequirement;
 use Php\Pie\Installing\InstallForPhpProject\FindMatchingPackages;
 use Php\Pie\Platform\PackageManager;
@@ -24,6 +25,8 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
+
+use function array_map;
 
 #[AsCommand(
     name: 'build',
@@ -131,11 +134,11 @@ final class BuildCommand extends Command
             return self::INVALID;
         }
 
-        // Now we know what package we have, we can validate the configure options for the command and re-create the
+        // Now we know what packages we have, we can validate the configure options for the command and re-create the
         // Composer instance with the populated configure options
-        // @todo handle this; CommandHelper::bindConfigureOptionsFromPackage($this, $package, $input);
-        // @todo handle this; $configureOptionsValues = CommandHelper::processConfigureOptionsFromInput($package, $input);
-        $configureOptionsValues = []; // @todo handle this
+        $resolvedPiePackages = array_map(static fn (ResolvedPackageRequest $resolvedPackage) => $resolvedPackage->piePackage, $resolvedPackages);
+        CommandHelper::bindConfigureOptionsFromPackage($this, $resolvedPiePackages, $input);
+        $configureOptionsValues = CommandHelper::processConfigureOptionsFromInput($resolvedPiePackages, $input);
 
         $composer = PieComposerFactory::createPieComposer(
             $this->container,

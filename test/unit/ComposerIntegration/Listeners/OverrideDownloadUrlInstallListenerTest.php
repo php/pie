@@ -541,7 +541,7 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
                 ),
                 [new RequestedPackageAndVersion('foo/bar', '^1.1')],
                 PieOperation::Install,
-                ['--with-foo'],
+                ['foo/bar' => ['--with-foo']],
                 false,
             ),
         );

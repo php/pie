@@ -68,7 +68,7 @@ final class InstallAndBuildProcessTest extends TestCase
             ),
             [new RequestedPackageAndVersion('foo/bar', '^1.0')],
             PieOperation::Download,
-            ['--foo', '--bar="yes"'],
+            ['foo/bar' => ['--foo', '--bar="yes"']],
             false,
         );
         $composerPackage = new CompletePackage('foo/bar', '1.2.3.0', '1.2.3');
@@ -109,7 +109,7 @@ final class InstallAndBuildProcessTest extends TestCase
             ),
             [new RequestedPackageAndVersion('foo/bar', '^1.0')],
             PieOperation::Build,
-            ['--foo', '--bar="yes"'],
+            ['foo/bar' => ['--foo', '--bar="yes"']],
             false,
         );
         $composerPackage = new CompletePackage('foo/bar', '1.2.3.0', '1.2.3');
@@ -153,7 +153,7 @@ final class InstallAndBuildProcessTest extends TestCase
             ),
             [new RequestedPackageAndVersion('foo/bar', '^1.0')],
             PieOperation::Install,
-            ['--foo', '--bar="yes"'],
+            ['foo/bar' => ['--foo', '--bar="yes"']],
             false,
         );
         $composerPackage = new CompletePackage('foo/bar', '1.2.3.0', '1.2.3');
