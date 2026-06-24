@@ -58,7 +58,7 @@ class PrescanSystemDependencies
         );
 
         $unmetDependencies = array_filter(
-            ($this->fetchDependencyStatuses)($targetPlatform, $composer, $package->composerPackage()),
+            ($this->fetchDependencyStatuses)($targetPlatform, $composer, $package->piePackage->composerPackage()),
             static function (DependencyStatus $dependencyStatus): bool {
                 return ! $dependencyStatus->satisfied();
             },

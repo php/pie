@@ -23,6 +23,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Throwable;
 
 #[AsCommand(
     name: 'build',
@@ -88,22 +89,23 @@ final class BuildCommand extends Command
             ),
         );
 
-        // @todo fix this
-//        if (CommandHelper::shouldCheckSystemDependencies($input)) {
-//            try {
-//                ($this->prescanSystemDependencies)(
-//                    $composer,
-//                    $targetPlatform,
-//                    $requestedNamesAndVersions,
-//                    CommandHelper::autoInstallSystemDependencies($input),
-//                );
-//            } catch (Throwable $anything) {
-//                $this->io->writeError(
-//                    '<comment>Skipping system dependency pre-scan due to exception:</comment> ' . $anything->getMessage(),
-//                    verbosity: IOInterface::VERBOSE,
-//                );
-//            }
-//        }
+        if (CommandHelper::shouldCheckSystemDependencies($input)) {
+            foreach ($requestedNamesAndVersions as $requestedNameAndVersion) {
+                try {
+                    ($this->prescanSystemDependencies)(
+                        $composer,
+                        $targetPlatform,
+                        $requestedNameAndVersion,
+                        CommandHelper::autoInstallSystemDependencies($input),
+                    );
+                } catch (Throwable $anything) {
+                    $this->io->writeError(
+                        '<comment>Skipping system dependency pre-scan due to exception:</comment> ' . $anything->getMessage(),
+                        verbosity: IOInterface::VERBOSE,
+                    );
+                }
+            }
+        }
 
         try {
             $resolvedPackages = CommandHelper::resolveRequestedPackages(
