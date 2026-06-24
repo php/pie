@@ -12,6 +12,7 @@ use Composer\Package\RootPackageInterface;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieJsonEditor;
+use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
 use Php\Pie\Installing\InstallForPhpProject\CheckExtensionStatus;
@@ -36,9 +37,11 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 use Webmozart\Assert\Assert;
 
+use function array_filter;
 use function array_keys;
 use function array_map;
-use function array_walk;
+use function array_values;
+use function count;
 use function implode;
 use function Safe\getcwd;
 use function Safe\realpath;
@@ -136,26 +139,56 @@ final class InstallExtensionsForProjectCommand extends Command
 
         $anyErrorsHappened = false;
 
-        array_walk(
-            $extensionsRequired,
-            function (Link $link) use ($pieComposer, $phpEnabledExtensions, $installedPiePackages, $input, &$anyErrorsHappened, $targetPlatform, $extensionToPackageSelections): void {
-                if (
-                    $this->handleSingleExtensionRequiredByPhpProject(
-                        $input,
-                        $pieComposer,
-                        $link,
-                        $installedPiePackages,
-                        $targetPlatform,
-                        $phpEnabledExtensions,
-                        $extensionToPackageSelections,
-                    )
-                ) {
-                    return;
+        $scheduledForInstall = array_values(array_filter(array_map(
+            function (Link $link) use ($pieComposer, $phpEnabledExtensions, $installedPiePackages, &$anyErrorsHappened, $targetPlatform, $extensionToPackageSelections): RequestedPackageAndVersion|null {
+                $result = $this->handleSingleExtensionRequiredByPhpProject(
+                    $pieComposer,
+                    $link,
+                    $installedPiePackages,
+                    $targetPlatform,
+                    $phpEnabledExtensions,
+                    $extensionToPackageSelections,
+                );
+
+                if ($result instanceof RequestedPackageAndVersion) {
+                    return $result;
                 }
 
-                $anyErrorsHappened = true;
+                if ($result === false) {
+                    $anyErrorsHappened = true;
+                }
+
+                return null;
             },
-        );
+            $extensionsRequired,
+        )));
+
+        if (count($scheduledForInstall)) {
+            $nicePackageList = implode(', ', array_map(
+                static fn (RequestedPackageAndVersion $req) => $req->prettyNameAndVersion(),
+                $scheduledForInstall,
+            ));
+
+            try {
+                $this->io->write(
+                    sprintf('Invoking pie install of %s', $nicePackageList),
+                    verbosity: IOInterface::VERBOSE,
+                );
+                Assert::same(
+                    0,
+                    $this->installSelectedPackage->withSubCommand(
+                        $scheduledForInstall,
+                        $this,
+                        $input,
+                    ),
+                    'Non-zero exit code %s whilst installing ' . $nicePackageList,
+                );
+            } catch (Throwable $t) {
+                $this->io->writeError('<error>' . $t->getMessage() . '</error>');
+
+                $anyErrorsHappened = true;
+            }
+        }
 
         $this->io->write(PHP_EOL . 'Finished checking extensions.');
 
@@ -172,14 +205,13 @@ final class InstallExtensionsForProjectCommand extends Command
      * @param array<non-empty-string, non-empty-string> $extensionToPackageSelections
      */
     private function handleSingleExtensionRequiredByPhpProject(
-        InputInterface $input,
         Composer $pieComposer,
         Link $link,
         PiePackageList $installedPiePackages,
         TargetPlatform $targetPlatform,
         array $phpEnabledExtensions,
         array $extensionToPackageSelections,
-    ): bool {
+    ): RequestedPackageAndVersion|bool {
         $extension               = ExtensionName::normaliseFromString($link->getTarget());
         $piePackagesForExtension = $installedPiePackages
             ->findByPhpFormattedExtensionName($extension->phpFormattedExtensionName())
@@ -223,29 +255,7 @@ final class InstallExtensionsForProjectCommand extends Command
             return false;
         }
 
-        try {
-            // @todo instead of individually installing them, we can now do `pie install <a> <b> ...`
-            $this->io->write(
-                sprintf('Invoking pie install of %s', $requestedPackageAndVersion->prettyNameAndVersion()),
-                verbosity: IOInterface::VERBOSE,
-            );
-            Assert::same(
-                0,
-                $this->installSelectedPackage->withSubCommand(
-                    $extension,
-                    $requestedPackageAndVersion,
-                    $this,
-                    $input,
-                ),
-                'Non-zero exit code %s whilst installing ' . $requestedPackageAndVersion->package,
-            );
-
-            return true;
-        } catch (Throwable $t) {
-            $this->io->writeError('<error>' . $t->getMessage() . '</error>');
-
-            return false;
-        }
+        return $requestedPackageAndVersion;
     }
 
     public function execute(InputInterface $input, OutputInterface $output): int

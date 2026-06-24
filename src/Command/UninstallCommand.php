@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Php\Pie\Command;
 
-use Composer\Composer;
 use Composer\IO\IOInterface;
 use Composer\IO\NullIO;
 use OutOfRangeException;
@@ -12,7 +11,6 @@ use Php\Pie\ComposerIntegration\ComposerIntegrationHandler;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieOperation;
-use Php\Pie\DependencyResolver\Package;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\DependencyResolver\ResolvedPackageRequest;
 use Php\Pie\Platform\InstalledPiePackages;
