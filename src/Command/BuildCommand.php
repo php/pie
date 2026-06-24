@@ -26,8 +26,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 
-use function array_map;
-
 #[AsCommand(
     name: 'build',
     description: 'Download and build a PIE-compatible PHP extension, without installing it.',
@@ -136,7 +134,7 @@ final class BuildCommand extends Command
 
         // Now we know what packages we have, we can validate the configure options for the command and re-create the
         // Composer instance with the populated configure options
-        $resolvedPiePackages = array_map(static fn (ResolvedPackageRequest $resolvedPackage) => $resolvedPackage->piePackage, $resolvedPackages);
+        $resolvedPiePackages = ResolvedPackageRequest::piePackages($resolvedPackages);
         CommandHelper::bindConfigureOptionsFromPackage($this, $resolvedPiePackages, $input);
         $configureOptionsValues = CommandHelper::processConfigureOptionsFromInput($resolvedPiePackages, $input);
 

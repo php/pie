@@ -149,10 +149,7 @@ class ComposerIntegrationHandler
 
         $composerInstaller = PieComposerInstaller::createWithPhpBinary(
             $targetPlatform->phpBinaryPath,
-            array_map(
-                static fn (ResolvedPackageRequest $resolvedPackageRequest) => $resolvedPackageRequest->piePackage->extensionName(),
-                $resolvedRequestedPackages,
-            ),
+            ResolvedPackageRequest::extensionNames($resolvedRequestedPackages),
             $this->arrayCollectionIo,
             $composer,
         );
@@ -166,10 +163,7 @@ class ComposerIntegrationHandler
 
         if (file_exists(PieComposerFactory::getLockFile($pieComposerJson))) {
             $composerInstaller->setUpdate(true);
-            $composerInstaller->setUpdateAllowList(array_map(
-                static fn (ResolvedPackageRequest $resolvedPackageRequest) => $resolvedPackageRequest->requestedPackageAndVersion->package,
-                $resolvedRequestedPackages,
-            ));
+            $composerInstaller->setUpdateAllowList(ResolvedPackageRequest::requestedPackageNames($resolvedRequestedPackages));
         }
 
         $resultCode = $composerInstaller->run();
@@ -208,10 +202,7 @@ class ComposerIntegrationHandler
 
         $composerInstaller = PieComposerInstaller::createWithPhpBinary(
             $targetPlatform->phpBinaryPath,
-            array_map(
-                static fn (ResolvedPackageRequest $resolvedPackageRequest) => $resolvedPackageRequest->piePackage->extensionName(),
-                $resolvedPackagesToRemove,
-            ),
+            ResolvedPackageRequest::extensionNames($resolvedPackagesToRemove),
             $this->arrayCollectionIo,
             $composer,
         );
@@ -224,10 +215,7 @@ class ComposerIntegrationHandler
 
         if (file_exists(PieComposerFactory::getLockFile($pieComposerJson))) {
             $composerInstaller->setUpdate(true);
-            $composerInstaller->setUpdateAllowList(array_map(
-                static fn (ResolvedPackageRequest $resolvedPackageRequest) => $resolvedPackageRequest->requestedPackageAndVersion->package,
-                $resolvedPackagesToRemove,
-            ));
+            $composerInstaller->setUpdateAllowList(ResolvedPackageRequest::requestedPackageNames($resolvedPackagesToRemove));
         }
 
         $resultCode = $composerInstaller->run();
