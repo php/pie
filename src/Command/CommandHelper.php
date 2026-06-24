@@ -321,6 +321,10 @@ final class CommandHelper
     {
         $requestedPackageStrings = $input->getArgument(self::ARG_REQUESTED_PACKAGE_AND_VERSION);
 
+        if (is_string($requestedPackageStrings)) {
+            $requestedPackageStrings = [$requestedPackageStrings];
+        }
+
         if (! is_array($requestedPackageStrings) || ! count($requestedPackageStrings)) {
             throw new InvalidArgumentException('No package was requested for installation');
         }

@@ -19,6 +19,7 @@ use Php\Pie\Util\Emoji;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -46,7 +47,13 @@ final class InfoCommand extends Command
     {
         parent::configure();
 
-        CommandHelper::configureDownloadBuildInstallOptions($this);
+        // `info` only ever supports a single package, unlike the other download/build/install commands.
+        CommandHelper::configureDownloadBuildInstallOptions($this, false);
+        $this->addArgument(
+            CommandHelper::ARG_REQUESTED_PACKAGE_AND_VERSION,
+            InputArgument::REQUIRED,
+            'The PIE package name and version constraint to use, in the format {vendor/package}{?:{?version-constraint}{?@stability}}, for example `xdebug/xdebug:^3.4@alpha`, `xdebug/xdebug:@alpha`, `xdebug/xdebug:^3.4`, etc.',
+        );
     }
 
     public function execute(InputInterface $input, OutputInterface $output): int
