@@ -16,6 +16,7 @@ use Php\Pie\DependencyResolver\DependencyStatus;
 use Php\Pie\DependencyResolver\FetchDependencyStatuses;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
+use Php\Pie\DependencyResolver\ResolvedPackageRequest;
 use Php\Pie\Platform\PackageManager;
 use Php\Pie\Platform\TargetPlatform;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -77,7 +78,7 @@ final class PrescanSystemDependenciesTest extends TestCase
         $this->dependencyResolver->expects(self::once())
             ->method('__invoke')
             ->with($this->composer, $this->targetPlatform, $request, true)
-            ->willReturn($piePackage);
+            ->willReturn(new ResolvedPackageRequest($piePackage, $request));
 
         $versionParser = new VersionParser();
 
@@ -113,7 +114,7 @@ final class PrescanSystemDependenciesTest extends TestCase
         $this->dependencyResolver->expects(self::once())
             ->method('__invoke')
             ->with($this->composer, $this->targetPlatform, $request, true)
-            ->willReturn($piePackage);
+            ->willReturn(new ResolvedPackageRequest($piePackage, $request));
 
         $versionParser = new VersionParser();
 
@@ -153,7 +154,7 @@ final class PrescanSystemDependenciesTest extends TestCase
         $this->dependencyResolver->expects(self::once())
             ->method('__invoke')
             ->with($this->composer, $this->targetPlatform, $request, true)
-            ->willReturn($piePackage);
+            ->willReturn(new ResolvedPackageRequest($piePackage, $request));
 
         $versionParser = new VersionParser();
 
@@ -193,7 +194,7 @@ final class PrescanSystemDependenciesTest extends TestCase
         $this->dependencyResolver->expects(self::once())
             ->method('__invoke')
             ->with($this->composer, $this->targetPlatform, $request, true)
-            ->willReturn($piePackage);
+            ->willReturn(new ResolvedPackageRequest($piePackage, $request));
 
         $versionParser = new VersionParser();
 
@@ -233,7 +234,7 @@ final class PrescanSystemDependenciesTest extends TestCase
         $this->dependencyResolver->expects(self::once())
             ->method('__invoke')
             ->with($this->composer, $this->targetPlatform, $request, true)
-            ->willReturn($piePackage);
+            ->willReturn(new ResolvedPackageRequest($piePackage, $request));
 
         $versionParser = new VersionParser();
 
@@ -274,7 +275,7 @@ final class PrescanSystemDependenciesTest extends TestCase
         $this->dependencyResolver->expects(self::once())
             ->method('__invoke')
             ->with($this->composer, $this->targetPlatform, $request, true)
-            ->willReturn($piePackage);
+            ->willReturn(new ResolvedPackageRequest($piePackage, $request));
 
         $versionParser = new VersionParser();
 

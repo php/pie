@@ -59,7 +59,7 @@ final class InstallPiePackageFromPathTest extends TestCase
                 $this->command,
                 [
                     'command' => 'install',
-                    'requested-package-and-version' => 'foo/bar:*@dev',
+                    'requested-package-and-version' => ['foo/bar:*@dev'],
                 ],
                 $this->input,
             )
@@ -101,7 +101,7 @@ final class InstallPiePackageFromPathTest extends TestCase
                 $this->command,
                 [
                     'command' => 'install',
-                    'requested-package-and-version' => 'foo/bar:*@dev',
+                    'requested-package-and-version' => ['foo/bar:*@dev'],
                 ],
                 $this->input,
             )
