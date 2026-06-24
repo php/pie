@@ -6,9 +6,7 @@ namespace Php\PieUnitTest\Installing\InstallForPhpProject;
 
 use Php\Pie\Command\InvokeSubCommand;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
-use Php\Pie\ExtensionName;
 use Php\Pie\Installing\InstallForPhpProject\InstallSelectedPackage;
-use Php\Pie\Util\OutputFormatterWithPrefix;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Command\Command;
@@ -28,20 +26,20 @@ final class InstallSelectedPackageTest extends TestCase
                 $command,
                 [
                     'command' => 'install',
-                    'requested-package-and-version' => 'foo/foo:^1.0',
+                    'requested-package-and-version' => ['foo/foo:^1.0'],
                 ],
                 $input,
-                self::isInstanceOf(OutputFormatterWithPrefix::class),
             )
             ->willReturn(0);
 
         $installer = new InstallSelectedPackage($invoker);
         $installer->withSubCommand(
-            ExtensionName::normaliseFromString('foo'),
-            new RequestedPackageAndVersion(
-                'foo/foo',
-                '^1.0',
-            ),
+            [
+                new RequestedPackageAndVersion(
+                    'foo/foo',
+                    '^1.0',
+                ),
+            ],
             $command,
             $input,
         );
