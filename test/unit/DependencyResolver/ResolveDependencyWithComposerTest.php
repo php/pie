@@ -97,8 +97,8 @@ final class ResolveDependencyWithComposerTest extends TestCase
             $this->createMock(QuieterConsoleIO::class),
         ))($this->composer, $targetPlatform, new RequestedPackageAndVersion('asgrim/example-pie-extension', '^1.0'), false);
 
-        self::assertSame('asgrim/example-pie-extension', $package->name());
-        self::assertStringStartsWith('1.', $package->version());
+        self::assertSame('asgrim/example-pie-extension', $package->piePackage->name());
+        self::assertStringStartsWith('1.', $package->piePackage->version());
     }
 
     /** @return array<string, array{0: array<string, string>, 1: non-empty-string, 2: non-empty-string}> */
@@ -190,8 +190,8 @@ final class ResolveDependencyWithComposerTest extends TestCase
             true,
         );
 
-        self::assertSame('asgrim/example-pie-extension', $package->name());
-        self::assertStringStartsWith('1.', $package->version());
+        self::assertSame('asgrim/example-pie-extension', $package->piePackage->name());
+        self::assertStringStartsWith('1.', $package->piePackage->version());
     }
 
     public function testZtsOnlyPackageCannotBeInstalledOnNtsSystem(): void
@@ -423,8 +423,8 @@ final class ResolveDependencyWithComposerTest extends TestCase
             $this->createMock(QuieterConsoleIO::class),
         ))($this->composer, $targetPlatform, new RequestedPackageAndVersion('asgrim/example-pie-extension', '^1.0'), false);
 
-        self::assertSame('asgrim/example-pie-extension', $package->name());
-        self::assertStringStartsWith('1.', $package->version());
+        self::assertSame('asgrim/example-pie-extension', $package->piePackage->name());
+        self::assertStringStartsWith('1.', $package->piePackage->version());
     }
 
     public function testBundledExtensionCannotBeInstalledOnDevPhpVersion(): void
@@ -539,6 +539,6 @@ final class ResolveDependencyWithComposerTest extends TestCase
 
         $package = $resolver->__invoke($this->composer, $targetPlatform, $requestedPackage, true);
 
-        self::assertSame('php/bundled', $package->name());
+        self::assertSame('php/bundled', $package->piePackage->name());
     }
 }
