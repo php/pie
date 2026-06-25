@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\Pie\Platform;
 
+use Composer\IO\IOInterface;
 use Php\Pie\File\Sudo;
 use Php\Pie\Platform;
 use Php\Pie\Util\Process;
@@ -58,20 +59,21 @@ enum PackageManager: string
     }
 
     /** @param list<string> $packages */
-    public function install(array $packages): void
+    public function install(IOInterface $io, array $packages): void
     {
+        $outputCallback = Process::outputCallbackForVerbosity($io, IOInterface::VERY_VERBOSE);
+
         $cmd = self::installCommand($packages);
 
-        // @todo in -vv mode, would be useful to see output from these commands
         try {
-            Process::run($cmd);
+            Process::run($cmd, outputCallback: $outputCallback);
 
             return;
         } catch (ProcessFailedException $e) {
             if (Platform::isInteractive() && Process::processProbablyPermissionDenied($e)) {
                 array_unshift($cmd, Sudo::find());
 
-                Process::run($cmd);
+                Process::run($cmd, outputCallback: $outputCallback);
 
                 return;
             }

@@ -160,7 +160,7 @@ class CheckAllBuildTools
         }
 
         try {
-            $packageManager->install(array_values(array_unique($packagesToInstall)));
+            $packageManager->install($io, array_values(array_unique($packagesToInstall)));
 
             $io->write('<info>Missing build tools have been installed.</info>');
         } catch (Throwable $throwable) {
