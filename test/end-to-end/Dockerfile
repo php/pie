@@ -22,6 +22,12 @@ COPY --from=build_pie_phar /app/pie.phar /usr/local/bin/pie
 RUN pie install --auto-install-build-tools -v asgrim/example-pie-extension
 RUN pie show
 
+FROM quay.io/rockylinux/rockylinux:10 AS test_pie_installs_build_tools_on_rocky
+RUN dnf install -y php8.4-cli epel-release unzip
+COPY --from=build_pie_phar /app/pie.phar /usr/local/bin/pie
+RUN pie install --auto-install-build-tools -v asgrim/example-pie-extension:2.0.5
+RUN pie show
+
 FROM ubuntu_base AS test_pie_installs_build_tools_on_ubuntu
 RUN apt-get update && apt-get install -y php unzip libbz2-dev
 COPY --from=build_pie_phar /app/pie.phar /usr/local/bin/pie

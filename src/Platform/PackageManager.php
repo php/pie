@@ -62,6 +62,7 @@ enum PackageManager: string
     {
         $cmd = self::installCommand($packages);
 
+        // @todo in -vv mode, would be useful to see output from these commands
         try {
             Process::run($cmd);
 
