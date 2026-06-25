@@ -107,7 +107,7 @@ class PrescanSystemDependencies
         }
 
         try {
-            $this->packageManager->install($packageManagerPackages);
+            $this->packageManager->install($this->io, $packageManagerPackages);
 
             $this->io->write('<info>Missing system dependencies have been installed.</info>');
         } catch (Throwable $anything) {
