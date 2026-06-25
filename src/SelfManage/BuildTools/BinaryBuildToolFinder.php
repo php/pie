@@ -9,8 +9,10 @@ use Php\Pie\Platform\TargetPlatform;
 use Symfony\Component\Process\ExecutableFinder;
 
 use function array_key_exists;
+use function assert;
 use function implode;
 use function is_array;
+use function Safe\preg_replace;
 use function str_replace;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
@@ -49,6 +51,13 @@ class BinaryBuildToolFinder
     {
         if (! array_key_exists($packageManager->value, $this->packageManagerPackages) || $this->packageManagerPackages[$packageManager->value] === null) {
             return null;
+        }
+
+        if ($this->packageManagerPackages[$packageManager->value] === '{php-config-path}') {
+            $phpConfigPath = preg_replace('((.*)php)', '$1php-config', $targetPlatform->phpBinaryPath->phpBinaryPath);
+            assert($phpConfigPath !== '');
+
+            return $phpConfigPath;
         }
 
         // If we need to customise specific package names depending on OS

@@ -74,17 +74,7 @@ final class UnixBuild implements Build
         array $configureOptions,
         IOInterface $io,
     ): BinaryFile {
-        $outputCallback = null;
-        if ($io->isVerbose()) {
-            $outputCallback = static function (string $type, string $outputMessage) use ($io): void {
-                $io->write(sprintf(
-                    '%s%s%s',
-                    $type === SymfonyProcess::ERR ? '<comment>' : '',
-                    $outputMessage,
-                    $type === SymfonyProcess::ERR ? '</comment>' : '',
-                ));
-            };
-        }
+        $outputCallback = Process::outputCallbackForVerbosity($io, IOInterface::VERBOSE);
 
         $phpizePath = $targetPlatform->phpizePath ?? PhpizePath::guessFrom($targetPlatform->phpBinaryPath);
 
