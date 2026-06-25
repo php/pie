@@ -69,7 +69,7 @@ class AddInstalledJsonMetadata
             $composer,
             $composerPackage,
             InstalledJsonMetadata::KEY_CONFIGURE_OPTIONS,
-            implode(' ', $composerRequest->configureOptions),
+            implode(' ', $composerRequest->configureOptionsFor($composerPackage->getName())),
         );
 
         $this->addPieMetadata(

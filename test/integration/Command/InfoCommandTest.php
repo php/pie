@@ -22,7 +22,7 @@ final class InfoCommandTest extends IsolatedWorkingDirectoryTestCase
 
     public function testInfoCommandDisplaysInformation(): void
     {
-        $this->commandTester->execute(['requested-package-and-version' => 'asgrim/example-pie-extension:dev-main#9b5e6c80a1e05556e4e6824f0c112a4992cee001']);
+        $this->commandTester->execute(['requested-package-and-version' => ['asgrim/example-pie-extension:dev-main#9b5e6c80a1e05556e4e6824f0c112a4992cee001']]);
 
         $this->commandTester->assertCommandIsSuccessful();
 

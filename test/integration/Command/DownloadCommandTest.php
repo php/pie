@@ -68,7 +68,7 @@ class DownloadCommandTest extends IsolatedWorkingDirectoryTestCase
         string $requestedVersion,
         string $expectedVersion,
     ): void {
-        $this->commandTester->execute(['requested-package-and-version' => $requestedVersion]);
+        $this->commandTester->execute(['requested-package-and-version' => [$requestedVersion]]);
 
         $this->commandTester->assertCommandIsSuccessful();
 
@@ -83,7 +83,7 @@ class DownloadCommandTest extends IsolatedWorkingDirectoryTestCase
             self::markTestSkipped('This test can only run on non-Windows systems');
         }
 
-        $this->commandTester->execute(['requested-package-and-version' => 'asgrim/example-pie-extension:dev-main#9b5e6c80a1e05556e4e6824f0c112a4992cee001']);
+        $this->commandTester->execute(['requested-package-and-version' => ['asgrim/example-pie-extension:dev-main#9b5e6c80a1e05556e4e6824f0c112a4992cee001']]);
 
         $this->commandTester->assertCommandIsSuccessful();
 
@@ -110,7 +110,7 @@ class DownloadCommandTest extends IsolatedWorkingDirectoryTestCase
 
         $this->commandTester->execute([
             '--with-php-config' => $phpConfigPath,
-            'requested-package-and-version' => $requestedVersion,
+            'requested-package-and-version' => [$requestedVersion],
         ]);
 
         $this->commandTester->assertCommandIsSuccessful();
@@ -132,7 +132,7 @@ class DownloadCommandTest extends IsolatedWorkingDirectoryTestCase
 
         $this->commandTester->execute([
             '--with-php-path' => $phpBinaryPath,
-            'requested-package-and-version' => $requestedVersion,
+            'requested-package-and-version' => [$requestedVersion],
         ]);
 
         $this->commandTester->assertCommandIsSuccessful();
@@ -146,7 +146,7 @@ class DownloadCommandTest extends IsolatedWorkingDirectoryTestCase
     public function testDownloadCommandFailsWhenUsingIncompatiblePhpVersion(): void
     {
         // 1.0.0 is only compatible with PHP 8.3.0
-        self::assertSame(1, $this->commandTester->execute(['requested-package-and-version' => self::TEST_PACKAGE . ':1.0.0']));
+        self::assertSame(1, $this->commandTester->execute(['requested-package-and-version' => [self::TEST_PACKAGE . ':1.0.0']]));
 
         $output = $this->commandTester->getDisplay();
         self::assertStringContainsString(
@@ -164,7 +164,7 @@ class DownloadCommandTest extends IsolatedWorkingDirectoryTestCase
 
         $this->commandTester->execute(
             [
-                'requested-package-and-version' => $incompatiblePackage,
+                'requested-package-and-version' => [$incompatiblePackage],
                 '--force' => true,
             ],
         );

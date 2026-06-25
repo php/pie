@@ -19,6 +19,7 @@ use Php\Pie\Util\Emoji;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -46,7 +47,13 @@ final class InfoCommand extends Command
     {
         parent::configure();
 
-        CommandHelper::configureDownloadBuildInstallOptions($this);
+        // `info` only ever supports a single package, unlike the other download/build/install commands.
+        CommandHelper::configureDownloadBuildInstallOptions($this, false);
+        $this->addArgument(
+            CommandHelper::ARG_REQUESTED_PACKAGE_AND_VERSION,
+            InputArgument::REQUIRED,
+            'The PIE package name and version constraint to use, in the format {vendor/package}{?:{?version-constraint}{?@stability}}, for example `xdebug/xdebug:^3.4@alpha`, `xdebug/xdebug:@alpha`, `xdebug/xdebug:^3.4`, etc.',
+        );
     }
 
     public function execute(InputInterface $input, OutputInterface $output): int
@@ -56,7 +63,7 @@ final class InfoCommand extends Command
         $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $this->io);
 
         try {
-            $requestedNameAndVersion = CommandHelper::requestedNameAndVersionPair($input);
+            $requestedNamesAndVersions = CommandHelper::requestedNameAndVersionPairs($input);
         } catch (InvalidPackageName $invalidPackageName) {
             return CommandHelper::handlePackageNotFound(
                 $invalidPackageName,
@@ -74,7 +81,7 @@ final class InfoCommand extends Command
             new PieComposerRequest(
                 $this->io,
                 $targetPlatform,
-                $requestedNameAndVersion,
+                $requestedNamesAndVersions,
                 PieOperation::Resolve,
                 [], // Configure options are not needed for resolve only
                 false, // setting up INI not needed for info
@@ -82,10 +89,12 @@ final class InfoCommand extends Command
         );
 
         try {
-            $package = ($this->dependencyResolver)(
+            $resolvedPackages = CommandHelper::resolveRequestedPackages(
+                $this->dependencyResolver,
+                $this->io,
                 $composer,
                 $targetPlatform,
-                $requestedNameAndVersion,
+                $requestedNamesAndVersions,
                 true,
             );
         } catch (UnableToResolveRequirement $unableToResolveRequirement) {
@@ -103,7 +112,7 @@ final class InfoCommand extends Command
             return self::INVALID;
         }
 
-        $this->io->write(sprintf('<info>Found package:</info> %s which provides <info>%s</info>', $package->prettyNameAndVersion(), $package->extensionName()->nameWithExtPrefix()));
+        $package = $resolvedPackages[0]->piePackage;
 
         $this->io->write(sprintf('Extension name: %s', $package->extensionName()->name()));
         $this->io->write(sprintf('Extension type: %s (%s)', $package->extensionType()->value, $package->extensionType()->name));

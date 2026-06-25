@@ -21,8 +21,6 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-use function sprintf;
-
 #[AsCommand(
     name: 'download',
     description: 'Same behaviour as build, but puts the files in a local directory for manual building and installation.',
@@ -52,7 +50,7 @@ final class DownloadCommand extends Command
 
         $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $this->io);
         try {
-            $requestedNameAndVersion = CommandHelper::requestedNameAndVersionPair($input);
+            $requestedNamesAndVersions = CommandHelper::requestedNameAndVersionPairs($input);
         } catch (InvalidPackageName $invalidPackageName) {
             return CommandHelper::handlePackageNotFound(
                 $invalidPackageName,
@@ -71,7 +69,7 @@ final class DownloadCommand extends Command
             new PieComposerRequest(
                 $this->io,
                 $targetPlatform,
-                $requestedNameAndVersion,
+                $requestedNamesAndVersions,
                 PieOperation::Download,
                 [], // Configure options are not needed for download only
                 false, // setting up INI not needed for download
@@ -79,10 +77,12 @@ final class DownloadCommand extends Command
         );
 
         try {
-            $package = ($this->dependencyResolver)(
+            $resolvedPackages = CommandHelper::resolveRequestedPackages(
+                $this->dependencyResolver,
+                $this->io,
                 $composer,
                 $targetPlatform,
-                $requestedNameAndVersion,
+                $requestedNamesAndVersions,
                 $forceInstallPackageVersion,
             );
         } catch (UnableToResolveRequirement $unableToResolveRequirement) {
@@ -100,14 +100,11 @@ final class DownloadCommand extends Command
             return self::INVALID;
         }
 
-        $this->io->write(sprintf('<info>Found package:</info> %s which provides <info>%s</info>', $package->prettyNameAndVersion(), $package->extensionName()->nameWithExtPrefix()));
-
         try {
             $this->composerIntegrationHandler->runInstall(
-                $package,
+                $resolvedPackages,
                 $composer,
                 $targetPlatform,
-                $requestedNameAndVersion,
                 $forceInstallPackageVersion,
                 false,
             );

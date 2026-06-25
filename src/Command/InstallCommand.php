@@ -14,6 +14,7 @@ use Php\Pie\DependencyResolver\BundledPhpExtensionRefusal;
 use Php\Pie\DependencyResolver\DependencyInstaller\PrescanSystemDependencies;
 use Php\Pie\DependencyResolver\DependencyResolver;
 use Php\Pie\DependencyResolver\InvalidPackageName;
+use Php\Pie\DependencyResolver\ResolvedPackageRequest;
 use Php\Pie\DependencyResolver\UnableToResolveRequirement;
 use Php\Pie\Installing\InstallForPhpProject\FindMatchingPackages;
 use Php\Pie\Platform\PackageManager;
@@ -25,8 +26,6 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
-
-use function sprintf;
 
 #[AsCommand(
     name: 'install',
@@ -70,7 +69,7 @@ final class InstallCommand extends Command
 
         $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $this->io);
         try {
-            $requestedNameAndVersion = CommandHelper::requestedNameAndVersionPair($input);
+            $requestedNamesAndVersions = CommandHelper::requestedNameAndVersionPairs($input);
         } catch (InvalidPackageName $invalidPackageName) {
             return CommandHelper::handlePackageNotFound(
                 $invalidPackageName,
@@ -98,7 +97,7 @@ final class InstallCommand extends Command
             new PieComposerRequest(
                 $this->io,
                 $targetPlatform,
-                $requestedNameAndVersion,
+                $requestedNamesAndVersions,
                 PieOperation::Resolve,
                 [], // Configure options are not needed for resolve only
                 false, // setting up INI not needed for resolve step
@@ -106,26 +105,30 @@ final class InstallCommand extends Command
         );
 
         if (CommandHelper::shouldCheckSystemDependencies($input)) {
-            try {
-                ($this->prescanSystemDependencies)(
-                    $composer,
-                    $targetPlatform,
-                    $requestedNameAndVersion,
-                    CommandHelper::autoInstallSystemDependencies($input),
-                );
-            } catch (Throwable $anything) {
-                $this->io->writeError(
-                    '<comment>Skipping system dependency pre-scan due to exception:</comment> ' . $anything->getMessage(),
-                    verbosity: IOInterface::VERBOSE,
-                );
+            foreach ($requestedNamesAndVersions as $requestedNameAndVersion) {
+                try {
+                    ($this->prescanSystemDependencies)(
+                        $composer,
+                        $targetPlatform,
+                        $requestedNameAndVersion,
+                        CommandHelper::autoInstallSystemDependencies($input),
+                    );
+                } catch (Throwable $anything) {
+                    $this->io->writeError(
+                        '<comment>Skipping system dependency pre-scan due to exception:</comment> ' . $anything->getMessage(),
+                        verbosity: IOInterface::VERBOSE,
+                    );
+                }
             }
         }
 
         try {
-            $package = ($this->dependencyResolver)(
+            $resolvedPackages = CommandHelper::resolveRequestedPackages(
+                $this->dependencyResolver,
+                $this->io,
                 $composer,
                 $targetPlatform,
-                $requestedNameAndVersion,
+                $requestedNamesAndVersions,
                 $forceInstallPackageVersion,
             );
         } catch (UnableToResolveRequirement $unableToResolveRequirement) {
@@ -143,19 +146,18 @@ final class InstallCommand extends Command
             return self::INVALID;
         }
 
-        $this->io->write(sprintf('<info>Found package:</info> %s which provides <info>%s</info>', $package->prettyNameAndVersion(), $package->extensionName()->nameWithExtPrefix()));
-
-        // Now we know what package we have, we can validate the configure options for the command and re-create the
+        // Now we know what packages we have, we can validate the configure options for the command and re-create the
         // Composer instance with the populated configure options
-        CommandHelper::bindConfigureOptionsFromPackage($this, $package, $input);
-        $configureOptionsValues = CommandHelper::processConfigureOptionsFromInput($package, $input);
+        $resolvedPiePackages = ResolvedPackageRequest::piePackages($resolvedPackages);
+        CommandHelper::bindConfigureOptionsFromPackage($this, $resolvedPiePackages, $input);
+        $configureOptionsValues = CommandHelper::processConfigureOptionsFromInput($resolvedPiePackages, $input);
 
         $composer = PieComposerFactory::createPieComposer(
             $this->container,
             new PieComposerRequest(
                 $this->io,
                 $targetPlatform,
-                $requestedNameAndVersion,
+                $requestedNamesAndVersions,
                 PieOperation::Install,
                 $configureOptionsValues,
                 CommandHelper::determineAttemptToSetupIniFile($input),
@@ -164,10 +166,9 @@ final class InstallCommand extends Command
 
         try {
             $this->composerIntegrationHandler->runInstall(
-                $package,
+                $resolvedPackages,
                 $composer,
                 $targetPlatform,
-                $requestedNameAndVersion,
                 $forceInstallPackageVersion,
                 true,
             );

@@ -27,7 +27,7 @@ class BuildCommandTest extends IsolatedWorkingDirectoryTestCase
 
     public function testBuildCommandWillBuildTheExtension(): void
     {
-        $this->commandTester->execute(['requested-package-and-version' => self::TEST_PACKAGE]);
+        $this->commandTester->execute(['requested-package-and-version' => [self::TEST_PACKAGE]]);
 
         $this->commandTester->assertCommandIsSuccessful();
 

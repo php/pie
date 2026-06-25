@@ -90,7 +90,7 @@ class InstallCommandTest extends IsolatedWorkingDirectoryTestCase
 
         $this->commandTester->execute(
             [
-                'requested-package-and-version' => self::TEST_PACKAGE,
+                'requested-package-and-version' => [self::TEST_PACKAGE],
                 '--with-php-config' => $phpConfigPath,
                 '--skip-enable-extension' => true,
             ],
@@ -117,7 +117,7 @@ class InstallCommandTest extends IsolatedWorkingDirectoryTestCase
     public function testInstallCommandWillInstallCompatibleExtensionWindows(): void
     {
         $this->commandTester->execute([
-            'requested-package-and-version' => self::TEST_PACKAGE,
+            'requested-package-and-version' => [self::TEST_PACKAGE],
             '--skip-enable-extension' => true,
         ]);
 

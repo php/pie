@@ -14,6 +14,7 @@ use Safe\Exceptions\PcreException;
 use Symfony\Component\Process\Process;
 use Webmozart\Assert\Assert;
 
+use function array_map;
 use function array_merge;
 use function Safe\copy;
 use function Safe\preg_match_all;
@@ -30,10 +31,9 @@ class CliContext implements Context
     private string|null $errorOutput = null;
     private int|null $exitCode       = null;
     /** @var list<string> */
-    private array $phpArguments  = [];
-    private string $theExtension = 'example_pie_extension';
-    /** @var non-empty-string */
-    private string $thePackage            = 'asgrim/example-pie-extension';
+    private array $phpArguments = [];
+    /** @var list<array{extension: string, package: non-empty-string}> */
+    private array $interactions           = [];
     private string|null $workingDirectory = null;
 
     /** @throws PcreException */
@@ -58,12 +58,22 @@ class CliContext implements Context
     #[Given('an extension was previously downloaded but not built')]
     public function iRunACommandToDownloadTheLatestVersionOfAnExtension(): void
     {
+        $this->interactions[] = ['extension' => 'example_pie_extension', 'package' => 'asgrim/example-pie-extension'];
         $this->runPieCommand(['download', 'asgrim/example-pie-extension']);
+    }
+
+    #[When('I run a command to download multiple extensions')]
+    public function iRunACommandToDownloadMultipleExtensions(): void
+    {
+        $this->interactions[] = ['extension' => 'example_pie_extension', 'package' => 'asgrim/example-pie-extension'];
+        $this->interactions[] = ['extension' => 'quickhash', 'package' => 'derickr/quickhash'];
+        $this->runPieCommand(['download', 'asgrim/example-pie-extension', 'derickr/quickhash']);
     }
 
     #[When('I run a command to download version :version of an extension')]
     public function iRunACommandToDownloadSpecificVersionOfAnExtension(string $version): void
     {
+        $this->interactions[] = ['extension' => 'example_pie_extension', 'package' => 'asgrim/example-pie-extension'];
         $this->runPieCommand(['download', 'asgrim/example-pie-extension:' . $version]);
     }
 
@@ -111,18 +121,25 @@ class CliContext implements Context
     }
 
     #[Then('the latest version should have been downloaded')]
+    #[Then('the extensions should have been downloaded')]
     public function theLatestVersionShouldHaveBeenDownloaded(): void
     {
         $this->assertCommandSuccessful();
-        Assert::regex($this->output, '#Found package: asgrim/example-pie-extension:v?\d+\.\d+\.\d+ which provides ext-example_pie_extension#');
-        Assert::regex($this->output, '#Extracted asgrim/example-pie-extension:v?\d+\.\d+\.\d+ source to: #');
+
+        foreach ($this->interactions as $downloads) {
+            Assert::regex($this->output, '#Found package: ' . $downloads['package'] . ':v?\d+\.\d+\.\d+ which provides ext-' . $downloads['extension'] . '#');
+            Assert::regex($this->output, '#Extracted ' . $downloads['package'] . ':v?\d+\.\d+\.\d+ source to: #');
+        }
     }
 
     #[Then('version :version should have been downloaded')]
     public function versionOfTheExtensionShouldHaveBeen(string $version): void
     {
         $this->assertCommandSuccessful();
-        Assert::contains($this->output, 'Found package: asgrim/example-pie-extension:' . $version);
+
+        foreach ($this->interactions as $downloads) {
+            Assert::contains($this->output, 'Found package: ' . $downloads['package'] . ':' . $version);
+        }
     }
 
     #[When('I run a command to build an extension')]
@@ -132,7 +149,14 @@ class CliContext implements Context
         $this->runPieCommand(['build', 'asgrim/example-pie-extension']);
     }
 
+    #[When('I run a command to build multiple extensions')]
+    public function iRunACommandToBuildMultipleExtensions(): void
+    {
+        $this->runPieCommand(['build', 'asgrim/example-pie-extension', 'derickr/quickhash']);
+    }
+
     #[Then('the extension should have been built')]
+    #[Then('the extensions should have been built')]
     public function theExtensionShouldHaveBeenBuilt(): void
     {
         $this->assertCommandSuccessful();
@@ -188,53 +212,70 @@ class CliContext implements Context
     #[Given('an extension was previously installed and enabled')]
     public function iRunACommandToInstallAnExtension(): void
     {
-        $this->theExtension = 'example_pie_extension';
-        $this->thePackage   = 'asgrim/example-pie-extension';
-        $this->runPieCommand(['install', $this->thePackage]);
+        $this->interactions[] = ['extension' => 'example_pie_extension', 'package' => 'asgrim/example-pie-extension'];
+        $this->runPieCommand(['install', 'asgrim/example-pie-extension']);
+    }
+
+    #[When('I run a command to install multiple extensions')]
+    #[Given('multiple extensions were previously installed and enabled')]
+    public function iRunACommandToInstallMultipleExtensions(): void
+    {
+        $this->interactions[] = ['extension' => 'example_pie_extension', 'package' => 'asgrim/example-pie-extension'];
+        $this->interactions[] = ['extension' => 'quickhash', 'package' => 'derickr/quickhash'];
+        $this->runPieCommand(['install', 'asgrim/example-pie-extension', 'derickr/quickhash']);
     }
 
     #[When('I run a command to forcefully install an extension')]
     public function iRunACommandToForcefullyInstallAnExtension(): void
     {
-        $this->theExtension = 'example_pie_extension';
-        $this->thePackage   = 'asgrim/example-pie-extension';
-        $this->runPieCommand(['install', '--force', $this->thePackage]);
+        $this->interactions[] = ['extension' => 'example_pie_extension', 'package' => 'asgrim/example-pie-extension'];
+        $this->runPieCommand(['install', '--force', 'asgrim/example-pie-extension']);
     }
 
     #[When('I run a command to install an extension without enabling it')]
     public function iRunACommandToInstallAnExtensionWithoutEnabling(): void
     {
-        $this->theExtension = 'example_pie_extension';
-        $this->thePackage   = 'asgrim/example-pie-extension';
-        $this->runPieCommand(['install', $this->thePackage, '--skip-enable-extension']);
+        $this->interactions[] = ['extension' => 'example_pie_extension', 'package' => 'asgrim/example-pie-extension'];
+        $this->runPieCommand(['install', 'asgrim/example-pie-extension', '--skip-enable-extension']);
     }
 
     #[When('I run a command to uninstall an extension')]
     public function iRunACommandToUninstallAnExtension(): void
     {
-        $this->runPieCommand(['uninstall', $this->thePackage]);
+        $this->runPieCommand(['uninstall', ...array_map(static fn (array $interaction) => $interaction['package'], $this->interactions)]);
+    }
+
+    #[When('I run a command to uninstall multiple extensions')]
+    public function iRunACommandToUninstallMultipleExtensions(): void
+    {
+        $this->interactions[] = ['extension' => 'example_pie_extension', 'package' => 'asgrim/example-pie-extension'];
+        $this->interactions[] = ['extension' => 'quickhash', 'package' => 'derickr/quickhash'];
+        $this->runPieCommand(['uninstall', 'asgrim/example-pie-extension', 'derickr/quickhash']);
     }
 
     #[Then('the extension should not be installed anymore')]
+    #[Then('the extensions should not be installed anymore')]
     public function theExtensionShouldNotBeInstalled(): void
     {
         $this->assertCommandSuccessful();
 
-        if (Platform::isWindows()) {
-            Assert::regex($this->output, '#👋 Removed extension: [-\\\_:.a-zA-Z0-9]+\\\php_' . $this->theExtension . '.dll#');
-        } else {
-            Assert::regex($this->output, '#👋 Removed extension: [-_.a-zA-Z0-9/]+/' . $this->theExtension . '.so#');
+        foreach ($this->interactions as $uninstall) {
+            if (Platform::isWindows()) {
+                Assert::regex($this->output, '#👋 Removed extension: [-\\\_:.a-zA-Z0-9]+\\\php_' . $uninstall['extension'] . '.dll#');
+            } else {
+                Assert::regex($this->output, '#👋 Removed extension: [-_.a-zA-Z0-9/]+/' . $uninstall['extension'] . '.so#');
+            }
+
+            $isExtEnabled = (new Process([self::PHP_BINARY, '-r', 'echo extension_loaded("' . $uninstall['extension'] . '")?"yes":"no";']))
+                ->mustRun()
+                ->getOutput();
+
+            Assert::same(
+                $isExtEnabled,
+                'no',
+                sprintf("Failed to remove extension.\n\nOutput:\n%s\n\nError output:\n%s\n", $this->output, $this->errorOutput),
+            );
         }
-
-        $isExtEnabled = (new Process([self::PHP_BINARY, '-r', 'echo extension_loaded("' . $this->theExtension . '")?"yes":"no";']))
-            ->mustRun()
-            ->getOutput();
-
-        Assert::same(
-            $isExtEnabled,
-            'no',
-            sprintf("Failed to remove extension.\n\nOutput:\n%s\n\nError output:\n%s\n", $this->output, $this->errorOutput),
-        );
     }
 
     #[Then('the extension should have been installed')]
@@ -244,35 +285,40 @@ class CliContext implements Context
 
         Assert::contains($this->output, 'Extension has NOT been automatically enabled.');
 
-        if (Platform::isWindows()) {
-            Assert::regex($this->output, '#Copied DLL to: [-\\\_:.a-zA-Z0-9]+\\\php_' . $this->theExtension . '.dll#');
+        foreach ($this->interactions as $install) {
+            if (Platform::isWindows()) {
+                Assert::regex($this->output, '#Copied DLL to: [-\\\_:.a-zA-Z0-9]+\\\php_' . $install['extension'] . '.dll#');
 
-            return;
+                continue;
+            }
+
+            Assert::regex($this->output, '#Install complete: [-_.a-zA-Z0-9/]+/' . $install['extension'] . '.so#');
         }
-
-        Assert::regex($this->output, '#Install complete: [-_.a-zA-Z0-9/]+/' . $this->theExtension . '.so#');
     }
 
     #[Then('the extension should have been installed and enabled')]
+    #[Then('the extensions should have been installed and enabled')]
     public function theExtensionShouldHaveBeenInstalledAndEnabled(): void
     {
         $this->assertCommandSuccessful();
 
         Assert::contains($this->output, 'Extension is enabled and loaded');
 
-        if (Platform::isWindows()) {
-            Assert::regex($this->output, '#Copied DLL to: [-\\\_:.a-zA-Z0-9]+\\\php_' . $this->theExtension . '.dll#');
+        foreach ($this->interactions as $install) {
+            if (Platform::isWindows()) {
+                Assert::regex($this->output, '#Copied DLL to: [-\\\_:.a-zA-Z0-9]+\\\php_' . $install['extension'] . '.dll#');
 
-            return;
+                continue;
+            }
+
+            Assert::regex($this->output, '#Install complete: [-_.a-zA-Z0-9/]+/' . $install['extension'] . '.so#');
+
+            $isExtEnabled = (new Process([self::PHP_BINARY, '-r', 'echo extension_loaded("' . $install['extension'] . '")?"yes":"no";']))
+                ->mustRun()
+                ->getOutput();
+
+            Assert::same($isExtEnabled, 'yes');
         }
-
-        Assert::regex($this->output, '#Install complete: [-_.a-zA-Z0-9/]+/' . $this->theExtension . '.so#');
-
-        $isExtEnabled = (new Process([self::PHP_BINARY, '-r', 'echo extension_loaded("' . $this->theExtension . '")?"yes":"no";']))
-            ->mustRun()
-            ->getOutput();
-
-        Assert::same($isExtEnabled, 'yes');
     }
 
     #[Then('the extension should not have been re-installed')]
@@ -280,13 +326,15 @@ class CliContext implements Context
     {
         $this->assertCommandSuccessful();
 
-        Assert::contains($this->output, 'PIE package asgrim/example-pie-extension (example_pie_extension) is already installed and verified.');
+        foreach ($this->interactions as $noops) {
+            Assert::contains($this->output, 'PIE package ' . $noops['package'] . ' (' . $noops['extension'] . ') is already installed and verified.');
 
-        $isExtEnabled = (new Process([self::PHP_BINARY, '-r', 'echo extension_loaded("' . $this->theExtension . '")?"yes":"no";']))
-            ->mustRun()
-            ->getOutput();
+            $isExtEnabled = (new Process([self::PHP_BINARY, '-r', 'echo extension_loaded("' . $noops['extension'] . '")?"yes":"no";']))
+                ->mustRun()
+                ->getOutput();
 
-        Assert::same($isExtEnabled, 'yes');
+            Assert::same($isExtEnabled, 'yes');
+        }
     }
 
     #[Given('I have an invalid extension installed')]
@@ -345,9 +393,8 @@ class CliContext implements Context
     #[Given('I have the sodium extension installed with PIE')]
     public function iInstallTheSodiumExtensionWithPie(): void
     {
-        $this->theExtension = 'sodium';
-        $this->thePackage   = 'php/sodium';
-        $this->runPieCommand(['install', $this->thePackage]);
+        $this->interactions[] = ['extension' => 'sodium', 'package' => 'php/sodium'];
+        $this->runPieCommand(['install', 'php/sodium']);
     }
 
     #[Given('I do not have libsodium on my system')]
@@ -359,9 +406,8 @@ class CliContext implements Context
     #[When('I display information about the sodium extension with PIE')]
     public function iDisplayInformationAboutTheSodiumExtensionWithPie(): void
     {
-        $this->theExtension = 'sodium';
-        $this->thePackage   = 'php/sodium';
-        $this->runPieCommand(['info', $this->thePackage]);
+        $this->interactions[] = ['extension' => 'sodium', 'package' => 'php/sodium'];
+        $this->runPieCommand(['info', 'php/sodium']);
     }
 
     #[Then('the information should show that libsodium is a missing dependency')]
@@ -445,8 +491,8 @@ class CliContext implements Context
     #[When('I run a command to install the extensions without package selections')]
     public function iRunACommandToInstallTheExtension(): void
     {
-        $this->theExtension = 'example_pie_extension';
-        $this->thePackage   = 'asgrim/example-pie-extension';
+        // Note: implied from composer.json, we don't explicitly request the packages here
+        $this->interactions[] = ['extension' => 'example_pie_extension', 'package' => 'asgrim/example-pie-extension'];
         $this->runPieCommand(['install']);
     }
 

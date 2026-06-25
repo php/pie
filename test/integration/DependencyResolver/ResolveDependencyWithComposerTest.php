@@ -83,7 +83,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
                 new PieComposerRequest(
                     $this->createMock(IOInterface::class),
                     $targetPlatform,
-                    $requestedPackageAndVersion,
+                    [$requestedPackageAndVersion],
                     PieOperation::Resolve,
                     [],
                     false,
@@ -94,8 +94,8 @@ final class ResolveDependencyWithComposerTest extends TestCase
             false,
         );
 
-        self::assertSame($expectedVersion, $package->version());
-        self::assertNotNull($package->downloadUrl());
-        self::assertStringMatchesFormat($expectedDownloadUrl, $package->downloadUrl());
+        self::assertSame($expectedVersion, $package->piePackage->version());
+        self::assertNotNull($package->piePackage->downloadUrl());
+        self::assertStringMatchesFormat($expectedDownloadUrl, $package->piePackage->downloadUrl());
     }
 }

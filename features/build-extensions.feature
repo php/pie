@@ -15,3 +15,8 @@ Feature: Extensions can be built with PIE
   Example: An extension can be built with configure options
     When I run a command to build an extension with configure options
     Then the extension should have been built with options
+
+  # pie build <ext1> <ext2>
+  Example: Multiple extensions can be built at once
+    When I run a command to build multiple extensions
+    Then the extensions should have been built

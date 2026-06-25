@@ -11,8 +11,11 @@ use Composer\Package\PackageInterface;
 use Composer\PartialComposer;
 use Composer\Repository\InstalledRepositoryInterface;
 use Composer\Util\Filesystem;
+use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\ExtensionType;
 
+use function array_map;
+use function implode;
 use function sprintf;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
@@ -39,12 +42,12 @@ class PiePackageInstaller extends LibraryInstaller
             ?->then(function () use ($composerPackage) {
                 $io = $this->composerRequest->pieOutput;
 
-                if ($this->composerRequest->requestedPackage->package !== $composerPackage->getName()) {
+                if (! $this->composerRequest->isFor($composerPackage->getName())) {
                     $io->write(
                         sprintf(
-                            '<comment>Skipping %s install request from Composer as it was not the expected PIE package %s</comment>',
+                            '<comment>Skipping %s install request from Composer as it was not the expected PIE package(s) %s</comment>',
                             $composerPackage->getName(),
-                            $this->composerRequest->requestedPackage->package,
+                            implode(', ', array_map(static fn (RequestedPackageAndVersion $req) => $req->package, $this->composerRequest->requestedPackages)),
                         ),
                         verbosity: IOInterface::VERY_VERBOSE,
                     );
@@ -81,12 +84,12 @@ class PiePackageInstaller extends LibraryInstaller
             ?->then(function () use ($composerPackage) {
                 $io = $this->composerRequest->pieOutput;
 
-                if ($this->composerRequest->requestedPackage->package !== $composerPackage->getName()) {
+                if (! $this->composerRequest->isFor($composerPackage->getName())) {
                     $io->write(
                         sprintf(
-                            '<comment>Skipping %s uninstall request from Composer as it was not the expected PIE package %s</comment>',
+                            '<comment>Skipping %s uninstall request from Composer as it was not the expected PIE package(s) %s</comment>',
                             $composerPackage->getName(),
-                            $this->composerRequest->requestedPackage->package,
+                            implode(', ', array_map(static fn (RequestedPackageAndVersion $req) => $req->package, $this->composerRequest->requestedPackages)),
                         ),
                         verbosity: IOInterface::VERY_VERBOSE,
                     );

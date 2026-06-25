@@ -61,7 +61,7 @@ class InstallAndBuildProcess
             $builtBinaryFile = ($this->pieBuild)(
                 $downloadedPackage,
                 $composerRequest->targetPlatform,
-                $composerRequest->configureOptions,
+                $composerRequest->configureOptionsFor($downloadedPackage->package->name()),
                 $io,
             );
 

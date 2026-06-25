@@ -28,7 +28,7 @@ class FetchDependencyStatuses
 
         /** @var array<string, Constraint> $platformConstraints */
         $platformConstraints = [];
-        $composerPlatform    = new PhpBinaryPathBasedPlatformRepository($targetPlatform->phpBinaryPath, $composer, new InstalledPiePackages(), null);
+        $composerPlatform    = new PhpBinaryPathBasedPlatformRepository($targetPlatform->phpBinaryPath, $composer, new InstalledPiePackages(), []);
         foreach ($composerPlatform->getPackages() as $platformPackage) {
             $platformConstraints[$platformPackage->getName()] = new Constraint('==', $platformPackage->getVersion());
         }

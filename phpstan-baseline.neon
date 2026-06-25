@@ -37,12 +37,6 @@ parameters:
 			path: src/Command/SelfVerifyCommand.php
 
 		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 1
-			path: src/Command/UninstallCommand.php
-
-		-
 			message: '#^Call to function assert\(\) with true will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1

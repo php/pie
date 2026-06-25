@@ -16,5 +16,5 @@ interface DependencyResolver
         TargetPlatform $targetPlatform,
         RequestedPackageAndVersion $requestedPackageAndVersion,
         bool $forceInstallPackageVersion,
-    ): Package;
+    ): ResolvedPackageRequest;
 }

@@ -8,6 +8,9 @@ use Composer\IO\IOInterface;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\Platform\TargetPlatform;
 
+use function array_map;
+use function in_array;
+
 /**
  * @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks
  *
@@ -15,15 +18,28 @@ use Php\Pie\Platform\TargetPlatform;
  */
 final class PieComposerRequest
 {
-    /** @param list<non-empty-string> $configureOptions */
+    /** @var list<string> */
+    private readonly array $requestedPackageNames;
+
+    /**
+     * @param list<RequestedPackageAndVersion>      $requestedPackages
+     * @param array<string, list<non-empty-string>> $configureOptions  Keyed by package name
+     */
     public function __construct(
         public readonly IOInterface $pieOutput,
         public readonly TargetPlatform $targetPlatform,
-        public readonly RequestedPackageAndVersion $requestedPackage,
+        public readonly array $requestedPackages,
         public readonly PieOperation $operation,
         public readonly array $configureOptions,
         public readonly bool $attemptToSetupIniFile,
     ) {
+        $this->requestedPackageNames = array_map(static fn (RequestedPackageAndVersion $request) => $request->package, $this->requestedPackages);
+    }
+
+    /** @return list<non-empty-string> */
+    public function configureOptionsFor(string $packageName): array
+    {
+        return $this->configureOptions[$packageName] ?? [];
     }
 
     /**
@@ -37,10 +53,15 @@ final class PieComposerRequest
         return new PieComposerRequest(
             $pieOutput,
             $targetPlatform,
-            new RequestedPackageAndVersion('null/null', null),
+            [],
             PieOperation::Resolve,
             [],
             false,
         );
+    }
+
+    public function isFor(string $packageName): bool
+    {
+        return in_array($packageName, $this->requestedPackageNames);
     }
 }

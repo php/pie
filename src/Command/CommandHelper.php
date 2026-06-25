@@ -16,9 +16,12 @@ use InvalidArgumentException;
 use OutOfRangeException;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
+use Php\Pie\DependencyResolver\BundledPhpExtensionRefusal;
+use Php\Pie\DependencyResolver\DependencyResolver;
 use Php\Pie\DependencyResolver\InvalidPackageName;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
+use Php\Pie\DependencyResolver\ResolvedPackageRequest;
 use Php\Pie\DependencyResolver\UnableToResolveRequirement;
 use Php\Pie\ExtensionName;
 use Php\Pie\Installing\InstallForPhpProject\FindMatchingPackages;
@@ -37,6 +40,7 @@ use Webmozart\Assert\Assert;
 
 use function array_key_exists;
 use function array_map;
+use function array_values;
 use function assert;
 use function count;
 use function explode;
@@ -110,8 +114,8 @@ final class CommandHelper
         if ($withRequestedPackageAndVersion) {
             $command->addArgument(
                 self::ARG_REQUESTED_PACKAGE_AND_VERSION,
-                InputArgument::OPTIONAL,
-                'The PIE package name and version constraint to use, in the format {vendor/package}{?:{?version-constraint}{?@stability}}, for example `xdebug/xdebug:^3.4@alpha`, `xdebug/xdebug:@alpha`, `xdebug/xdebug:^3.4`, etc.',
+                InputArgument::OPTIONAL | InputArgument::IS_ARRAY,
+                'The PIE package names and versions constraint to use, in the format {vendor/package}{?:{?version-constraint}{?@stability}}, for example `xdebug/xdebug:^3.4@alpha`, `xdebug/xdebug:@alpha`, `xdebug/xdebug:^3.4`, etc.',
             );
         }
 
@@ -312,74 +316,152 @@ final class CommandHelper
             || ! $input->getOption(self::OPTION_SUPPRESS_SYSTEM_DEPENDENCIES_CHECK);
     }
 
-    public static function requestedNameAndVersionPair(InputInterface $input): RequestedPackageAndVersion
+    /** @return non-empty-list<RequestedPackageAndVersion> */
+    public static function requestedNameAndVersionPairs(InputInterface $input): array
     {
-        $requestedPackageString = $input->getArgument(self::ARG_REQUESTED_PACKAGE_AND_VERSION);
+        $requestedPackageStrings = $input->getArgument(self::ARG_REQUESTED_PACKAGE_AND_VERSION);
 
-        if (! is_string($requestedPackageString) || $requestedPackageString === '') {
+        if (is_string($requestedPackageStrings)) {
+            $requestedPackageStrings = [$requestedPackageStrings];
+        }
+
+        if (! is_array($requestedPackageStrings) || ! count($requestedPackageStrings)) {
             throw new InvalidArgumentException('No package was requested for installation');
         }
 
-        $nameAndVersionPairs         = (new VersionParser())
-            ->parseNameVersionPairs([$requestedPackageString]);
-        $requestedNameAndVersionPair = reset($nameAndVersionPairs);
+        Assert::allStringNotEmpty($requestedPackageStrings);
 
-        if (! is_array($requestedNameAndVersionPair)) {
-            throw new InvalidArgumentException('Failed to parse the name/version pair');
-        }
+        return array_values(array_map(
+            static function (string $requestedPackageString): RequestedPackageAndVersion {
+                $nameAndVersionPairs         = (new VersionParser())
+                    ->parseNameVersionPairs([$requestedPackageString]);
+                $requestedNameAndVersionPair = reset($nameAndVersionPairs);
 
-        if (! array_key_exists('version', $requestedNameAndVersionPair)) {
-            $requestedNameAndVersionPair['version'] = null;
-        }
+                if (! is_array($requestedNameAndVersionPair)) {
+                    throw new InvalidArgumentException('Failed to parse the name/version pair');
+                }
 
-        Assert::stringNotEmpty($requestedNameAndVersionPair['name']);
-        Assert::nullOrStringNotEmpty($requestedNameAndVersionPair['version']);
+                if (! array_key_exists('version', $requestedNameAndVersionPair)) {
+                    $requestedNameAndVersionPair['version'] = null;
+                }
 
-        return new RequestedPackageAndVersion(
-            $requestedNameAndVersionPair['name'],
-            $requestedNameAndVersionPair['version'],
+                Assert::stringNotEmpty($requestedNameAndVersionPair['name']);
+                Assert::nullOrStringNotEmpty($requestedNameAndVersionPair['version']);
+
+                return new RequestedPackageAndVersion(
+                    $requestedNameAndVersionPair['name'],
+                    $requestedNameAndVersionPair['version'],
+                );
+            },
+            $requestedPackageStrings,
+        ));
+    }
+
+    /**
+     * @param non-empty-list<RequestedPackageAndVersion> $requestedNamesAndVersions
+     *
+     * @return non-empty-list<ResolvedPackageRequest>
+     *
+     * @throws UnableToResolveRequirement
+     * @throws BundledPhpExtensionRefusal
+     */
+    public static function resolveRequestedPackages(
+        DependencyResolver $dependencyResolver,
+        IOInterface $io,
+        Composer $composer,
+        TargetPlatform $targetPlatform,
+        array $requestedNamesAndVersions,
+        bool $forceInstallPackageVersion,
+    ): array {
+        return array_map(
+            static function (RequestedPackageAndVersion $requestedNameAndVersion) use ($dependencyResolver, $io, $composer, $targetPlatform, $forceInstallPackageVersion): ResolvedPackageRequest {
+                $resolvedPackage = $dependencyResolver(
+                    $composer,
+                    $targetPlatform,
+                    $requestedNameAndVersion,
+                    $forceInstallPackageVersion,
+                );
+
+                $io->write(sprintf(
+                    '<info>Found package:</info> %s which provides <info>%s</info>',
+                    $resolvedPackage->piePackage->prettyNameAndVersion(),
+                    $resolvedPackage->piePackage->extensionName()->nameWithExtPrefix(),
+                ));
+
+                return $resolvedPackage;
+            },
+            $requestedNamesAndVersions,
         );
     }
 
-    public static function bindConfigureOptionsFromPackage(Command $command, Package $package, InputInterface $input): void
+    /**
+     * @param non-empty-list<Package> $packages
+     *
+     * @throws ConfigureOptionCollision if two of the requested packages declare a configure option with the same name.
+     */
+    public static function bindConfigureOptionsFromPackage(Command $command, array $packages, InputInterface $input): void
     {
-        foreach ($package->configureOptions() as $configureOption) {
-            $command->addOption(
-                $configureOption->name,
-                null,
-                $configureOption->needsValue ? InputOption::VALUE_REQUIRED : InputOption::VALUE_NONE,
-                $configureOption->description,
-            );
+        /** @var array<string, Package> $optionOwners */
+        $optionOwners = [];
+
+        foreach ($packages as $package) {
+            foreach ($package->configureOptions() as $configureOption) {
+                if (array_key_exists($configureOption->name, $optionOwners)) {
+                    throw ConfigureOptionCollision::forOptionName(
+                        $configureOption->name,
+                        $optionOwners[$configureOption->name],
+                        $package,
+                    );
+                }
+
+                $optionOwners[$configureOption->name] = $package;
+
+                $command->addOption(
+                    $configureOption->name,
+                    null,
+                    $configureOption->needsValue ? InputOption::VALUE_REQUIRED : InputOption::VALUE_NONE,
+                    $configureOption->description,
+                );
+            }
         }
 
         self::validateInput($input, $command);
     }
 
-    /** @return list<non-empty-string> */
-    public static function processConfigureOptionsFromInput(Package $package, InputInterface $input): array
+    /**
+     * @param non-empty-list<Package> $packages
+     *
+     * @return array<string, list<non-empty-string>> Keyed by package name
+     */
+    public static function processConfigureOptionsFromInput(array $packages, InputInterface $input): array
     {
         $configureOptionsValues = [];
-        foreach ($package->configureOptions() as $configureOption) {
-            if (! $input->hasOption($configureOption->name)) {
-                continue;
-            }
-
-            $value = $input->getOption($configureOption->name);
-
-            if ($configureOption->needsValue) {
-                if (is_string($value) && $value !== '') {
-                    $configureOptionsValues[] = '--' . $configureOption->name . '=' . $value;
+        foreach ($packages as $package) {
+            $optionsForPackage = [];
+            foreach ($package->configureOptions() as $configureOption) {
+                if (! $input->hasOption($configureOption->name)) {
+                    continue;
                 }
 
-                continue;
+                $value = $input->getOption($configureOption->name);
+
+                if ($configureOption->needsValue) {
+                    if (is_string($value) && $value !== '') {
+                        $optionsForPackage[] = '--' . $configureOption->name . '=' . $value;
+                    }
+
+                    continue;
+                }
+
+                Assert::boolean($value);
+                if ($value !== true) {
+                    continue;
+                }
+
+                $optionsForPackage[] = '--' . $configureOption->name;
             }
 
-            Assert::boolean($value);
-            if ($value !== true) {
-                continue;
-            }
-
-            $configureOptionsValues[] = '--' . $configureOption->name;
+            $configureOptionsValues[$package->name()] = $optionsForPackage;
         }
 
         return $configureOptionsValues;

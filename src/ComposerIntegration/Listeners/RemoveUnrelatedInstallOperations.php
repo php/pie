@@ -58,7 +58,7 @@ class RemoveUnrelatedInstallOperations
                     return false;
                 }
 
-                $isRequestedPiePackage = $this->composerRequest->requestedPackage->package === $operation->getPackage()->getName();
+                $isRequestedPiePackage = $this->composerRequest->isFor($operation->getPackage()->getName());
 
                 if (! $isRequestedPiePackage) {
                     $pieOutput->writeError(
