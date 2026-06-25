@@ -74,8 +74,8 @@ class CheckAllBuildTools
                 [
                     PackageManager::Apt->value => 'php-dev',
                     PackageManager::Apk->value => 'php{major}{minor}-dev',
-                    PackageManager::Dnf->value => 'php-devel',
-                    PackageManager::Yum->value => 'php-devel',
+                    PackageManager::Dnf->value => '{php-config-path}',
+                    PackageManager::Yum->value => '{php-config-path}',
                     PackageManager::Brew->value => 'php',
                 ],
             ),
