@@ -460,7 +460,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
     }
 
     /** @return array<non-empty-string, array{0: non-empty-string}> */
-    public function buildProvidersWithBundledExtensionWarnings(): array
+    public static function buildProvidersWithBundledExtensionWarnings(): array
     {
         return [
             'Docker' => ['https://github.com/docker-library/php'],

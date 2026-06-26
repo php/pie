@@ -12,6 +12,7 @@ enum PackageVerificationStatus
     case InstalledBinaryMetadataMissing;
     case ChecksumMetadataMissing;
     case InstalledBinaryPathDoesNotMatchActualBinaryPath;
+    case InstalledButDoesNotExistInRequires;
 
     public function description(): string
     {
@@ -22,6 +23,7 @@ enum PackageVerificationStatus
             self::InstalledBinaryMetadataMissing => Emoji::WARNING . ' - installed extension metadata missing',
             self::ChecksumMetadataMissing => Emoji::WARNING . ' - binary checksum metadata missing',
             self::InstalledBinaryPathDoesNotMatchActualBinaryPath => Emoji::WARNING . ' - binary path mismatch',
+            self::InstalledButDoesNotExistInRequires => Emoji::WARNING . '- installed but does not exist in pie.json',
         };
     }
 

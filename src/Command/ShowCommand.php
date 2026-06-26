@@ -6,6 +6,7 @@ namespace Php\Pie\Command;
 
 use Composer\IO\IOInterface;
 use Composer\IO\NullIO;
+use InvalidArgumentException;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\DependencyResolver\BundledPhpExtensionRefusal;
@@ -26,6 +27,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Webmozart\Assert\Assert;
 
 use function array_diff;
+use function array_key_exists;
 use function array_map;
 use function array_walk;
 use function count;
@@ -115,7 +117,7 @@ final class ShowCommand extends Command
                 foreach ($pieMatchesForExtension->packages() as $piePackage) {
                     $packageName        = $piePackage->name();
                     $verificationStatus = $piePackage->verifyPackageStatus($targetPlatform);
-                    $packageRequirement = $rootPackageRequires[$packageName]->getPrettyConstraint();
+                    $packageRequirement = array_key_exists($packageName, $rootPackageRequires) ? $rootPackageRequires[$packageName]->getPrettyConstraint() : null;
 
                     if ($verificationStatus === PackageVerificationStatus::InstalledBinaryMetadataMissing) {
                         continue;
@@ -145,7 +147,7 @@ final class ShowCommand extends Command
                             new RequestedPackageAndVersion($packageName, '*'),
                             false,
                         );
-                    } catch (UnableToResolveRequirement | BundledPhpExtensionRefusal) {
+                    } catch (UnableToResolveRequirement | BundledPhpExtensionRefusal | InvalidArgumentException) {
                         $latestConstrainedPackage = null;
                         $latestPackage            = null;
                     }
@@ -161,6 +163,10 @@ final class ShowCommand extends Command
 
                     if ($latestPackage !== null && $latestPackage->piePackage->version() !== $latestConstrainedPackage->piePackage->version()) {
                         $updateNotice .= sprintf(', latest version is %s', $latestPackage->piePackage->version());
+                    }
+
+                    if (! array_key_exists($packageName, $rootPackageRequires)) {
+                        $verificationStatus = PackageVerificationStatus::InstalledButDoesNotExistInRequires;
                     }
 
                     $this->io->write(sprintf(
