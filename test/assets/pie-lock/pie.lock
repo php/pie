@@ -1,0 +1,115 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "bbeb326cf52bdf49183176118718973c",
+    "packages": [
+        {
+            "name": "asgrim/example-pie-extension",
+            "version": "2.0.9",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/asgrim/example-pie-extension.git",
+                "reference": "963c8d70c57c23fa2098e499a0ebffabb64748b3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/asgrim/example-pie-extension/zipball/963c8d70c57c23fa2098e499a0ebffabb64748b3",
+                "reference": "963c8d70c57c23fa2098e499a0ebffabb64748b3",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.4,^8.0"
+            },
+            "replace": {
+                "ext-example_pie_extension": "*"
+            },
+            "type": "php-ext",
+            "notification-url": "https://packagist.org/downloads/",
+            "php-ext": {
+                "priority": 74,
+                "extension-name": "ext-example_pie_extension",
+                "configure-options": [
+                    {
+                        "name": "enable-example-pie-extension",
+                        "description": "whether to enable example-pie-extension support"
+                    },
+                    {
+                        "name": "with-hello-name",
+                        "description": "Name ot use when saying hello",
+                        "needs-value": true
+                    }
+                ],
+                "download-url-method": [
+                    "pre-packaged-binary",
+                    "composer-default"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Example PIE extension",
+            "support": {
+                "issues": "https://github.com/asgrim/example-pie-extension/issues",
+                "source": "https://github.com/asgrim/example-pie-extension/tree/2.0.9"
+            },
+            "time": "2026-02-04T17:27:25+00:00"
+        },
+        {
+            "name": "xdebug/xdebug",
+            "version": "3.5.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/xdebug/xdebug.git",
+                "reference": "f2f0ebf216d511c55d69f705f542a73b116dbf6e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/xdebug/xdebug/zipball/f2f0ebf216d511c55d69f705f542a73b116dbf6e",
+                "reference": "f2f0ebf216d511c55d69f705f542a73b116dbf6e",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.0,<8.6"
+            },
+            "type": "php-ext-zend",
+            "notification-url": "https://packagist.org/downloads/",
+            "php-ext": {
+                "priority": 90
+            },
+            "license": [
+                "Xdebug-1.03"
+            ],
+            "description": "Xdebug is a debugging and productivity extension for PHP",
+            "support": {
+                "source": "https://github.com/xdebug/xdebug/tree/3.5.2"
+            },
+            "funding": [
+                {
+                    "url": "https://xdebug.org/support",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/derickr",
+                    "type": "github"
+                },
+                {
+                    "url": "https://www.patreon.com/derickr",
+                    "type": "patreon"
+                }
+            ],
+            "time": "2026-06-08T14:31:52+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": {},
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": {},
+    "platform-dev": {},
+    "plugin-api-version": "2.9.0"
+}

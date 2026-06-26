@@ -10,17 +10,23 @@ use Behat\Step\Given;
 use Behat\Step\Then;
 use Behat\Step\When;
 use Composer\Util\Platform;
+use RuntimeException;
 use Safe\Exceptions\PcreException;
 use Symfony\Component\Process\Process;
 use Webmozart\Assert\Assert;
 
+use function array_combine;
 use function array_map;
 use function array_merge;
 use function Safe\copy;
+use function Safe\file_get_contents;
+use function Safe\file_put_contents;
+use function Safe\preg_match;
 use function Safe\preg_match_all;
 use function Safe\realpath;
 use function sprintf;
 use function str_contains;
+use function str_replace;
 
 class CliContext implements Context
 {
@@ -35,6 +41,10 @@ class CliContext implements Context
     /** @var list<array{extension: string, package: non-empty-string}> */
     private array $interactions           = [];
     private string|null $workingDirectory = null;
+    private string $pieJsonFilename;
+    private string $pieLockFilename;
+    private string $pieJsonContentBackup;
+    private string $pieLockContentBackup;
 
     /** @throws PcreException */
     #[AfterScenario]
@@ -537,5 +547,63 @@ class CliContext implements Context
 
         Assert::notNull($this->errorOutput);
         Assert::contains($this->errorOutput, '❌ Failed to verify that this PIE binary is the authentic release');
+    }
+
+    #[Given('I have a lock file')]
+    public function iHaveALockfile(): void
+    {
+        $this->runPieCommand(['install', 'xdebug/xdebug:3.5.2', 'derickr/quickhash']);
+
+        $this->runPieCommand(['show', '-v']);
+        Assert::notNull($this->output);
+        preg_match('#Using pie\.json: (.+)#', $this->output, $pieJsonRegexMatches);
+        Assert::keyExists($pieJsonRegexMatches, 1);
+        $this->pieJsonFilename = $pieJsonRegexMatches[1];
+        $this->pieLockFilename = str_replace('pie.json', 'pie.lock', $this->pieJsonFilename);
+
+        $this->pieJsonContentBackup = file_get_contents($this->pieJsonFilename);
+        $this->pieLockContentBackup = file_get_contents($this->pieLockFilename);
+
+        $testPieLockPath = realpath(__DIR__ . '/../assets/pie-lock');
+        copy($testPieLockPath . '/pie.json', $this->pieJsonFilename);
+        copy($testPieLockPath . '/pie.lock', $this->pieLockFilename);
+    }
+
+    #[When('I run a command to install from the lockfile')]
+    public function iRunACommandToInstallFromTheLockfile(): void
+    {
+        $this->runPieCommand(['install', '--from-lock']);
+    }
+
+    #[Then('the extensions should have been updated to the lock')]
+    public function theExtensionsShouldHaveBeenUpdatedToTheLock(): void
+    {
+        $this->assertCommandSuccessful();
+        // @todo could potentially check for signs the relevant packages are affected here
+
+        $this->runPieCommand(['show']);
+        $this->assertCommandSuccessful();
+
+        if (! preg_match_all('#([a-zA-Z0-9-_]+/[a-zA-Z0-9-_]+):([^ ]+)#', (string) $this->output, $matches)) {
+            throw new RuntimeException('no packages found in pie show');
+        }
+
+        $installedExtensionPackagesAndVersions = array_combine($matches[1], $matches[2]);
+
+        // `xdebug` should be downgraded to 3.5.2
+        Assert::keyExists($installedExtensionPackagesAndVersions, 'xdebug/xdebug');
+        Assert::same($installedExtensionPackagesAndVersions['xdebug/xdebug'], '3.5.2');
+
+        // `quickhash` should have been removed (not in lockfile)
+        Assert::keyNotExists($installedExtensionPackagesAndVersions, 'derickr/quickhash');
+
+        // `example_pie_extension` 2.0.9 should have been installed (was not previously installed)
+        Assert::keyExists($installedExtensionPackagesAndVersions, 'asgrim/example-pie-extension');
+        Assert::same($installedExtensionPackagesAndVersions['asgrim/example-pie-extension'], '2.0.9');
+
+        // restore the pie.json/lock contents, and re-install from the lock
+        file_put_contents($this->pieJsonFilename, $this->pieJsonContentBackup);
+        file_put_contents($this->pieLockFilename, $this->pieLockContentBackup);
+        $this->runPieCommand(['install', '--from-lock']);
     }
 }
