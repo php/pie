@@ -99,7 +99,7 @@ class PrescanSystemDependencies
         $this->io->write(sprintf('<info>Need to install missing system dependencies:</info> %s', $proposedInstallCommand));
 
         if ($this->io->isInteractive() && ! $autoInstallIfMissing) {
-            if (! $this->io->askConfirmation('<question>Would you like to install them now?</question>', false)) {
+            if (! $this->io->askConfirmation('<question>Would you like to install them now? [y/N]</question>', false)) {
                 $this->io->write('<comment>Ok, but things might not work. Just so you know.</comment>');
 
                 return;

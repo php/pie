@@ -79,6 +79,7 @@ final class CheckAllBuildToolsTest extends TestCase
         $outputString = $io->getOutput();
         self::assertStringContainsString('Checking if all build tools are installed.', $outputString);
         self::assertStringContainsString('The following build tools are missing: bloop', $outputString);
+        self::assertStringContainsString('Would you like to install them now? [y/N]', $outputString);
         self::assertStringContainsString('The following command will be run: echo "fake installing coreutils"', $outputString);
         self::assertStringContainsString('Missing build tools have been installed.', $outputString);
     }

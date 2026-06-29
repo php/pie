@@ -171,7 +171,7 @@ class CheckAllBuildTools
         $io->write('The following command will be run: ' . $proposedInstallCommand, verbosity: IOInterface::VERBOSE);
 
         if ($io->isInteractive() && ! $autoInstallIfMissing) {
-            if (! $io->askConfirmation('<question>Would you like to install them now?</question>', false)) {
+            if (! $io->askConfirmation('<question>Would you like to install them now? [y/N]</question>', false)) {
                 $io->write('<comment>Ok, but things might not work. Just so you know.</comment>');
 
                 return;
