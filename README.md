@@ -4,7 +4,7 @@
 
 PIE is the official installer for PHP extensions, which replaces
 [PECL](https://pecl.php.net/) (which is now deprecated). PIE is distributed as a
-[PHAR](https://www.php.net/manual/en/intro.phar.php), just like Composer, and
+[PHAR](https://www.php.net/manual/en/book.phar.php), just like Composer, and
 works in a similar way to Composer, but it installs PHP extensions (PHP Modules
 or Zend Extensions) to your PHP installation, rather than pulling PHP packages
 into your project or library.
