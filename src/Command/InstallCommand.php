@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\Pie\Command;
 
 use Composer\IO\IOInterface;
+use InvalidArgumentException;
 use Php\Pie\ComposerIntegration\ComposerIntegrationHandler;
 use Php\Pie\ComposerIntegration\ComposerRunFailed;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
@@ -24,6 +25,7 @@ use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 
@@ -33,6 +35,8 @@ use Throwable;
 )]
 final class InstallCommand extends Command
 {
+    public const OPTION_FROM_LOCK = 'from-lock';
+
     public function __construct(
         private readonly ContainerInterface $container,
         private readonly DependencyResolver $dependencyResolver,
@@ -51,11 +55,31 @@ final class InstallCommand extends Command
         parent::configure();
 
         CommandHelper::configureDownloadBuildInstallOptions($this);
+
+        $this->addOption(
+            self::OPTION_FROM_LOCK,
+            null,
+            InputOption::VALUE_NONE,
+            'Install the exact versions specified in the pie.lock file for the target PHP.',
+        );
+    }
+
+    public static function shouldInstallFromLock(InputInterface $input): bool
+    {
+        return $input->hasOption(self::OPTION_FROM_LOCK) && (bool) $input->getOption(self::OPTION_FROM_LOCK);
     }
 
     public function execute(InputInterface $input, OutputInterface $output): int
     {
-        if (! $input->getArgument(CommandHelper::ARG_REQUESTED_PACKAGE_AND_VERSION)) {
+        $installFromLock = self::shouldInstallFromLock($input);
+
+        if ($installFromLock && $input->getArgument(CommandHelper::ARG_REQUESTED_PACKAGE_AND_VERSION)) {
+            $this->io->writeError('<error>The --from-lock option installs all extensions from the lock file and cannot be combined with a specific package argument.</error>');
+
+            return self::INVALID;
+        }
+
+        if (! $installFromLock && ! $input->getArgument(CommandHelper::ARG_REQUESTED_PACKAGE_AND_VERSION)) {
             return ($this->invokeSubCommand)(
                 $this,
                 ['command' => 'install-extensions-for-project'],
@@ -78,6 +102,12 @@ final class InstallCommand extends Command
                 $targetPlatform,
                 $this->container,
             );
+        } catch (InvalidArgumentException $noPackagesRequested) {
+            if (! $installFromLock) {
+                throw $noPackagesRequested;
+            }
+
+            $requestedNamesAndVersions = [];
         }
 
         $forceInstallPackageVersion = CommandHelper::determineForceInstallingPackageVersion($input);
