@@ -32,6 +32,7 @@ final class PieComposerRequest
         public readonly PieOperation $operation,
         public readonly array $configureOptions,
         public readonly bool $attemptToSetupIniFile,
+        public readonly bool $installAllPackages = false,
     ) {
         $this->requestedPackageNames = array_map(static fn (RequestedPackageAndVersion $request) => $request->package, $this->requestedPackages);
     }
@@ -62,6 +63,10 @@ final class PieComposerRequest
 
     public function isFor(string $packageName): bool
     {
+        if ($this->installAllPackages) {
+            return true;
+        }
+
         return in_array($packageName, $this->requestedPackageNames);
     }
 }

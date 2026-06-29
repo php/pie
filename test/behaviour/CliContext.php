@@ -572,7 +572,7 @@ class CliContext implements Context
     #[When('I run a command to install from the lockfile')]
     public function iRunACommandToInstallFromTheLockfile(): void
     {
-        $this->runPieCommand(['install', '--from-lock']);
+        $this->runPieCommand(['install', '-v', '--from-lock']);
     }
 
     #[Then('the extensions should have been updated to the lock')]

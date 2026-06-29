@@ -395,7 +395,7 @@ final class CommandHelper
     }
 
     /**
-     * @param non-empty-list<Package> $packages
+     * @param list<Package> $packages
      *
      * @throws ConfigureOptionCollision if two of the requested packages declare a configure option with the same name.
      */
@@ -429,7 +429,7 @@ final class CommandHelper
     }
 
     /**
-     * @param non-empty-list<Package> $packages
+     * @param list<Package> $packages
      *
      * @return array<string, list<non-empty-string>> Keyed by package name
      */

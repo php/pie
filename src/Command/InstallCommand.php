@@ -152,15 +152,18 @@ final class InstallCommand extends Command
             }
         }
 
+        $resolvedPackages = [];
         try {
-            $resolvedPackages = CommandHelper::resolveRequestedPackages(
-                $this->dependencyResolver,
-                $this->io,
-                $composer,
-                $targetPlatform,
-                $requestedNamesAndVersions,
-                $forceInstallPackageVersion,
-            );
+            if ($requestedNamesAndVersions !== []) {
+                $resolvedPackages = CommandHelper::resolveRequestedPackages(
+                    $this->dependencyResolver,
+                    $this->io,
+                    $composer,
+                    $targetPlatform,
+                    $requestedNamesAndVersions,
+                    $forceInstallPackageVersion,
+                );
+            }
         } catch (UnableToResolveRequirement $unableToResolveRequirement) {
             return CommandHelper::handlePackageNotFound(
                 $unableToResolveRequirement,
@@ -191,6 +194,7 @@ final class InstallCommand extends Command
                 PieOperation::Install,
                 $configureOptionsValues,
                 CommandHelper::determineAttemptToSetupIniFile($input),
+                installAllPackages: $installFromLock,
             ),
         );
 
@@ -201,6 +205,7 @@ final class InstallCommand extends Command
                 $targetPlatform,
                 $forceInstallPackageVersion,
                 true,
+                installFromLock: $installFromLock,
             );
         } catch (ComposerRunFailed $composerRunFailed) {
             $this->io->writeError('<error>' . $composerRunFailed->getMessage() . '</error>');
