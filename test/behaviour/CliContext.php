@@ -18,6 +18,7 @@ use Webmozart\Assert\Assert;
 use function array_combine;
 use function array_map;
 use function array_merge;
+use function preg_quote;
 use function Safe\copy;
 use function Safe\file_get_contents;
 use function Safe\file_put_contents;
@@ -271,9 +272,9 @@ class CliContext implements Context
 
         foreach ($this->interactions as $uninstall) {
             if (Platform::isWindows()) {
-                Assert::regex($this->output, '#👋 Removed extension: [-\\\_:.a-zA-Z0-9]+\\\php_' . $uninstall['extension'] . '.dll#');
+                Assert::regex($this->output, '#👋 Removed extension ' . preg_quote($uninstall['package'], '#') . ':[^:]+: [-\\\_:.a-zA-Z0-9]+\\\php_' . preg_quote($uninstall['extension'], '#') . '.dll#');
             } else {
-                Assert::regex($this->output, '#👋 Removed extension: [-_.a-zA-Z0-9/]+/' . $uninstall['extension'] . '.so#');
+                Assert::regex($this->output, '#👋 Removed extension ' . preg_quote($uninstall['package'], '#') . ':[^:]+: [-_.a-zA-Z0-9/]+/' . preg_quote($uninstall['extension'], '#') . '.so#');
             }
 
             $isExtEnabled = (new Process([self::PHP_BINARY, '-r', 'echo extension_loaded("' . $uninstall['extension'] . '")?"yes":"no";']))
@@ -312,16 +313,16 @@ class CliContext implements Context
     {
         $this->assertCommandSuccessful();
 
-        Assert::contains($this->output, 'Extension is enabled and loaded');
-
         foreach ($this->interactions as $install) {
+            Assert::regex($this->output, '#Extension ' . preg_quote($install['package'], '#') . ':\S+ is enabled and loaded#');
+
             if (Platform::isWindows()) {
-                Assert::regex($this->output, '#Copied DLL to: [-\\\_:.a-zA-Z0-9]+\\\php_' . $install['extension'] . '.dll#');
+                Assert::regex($this->output, '#Copied DLL to: [-\\\_:.a-zA-Z0-9]+\\\php_' . preg_quote($install['extension'], '#') . '.dll#');
 
                 continue;
             }
 
-            Assert::regex($this->output, '#Install complete: [-_.a-zA-Z0-9/]+/' . $install['extension'] . '.so#');
+            Assert::regex($this->output, '#Install complete: [-_.a-zA-Z0-9/]+/' . preg_quote($install['extension'], '#') . '.so#');
 
             $isExtEnabled = (new Process([self::PHP_BINARY, '-r', 'echo extension_loaded("' . $install['extension'] . '")?"yes":"no";']))
                 ->mustRun()
@@ -552,7 +553,7 @@ class CliContext implements Context
     #[Given('I have a lock file')]
     public function iHaveALockfile(): void
     {
-        $this->runPieCommand(['install', 'xdebug/xdebug:3.5.2', 'derickr/quickhash']);
+        $this->runPieCommand(['install', 'xdebug/xdebug:3.5.3', 'derickr/quickhash']);
 
         $this->runPieCommand(['show', '-v']);
         Assert::notNull($this->output);
@@ -579,7 +580,9 @@ class CliContext implements Context
     public function theExtensionsShouldHaveBeenUpdatedToTheLock(): void
     {
         $this->assertCommandSuccessful();
-        // @todo could potentially check for signs the relevant packages are affected here
+
+        Assert::notNull($this->output);
+        $pieInstallOutput = $this->output;
 
         $this->runPieCommand(['show']);
         $this->assertCommandSuccessful();
@@ -591,13 +594,17 @@ class CliContext implements Context
         $installedExtensionPackagesAndVersions = array_combine($matches[1], $matches[2]);
 
         // `xdebug` should be downgraded to 3.5.2
+        Assert::contains($pieInstallOutput, 'PIE package xdebug/xdebug (xdebug) is at 3.5.3 but the lock requires 3.5.2, scheduling for reinstall');
+        Assert::contains($pieInstallOutput, 'Extension xdebug/xdebug:3.5.2 is enabled and loaded');
         Assert::keyExists($installedExtensionPackagesAndVersions, 'xdebug/xdebug');
         Assert::same($installedExtensionPackagesAndVersions['xdebug/xdebug'], '3.5.2');
 
         // `quickhash` should have been removed (not in lockfile)
+        Assert::contains($pieInstallOutput, 'Removed extension derickr/quickhash:');
         Assert::keyNotExists($installedExtensionPackagesAndVersions, 'derickr/quickhash');
 
         // `example_pie_extension` 2.0.9 should have been installed (was not previously installed)
+        Assert::contains($pieInstallOutput, 'Extension asgrim/example-pie-extension:2.0.9 is enabled and loaded');
         Assert::keyExists($installedExtensionPackagesAndVersions, 'asgrim/example-pie-extension');
         Assert::same($installedExtensionPackagesAndVersions['asgrim/example-pie-extension'], '2.0.9');
 

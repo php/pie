@@ -36,7 +36,11 @@ class UninstallProcess
         $status = $piePackage->verifyPackageStatus($composerRequest->targetPlatform);
 
         if ($status->isVerified()) {
-            $io->write(sprintf('👋 <info>Removed extension:</info> %s', ($this->uninstall)($targetPlatform, $piePackage)->filePath));
+            $io->write(sprintf(
+                '👋 <info>Removed extension %s:</info> %s',
+                $piePackage->prettyNameAndVersion(),
+                ($this->uninstall)($targetPlatform, $piePackage)->filePath,
+            ));
         } else {
             $io->writeError(sprintf('<warning>Did not remove extension file:</warning> %s', $status->description()));
         }
