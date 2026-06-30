@@ -20,10 +20,12 @@ use Php\Pie\DependencyResolver\Package;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\DependencyResolver\ResolvedPackageRequest;
 use Php\Pie\Platform;
+use Php\Pie\Platform\OperatingSystem;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
 use Php\PieIntegrationTest\Command\IsolatedWorkingDirectoryTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\RequiresOperatingSystemFamily;
 use Symfony\Component\Console\Output\BufferedOutput;
 
 use function file_exists;
@@ -117,6 +119,7 @@ final class ComposerIntegrationHandlerTest extends IsolatedWorkingDirectoryTestC
         self::assertStringContainsString('Nothing to install, update or remove', $output);
     }
 
+    #[RequiresOperatingSystemFamily('Linux')]
     public function testRunInstallReinstallsVerifiedPackageWhenVersionDiffers(): void
     {
         PieJsonEditor::fromTargetPlatform($this->targetPlatform)
@@ -169,7 +172,9 @@ final class ComposerIntegrationHandlerTest extends IsolatedWorkingDirectoryTestC
 
     private function extensionBinaryPath(): string
     {
-        return $this->targetPlatform->phpBinaryPath->extensionPath() . DIRECTORY_SEPARATOR . self::EXTENSION_NAME . '.so';
+        $isWindows = $this->targetPlatform->operatingSystem === OperatingSystem::Windows;
+
+        return $this->targetPlatform->phpBinaryPath->extensionPath() . DIRECTORY_SEPARATOR . ($isWindows ? 'php_' : '') . self::EXTENSION_NAME . ($isWindows ? '.dll' : '.so');
     }
 
     /** @param non-empty-string $version */
