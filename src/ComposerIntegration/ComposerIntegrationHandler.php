@@ -92,7 +92,14 @@ class ComposerIntegrationHandler
         // Refresh the Composer instance so it re-reads the updated pie.json
         $composer = PieComposerFactory::recreatePieComposer($this->container, $composer);
 
-        foreach ($composer->getRepositoryManager()->getLocalRepository()->getPackages() as $localRepoPackage) {
+        $resolvedPackageByName = [];
+        foreach ($resolvedRequestedPackages as $resolvedPackageRequest) {
+            $resolvedPackageByName[$resolvedPackageRequest->piePackage->composerPackage()->getName()] = $resolvedPackageRequest->piePackage;
+        }
+
+        $localRepository = $composer->getRepositoryManager()->getLocalRepository();
+
+        foreach ($localRepository->getPackages() as $localRepoPackage) {
             $extName = ExtensionName::determineFromComposerPackage($localRepoPackage);
 
             if ($localRepoPackage instanceof CompleteAliasPackage) {
@@ -116,12 +123,11 @@ class ComposerIntegrationHandler
                     $lockedRepo    = $composer->getLocker()->getLockedRepository();
                     $lockedPackage = $lockedRepo->findPackage($localRepoPackage->getName(), '*');
 
-                    // Not in locked repo
                     if ($lockedPackage === null) {
+                        // Not in locked repo; Composer will install it anyway
                         continue;
                     }
 
-                    // Locked, but the version we installed is different
                     if ($lockedPackage->getVersion() !== $localRepoPackage->getVersion()) {
                         $this->arrayCollectionIo->write(sprintf(
                             '%s PIE package %s (%s) is at %s but the lock requires %s, scheduling for reinstall.',
@@ -131,7 +137,25 @@ class ComposerIntegrationHandler
                             $localRepoPackage->getPrettyVersion(),
                             $lockedPackage->getPrettyVersion(),
                         ));
-                        $composer->getRepositoryManager()->getLocalRepository()->removePackage($localRepoPackage);
+
+                        // Locked, but the version we installed is different
+                        $localRepository->removePackage($localRepoPackage);
+                        continue;
+                    }
+                } else {
+                    $resolvedPackage = $resolvedPackageByName[$localRepoPackage->getName()] ?? null;
+                    if ($resolvedPackage !== null && $resolvedPackage->composerPackage()->getVersion() !== $localRepoPackage->getVersion()) {
+                        $this->arrayCollectionIo->write(sprintf(
+                            '%s PIE package %s (%s) is at %s but %s was installed, adding to install candidates.',
+                            Emoji::WARNING,
+                            $localRepoPackage->getName(),
+                            $extName->name(),
+                            $localRepoPackage->getPrettyVersion(),
+                            $resolvedPackage->composerPackage()->getPrettyVersion(),
+                        ));
+
+                        // Resolved a different version than what's installed
+                        $localRepository->removePackage($localRepoPackage);
                         continue;
                     }
                 }
@@ -170,7 +194,7 @@ class ComposerIntegrationHandler
                 $extName->name(),
                 $status->description(),
             ));
-            $composer->getRepositoryManager()->getLocalRepository()->removePackage($localRepoPackage);
+            $localRepository->removePackage($localRepoPackage);
         }
 
         $extensionNames = $installFromLock
