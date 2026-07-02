@@ -55,7 +55,15 @@ RUN --mount=type=bind,from=ghcr.io/php/pie:bin,source=/pie,target=/usr/local/bin
     pie -V
 ```
 
-Instead of `bin` tag (which represents latest binary-only image) you can also use explicit version (in `x.y.z-bin` format). Use [GitHub registry](https://ghcr.io/php/pie) to find available tags.
+The following tag styles (replace them with the real version you want!): are published from 1.5+:
+
+ * `bin` (latest _stable_, **recommended**)
+ * `nightly-bin` (latest _unstable_)
+ * `x.y.z-bin` (e.g. `1.5.0-bin`)
+ * `x.y-bin` (e.g. `1.5-bin`)
+ * `x-bin` (e.g. `1-bin`)
+
+Use [GitHub registry](https://ghcr.io/php/pie) to find available tags.
 
 > [!IMPORTANT]
 > Binary-only images don't include PHP runtime so you can't use them for _running_ PIE. This is just an alternative way of distributing PHAR file, you still need to satisfy PIE's runtime requirements on your own.
