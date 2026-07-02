@@ -224,6 +224,10 @@ This will install the Xdebug extension into the version of PHP that is used to
 invoke PIE, using whichever is the latest stable version of Xdebug compatible
 with that version of PHP.
 
+> [!TIP]
+> If PIE detects the extension of the same version with the same configure flags
+> is already installed, as of PIE 1.5, it will no longer be re-installed.
+
 ### Using PIE to install an extension for a different PHP version
 
 If you are trying to install an extension for a different version of PHP, you
