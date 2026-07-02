@@ -1,12 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Call to function is_string\(\) with non\-empty\-string will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Command/CommandHelper.php
-
-		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
 			count: 1
@@ -59,18 +53,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/ComposerIntegration/PieComposerInstaller.php
-
-		-
-			message: '#^Call to function assert\(\) with true will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/ComposerIntegration/QuieterConsoleIO.php
-
-		-
-			message: '#^Strict comparison using \!\=\= between Closure\(Composer\\IO\\ConsoleIO\)\: void and null will always evaluate to true\.$#'
-			identifier: notIdentical.alwaysTrue
-			count: 1
-			path: src/ComposerIntegration/QuieterConsoleIO.php
 
 		-
 			message: '#^Cannot cast mixed to string\.$#'
