@@ -459,6 +459,25 @@ pie install \
 > The `--allow-non-interactive-project-install` will no longer work. You must
 > provide package selections from PIE 1.5 onwards.
 
+## Install extensions from pie.lock
+
+If you have an existing `pie.json` and `pie.lock` for a given PHP install,
+place these files in the directory indicated by the `pie show -v` path for
+`Using pie.json`, e.g.:
+
+```bash
+$ php8.2 /usr/local/bin/pie show -v
+🥧 PHP Installer for Extensions (PIE) 1.5.0, from The PHP Foundation
+You are running PHP 8.2.31
+Target PHP installation: 8.2.31 nts, on Linux/OSX/etc x86_64 (from /usr/bin/php8.2)
+Using pie.json: /home/blah/.config/pie/php8.2_7cfa96d5dfc1df10afeb65851159197b/pie.json
+...
+```
+
+Move your `pie.json` and `pie.lock` into this path, then you can run
+`pie install --from-lock` which will install the locked extension dependencies
+specified in that `pie.lock`.
+
 ## Comparison with PECL
 
 Since PIE is a replacement for PECL, here is a comparison of the commands that
