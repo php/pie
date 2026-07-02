@@ -99,11 +99,15 @@ The following packages may be suitable, which would you like to install:
 Finished checking extensions.
 ```
 
-> [!TIP]
+> [!IMPORTANT]
 > If you are running PIE in a non-interactive shell (for example, CI, a
-> container), pass the `--allow-non-interactive-project-install` flag to run
-> this command. It may still fail if more than one PIE package provides a
-> particular extension.
+> container), the `--allow-non-interactive-project-install` is no longer
+> functional. You must specify `--select` flags for each missing package, e.g.:
+> ```bash
+> pie install \
+>   --select example_pie_extension=asgrim/example-pie-extension \
+>   --select redis=phpredis/phpredis
+> ```
 
 ## Extensions that support PIE
 

@@ -421,6 +421,34 @@ The following packages may be suitable, which would you like to install:
 Finished checking extensions.
 ```
 
+### Telling PIE which packages to use for missing extensions
+
+You can provide PIE a map of which packages to use for each missing extension
+using the new `--select` option in PIE 1.5+. For example, if your PHP project
+has dependencies:
+
+```json
+{
+    "require": {
+        "ext-curl": "*",
+        "ext-example_pie_extension": "^2.0",
+        "ext-redis": "^6.3"
+    }
+}
+```
+
+You can specify the missing extensions with:
+
+```bash
+pie install \
+  --select example_pie_extension=asgrim/example-pie-extension \
+  --select redis=phpredis/phpredis
+```
+
+> [!IMPORTANT]
+> The `--allow-non-interactive-project-install` will no longer work. You must
+> provide package selections from PIE 1.5 onwards.
+
 ## Comparison with PECL
 
 Since PIE is a replacement for PECL, here is a comparison of the commands that
