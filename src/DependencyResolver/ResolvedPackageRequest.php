@@ -44,9 +44,9 @@ final class ResolvedPackageRequest
     }
 
     /**
-     * @param non-empty-list<self> $resolvedPackageRequests
+     * @param list<self> $resolvedPackageRequests
      *
-     * @return non-empty-list<Package>
+     * @return list<Package>
      */
     public static function piePackages(array $resolvedPackageRequests): array
     {

@@ -1,0 +1,6 @@
+{
+    "require": {
+        "xdebug/xdebug": "3.5.2",
+        "asgrim/example-pie-extension": "2.0.9"
+    }
+}

@@ -9,6 +9,7 @@
          beStrictAboutOutputDuringTests="true"
          displayDetailsOnSkippedTests="true"
          displayDetailsOnTestsThatTriggerWarnings="true"
+         displayDetailsOnPhpunitDeprecations="true"
          failOnRisky="true"
          failOnWarning="true">
     <php>

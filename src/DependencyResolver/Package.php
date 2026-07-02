@@ -279,10 +279,10 @@ final class Package
     public function verifyPackageStatus(TargetPlatform $targetPlatform): PackageVerificationStatus
     {
         $extensionPath    = $targetPlatform->phpBinaryPath->extensionPath();
-        $extensionEnding  = $targetPlatform->operatingSystem === OperatingSystem::Windows ? '.dll' : '.so';
+        $isWindows        = $targetPlatform->operatingSystem === OperatingSystem::Windows;
         $phpExtensionName = $this->extensionName->name();
 
-        $actualBinaryPathByConvention = $extensionPath . DIRECTORY_SEPARATOR . $phpExtensionName . $extensionEnding;
+        $actualBinaryPathByConvention = $extensionPath . DIRECTORY_SEPARATOR . ($isWindows ? 'php_' : '') . $phpExtensionName . ($isWindows ? '.dll' : '.so');
 
         // The extension may not be in the usual path (since you can specify a full path to an extension in the INI file)
         if (! file_exists($actualBinaryPathByConvention)) {

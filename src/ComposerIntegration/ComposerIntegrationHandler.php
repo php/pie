@@ -19,6 +19,7 @@ use Php\Pie\Util\Emoji;
 use Psr\Container\ContainerInterface;
 
 use function array_map;
+use function array_values;
 use function assert;
 use function file_exists;
 use function sprintf;
@@ -72,6 +73,7 @@ class ComposerIntegrationHandler
         TargetPlatform $targetPlatform,
         bool $forceInstallPackageVersion,
         bool $runCleanup,
+        bool $installFromLock = false,
     ): void {
         $pieComposerJson        = Platform::getPieJsonFilename($targetPlatform);
         $pieJsonEditor          = PieJsonEditor::fromTargetPlatform($targetPlatform);
@@ -90,7 +92,14 @@ class ComposerIntegrationHandler
         // Refresh the Composer instance so it re-reads the updated pie.json
         $composer = PieComposerFactory::recreatePieComposer($this->container, $composer);
 
-        foreach ($composer->getRepositoryManager()->getLocalRepository()->getPackages() as $localRepoPackage) {
+        $resolvedPackageByName = [];
+        foreach ($resolvedRequestedPackages as $resolvedPackageRequest) {
+            $resolvedPackageByName[$resolvedPackageRequest->piePackage->composerPackage()->getName()] = $resolvedPackageRequest->piePackage;
+        }
+
+        $localRepository = $composer->getRepositoryManager()->getLocalRepository();
+
+        foreach ($localRepository->getPackages() as $localRepoPackage) {
             $extName = ExtensionName::determineFromComposerPackage($localRepoPackage);
 
             if ($localRepoPackage instanceof CompleteAliasPackage) {
@@ -110,6 +119,47 @@ class ComposerIntegrationHandler
             ), verbosity: IOInterface::VERY_VERBOSE);
 
             if ($status->isVerified() && ! $forceInstallPackageVersion) {
+                if ($installFromLock) {
+                    $lockedRepo    = $composer->getLocker()->getLockedRepository();
+                    $lockedPackage = $lockedRepo->findPackage($localRepoPackage->getName(), '*');
+
+                    if ($lockedPackage === null) {
+                        // Not in locked repo; Composer will install it anyway
+                        continue;
+                    }
+
+                    if ($lockedPackage->getVersion() !== $localRepoPackage->getVersion()) {
+                        $this->arrayCollectionIo->write(sprintf(
+                            '%s PIE package %s (%s) is at %s but the lock requires %s, scheduling for reinstall.',
+                            Emoji::WARNING,
+                            $localRepoPackage->getName(),
+                            $extName->name(),
+                            $localRepoPackage->getPrettyVersion(),
+                            $lockedPackage->getPrettyVersion(),
+                        ));
+
+                        // Locked, but the version we installed is different
+                        $localRepository->removePackage($localRepoPackage);
+                        continue;
+                    }
+                } else {
+                    $resolvedPackage = $resolvedPackageByName[$localRepoPackage->getName()] ?? null;
+                    if ($resolvedPackage !== null && $resolvedPackage->composerPackage()->getVersion() !== $localRepoPackage->getVersion()) {
+                        $this->arrayCollectionIo->write(sprintf(
+                            '%s PIE package %s (%s) is at %s but %s was installed, adding to install candidates.',
+                            Emoji::WARNING,
+                            $localRepoPackage->getName(),
+                            $extName->name(),
+                            $localRepoPackage->getPrettyVersion(),
+                            $resolvedPackage->composerPackage()->getPrettyVersion(),
+                        ));
+
+                        // Resolved a different version than what's installed
+                        $localRepository->removePackage($localRepoPackage);
+                        continue;
+                    }
+                }
+
                 $this->arrayCollectionIo->write(sprintf(
                     '%s PIE package %s (%s) is already installed and verified.',
                     Emoji::GREEN_CHECKMARK,
@@ -144,12 +194,16 @@ class ComposerIntegrationHandler
                 $extName->name(),
                 $status->description(),
             ));
-            $composer->getRepositoryManager()->getLocalRepository()->removePackage($localRepoPackage);
+            $localRepository->removePackage($localRepoPackage);
         }
+
+        $extensionNames = $installFromLock
+            ? array_values(array_map(ExtensionName::determineFromComposerPackage(...), $composer->getLocker()->getLockedRepository()->getPackages()))
+            : ResolvedPackageRequest::extensionNames($resolvedRequestedPackages);
 
         $composerInstaller = PieComposerInstaller::createWithPhpBinary(
             $targetPlatform->phpBinaryPath,
-            ResolvedPackageRequest::extensionNames($resolvedRequestedPackages),
+            $extensionNames,
             $this->arrayCollectionIo,
             $composer,
         );
@@ -161,7 +215,7 @@ class ComposerIntegrationHandler
             ->setPlatformRequirementFilter(PlatformRequirementFilterFactory::fromBoolOrList($forceInstallPackageVersion))
             ->setDownloadOnly(false);
 
-        if (file_exists(PieComposerFactory::getLockFile($pieComposerJson))) {
+        if (! $installFromLock && file_exists(PieComposerFactory::getLockFile($pieComposerJson))) {
             $composerInstaller->setUpdate(true);
             $composerInstaller->setUpdateAllowList(ResolvedPackageRequest::requestedPackageNames($resolvedRequestedPackages));
         }

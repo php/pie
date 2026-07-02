@@ -193,4 +193,48 @@ final class ShowCommandTest extends TestCase
             $outputString,
         );
     }
+
+    public function testExecuteShowsWarningWhenInstalledButNotInPieJson(): void
+    {
+        try {
+            $phpConfig = Process::run(['which', 'php-config']);
+            Assert::stringNotEmpty($phpConfig);
+        } catch (ProcessFailedException | InvalidArgumentException) {
+            self::markTestSkipped('This test can only run on systems with php-config');
+        }
+
+        $installCommand = new CommandTester(Container::testFactory()->get(InstallCommand::class));
+        $installCommand->execute([
+            'requested-package-and-version' => [self::TEST_PACKAGE . ':2.0.2'],
+            '--with-php-config' => $phpConfig,
+        ]);
+        $installCommand->assertCommandIsSuccessful();
+
+        $outputString = $installCommand->getDisplay();
+
+        if (str_contains($outputString, 'NOT been automatically')) {
+            self::markTestSkipped('PIE couldn\'t automatically enable the extension');
+        }
+
+        PieJsonEditor::fromTargetPlatform(
+            PiePlatform\TargetPlatform::fromPhpBinaryPath(
+                PiePlatform\TargetPhp\PhpBinaryPath::fromPhpConfigExecutable(
+                    $phpConfig,
+                ),
+                1,
+                null,
+            ),
+        )
+            ->removeRequire(self::TEST_PACKAGE);
+
+        $this->commandTester->execute(['--with-php-config' => $phpConfig]);
+        $this->commandTester->assertCommandIsSuccessful();
+
+        $outputString = $this->commandTester->getDisplay();
+
+        self::assertStringMatchesFormat(
+            '%Aexample_pie_extension:%S (from %S asgrim/example-pie-extension:2.0.2 %S- installed but does not exist in pie.json)%A',
+            $outputString,
+        );
+    }
 }

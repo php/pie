@@ -34,8 +34,9 @@ class SetupIniFile
             && $this->setupIniApproach->setup($targetPlatform, $downloadedPackage, $binaryFile, $io)
         ) {
             $io->write(sprintf(
-                '<info>%s Extension is enabled and loaded in</info> %s',
+                '<info>%s Extension %s is enabled and loaded in</info> %s',
                 Emoji::GREEN_CHECKMARK,
+                $downloadedPackage->package->prettyNameAndVersion(),
                 $targetPlatform->phpBinaryPath->phpBinaryPath,
             ));
         } else {

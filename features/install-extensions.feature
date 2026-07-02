@@ -14,3 +14,9 @@ Feature: Extensions can be installed with PIE
   Example: Multiple extensions can be installed at once
     When I run a command to install multiple extensions
     Then the extensions should have been installed and enabled
+
+  # pie install --from-lock
+  Example: I can install exact versions contained in the lockfile
+    Given I have a lock file
+    When I run a command to install from the lockfile
+    Then the extensions should have been updated to the lock

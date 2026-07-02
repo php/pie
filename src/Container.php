@@ -229,7 +229,7 @@ final class Container
         return $container;
     }
 
-    public static function testFactory(): ContainerInterface
+    public static function testFactory(OutputInterface $output = new NullOutput()): ContainerInterface
     {
         self::$testBuffer ??= new BufferIO();
 
@@ -243,10 +243,10 @@ final class Container
         // QuieterConsoleIO is wired separately from IOInterface in self::factory(), and writes
         // directly to a real ConsoleOutput; override it here only, so tests don't leak its output
         // to the terminal.
-        $container->singleton(QuieterConsoleIO::class, static function (ContainerInterface $container): QuieterConsoleIO {
+        $container->singleton(QuieterConsoleIO::class, static function (ContainerInterface $container) use ($output): QuieterConsoleIO {
             return new QuieterConsoleIO(
                 $container->get(InputInterface::class),
-                new NullOutput(),
+                $output,
                 new MinimalHelperSet(
                     [
                         'question' => new QuestionHelper(),

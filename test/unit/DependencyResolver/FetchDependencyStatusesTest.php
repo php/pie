@@ -39,7 +39,7 @@ final class FetchDependencyStatusesTest extends TestCase
     }
 
     /** @return array<non-empty-string, array{0: non-empty-string, 1: non-empty-string}> */
-    public function phpVersionProvider(): array
+    public static function phpVersionProvider(): array
     {
         return [
             '8.2.0' => ['8.2.0', '8.2.0'],
