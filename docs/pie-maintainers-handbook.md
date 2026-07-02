@@ -150,6 +150,11 @@ To attempt to auto-apply CS fixes:
 vendor/bin/phpcbf
 ```
 
+As of PIE branch 1.5.x and newer, we use the library
+[thecodingmachine/safe](https://github.com/thecodingmachine/safe) to throw
+exceptions instead of returning `false` when PHP functions are called. There is
+a static analysis rule in place to enforce this.
+
 ### Mutation Testing
 
 Install the `infection.phar` according to the [Infection PHP documentation](https://infection.github.io/guide/installation.html#Phar).
