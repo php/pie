@@ -63,6 +63,48 @@ developing on PIE, you will likely need to run some, or all, of these tests by h
 > [!TIP]
 > The development guide is primarily aimed at Linux systems, please adjust accordingly for your own platform.
 
+### Architecture overview
+
+Some key concepts are used in PIE;
+
+ - **Target PHP**: PIE can be invoked like `/path/to/php /path/to/pie ...` or with
+   `pie --with-php-config=/path/to/php/config`. This means that the PHP instance running PIE may not be the same PHP
+   instance we're installing the extensions for. For example, if you're using Ondrej Sury's DEB installer, you could
+   invoke `/usr/bin/php8.4 /usr/local/bin/pie --with-php-config=/usr/bin/php-config7.2` which would run PIE with
+   PHP 8.4, but compile and install the extension for the PHP 7.2 instance. In the code, this is represented by the
+   `\Php\Pie\Platform\TargetPhp\PhpBinaryPath` class.
+ - **Target Platform**: Along with the above **Target PHP**, the Target Platform describes other facets of the platform,
+   such as OS, thread safety option, architecture (`x86_64`, `x86`, `arm64`, etc.). This is represented by the
+   `\Php\Pie\Platform\TargetPlatform` class.
+
+#### Entry point and DI
+
+When running for development, `bin/pie` bootstraps a Symfony Console `Application` using `Container::factory()`, which
+wires everything with the [Laravel/Illuminate Container](https://laravel.com/docs/container).
+
+This entrypoint is also used by the PHAR file when built.
+
+#### Typical extension installation flow
+
+The flow for resolving and installing an extension:
+
+1. **Resolve** – `DependencyResolver` (`src/DependencyResolver/`) uses Composer's solver via
+   `ResolveDependencyWithComposer` to find a compatible `ResolvedPackageRequest`.
+2. **Download** – Composer's installer downloads/extracts the source. However, `OverrideDownloadUrlInstallListener` is
+   is a Composer plugin listener that potentially changes the download URL, for example when using Windows, or the
+   pre-built source or pre-built binary options are used.
+3. **Build** – `Build` (`src/Building/`) runs `phpize` + `./configure` + `make` (`UnixBuild`) or uses the pre-built DLL
+   on Windows (`WindowsBuild`), unless the pre-built binary option is used.
+4. **Install** – `Install` (`src/Installing/`) copies the `.so`/`.dll` and enables the extension in the INI via
+   `Ini\SetupIniApproach` (picks the best strategy: `phpenmod`, `docker-php-ext-enable`, or direct INI edit).
+
+This pipeline is coordinated by `InstallAndBuildProcess` (`src/ComposerIntegration/InstallAndBuildProcess.php`) called
+from Composer event listeners in `src/ComposerIntegration/Listeners/`.
+
+The operation mode is tracked by the `PieOperation` enum (`src/ComposerIntegration/PieOperation.php`): `Resolve`,
+`Download`, `Build`, `Install`, `Uninstall`. `PieComposerRequest` carries this value plus target platform and configure
+options into the Composer run.
+
 ### Unit & Integration Tests
 
 > [!CAUTION]
@@ -149,6 +191,10 @@ To attempt to auto-apply CS fixes:
 ```shell
 vendor/bin/phpcbf
 ```
+
+Classes marked `@internal` are not part of PIE's public API. Almost everything in the codebase should be marked as
+`@internal`, except things like exceptions. At this time PIE does not provide any extensibility or API surface to
+interact with.
 
 As of PIE branch 1.5.x and newer, we use the library
 [thecodingmachine/safe](https://github.com/thecodingmachine/safe) to throw
