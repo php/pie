@@ -55,7 +55,15 @@ RUN --mount=type=bind,from=ghcr.io/php/pie:bin,source=/pie,target=/usr/local/bin
     pie -V
 ```
 
-Instead of `bin` tag (which represents latest binary-only image) you can also use explicit version (in `x.y.z-bin` format). Use [GitHub registry](https://ghcr.io/php/pie) to find available tags.
+The following tag styles (replace them with the real version you want!): are published from 1.5+:
+
+ * `bin` (latest _stable_, **recommended**)
+ * `nightly-bin` (latest _unstable_)
+ * `x.y.z-bin` (e.g. `1.5.0-bin`)
+ * `x.y-bin` (e.g. `1.5-bin`)
+ * `x-bin` (e.g. `1-bin`)
+
+Use [GitHub registry](https://ghcr.io/php/pie) to find available tags.
 
 > [!IMPORTANT]
 > Binary-only images don't include PHP runtime so you can't use them for _running_ PIE. This is just an alternative way of distributing PHAR file, you still need to satisfy PIE's runtime requirements on your own.
@@ -113,7 +121,6 @@ stable releases can be downloaded from these links:
 |------------------|------------------|-------------------------------------------------------------------------|
 | Linux            | amd64 / x86_64   | https://github.com/php/pie/releases/latest/download/pie-Linux-X64       |
 | OS X             | ARM 64 / aarch64 | https://github.com/php/pie/releases/latest/download/pie-macOS-ARM64     |
-| Windows          | x86_64           | https://github.com/php/pie/releases/latest/download/pie-Windows-X64.exe |
 | Linux            | ARM 64 / aarch64 | https://github.com/php/pie/releases/latest/download/pie-Linux-ARM64     |
 | OS X             | Intel / x86_64   | https://github.com/php/pie/releases/latest/download/pie-macOS-X64       |
 
@@ -123,7 +130,6 @@ The "nightly" versions of these can be found here:
 |------------------|------------------|-----------------------------------------------|
 | Linux            | amd64 / x86_64   | https://php.github.io/pie/pie-Linux-X64       |
 | OS X             | ARM 64 / aarch64 | https://php.github.io/pie/pie-macOS-ARM64     |
-| Windows          | x86_64           | https://php.github.io/pie/pie-Windows-X64.exe |
 | Linux            | ARM 64 / aarch64 | https://php.github.io/pie/pie-Linux-ARM64     |
 | OS X             | Intel / x86_64   | https://php.github.io/pie/pie-macOS-X64       |
 
@@ -217,6 +223,10 @@ pie install xdebug/xdebug
 This will install the Xdebug extension into the version of PHP that is used to
 invoke PIE, using whichever is the latest stable version of Xdebug compatible
 with that version of PHP.
+
+> [!TIP]
+> If PIE detects the extension of the same version with the same configure flags
+> is already installed, as of PIE 1.5, it will no longer be re-installed.
 
 ### Using PIE to install an extension for a different PHP version
 
@@ -420,6 +430,34 @@ The following packages may be suitable, which would you like to install:
 
 Finished checking extensions.
 ```
+
+### Telling PIE which packages to use for missing extensions
+
+You can provide PIE a map of which packages to use for each missing extension
+using the new `--select` option in PIE 1.5+. For example, if your PHP project
+has dependencies:
+
+```json
+{
+    "require": {
+        "ext-curl": "*",
+        "ext-example_pie_extension": "^2.0",
+        "ext-redis": "^6.3"
+    }
+}
+```
+
+You can specify the missing extensions with:
+
+```bash
+pie install \
+  --select example_pie_extension=asgrim/example-pie-extension \
+  --select redis=phpredis/phpredis
+```
+
+> [!IMPORTANT]
+> The `--allow-non-interactive-project-install` will no longer work. You must
+> provide package selections from PIE 1.5 onwards.
 
 ## Comparison with PECL
 

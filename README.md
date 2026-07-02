@@ -69,6 +69,15 @@ Install complete: /usr/lib/php/20250925/example_pie_extension.so
 $
 ```
 
+### Installing multiple extensions at once
+
+As of PIE 1.5 you can install multiple extensions at the same time. Note that
+if multiple extensions share the same configure options, this command will fail.
+
+```shell
+pie install foo/great-extension bar/another-extension
+```
+
 ### Installing all extensions for a PHP project
 
 When in your PHP project, you can install any missing top-level extensions:
@@ -99,11 +108,15 @@ The following packages may be suitable, which would you like to install:
 Finished checking extensions.
 ```
 
-> [!TIP]
+> [!IMPORTANT]
 > If you are running PIE in a non-interactive shell (for example, CI, a
-> container), pass the `--allow-non-interactive-project-install` flag to run
-> this command. It may still fail if more than one PIE package provides a
-> particular extension.
+> container), the `--allow-non-interactive-project-install` is no longer
+> functional. You must specify `--select` flags for each missing package, e.g.:
+> ```bash
+> pie install \
+>   --select example_pie_extension=asgrim/example-pie-extension \
+>   --select redis=phpredis/phpredis
+> ```
 
 ## Extensions that support PIE
 
