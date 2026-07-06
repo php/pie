@@ -46,8 +46,8 @@
         "behat/behat": "^3.29.0",
         "bnf/phpstan-psr-container": "^1.1",
         "doctrine/coding-standard": "^14.0.0",
-        "phpstan/phpstan": "^2.2.3",
-        "phpstan/phpstan-phpunit": "^2.0.17",
+        "phpstan/phpstan": "^2.2.5",
+        "phpstan/phpstan-phpunit": "^2.0.18",
         "phpstan/phpstan-webmozart-assert": "^2.0",
         "phpunit/phpunit": "^10.5.63",
         "thecodingmachine/phpstan-safe-rule": "^1.4.7"

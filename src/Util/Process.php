@@ -71,7 +71,7 @@ final class Process
                 $type === SymfonyProcess::ERR ? '<comment>' : '',
                 $outputMessage,
                 $type === SymfonyProcess::ERR ? '</comment>' : '',
-            ));
+            ), false);
         };
     }
 
