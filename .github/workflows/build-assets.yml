@@ -120,21 +120,16 @@ jobs:
               ;;
           esac
           tar zxvf spc.tgz
-          chmod +x spc
-          echo "SPC_BINARY=./spc" >> $GITHUB_ENV
-          echo "PIE_BINARY_OUTPUT=pie-${{ runner.os }}-${{ runner.arch }}" >> $GITHUB_ENV
+          mv spc spc.exe
+          chmod +x spc.exe
       - name: Download SPC (Windows)
         if: runner.os == 'Windows'
         run: |
           curl.exe -fsSL -o spc.exe https://github.com/crazywhalecc/static-php-cli/releases/download/${{ env.SPC_VERSION }}/spc-windows-x64.exe
           chmod +x spc.exe
-          echo "SPC_BINARY=.\spc.exe" >> $env:GITHUB_ENV
-          echo "PIE_BINARY_OUTPUT=pie-${{ runner.os }}-${{ runner.arch }}.exe" >> $env:GITHUB_ENV
 
       - name: Check SPC version
-        env:
-          SPC_BINARY: ${{ env.SPC_BINARY }}
-        run: ${SPC_BINARY} --version
+        run: ./spc.exe --version
 
       - name: Grab the pie.phar from artifacts
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c #v8.0.1
@@ -142,16 +137,12 @@ jobs:
           name: pie-${{ github.sha }}.phar
 
       - name: Build for ${{ runner.os }} ${{ runner.arch }} on ${{ matrix.operating-system }}
-        run: ${SPC_BINARY} craft resources/spc/craft.yml
+        run: ./spc.exe craft resources/spc/craft.yml
         env:
-          SPC_BINARY: ${{ env.SPC_BINARY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Bundle pie.phar into executable PIE binary
-        env:
-          PIE_BINARY_OUTPUT: ${{ env.PIE_BINARY_OUTPUT }}
-          SPC_BINARY: ${{ env.SPC_BINARY }}
-        run: ${SPC_BINARY} micro:combine pie.phar --output=${PIE_BINARY_OUTPUT}
+        run: ./spc.exe micro:combine pie.phar --output=pie-${{ runner.os }}-${{ runner.arch }}${{ runner.os == 'Windows' && '.exe' || '' }}
 
       - name: Setup PHP
         uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 #2.37.2
@@ -160,9 +151,7 @@ jobs:
           tools: composer
           php-version: "7.4"
       - name: Quick validation that the binary runs
-        env:
-          PIE_BINARY_OUTPUT: ${{ env.PIE_BINARY_OUTPUT }}
-        run: ./${PIE_BINARY_OUTPUT} show --all
+        run: ./pie-${{ runner.os }}-${{ runner.arch }}${{ runner.os == 'Windows' && '.exe' || '' }} show --all
 
       - name: Generate build provenance attestation
         # It does not make sense to do this for PR builds, nor do contributors
@@ -173,9 +162,9 @@ jobs:
         if: github.event_name != 'pull_request' && github.event.repository.visibility == 'public'
         uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 #v4.1.0
         with:
-          subject-path: ${{ github.workspace }}/${{ env.PIE_BINARY_OUTPUT }}
+          subject-path: ${{ github.workspace }}/pie-${{ runner.os }}-${{ runner.arch }}${{ runner.os == 'Windows' && '.exe' || '' }}
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
         with:
           name: pie-${{ github.sha }}-${{ runner.os }}-${{ runner.arch }}.bin
-          path: ${{ env.PIE_BINARY_OUTPUT }}
+          path: pie-${{ runner.os }}-${{ runner.arch }}${{ runner.os == 'Windows' && '.exe' || '' }}
