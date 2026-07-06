@@ -79,7 +79,7 @@ jobs:
           - ubuntu-24.04-arm
           - macos-15-intel
           - macos-26
-#          - windows-2025 - disabled for now, seems broken
+          - windows-2022
     permissions:
       contents: read
       # id-token:write is required for build provenance attestation.
