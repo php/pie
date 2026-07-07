@@ -1,0 +1,70 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "52fcc35c994bb87556f462b69bab5d92",
+    "packages": [
+        {
+            "name": "asgrim/example-pie-extension",
+            "version": "2.0.7",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/asgrim/example-pie-extension.git",
+                "reference": "a84a5fefc4065bedfd7750e7e2737b29f762700f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/asgrim/example-pie-extension/zipball/a84a5fefc4065bedfd7750e7e2737b29f762700f",
+                "reference": "a84a5fefc4065bedfd7750e7e2737b29f762700f",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.4,^8.0"
+            },
+            "replace": {
+                "ext-example_pie_extension": "*"
+            },
+            "type": "php-ext",
+            "notification-url": "https://packagist.org/downloads/",
+            "php-ext": {
+                "priority": 74,
+                "extension-name": "ext-example_pie_extension",
+                "configure-options": [
+                    {
+                        "name": "enable-example-pie-extension",
+                        "description": "whether to enable example-pie-extension support"
+                    },
+                    {
+                        "name": "with-hello-name",
+                        "description": "Name ot use when saying hello",
+                        "needs-value": true
+                    }
+                ],
+                "download-url-method": [
+                    "pre-packaged-binary",
+                    "composer-default"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Example PIE extension",
+            "support": {
+                "issues": "https://github.com/asgrim/example-pie-extension/issues",
+                "source": "https://github.com/asgrim/example-pie-extension/tree/2.0.7"
+            },
+            "time": "2026-02-03T13:51:24+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": {},
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": {},
+    "platform-dev": {},
+    "plugin-api-version": "2.9.0"
+}

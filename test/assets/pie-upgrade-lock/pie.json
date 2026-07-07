@@ -1,0 +1,5 @@
+{
+    "require": {
+        "asgrim/example-pie-extension": "^2.0"
+    }
+}
