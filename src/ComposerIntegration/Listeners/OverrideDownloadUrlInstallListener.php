@@ -7,6 +7,7 @@ namespace Php\Pie\ComposerIntegration\Listeners;
 use Composer\Composer;
 use Composer\DependencyResolver\Operation\InstallOperation;
 use Composer\DependencyResolver\Operation\OperationInterface;
+use Composer\DependencyResolver\Operation\UpdateOperation;
 use Composer\Installer\InstallerEvent;
 use Composer\Installer\InstallerEvents;
 use Composer\IO\IOInterface;
@@ -56,11 +57,11 @@ class OverrideDownloadUrlInstallListener
         array_walk(
             $operations,
             function (OperationInterface $operation): void {
-                if (! $operation instanceof InstallOperation) {
+                if (! $operation instanceof InstallOperation && ! $operation instanceof UpdateOperation) {
                     return;
                 }
 
-                $composerPackage = $operation->getPackage();
+                $composerPackage = $operation instanceof UpdateOperation ? $operation->getTargetPackage() : $operation->getPackage();
                 if (! $composerPackage instanceof CompletePackageInterface) {
                     return;
                 }

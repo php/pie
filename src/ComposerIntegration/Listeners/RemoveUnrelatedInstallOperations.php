@@ -9,6 +9,7 @@ use Composer\Composer;
 use Composer\DependencyResolver\Operation\InstallOperation;
 use Composer\DependencyResolver\Operation\OperationInterface;
 use Composer\DependencyResolver\Operation\UninstallOperation;
+use Composer\DependencyResolver\Operation\UpdateOperation;
 use Composer\DependencyResolver\Transaction;
 use Composer\Installer\InstallerEvent;
 use Composer\Installer\InstallerEvents;
@@ -46,7 +47,7 @@ class RemoveUnrelatedInstallOperations
         $newOperations = array_filter(
             $installerEvent->getTransaction()?->getOperations() ?? [],
             function (OperationInterface $operation) use ($pieOutput): bool {
-                if (! $operation instanceof InstallOperation && ! $operation instanceof UninstallOperation) {
+                if (! $operation instanceof InstallOperation && ! $operation instanceof UninstallOperation && ! $operation instanceof UpdateOperation) {
                     $pieOutput->writeError(
                         sprintf(
                             'Unexpected operation during installer: %s',
@@ -58,13 +59,15 @@ class RemoveUnrelatedInstallOperations
                     return false;
                 }
 
-                $isRequestedPiePackage = $this->composerRequest->isFor($operation->getPackage()->getName());
+                $operationPackageName = $operation instanceof UpdateOperation ? $operation->getTargetPackage()->getName() : $operation->getPackage()->getName();
+
+                $isRequestedPiePackage = $this->composerRequest->isFor($operationPackageName);
 
                 if (! $isRequestedPiePackage) {
                     $pieOutput->writeError(
                         sprintf(
                             'Filtering package %s from install operations, as it was not the requested package',
-                            $operation->getPackage()->getName(),
+                            $operationPackageName,
                         ),
                         verbosity: IOInterface::VERY_VERBOSE,
                     );

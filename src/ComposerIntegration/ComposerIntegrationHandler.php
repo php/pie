@@ -197,7 +197,9 @@ class ComposerIntegrationHandler
             $localRepository->removePackage($localRepoPackage);
         }
 
-        $extensionNames = $installFromLock
+        // When no specific packages were resolved (e.g. `--from-lock`, or `upgrade`), treat every
+        // package tracked in the lock file as being installed/updated by this operation.
+        $extensionNames = $resolvedRequestedPackages === []
             ? array_values(array_map(ExtensionName::determineFromComposerPackage(...), $composer->getLocker()->getLockedRepository()->getPackages()))
             : ResolvedPackageRequest::extensionNames($resolvedRequestedPackages);
 

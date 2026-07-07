@@ -56,6 +56,51 @@
                 "source": "https://github.com/asgrim/example-pie-extension/tree/2.0.7"
             },
             "time": "2026-02-03T13:51:24+00:00"
+        },
+        {
+            "name": "xdebug/xdebug",
+            "version": "3.5.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/xdebug/xdebug.git",
+                "reference": "127bbcb980400752221cfaa54bdc1420e6ef3c12"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/xdebug/xdebug/zipball/127bbcb980400752221cfaa54bdc1420e6ef3c12",
+                "reference": "127bbcb980400752221cfaa54bdc1420e6ef3c12",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.0,<8.6"
+            },
+            "type": "php-ext-zend",
+            "notification-url": "https://packagist.org/downloads/",
+            "php-ext": {
+                "priority": 90
+            },
+            "license": [
+                "Xdebug-1.03"
+            ],
+            "description": "Xdebug is a debugging and productivity extension for PHP",
+            "support": {
+                "source": "https://github.com/xdebug/xdebug/tree/3.5.3"
+            },
+            "funding": [
+                {
+                    "url": "https://xdebug.org/support",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/derickr",
+                    "type": "github"
+                },
+                {
+                    "url": "https://www.patreon.com/derickr",
+                    "type": "patreon"
+                }
+            ],
+            "time": "2026-06-08T14:39:07+00:00"
         }
     ],
     "packages-dev": [],

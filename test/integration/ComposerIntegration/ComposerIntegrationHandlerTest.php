@@ -146,6 +146,42 @@ final class ComposerIntegrationHandlerTest extends IsolatedWorkingDirectoryTestC
         self::assertStringNotContainsString('is already installed and verified', $output);
     }
 
+    public function testRunInstallWithNoResolvedPackagesTreatsLockedPackagesAsExtensionNames(): void
+    {
+        PieJsonEditor::fromTargetPlatform($this->targetPlatform)
+            ->ensureExists()
+            ->addRequire(self::PACKAGE_NAME, self::VERSION_CURRENT);
+        $this->setUpInstalledJson(self::VERSION_CURRENT);
+        $this->setUpLockFile();
+
+        $composer = PieComposerFactory::createPieComposer(
+            Container::testFactory($this->capturedOutput),
+            new PieComposerRequest(
+                new NullIO(),
+                $this->targetPlatform,
+                [],
+                PieOperation::Install,
+                [],
+                false,
+                installAllPackages: true,
+            ),
+        );
+
+        $this->handler->runInstall(
+            [],
+            $composer,
+            $this->targetPlatform,
+            false,
+            false,
+        );
+
+        $output = $this->capturedOutput->fetch();
+        self::assertStringContainsString(
+            self::PACKAGE_NAME . ' (' . self::EXTENSION_NAME . ') is already installed and verified',
+            $output,
+        );
+    }
+
     public function testRunUninstallRemovesPackageFromPieJson(): void
     {
         PieJsonEditor::fromTargetPlatform($this->targetPlatform)
@@ -212,7 +248,7 @@ final class ComposerIntegrationHandlerTest extends IsolatedWorkingDirectoryTestC
 
     private function setUpLockFile(): void
     {
-        copy(__DIR__ . '/../../assets/pie-lock/pie.lock', Platform::getPieWorkingDirectory($this->targetPlatform) . '/pie.lock');
+        copy(__DIR__ . '/../../assets/pie-install-from-lock/pie.lock', Platform::getPieWorkingDirectory($this->targetPlatform) . '/pie.lock');
     }
 
     /** @param non-empty-string $version */
