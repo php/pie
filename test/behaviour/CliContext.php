@@ -29,6 +29,7 @@ use function Safe\realpath;
 use function sprintf;
 use function str_contains;
 use function str_replace;
+use function trim;
 
 class CliContext implements Context
 {
@@ -586,6 +587,13 @@ class CliContext implements Context
         $this->copyPieJsonAndLock('pie-upgrade-lock');
     }
 
+    #[Given('I have installed PIE extensions with configure options that have upgrades available')]
+    public function iHaveInstalledPieExtensionsThatHaveConfigureOptions(): void
+    {
+        $this->runPieCommand(['install', 'asgrim/example-pie-extension:2.0.7', '--with-hello-name=UpgradeTest']);
+        $this->copyPieJsonAndLock('pie-upgrade-lock');
+    }
+
     #[Given('I have a lock file')]
     public function iHaveALockfile(): void
     {
@@ -685,6 +693,28 @@ class CliContext implements Context
 
         // asgrim/example-pie-extension should be newer than 2.0.7 (min 2.0.9 at time of writing)
         self::assertPackageVersionInstalledInPieShowOutput($pieShowOutput, 'asgrim/example-pie-extension', '^2.0.9');
+
+        $this->restorePieJsonAndLock();
+    }
+
+    #[Then('the extension has been upgraded with the previous configure options')]
+    public function theExtensionsShouldHaveBeenUpgradedWithThePreviousConfigureOptions(): void
+    {
+        $this->runPieCommand(['show']);
+        $this->assertCommandSuccessful();
+        $pieShowOutput = $this->output;
+
+        // xdebug/xdebug should still exist (upgrade should NOT uninstall it)
+        self::assertPackageVersionInstalledInPieShowOutput($pieShowOutput, 'xdebug/xdebug');
+
+        // asgrim/example-pie-extension should be newer than 2.0.7 (min 2.0.9 at time of writing)
+        self::assertPackageVersionInstalledInPieShowOutput($pieShowOutput, 'asgrim/example-pie-extension', '^2.0.9');
+
+        $exampleTest = (new Process([self::PHP_BINARY, '-r', 'example_pie_extension_test();']))
+            ->mustRun()
+            ->getOutput();
+
+        Assert::same(trim($exampleTest), 'Hello, UpgradeTest!');
 
         $this->restorePieJsonAndLock();
     }

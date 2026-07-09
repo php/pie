@@ -11,6 +11,7 @@ use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieOperation;
 use Php\Pie\Platform;
+use Php\Pie\Platform\InstalledPiePackages;
 use Php\Pie\Platform\PackageManager;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\SelfManage\BuildTools\CheckAllBuildTools;
@@ -19,7 +20,9 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Webmozart\Assert\Assert;
 
+use function explode;
 use function file_exists;
 
 #[AsCommand(
@@ -33,6 +36,7 @@ final class UpgradeCommand extends Command
         private readonly ComposerIntegrationHandler $composerIntegrationHandler,
         private readonly IOInterface $io,
         private readonly CheckAllBuildTools $checkBuildTools,
+        private readonly InstalledPiePackages $installedPiePackages,
     ) {
         parent::__construct();
     }
@@ -70,6 +74,24 @@ final class UpgradeCommand extends Command
             return Command::INVALID;
         }
 
+        $existingComposer = PieComposerFactory::createPieComposer(
+            $this->container,
+            PieComposerRequest::noOperation($this->io, $targetPlatform),
+        );
+
+        $configureOptions = [];
+        foreach ($this->installedPiePackages->allPiePackages($existingComposer)->packages() as $installedPackage) {
+            $existingConfigureOptions = $installedPackage->installedJsonMetadata()->configureOptions();
+            if ($existingConfigureOptions === null) {
+                continue;
+            }
+
+            $existingConfigureOptionsList = explode(' ', $existingConfigureOptions);
+            Assert::allStringNotEmpty($existingConfigureOptionsList);
+
+            $configureOptions[$installedPackage->name()] = $existingConfigureOptionsList;
+        }
+
         $composer = PieComposerFactory::createPieComposer(
             $this->container,
             new PieComposerRequest(
@@ -77,8 +99,7 @@ final class UpgradeCommand extends Command
                 $targetPlatform,
                 [],
                 PieOperation::Install,
-                // @todo re-use each already-installed package's existing configure options here, rather than rebuilding with the defaults
-                [],
+                $configureOptions,
                 CommandHelper::determineAttemptToSetupIniFile($input),
                 installAllPackages: true,
             ),
