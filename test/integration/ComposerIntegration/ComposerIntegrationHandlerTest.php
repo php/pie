@@ -216,14 +216,19 @@ final class ComposerIntegrationHandlerTest extends IsolatedWorkingDirectoryTestC
     /** @param non-empty-string $version */
     private function makeComposerPackage(string $version): CompletePackage
     {
+        $sha                 = '963c8d70c57c23fa2098e499a0ebffabb64748b3';
         $extensionBinaryPath = $this->extensionBinaryPath();
 
         $package = new CompletePackage(self::PACKAGE_NAME, $version . '.0', $version);
         $package->setType('php-ext');
         $package->setPhpExt(['extension-name' => 'ext-' . self::EXTENSION_NAME]);
         $package->setDistType('zip');
-        $package->setDistUrl('https://github.com/asgrim/example-pie-extension/archive/refs/tags/' . $version . '.zip');
         $package->setInstallationSource('dist');
+        $package->setDistUrl('https://api.github.com/repos/asgrim/example-pie-extension/zipball/' . $sha);
+        $package->setDistReference($sha);
+        $package->setSourceType('git');
+        $package->setSourceUrl('https://github.com/asgrim/example-pie-extension.git');
+        $package->setSourceReference($sha);
         $package->setExtra([
             InstalledJsonMetadata::KEY_TARGET_PLATFORM_PHP_VERSION => $this->targetPlatform->phpBinaryPath->version(),
             InstalledJsonMetadata::KEY_BUILT_BINARY                => $extensionBinaryPath,
