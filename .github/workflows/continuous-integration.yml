@@ -122,7 +122,7 @@ jobs:
           - '8.3'
           - '8.4'
           - '8.5'
-          - '8.6'
+          - '8.6-dev'
     steps:
       - name: "Purge built-in PHP version"
         run: |
@@ -162,8 +162,15 @@ jobs:
             libzip-dev
       - name: "Set php-src download URL"
         run: |
-          DIST_URL=`curl -fsSL "https://www.php.net/releases/index.php?json&max=1&version=${{ matrix.php-versions }}" | jq -r '.[].source[]|select(.filename|endswith(".gz")).filename'`
-          echo "php_src_download_url=https://www.php.net/distributions/$DIST_URL" >> $GITHUB_ENV
+          if [[ "${{ matrix.php-versions }}" == *-dev ]]; then
+            VERSION="${{ matrix.php-versions }}"
+            VERSION="${VERSION%-dev}"
+            DIST_URL=`curl -fsSL "https://www.php.net/pre-release-builds.php?format=json" | jq -r --arg v "$VERSION" 'to_entries[] | select(.key | startswith($v)) | .value.release.files.gz.path'`
+            echo "php_src_download_url=$DIST_URL" >> $GITHUB_ENV
+          else
+            DIST_URL=`curl -fsSL "https://www.php.net/releases/index.php?json&max=1&version=${{ matrix.php-versions }}" | jq -r '.[].source[]|select(.filename|endswith(".gz")).filename'`
+            echo "php_src_download_url=https://www.php.net/distributions/$DIST_URL" >> $GITHUB_ENV
+          fi
       - name: "Install PHP ${{ matrix.php-versions }}"
         env:
           php_src_download_url: ${{ env.php_src_download_url }}
@@ -222,7 +229,7 @@ jobs:
           - '8.3'
           - '8.4'
           - '8.5'
-          - '8.6'
+          - '8.6-dev'
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 #v7.0.0
         with:

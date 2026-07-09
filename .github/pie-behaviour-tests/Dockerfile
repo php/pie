@@ -29,8 +29,13 @@ RUN export DEBIAN_FRONTEND="noninteractive"; \
 ARG PHP_VERSION=8.4
 RUN mkdir -p /usr/local/src/php; \
     cd /usr/local/src/php; \
-    FULL_LATEST_VERSION=`curl -fsSL "https://www.php.net/releases/index.php?json&max=1&version=$PHP_VERSION" | jq -r '.[].source[]|select(.filename|endswith(".gz")).filename'`; \
-    wget -O php.tgz "https://www.php.net/distributions/$FULL_LATEST_VERSION" ; \
+    if [ "${PHP_VERSION%-dev}" != "$PHP_VERSION" ]; then \
+        PHP_SRC_DOWNLOAD_URL=`curl -fsSL "https://www.php.net/pre-release-builds.php?format=json" | jq -r --arg v "${PHP_VERSION%-dev}" 'to_entries[] | select(.key | startswith($v)) | .value.release.files.gz.path'` ; \
+    else \
+        FULL_LATEST_VERSION=`curl -fsSL "https://www.php.net/releases/index.php?json&max=1&version=$PHP_VERSION" | jq -r '.[].source[]|select(.filename|endswith(".gz")).filename'`; \
+        PHP_SRC_DOWNLOAD_URL="https://www.php.net/distributions/$FULL_LATEST_VERSION" ; \
+    fi; \
+    wget -O php.tgz "$PHP_SRC_DOWNLOAD_URL" ; \
     tar zxf php.tgz ; \
     rm php.tgz ; \
     ls -l ; \

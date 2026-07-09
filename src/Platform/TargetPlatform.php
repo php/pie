@@ -97,6 +97,9 @@ class TargetPlatform
                     case 'VS17':
                         $windowsCompiler = WindowsCompiler::VS17;
                         break;
+                    case 'VS18':
+                        $windowsCompiler = WindowsCompiler::VS18;
+                        break;
                 }
             }
         }
