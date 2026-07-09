@@ -49,7 +49,7 @@ RUN mkdir -p /usr/local/src/php; \
 RUN touch /usr/local/lib/php.ini
 
 COPY --from=ghcr.io/php/pie:bin /pie /usr/local/bin/pie
-RUN pie install xdebug/xdebug
+RUN BOX_REQUIREMENT_CHECKER=0 pie install xdebug/xdebug
 
 COPY --from=clone_ext_repo /example-pie-extension /example-pie-extension
 
