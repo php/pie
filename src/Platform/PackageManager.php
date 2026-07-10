@@ -21,8 +21,10 @@ enum PackageManager: string
     case Apt  = 'apt-get';
     case Apk  = 'apk';
     case Dnf  = 'dnf';
-    case Yum  = 'yum';
     case Brew = 'brew';
+
+    /** @deprecated Use `dnf` instead of `yum` */
+    case Yum = 'yum';
 
     public static function detect(): self|null
     {
@@ -61,6 +63,10 @@ enum PackageManager: string
     /** @param list<string> $packages */
     public function install(IOInterface $io, array $packages): void
     {
+        if ($this === self::Yum) {
+            $io->writeError('<warning>Usage of `yum` in PIE is deprecated in favour of `dnf`, and will be removed in a future release of PIE.</warning>');
+        }
+
         $outputCallback = Process::outputCallbackForVerbosity($io, IOInterface::VERY_VERBOSE);
 
         $cmd = self::installCommand($packages);

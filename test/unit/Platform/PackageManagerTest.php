@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Php\PieUnitTest\Platform;
 
+use Composer\IO\BufferIO;
 use Php\Pie\Platform\PackageManager;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 
 #[CoversClass(PackageManager::class)]
 final class PackageManagerTest extends TestCase
@@ -37,5 +39,18 @@ final class PackageManagerTest extends TestCase
             ['brew', 'install', 'a', 'b'],
             PackageManager::Brew->installCommand(['a', 'b']),
         );
+    }
+
+    public function testInstallWithYumWritesDeprecationWarning(): void
+    {
+        $io = new BufferIO();
+
+        try {
+            PackageManager::Yum->install($io, ['some-package-that-does-not-exist']);
+        } catch (ProcessFailedException) {
+            // Expected
+        }
+
+        self::assertStringContainsString('deprecated', $io->getOutput());
     }
 }
