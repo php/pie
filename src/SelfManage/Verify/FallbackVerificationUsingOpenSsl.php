@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\Pie\SelfManage\Verify;
 
+use Composer\Downloader\TransportException;
 use Composer\IO\IOInterface;
 use Php\Pie\File\BinaryFile;
 use Php\Pie\SelfManage\Update\FetchPieRelease;
@@ -73,6 +74,12 @@ final class FallbackVerificationUsingOpenSsl implements VerifyPiePhar
             );
         } catch (FailedToVerifyArtifact $failedToVerifyArtifact) {
             throw FailedToVerifyRelease::fromAttestationException($failedToVerifyArtifact);
+        } catch (TransportException $transportException) {
+            if ($transportException->getStatusCode() === 401) {
+                throw FailedToVerifyRelease::fromGithubAuthenticationFailure($transportException);
+            }
+
+            throw $transportException;
         }
 
         $io->write(sprintf(
