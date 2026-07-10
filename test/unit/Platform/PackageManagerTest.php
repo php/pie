@@ -32,6 +32,10 @@ final class PackageManagerTest extends TestCase
             PackageManager::Dnf->installCommand(['a', 'b']),
         );
         self::assertSame(
+            ['microdnf', 'install', '-y', 'a', 'b'],
+            PackageManager::Microdnf->installCommand(['a', 'b']),
+        );
+        self::assertSame(
             ['yum', 'install', '-y', 'a', 'b'],
             PackageManager::Yum->installCommand(['a', 'b']),
         );

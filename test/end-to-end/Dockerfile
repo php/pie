@@ -3,6 +3,7 @@ FROM alpine:3.24 AS alpine_base
 FROM fedora:44 AS fedora_base
 FROM ubuntu:26.04 AS ubuntu_base
 FROM homebrew/brew:4.6.20 AS homebrew_base
+FROM redhat/ubi9-minimal:9.8 AS ubi9_base
 
 FROM box_base AS build_pie_phar
 RUN apk add git
@@ -26,6 +27,12 @@ FROM quay.io/rockylinux/rockylinux:10 AS test_pie_installs_build_tools_on_rocky
 RUN dnf install -y php8.4-cli epel-release unzip
 COPY --from=build_pie_phar /app/pie.phar /usr/local/bin/pie
 RUN pie install --auto-install-build-tools -vv asgrim/example-pie-extension:2.0.5
+RUN pie show
+
+FROM ubi9_base AS test_pie_installs_build_tools_on_ubi9
+RUN microdnf module enable -y php:8.3 && microdnf install -y php-cli php-pecl-zip unzip
+COPY --from=build_pie_phar /app/pie.phar /usr/local/bin/pie
+RUN pie install --auto-install-build-tools -v asgrim/example-pie-extension:2.0.5
 RUN pie show
 
 FROM ubuntu_base AS test_pie_installs_build_tools_on_ubuntu

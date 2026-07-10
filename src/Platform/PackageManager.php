@@ -17,11 +17,12 @@ use function implode;
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 enum PackageManager: string
 {
-    case Test = 'test';
-    case Apt  = 'apt-get';
-    case Apk  = 'apk';
-    case Dnf  = 'dnf';
-    case Brew = 'brew';
+    case Test     = 'test';
+    case Apt      = 'apt-get';
+    case Apk      = 'apk';
+    case Dnf      = 'dnf';
+    case Microdnf = 'microdnf';
+    case Brew     = 'brew';
 
     /** @deprecated Use `dnf` instead of `yum` */
     case Yum = 'yum';
@@ -55,6 +56,7 @@ enum PackageManager: string
             self::Apt => ['apt-get', 'install', '-y', '--no-install-recommends', '--no-install-suggests', ...$packages],
             self::Apk => ['apk', 'add', '--no-cache', '--virtual', '.php-pie-deps', ...$packages],
             self::Dnf => ['dnf', 'install', '-y', ...$packages],
+            self::Microdnf => ['microdnf', 'install', '-y', ...$packages],
             self::Yum => ['yum', 'install', '-y', ...$packages],
             self::Brew => ['brew', 'install', ...$packages],
         };
