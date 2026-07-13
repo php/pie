@@ -9,6 +9,7 @@ use Behat\Hook\AfterScenario;
 use Behat\Step\Given;
 use Behat\Step\Then;
 use Behat\Step\When;
+use Composer\Semver\VersionParser;
 use Composer\Util\Platform;
 use RuntimeException;
 use Safe\Exceptions\PcreException;
@@ -28,6 +29,7 @@ use function Safe\realpath;
 use function sprintf;
 use function str_contains;
 use function str_replace;
+use function trim;
 
 class CliContext implements Context
 {
@@ -476,9 +478,10 @@ class CliContext implements Context
 
         $this->runPieCommand(['show']);
         $this->assertCommandSuccessful();
+        $pieShowOutput = $this->output;
 
-        Assert::contains($this->output, 'asgrim/example-pie-extension');
-        Assert::contains($this->output, 'phpredis/phpredis');
+        self::assertPackageVersionInstalledInPieShowOutput($pieShowOutput, 'asgrim/example-pie-extension');
+        self::assertPackageVersionInstalledInPieShowOutput($pieShowOutput, 'phpredis/phpredis');
     }
 
     #[Then('I should see information on how to select packages for install')]
@@ -550,11 +553,9 @@ class CliContext implements Context
         Assert::contains($this->errorOutput, '❌ Failed to verify that this PIE binary is the authentic release');
     }
 
-    #[Given('I have a lock file')]
-    public function iHaveALockfile(): void
+    private function copyPieJsonAndLock(string $asset): void
     {
-        $this->runPieCommand(['install', 'xdebug/xdebug:3.5.3', 'derickr/quickhash']);
-
+        // Find existing pie.json
         $this->runPieCommand(['show', '-v']);
         Assert::notNull($this->output);
         preg_match('#Using pie\.json: (.+)#', $this->output, $pieJsonRegexMatches);
@@ -562,18 +563,94 @@ class CliContext implements Context
         $this->pieJsonFilename = $pieJsonRegexMatches[1];
         $this->pieLockFilename = str_replace('pie.json', 'pie.lock', $this->pieJsonFilename);
 
+        // Make a backup of the pie.json/.lock
         $this->pieJsonContentBackup = file_get_contents($this->pieJsonFilename);
         $this->pieLockContentBackup = file_get_contents($this->pieLockFilename);
 
-        $testPieLockPath = realpath(__DIR__ . '/../assets/pie-lock');
+        // Copy the new ones over
+        $testPieLockPath = realpath(__DIR__ . '/../assets/' . $asset);
         copy($testPieLockPath . '/pie.json', $this->pieJsonFilename);
         copy($testPieLockPath . '/pie.lock', $this->pieLockFilename);
+    }
+
+    private function restorePieJsonAndLock(): void
+    {
+        file_put_contents($this->pieJsonFilename, $this->pieJsonContentBackup);
+        file_put_contents($this->pieLockFilename, $this->pieLockContentBackup);
+        $this->runPieCommand(['install', '--from-lock']);
+    }
+
+    #[Given('I have installed PIE extensions that have upgrades available')]
+    public function iHaveInstalledPieExtensionsThatHaveUpgradesAvailable(): void
+    {
+        $this->runPieCommand(['install', 'asgrim/example-pie-extension:2.0.7']);
+        $this->copyPieJsonAndLock('pie-upgrade-lock');
+    }
+
+    #[Given('I have installed PIE extensions with configure options that have upgrades available')]
+    public function iHaveInstalledPieExtensionsThatHaveConfigureOptions(): void
+    {
+        $this->runPieCommand(['install', 'asgrim/example-pie-extension:2.0.7', '--with-hello-name=UpgradeTest']);
+        $this->copyPieJsonAndLock('pie-upgrade-lock');
+    }
+
+    #[Given('I have a lock file')]
+    public function iHaveALockfile(): void
+    {
+        $this->runPieCommand(['install', 'xdebug/xdebug:3.5.3', 'derickr/quickhash']);
+        $this->copyPieJsonAndLock('pie-install-from-lock');
     }
 
     #[When('I run a command to install from the lockfile')]
     public function iRunACommandToInstallFromTheLockfile(): void
     {
         $this->runPieCommand(['install', '-v', '--from-lock']);
+    }
+
+    #[When('I run a command to upgrade my extensions')]
+    public function iRunACommandToUpgradeMyExtensions(): void
+    {
+        $this->runPieCommand(['upgrade', '-v']);
+    }
+
+    /** @return array<string, string> */
+    private static function installedExtensionPackagesAndVersions(string $pieShowOutput): array
+    {
+        if (! preg_match_all('#([a-zA-Z0-9-_]+/[a-zA-Z0-9-_]+):([^ ]+)#', $pieShowOutput, $matches)) {
+            throw new RuntimeException('no packages found in pie show');
+        }
+
+        return array_combine($matches[1], $matches[2]);
+    }
+
+    private static function assertPackageVersionInstalledInPieShowOutput(string $pieShowOutput, string $expectedPackage, string|null $expectedVersion = null): void
+    {
+        $installedExtensionPackagesAndVersions = self::installedExtensionPackagesAndVersions($pieShowOutput);
+        Assert::keyExists($installedExtensionPackagesAndVersions, $expectedPackage);
+
+        if ($expectedVersion === null) {
+            return;
+        }
+
+        $versionParser       = new VersionParser();
+        $installedConstraint = $versionParser->parseConstraints($installedExtensionPackagesAndVersions[$expectedPackage]);
+        $expectedConstraint  = $versionParser->parseConstraints($expectedVersion);
+        Assert::true(
+            $expectedConstraint->matches($installedConstraint),
+            sprintf(
+                'Installed version %s does not match expected constraint %s',
+                $installedConstraint->getPrettyString(),
+                $expectedConstraint->getPrettyString(),
+            ),
+        );
+    }
+
+    private static function assertPackageNotInstalledInPieShowOutput(string $pieShowOutput, string $notExpectedPackage): void
+    {
+        Assert::keyNotExists(
+            self::installedExtensionPackagesAndVersions($pieShowOutput),
+            $notExpectedPackage,
+        );
     }
 
     #[Then('the extensions should have been updated to the lock')]
@@ -586,31 +663,59 @@ class CliContext implements Context
 
         $this->runPieCommand(['show']);
         $this->assertCommandSuccessful();
-
-        if (! preg_match_all('#([a-zA-Z0-9-_]+/[a-zA-Z0-9-_]+):([^ ]+)#', (string) $this->output, $matches)) {
-            throw new RuntimeException('no packages found in pie show');
-        }
-
-        $installedExtensionPackagesAndVersions = array_combine($matches[1], $matches[2]);
+        $pieShowOutput = $this->output;
 
         // `xdebug` should be downgraded to 3.5.2
         Assert::contains($pieInstallOutput, 'PIE package xdebug/xdebug (xdebug) is at 3.5.3 but the lock requires 3.5.2, scheduling for reinstall');
         Assert::contains($pieInstallOutput, 'Extension xdebug/xdebug:3.5.2 is enabled and loaded');
-        Assert::keyExists($installedExtensionPackagesAndVersions, 'xdebug/xdebug');
-        Assert::same($installedExtensionPackagesAndVersions['xdebug/xdebug'], '3.5.2');
+        self::assertPackageVersionInstalledInPieShowOutput($pieShowOutput, 'xdebug/xdebug', '3.5.2');
 
         // `quickhash` should have been removed (not in lockfile)
         Assert::contains($pieInstallOutput, 'Removed extension derickr/quickhash:');
-        Assert::keyNotExists($installedExtensionPackagesAndVersions, 'derickr/quickhash');
+        self::assertPackageNotInstalledInPieShowOutput($pieShowOutput, 'derickr/quickhash');
 
         // `example_pie_extension` 2.0.9 should have been installed (was not previously installed)
         Assert::contains($pieInstallOutput, 'Extension asgrim/example-pie-extension:2.0.9 is enabled and loaded');
-        Assert::keyExists($installedExtensionPackagesAndVersions, 'asgrim/example-pie-extension');
-        Assert::same($installedExtensionPackagesAndVersions['asgrim/example-pie-extension'], '2.0.9');
+        self::assertPackageVersionInstalledInPieShowOutput($pieShowOutput, 'asgrim/example-pie-extension', '2.0.9');
 
-        // restore the pie.json/lock contents, and re-install from the lock
-        file_put_contents($this->pieJsonFilename, $this->pieJsonContentBackup);
-        file_put_contents($this->pieLockFilename, $this->pieLockContentBackup);
-        $this->runPieCommand(['install', '--from-lock']);
+        $this->restorePieJsonAndLock();
+    }
+
+    #[Then('the extensions should have been upgraded to the latest versions')]
+    public function theExtensionsShouldHaveBeenUpgradedToTheLatestVersions(): void
+    {
+        $this->runPieCommand(['show']);
+        $this->assertCommandSuccessful();
+        $pieShowOutput = $this->output;
+
+        // xdebug/xdebug should still exist (upgrade should NOT uninstall it)
+        self::assertPackageVersionInstalledInPieShowOutput($pieShowOutput, 'xdebug/xdebug');
+
+        // asgrim/example-pie-extension should be newer than 2.0.7 (min 2.0.9 at time of writing)
+        self::assertPackageVersionInstalledInPieShowOutput($pieShowOutput, 'asgrim/example-pie-extension', '^2.0.9');
+
+        $this->restorePieJsonAndLock();
+    }
+
+    #[Then('the extension has been upgraded with the previous configure options')]
+    public function theExtensionsShouldHaveBeenUpgradedWithThePreviousConfigureOptions(): void
+    {
+        $this->runPieCommand(['show']);
+        $this->assertCommandSuccessful();
+        $pieShowOutput = $this->output;
+
+        // xdebug/xdebug should still exist (upgrade should NOT uninstall it)
+        self::assertPackageVersionInstalledInPieShowOutput($pieShowOutput, 'xdebug/xdebug');
+
+        // asgrim/example-pie-extension should be newer than 2.0.7 (min 2.0.9 at time of writing)
+        self::assertPackageVersionInstalledInPieShowOutput($pieShowOutput, 'asgrim/example-pie-extension', '^2.0.9');
+
+        $exampleTest = (new Process([self::PHP_BINARY, '-r', 'example_pie_extension_test();']))
+            ->mustRun()
+            ->getOutput();
+
+        Assert::same(trim($exampleTest), 'Hello, UpgradeTest!');
+
+        $this->restorePieJsonAndLock();
     }
 }

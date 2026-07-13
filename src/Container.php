@@ -26,6 +26,7 @@ use Php\Pie\Command\SelfUpdateCommand;
 use Php\Pie\Command\SelfVerifyCommand;
 use Php\Pie\Command\ShowCommand;
 use Php\Pie\Command\UninstallCommand;
+use Php\Pie\Command\UpgradeCommand;
 use Php\Pie\ComposerIntegration\MinimalHelperSet;
 use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use Php\Pie\DependencyResolver\DependencyInstaller\SystemDependenciesDefinition;
@@ -114,6 +115,7 @@ final class Container
         $container->singleton(DownloadCommand::class);
         $container->singleton(BuildCommand::class);
         $container->singleton(InstallCommand::class);
+        $container->singleton(UpgradeCommand::class);
         $container->singleton(InfoCommand::class);
         $container->singleton(ShowCommand::class);
         $container->singleton(RepositoryListCommand::class);

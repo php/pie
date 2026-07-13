@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\PieUnitTest\ComposerIntegration\Listeners;
 
 use Composer\Composer;
+use Composer\DependencyResolver\Operation\UpdateOperation;
 use Composer\DependencyResolver\Transaction;
 use Composer\EventDispatcher\EventDispatcher;
 use Composer\Installer\InstallerEvent;
@@ -31,6 +32,8 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
+
+use function array_map;
 
 #[CoversClass(OverrideDownloadUrlInstallListener::class)]
 final class OverrideDownloadUrlInstallListenerTest extends TestCase
@@ -549,6 +552,72 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
         $this->expectException(CouldNotDetermineDownloadUrlMethod::class);
         $this->expectExceptionMessage('Could not download foo/bar using pre-packaged-binary method: Cannot use pre-packaged-binary download method, as configure options were passed.');
         $listener($installerEvent);
+    }
+
+    public function testDistUrlIsUpdatedForWindowsInstallersOnUpdateOperations(): void
+    {
+        $initialPackage = new CompletePackage('foo/bar', '1.2.3.0', '1.2.3');
+        $initialPackage->setDistUrl('https://example.com/git-archive-zip-url');
+
+        $targetPackage = new CompletePackage('foo/bar', '1.3.0.0', '1.3.0');
+        $targetPackage->setDistUrl('https://example.com/git-archive-zip-url');
+
+        $installerEvent = new InstallerEvent(
+            InstallerEvents::PRE_OPERATIONS_EXEC,
+            $this->composer,
+            $this->io,
+            false,
+            true,
+            new Transaction([$initialPackage], [$targetPackage]),
+        );
+
+        self::assertSame(
+            [UpdateOperation::class],
+            array_map(
+                static fn (object $operation): string => $operation::class,
+                $installerEvent->getTransaction()?->getOperations() ?? [],
+            ),
+        );
+
+        $packageReleaseAssets = $this->createMock(PackageReleaseAssets::class);
+        $packageReleaseAssets
+            ->expects(self::once())
+            ->method('findMatchingReleaseAssetUrl')
+            ->willReturn('https://example.com/windows-download-url');
+
+        $this->container
+            ->method('get')
+            ->with(PackageReleaseAssets::class)
+            ->willReturn($packageReleaseAssets);
+
+        (new OverrideDownloadUrlInstallListener(
+            $this->composer,
+            $this->io,
+            $this->container,
+            new PieComposerRequest(
+                $this->createMock(IOInterface::class),
+                new TargetPlatform(
+                    OperatingSystem::Windows,
+                    OperatingSystemFamily::Linux,
+                    PhpBinaryPath::fromCurrentProcess(),
+                    Architecture::x86_64,
+                    ThreadSafetyMode::NonThreadSafe,
+                    1,
+                    WindowsCompiler::VC15,
+                    null,
+                ),
+                [new RequestedPackageAndVersion('foo/bar', '^1.1')],
+                PieOperation::Install,
+                [],
+                false,
+            ),
+        ))($installerEvent);
+
+        self::assertSame(
+            'https://example.com/windows-download-url',
+            $targetPackage->getDistUrl(),
+        );
+        self::assertSame(DownloadUrlMethod::WindowsBinaryDownload, DownloadUrlMethod::fromComposerPackage($targetPackage));
     }
 
     public function testNoSelectedDownloadUrlMethodWillThrowException(): void

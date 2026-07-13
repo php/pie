@@ -146,6 +146,42 @@ final class ComposerIntegrationHandlerTest extends IsolatedWorkingDirectoryTestC
         self::assertStringNotContainsString('is already installed and verified', $output);
     }
 
+    public function testRunInstallWithNoResolvedPackagesTreatsLockedPackagesAsExtensionNames(): void
+    {
+        PieJsonEditor::fromTargetPlatform($this->targetPlatform)
+            ->ensureExists()
+            ->addRequire(self::PACKAGE_NAME, self::VERSION_CURRENT);
+        $this->setUpInstalledJson(self::VERSION_CURRENT);
+        $this->setUpLockFile();
+
+        $composer = PieComposerFactory::createPieComposer(
+            Container::testFactory($this->capturedOutput),
+            new PieComposerRequest(
+                new NullIO(),
+                $this->targetPlatform,
+                [],
+                PieOperation::Install,
+                [],
+                false,
+                installAllPackages: true,
+            ),
+        );
+
+        $this->handler->runInstall(
+            [],
+            $composer,
+            $this->targetPlatform,
+            false,
+            false,
+        );
+
+        $output = $this->capturedOutput->fetch();
+        self::assertStringContainsString(
+            self::PACKAGE_NAME . ' (' . self::EXTENSION_NAME . ') is already installed and verified',
+            $output,
+        );
+    }
+
     public function testRunUninstallRemovesPackageFromPieJson(): void
     {
         PieJsonEditor::fromTargetPlatform($this->targetPlatform)
@@ -180,14 +216,19 @@ final class ComposerIntegrationHandlerTest extends IsolatedWorkingDirectoryTestC
     /** @param non-empty-string $version */
     private function makeComposerPackage(string $version): CompletePackage
     {
+        $sha                 = '963c8d70c57c23fa2098e499a0ebffabb64748b3';
         $extensionBinaryPath = $this->extensionBinaryPath();
 
         $package = new CompletePackage(self::PACKAGE_NAME, $version . '.0', $version);
         $package->setType('php-ext');
         $package->setPhpExt(['extension-name' => 'ext-' . self::EXTENSION_NAME]);
         $package->setDistType('zip');
-        $package->setDistUrl('https://github.com/asgrim/example-pie-extension/archive/refs/tags/' . $version . '.zip');
         $package->setInstallationSource('dist');
+        $package->setDistUrl('https://api.github.com/repos/asgrim/example-pie-extension/zipball/' . $sha);
+        $package->setDistReference($sha);
+        $package->setSourceType('git');
+        $package->setSourceUrl('https://github.com/asgrim/example-pie-extension.git');
+        $package->setSourceReference($sha);
         $package->setExtra([
             InstalledJsonMetadata::KEY_TARGET_PLATFORM_PHP_VERSION => $this->targetPlatform->phpBinaryPath->version(),
             InstalledJsonMetadata::KEY_BUILT_BINARY                => $extensionBinaryPath,
@@ -212,7 +253,7 @@ final class ComposerIntegrationHandlerTest extends IsolatedWorkingDirectoryTestC
 
     private function setUpLockFile(): void
     {
-        copy(__DIR__ . '/../../assets/pie-lock/pie.lock', Platform::getPieWorkingDirectory($this->targetPlatform) . '/pie.lock');
+        copy(__DIR__ . '/../../assets/pie-install-from-lock/pie.lock', Platform::getPieWorkingDirectory($this->targetPlatform) . '/pie.lock');
     }
 
     /** @param non-empty-string $version */

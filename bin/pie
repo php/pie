@@ -17,6 +17,7 @@ use Php\Pie\Command\SelfUpdateCommand;
 use Php\Pie\Command\SelfVerifyCommand;
 use Php\Pie\Command\ShowCommand;
 use Php\Pie\Command\UninstallCommand;
+use Php\Pie\Command\UpgradeCommand;
 use Php\Pie\Util\PieVersion;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\CommandLoader\ContainerCommandLoader;
@@ -48,6 +49,7 @@ $application->setCommandLoader(new ContainerCommandLoader(
         'download' => DownloadCommand::class,
         'build' => BuildCommand::class,
         'install' => InstallCommand::class,
+        'upgrade' => UpgradeCommand::class,
         'info' => InfoCommand::class,
         'show' => ShowCommand::class,
         'repository:list' => RepositoryListCommand::class,
