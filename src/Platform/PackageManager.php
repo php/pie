@@ -17,12 +17,15 @@ use function implode;
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 enum PackageManager: string
 {
-    case Test = 'test';
-    case Apt  = 'apt-get';
-    case Apk  = 'apk';
-    case Dnf  = 'dnf';
-    case Yum  = 'yum';
-    case Brew = 'brew';
+    case Test     = 'test';
+    case Apt      = 'apt-get';
+    case Apk      = 'apk';
+    case Dnf      = 'dnf';
+    case Microdnf = 'microdnf';
+    case Brew     = 'brew';
+
+    /** @deprecated Use `dnf` instead of `yum` */
+    case Yum = 'yum';
 
     public static function detect(): self|null
     {
@@ -53,6 +56,7 @@ enum PackageManager: string
             self::Apt => ['apt-get', 'install', '-y', '--no-install-recommends', '--no-install-suggests', ...$packages],
             self::Apk => ['apk', 'add', '--no-cache', '--virtual', '.php-pie-deps', ...$packages],
             self::Dnf => ['dnf', 'install', '-y', ...$packages],
+            self::Microdnf => ['microdnf', 'install', '-y', ...$packages],
             self::Yum => ['yum', 'install', '-y', ...$packages],
             self::Brew => ['brew', 'install', ...$packages],
         };
@@ -61,6 +65,10 @@ enum PackageManager: string
     /** @param list<string> $packages */
     public function install(IOInterface $io, array $packages): void
     {
+        if ($this === self::Yum) {
+            $io->writeError('<warning>Usage of `yum` in PIE is deprecated in favour of `dnf`, and will be removed in a future release of PIE.</warning>');
+        }
+
         $outputCallback = Process::outputCallbackForVerbosity($io, IOInterface::VERY_VERBOSE);
 
         $cmd = self::installCommand($packages);
