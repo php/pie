@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\Pie\SelfManage\Verify;
 
+use Composer\Downloader\TransportException;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
 use RuntimeException;
 use Symfony\Component\Process\Exception\ProcessFailedException;
@@ -14,6 +15,18 @@ use function trim;
 
 class FailedToVerifyRelease extends RuntimeException
 {
+    public static function fromGithubAuthenticationFailure(TransportException $transportException): self
+    {
+        return new self(
+            $transportException->getMessage() . ' while downloading attestation to verify PIE. This likely '
+            . 'means you have not set up GitHub authentication in Composer yet. PIE relies on this Composer '
+            . 'authentication configuration to make API requests to GitHub; check out '
+            . 'https://getcomposer.org/doc/articles/authentication-for-private-packages.md#command-line-github-oauth'
+            . 'for help configuring Composer, or set GITHUB_TOKEN if the environment makes sense',
+            previous: $transportException,
+        );
+    }
+
     public static function fromAttestationException(FailedToVerifyArtifact $failedToVerifyArtifact): self
     {
         return new self($failedToVerifyArtifact->getMessage(), 0, $failedToVerifyArtifact);
