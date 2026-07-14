@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Php\Pie\Platform;
 
-use RuntimeException;
 use Symfony\Component\Process\Process;
 
 use function assert;
@@ -45,6 +44,7 @@ final class MakePath
     public static function guess(): string
     {
         foreach (['make', 'gmake'] as $candidate) {
+            // Note: depends on `which` existing, which doesn't always...
             $which = new Process(['which', $candidate]);
             if ($which->run() !== 0) {
                 continue;
@@ -61,6 +61,7 @@ final class MakePath
             return $candidatePath;
         }
 
-        throw new RuntimeException('Could not find a suitable GNU `make` binary (checked "make" and "gmake" on your PATH).');
+        // Fall back to assuming/hoping make is on the path
+        return 'make';
     }
 }
