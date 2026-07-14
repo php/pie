@@ -34,22 +34,34 @@ class FindMatchingPackages
      */
     private function filterToCompatible(Composer $pieComposer, array $matches, string $searchTerm): array
     {
-        if (ExtensionName::isValidExtensionName($searchTerm)) {
-            $extensionName = ExtensionName::normaliseFromString($searchTerm);
+        $normalisedExtensionNameIfValid = ExtensionName::isValidExtensionName($searchTerm)
+            ? ExtensionName::normaliseFromString($searchTerm)
+            : null;
 
-            $matches = array_filter(
-                $matches,
-                static function (array $match) use ($pieComposer, $extensionName): bool {
-                    $package = $pieComposer->getRepositoryManager()->findPackage($match['name'], '*');
+        $matches = array_filter(
+            $matches,
+            static function (array $match) use ($pieComposer, $normalisedExtensionNameIfValid): bool {
+                $package = $pieComposer->getRepositoryManager()->findPackage($match['name'], '*');
 
-                    if (! $package instanceof CompletePackageInterface || ! ExtensionType::isValid($package->getType())) {
-                        return false;
-                    }
+                /** Don't include abandoned packages */
+                if ($package instanceof CompletePackageInterface && $package->isAbandoned()) {
+                    return false;
+                }
 
-                    return Package::fromComposerCompletePackage($package)->extensionName()->name() === $extensionName->name();
-                },
-            );
-        }
+                /** Allows "search results", used for {@see bySearching()} where the search term might not be an extension name*/
+                if ($normalisedExtensionNameIfValid === null) {
+                    return true;
+                }
+
+                /** Don't include packages without type php-ext or php-ext-zend */
+                if (! $package instanceof CompletePackageInterface || ! ExtensionType::isValid($package->getType())) {
+                    return false;
+                }
+
+                /** Return if the package extension name (derived or explicit) matches what we are looking for */
+                return Package::fromComposerCompletePackage($package)->extensionName()->name() === $normalisedExtensionNameIfValid->name();
+            },
+        );
 
         if (! count($matches)) {
             throw new OutOfRangeException('No matches found for ' . $searchTerm);
