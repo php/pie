@@ -109,6 +109,16 @@ final class CommandHelper
         );
     }
 
+    public static function configureBuildToolsCheckOptions(Command $command): void
+    {
+        $command->addOption(
+            self::OPTION_AUTO_INSTALL_BUILD_TOOLS,
+            null,
+            InputOption::VALUE_NONE,
+            'If build tools are missing, automatically install them, instead of prompting.',
+        );
+    }
+
     public static function configureDownloadBuildInstallOptions(Command $command, bool $withRequestedPackageAndVersion = true): void
     {
         if ($withRequestedPackageAndVersion) {
@@ -161,12 +171,7 @@ final class CommandHelper
             'Select a PIE package for a given extension name, e.g. `--select=foo=myvendor/foo` to resolve the `ext-foo` extension to `myvendor/foo` PIE package.',
         );
 
-        $command->addOption(
-            self::OPTION_AUTO_INSTALL_BUILD_TOOLS,
-            null,
-            InputOption::VALUE_NONE,
-            'If build tools are missing, automatically install them, instead of prompting.',
-        );
+        self::configureBuildToolsCheckOptions($command);
         $command->addOption(
             self::OPTION_SUPPRESS_BUILD_TOOLS_CHECK,
             null,

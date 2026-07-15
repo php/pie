@@ -15,6 +15,7 @@ use Php\Pie\Building\UnixBuild;
 use Php\Pie\Building\WindowsBuild;
 use Php\Pie\Command\ArgvInput;
 use Php\Pie\Command\BuildCommand;
+use Php\Pie\Command\CheckBuildToolsCommand;
 use Php\Pie\Command\DownloadCommand;
 use Php\Pie\Command\InfoCommand;
 use Php\Pie\Command\InstallCommand;
@@ -125,6 +126,7 @@ final class Container
         $container->singleton(SelfUpdateCommand::class);
         $container->singleton(SelfVerifyCommand::class);
         $container->singleton(InstallExtensionsForProjectCommand::class);
+        $container->singleton(CheckBuildToolsCommand::class);
 
         $container->singleton(IOInterface::class, static function (ContainerInterface $container): IOInterface {
             return new ConsoleIO(

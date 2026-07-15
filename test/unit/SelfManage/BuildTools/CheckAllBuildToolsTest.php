@@ -21,6 +21,62 @@ use Symfony\Component\Console\Output\OutputInterface;
 #[CoversClass(CheckAllBuildTools::class)]
 final class CheckAllBuildToolsTest extends TestCase
 {
+    private static function targetPlatform(): TargetPlatform
+    {
+        return new TargetPlatform(
+            OperatingSystem::NonWindows,
+            OperatingSystemFamily::Linux,
+            PhpBinaryPath::fromCurrentProcess(),
+            Architecture::x86_64,
+            ThreadSafetyMode::NonThreadSafe,
+            1,
+            null,
+            null,
+        );
+    }
+
+    public function testStatusesReportsFoundToolWithNoPackageName(): void
+    {
+        $checkAllBuildTools = new CheckAllBuildTools([
+            new BinaryBuildToolFinder('echo', [PackageManager::Test->value => 'coreutils']),
+        ]);
+
+        $statuses = $checkAllBuildTools->statuses(self::targetPlatform(), PackageManager::Test);
+
+        self::assertCount(1, $statuses);
+        self::assertSame('echo', $statuses[0]->toolNames);
+        self::assertTrue($statuses[0]->found);
+        self::assertNull($statuses[0]->packageName);
+    }
+
+    public function testStatusesReportsMissingToolWithPackageNameWhenPackageManagerKnown(): void
+    {
+        $checkAllBuildTools = new CheckAllBuildTools([
+            new BinaryBuildToolFinder('bloop', [PackageManager::Test->value => 'coreutils']),
+        ]);
+
+        $statuses = $checkAllBuildTools->statuses(self::targetPlatform(), PackageManager::Test);
+
+        self::assertCount(1, $statuses);
+        self::assertSame('bloop', $statuses[0]->toolNames);
+        self::assertFalse($statuses[0]->found);
+        self::assertSame('coreutils', $statuses[0]->packageName);
+    }
+
+    public function testStatusesReportsMissingToolWithoutPackageNameWhenNoPackageManagerKnown(): void
+    {
+        $checkAllBuildTools = new CheckAllBuildTools([
+            new BinaryBuildToolFinder('bloop', [PackageManager::Test->value => 'coreutils']),
+        ]);
+
+        $statuses = $checkAllBuildTools->statuses(self::targetPlatform(), null);
+
+        self::assertCount(1, $statuses);
+        self::assertSame('bloop', $statuses[0]->toolNames);
+        self::assertFalse($statuses[0]->found);
+        self::assertNull($statuses[0]->packageName);
+    }
+
     public function testCheckDoesNothingWhenAllBuildToolsAreFound(): void
     {
         $io = new BufferIO(verbosity: OutputInterface::VERBOSITY_VERY_VERBOSE);
@@ -32,16 +88,7 @@ final class CheckAllBuildToolsTest extends TestCase
         $checkAllBuildTools->check(
             $io,
             PackageManager::Test,
-            new TargetPlatform(
-                OperatingSystem::NonWindows,
-                OperatingSystemFamily::Linux,
-                PhpBinaryPath::fromCurrentProcess(),
-                Architecture::x86_64,
-                ThreadSafetyMode::NonThreadSafe,
-                1,
-                null,
-                null,
-            ),
+            self::targetPlatform(),
             false,
         );
 
@@ -63,16 +110,7 @@ final class CheckAllBuildToolsTest extends TestCase
         $checkAllBuildTools->check(
             $io,
             PackageManager::Test,
-            new TargetPlatform(
-                OperatingSystem::NonWindows,
-                OperatingSystemFamily::Linux,
-                PhpBinaryPath::fromCurrentProcess(),
-                Architecture::x86_64,
-                ThreadSafetyMode::NonThreadSafe,
-                1,
-                null,
-                null,
-            ),
+            self::targetPlatform(),
             false,
         );
 
@@ -95,16 +133,7 @@ final class CheckAllBuildToolsTest extends TestCase
         $checkAllBuildTools->check(
             $io,
             PackageManager::Test,
-            new TargetPlatform(
-                OperatingSystem::NonWindows,
-                OperatingSystemFamily::Linux,
-                PhpBinaryPath::fromCurrentProcess(),
-                Architecture::x86_64,
-                ThreadSafetyMode::NonThreadSafe,
-                1,
-                null,
-                null,
-            ),
+            self::targetPlatform(),
             false,
         );
 
@@ -126,16 +155,7 @@ final class CheckAllBuildToolsTest extends TestCase
         $checkAllBuildTools->check(
             $io,
             PackageManager::Test,
-            new TargetPlatform(
-                OperatingSystem::NonWindows,
-                OperatingSystemFamily::Linux,
-                PhpBinaryPath::fromCurrentProcess(),
-                Architecture::x86_64,
-                ThreadSafetyMode::NonThreadSafe,
-                1,
-                null,
-                null,
-            ),
+            self::targetPlatform(),
             true,
         );
 

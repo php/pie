@@ -9,6 +9,7 @@ use Php\Pie\Platform\PackageManager;
 use Php\Pie\Platform\TargetPlatform;
 use Throwable;
 
+use function array_map;
 use function array_unique;
 use function array_values;
 use function count;
@@ -114,38 +115,51 @@ class CheckAllBuildTools
     ) {
     }
 
+    /** @return list<BuildToolStatus> */
+    public function statuses(TargetPlatform $targetPlatform, PackageManager|null $packageManager): array
+    {
+        return array_map(
+            static function (BinaryBuildToolFinder $buildTool) use ($targetPlatform, $packageManager): BuildToolStatus {
+                $found = $buildTool->check($targetPlatform);
+
+                return new BuildToolStatus(
+                    $buildTool->toolNames(),
+                    $found,
+                    $found || $packageManager === null ? null : $buildTool->packageNameFor($packageManager, $targetPlatform),
+                );
+            },
+            $this->buildTools,
+        );
+    }
+
     public function check(IOInterface $io, PackageManager|null $packageManager, TargetPlatform $targetPlatform, bool $autoInstallIfMissing): void
     {
         $io->write('<info>Checking if all build tools are installed.</info>', verbosity: IOInterface::VERBOSE);
         /** @var list<string> $packagesToInstall */
         $packagesToInstall = [];
         $missingTools      = [];
-        $allFound          = true;
 
-        foreach ($this->buildTools as $buildTool) {
-            if ($buildTool->check($targetPlatform) !== false) {
-                $io->write('Build tool ' . $buildTool->toolNames() . ' is installed.', verbosity: IOInterface::VERY_VERBOSE);
+        foreach ($this->statuses($targetPlatform, $packageManager) as $status) {
+            if ($status->found) {
+                $io->write('Build tool ' . $status->toolNames . ' is installed.', verbosity: IOInterface::VERY_VERBOSE);
                 continue;
             }
 
-            $allFound       = false;
-            $missingTools[] = $buildTool->toolNames();
+            $missingTools[] = $status->toolNames;
 
             if ($packageManager === null) {
                 continue;
             }
 
-            $packageName = $buildTool->packageNameFor($packageManager, $targetPlatform);
-
-            if ($packageName === null) {
-                $io->writeError('<warning>Could not find package name for build tool ' . $buildTool->toolNames() . '.</warning>', verbosity: IOInterface::VERBOSE);
+            if ($status->packageName === null) {
+                $io->writeError('<warning>Could not find package name for build tool ' . $status->toolNames . '.</warning>', verbosity: IOInterface::VERBOSE);
                 continue;
             }
 
-            $packagesToInstall[] = $packageName;
+            $packagesToInstall[] = $status->packageName;
         }
 
-        if ($allFound) {
+        if (! count($missingTools)) {
             $io->write('<info>All build tools found.</info>', verbosity: IOInterface::VERBOSE);
 
             return;
