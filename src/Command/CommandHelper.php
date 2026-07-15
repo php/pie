@@ -58,7 +58,11 @@ use function trim;
 
 use const PHP_VERSION;
 
-/** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
+/**
+ * @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks
+ *
+ * @phpstan-import-type MatchingPackages from FindMatchingPackages
+ */
 final class CommandHelper
 {
     public const ARG_REQUESTED_PACKAGE_AND_VERSION            = 'requested-package-and-version';
@@ -533,32 +537,10 @@ final class CommandHelper
         $io->writeError($exception->getMessage());
 
         try {
-            $matches = array_map(
-                static function (array $match) use ($io, $pieComposer): array {
-                    $composerMatchingPackage = $pieComposer->getRepositoryManager()->findPackage($match['name'], '*');
-
-                    // Attempts to augment the Composer packages found with the PIE extension name
-                    if ($composerMatchingPackage instanceof CompletePackageInterface) {
-                        try {
-                            $match['extension-name'] = Package
-                                ::fromComposerCompletePackage($composerMatchingPackage)
-                                ->extensionName()
-                                ->name();
-                        } catch (Throwable $t) {
-                            $io->writeError(
-                                sprintf(
-                                    'Tried looking up extension name for %s, but failed: %s',
-                                    $match['name'],
-                                    $t->getMessage(),
-                                ),
-                                verbosity: IOInterface::VERY_VERBOSE,
-                            );
-                        }
-                    }
-
-                    return $match;
-                },
+            $matches = self::augmentMatchesWithExtensionName(
+                $pieComposer,
                 $findMatchingPackages->bySearching($pieComposer, $requestedPackageName),
+                $io,
             );
 
             if (count($matches)) {
@@ -594,6 +576,43 @@ final class CommandHelper
         }
 
         return 1;
+    }
+
+    /**
+     * Attempts to augment the given Composer package matches with the PIE extension name, where resolvable.
+     *
+     * @param MatchingPackages $matches
+     *
+     * @return MatchingPackages
+     */
+    public static function augmentMatchesWithExtensionName(Composer $pieComposer, array $matches, IOInterface $io): array
+    {
+        return array_map(
+            static function (array $match) use ($io, $pieComposer): array {
+                $composerMatchingPackage = $pieComposer->getRepositoryManager()->findPackage($match['name'], '*');
+
+                if ($composerMatchingPackage instanceof CompletePackageInterface) {
+                    try {
+                        $match['extension-name'] = Package
+                            ::fromComposerCompletePackage($composerMatchingPackage)
+                            ->extensionName()
+                            ->name();
+                    } catch (Throwable $t) {
+                        $io->writeError(
+                            sprintf(
+                                'Tried looking up extension name for %s, but failed: %s',
+                                $match['name'],
+                                $t->getMessage(),
+                            ),
+                            verbosity: IOInterface::VERY_VERBOSE,
+                        );
+                    }
+                }
+
+                return $match;
+            },
+            $matches,
+        );
     }
 
     public static function applyNoCacheOptionIfSet(InputInterface $input, IOInterface $io): void
