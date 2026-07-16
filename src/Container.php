@@ -22,6 +22,7 @@ use Php\Pie\Command\InstallExtensionsForProjectCommand;
 use Php\Pie\Command\RepositoryAddCommand;
 use Php\Pie\Command\RepositoryListCommand;
 use Php\Pie\Command\RepositoryRemoveCommand;
+use Php\Pie\Command\SearchCommand;
 use Php\Pie\Command\SelfUpdateCommand;
 use Php\Pie\Command\SelfVerifyCommand;
 use Php\Pie\Command\ShowCommand;
@@ -118,6 +119,7 @@ final class Container
         $container->singleton(UpgradeCommand::class);
         $container->singleton(InfoCommand::class);
         $container->singleton(ShowCommand::class);
+        $container->singleton(SearchCommand::class);
         $container->singleton(RepositoryListCommand::class);
         $container->singleton(RepositoryAddCommand::class);
         $container->singleton(RepositoryRemoveCommand::class);
