@@ -10,6 +10,7 @@ use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\Downloading\DownloadUrlMethod;
 use Php\Pie\File\BinaryFile;
 use Php\Pie\File\Sudo;
+use Php\Pie\Platform\MakePath;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Util\Process;
 use RuntimeException;
@@ -76,7 +77,7 @@ final class UnixInstall implements Install
                 break;
 
             default:
-                $installCommands[] = ['make', 'install'];
+                $installCommands[] = [MakePath::guess(), 'install'];
         }
 
         // If the target directory isn't writable, or a .so file already exists and isn't writable, try to use sudo

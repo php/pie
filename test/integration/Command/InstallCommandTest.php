@@ -70,6 +70,7 @@ class InstallCommandTest extends IsolatedWorkingDirectoryTestCase
                 '/usr/bin/php-config8.1',
                 '/usr/bin/php-config8.0',
                 '/usr/bin/php-config7.4',
+                '/usr/local/bin/php-config',
             ],
             static fn (string $phpConfigPath) => file_exists($phpConfigPath)
                 && is_executable($phpConfigPath),

@@ -10,6 +10,7 @@ use Php\Pie\ComposerIntegration\BundledPhpExtensionsRepository;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\Downloading\DownloadUrlMethod;
 use Php\Pie\File\BinaryFile;
+use Php\Pie\Platform\MakePath;
 use Php\Pie\Platform\TargetPhp\PhpizePath;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Util\Process;
@@ -198,7 +199,7 @@ final class UnixBuild implements Build
         IOInterface $io,
         callable|null $outputCallback,
     ): void {
-        $makeCommand = ['make'];
+        $makeCommand = [MakePath::guess()];
 
         if ($targetPlatform->makeParallelJobs === 1) {
             $io->write('Running make without parallelization - try providing -jN to PIE where N is the number of cores you have.');

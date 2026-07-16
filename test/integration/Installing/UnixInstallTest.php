@@ -68,6 +68,7 @@ final class UnixInstallTest extends TestCase
                 '/usr/bin/php-config7.4',
                 '/usr/bin/php-config7.3',
                 '/usr/bin/php-config7.2',
+                '/usr/local/bin/php-config',
             ],
             static fn (string $phpConfigPath) => file_exists($phpConfigPath)
                 && is_executable($phpConfigPath),

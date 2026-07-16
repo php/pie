@@ -50,6 +50,64 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  unit-tests-freebsd:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-versions:
+          - '82'
+          - '83'
+          - '84'
+          - '85'
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 #v7.0.0
+        with:
+          persist-credentials: false
+      - name: Test in FreeBSD
+        uses: vmactions/freebsd-vm@5a72679103d223925653750faa878a143340fbd0 #v1.5.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          envs: 'GITHUB_TOKEN'
+          usesh: true
+          prepare: |
+            pkg install -y \
+              php${{ matrix.php-versions }} \
+              php${{ matrix.php-versions }}-composer \
+              php${{ matrix.php-versions }}-ctype \
+              php${{ matrix.php-versions }}-curl \
+              php${{ matrix.php-versions }}-dom \
+              php${{ matrix.php-versions }}-filter \
+              php${{ matrix.php-versions }}-iconv \
+              php${{ matrix.php-versions }}-intl \
+              php${{ matrix.php-versions }}-mbstring \
+              php${{ matrix.php-versions }}-pcntl \
+              php${{ matrix.php-versions }}-phar \
+              php${{ matrix.php-versions }}-posix \
+              php${{ matrix.php-versions }}-session \
+              php${{ matrix.php-versions }}-simplexml \
+              php${{ matrix.php-versions }}-sodium \
+              php${{ matrix.php-versions }}-tokenizer \
+              php${{ matrix.php-versions }}-xml \
+              php${{ matrix.php-versions }}-xmlwriter \
+              php${{ matrix.php-versions }}-zip \
+              autoconf \
+              automake \
+              bash \
+              bison \
+              ca_root_nss \
+              gmake \
+              pkgconf \
+              re2c \
+              sudo \
+              git
+          run: |
+            export PATH="/usr/local/bin:/usr/local/sbin:$PATH"
+            composer config --global --auth github-oauth.github.com "$GITHUB_TOKEN"
+            composer install
+            vendor/bin/phpunit
+
   bundled-php-extension-tests:
     runs-on: ${{ matrix.operating-system }}
     strategy:
