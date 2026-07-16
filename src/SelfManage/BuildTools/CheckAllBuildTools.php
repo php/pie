@@ -22,7 +22,7 @@ class CheckAllBuildTools
     {
         return new self([
             new BinaryBuildToolFinder(
-                'gcc',
+                ['cc', 'gcc'],
                 [
                     PackageManager::Apt->value => 'gcc',
                     PackageManager::Apk->value => 'build-base',
