@@ -13,7 +13,6 @@ use Php\Pie\File\BinaryFile;
 use Php\Pie\File\FullPathToSelf;
 use Php\Pie\SelfManage\Update\FetchPieReleaseFromGitHub;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
-use Php\Pie\SelfManage\Verify\FailedToVerifyRelease;
 use Php\Pie\SelfManage\Verify\VerifyPieReleaseUsingAttestation;
 use Php\Pie\Util\Emoji;
 use Php\Pie\Util\PieVersion;
@@ -22,7 +21,9 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Throwable;
 
 use function sprintf;
 
@@ -96,12 +97,16 @@ final class SelfVerifyCommand extends Command
 
         try {
             $verifyPiePhar->verify($latestRelease, $pharFilename, $this->io);
-        } catch (FailedToVerifyRelease $failedToVerifyRelease) {
+        } catch (Throwable $verificationFailure) {
             $this->io->writeError(sprintf(
                 '<error>❌ Failed to verify that this PIE binary is the authentic release %s: %s</error>',
                 $latestRelease->tag,
-                $failedToVerifyRelease->getMessage(),
+                $verificationFailure->getMessage(),
             ));
+            $this->getApplication()?->renderThrowable(
+                $verificationFailure,
+                $output instanceof ConsoleOutputInterface ? $output->getErrorOutput() : $output,
+            );
 
             return Command::FAILURE;
         }

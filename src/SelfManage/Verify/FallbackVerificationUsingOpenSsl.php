@@ -13,6 +13,7 @@ use ThePhpFoundation\Attestation\FilenameWithChecksum;
 use ThePhpFoundation\Attestation\FulcioSigstoreOidExtensions;
 use ThePhpFoundation\Attestation\Verification\Exception\FailedToVerifyArtifact;
 use ThePhpFoundation\Attestation\Verification\VerifyAttestation;
+use Throwable;
 
 use function sprintf;
 
@@ -70,6 +71,8 @@ final class FallbackVerificationUsingOpenSsl implements VerifyPiePhar
             );
         } catch (FailedToVerifyArtifact $failedToVerifyArtifact) {
             throw FailedToVerifyRelease::fromAttestationException($failedToVerifyArtifact);
+        } catch (Throwable $throwable) {
+            throw FailedToVerifyRelease::fromUnexpectedException($throwable);
         }
 
         $io->write(sprintf(

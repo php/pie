@@ -16,7 +16,9 @@ use Php\Pie\SelfManage\Verify\FallbackVerificationUsingOpenSsl;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use ThePhpFoundation\Attestation\Verification\VerifyAttestation;
 use ThePhpFoundation\Attestation\Verification\VerifyAttestationWithOpenSsl;
+use Webmozart\Assert\InvalidArgumentException;
 
 use function assert;
 use function base64_encode;
@@ -368,5 +370,19 @@ EOF);
 
         $this->expectException(FailedToVerifyRelease::class);
         $this->verifier->verify($this->release, $this->downloadedPhar, $this->io);
+    }
+
+    public function testUnexpectedThrowableFromVerifyAttestationIsWrappedInFailedToVerifyRelease(): void
+    {
+        $verifyAttestation = $this->createMock(VerifyAttestation::class);
+        $verifyAttestation->method('verify')
+            ->willThrowException(new InvalidArgumentException('Expected an array. Got: NULL'));
+
+        $verifier = new FallbackVerificationUsingOpenSsl($verifyAttestation, $this->fetchPieRelease);
+
+        $this->expectException(FailedToVerifyRelease::class);
+        $this->expectExceptionMessageMatches('/Expected an array\. Got: NULL/');
+
+        $verifier->verify($this->release, $this->downloadedPhar, $this->io);
     }
 }
