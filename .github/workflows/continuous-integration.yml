@@ -98,6 +98,7 @@ jobs:
               bison \
               ca_root_nss \
               gmake \
+              libtool \
               pkgconf \
               re2c \
               sudo \
