@@ -62,6 +62,13 @@ class SystemDependenciesDefinition
                 PackageManager::Microdnf->value => 'pkgconfig(libcurl)',
                 PackageManager::Yum->value => 'pkgconfig(libcurl)',
             ],
+            'gpgme' => [
+                PackageManager::Apt->value => 'libgpgme-dev',
+                PackageManager::Apk->value => 'gpgme-dev',
+                PackageManager::Dnf->value => 'pkgconfig(gpgme)',
+                PackageManager::Microdnf->value => 'pkgconfig(gpgme)',
+                PackageManager::Yum->value => 'pkgconfig(gpgme)',
+            ],
         ]);
     }
 }

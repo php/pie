@@ -171,6 +171,7 @@ class PhpBinaryPathBasedPlatformRepository extends PlatformRepository
         $this->detectLibraryWithPkgConfig('freetype2', 'freetype2');
         $this->detectLibraryWithPkgConfig('gdlib', 'gdlib');
         $this->detectLibraryWithPkgConfig('gmp', 'gmp');
+        $this->detectLibraryWithPkgConfig('gpgme', 'gpgme');
         $this->detectLibraryWithPkgConfig('sasl', 'libsasl2');
         $this->detectLibraryWithPkgConfig('onig', 'oniguruma');
         $this->detectLibraryWithPkgConfig('odbc', 'libiodbc');
