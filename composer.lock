@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1698ceeafd2ca389527647c5bf084d70",
+    "content-hash": "1f6ab4068638ae2fd252920019617e2b",
     "packages": [
         {
             "name": "composer/ca-bundle",
@@ -2650,16 +2650,16 @@
         },
         {
             "name": "thephpf/attestation",
-            "version": "0.0.5",
+            "version": "0.0.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ThePHPF/attestation.git",
-                "reference": "fa81efb3f6f8147287ebaebd81ff6688e0f2ec9d"
+                "reference": "c603fd7d41a44505f7bc67b8c687a7a65aef992a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ThePHPF/attestation/zipball/fa81efb3f6f8147287ebaebd81ff6688e0f2ec9d",
-                "reference": "fa81efb3f6f8147287ebaebd81ff6688e0f2ec9d",
+                "url": "https://api.github.com/repos/ThePHPF/attestation/zipball/c603fd7d41a44505f7bc67b8c687a7a65aef992a",
+                "reference": "c603fd7d41a44505f7bc67b8c687a7a65aef992a",
                 "shasum": ""
             },
             "require": {
@@ -2675,10 +2675,14 @@
                 "phpunit/phpunit": "^9.6.25"
             },
             "suggest": {
-                "ext-openssl": "Needed to verify certificates using OpenSSL"
+                "ext-openssl": "Needed to verify certificates using OpenSSL",
+                "ext-snappy": "Decompress bundle attestations faster; if not, flow-php/snappy PHP fallback is used"
             },
             "type": "library",
             "autoload": {
+                "files": [
+                    "src/FlowSnappy/polyfill.php"
+                ],
                 "psr-4": {
                     "ThePhpFoundation\\Attestation\\": "src/"
                 }
@@ -2696,7 +2700,7 @@
             "description": "A PHP library to aid in verifying artifact attestations",
             "support": {
                 "issues": "https://github.com/ThePHPF/attestation/issues",
-                "source": "https://github.com/ThePHPF/attestation/tree/0.0.5"
+                "source": "https://github.com/ThePHPF/attestation/tree/0.0.7"
             },
             "funding": [
                 {
@@ -2708,7 +2712,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2025-11-27T15:31:24+00:00"
+            "time": "2026-07-20T18:42:42+00:00"
         },
         {
             "name": "webmozart/assert",
