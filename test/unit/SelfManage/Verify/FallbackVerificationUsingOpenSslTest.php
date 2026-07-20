@@ -147,16 +147,7 @@ EOF);
         $url = self::TEST_GITHUB_URL . '/orgs/php/attestations/sha256:' . $digestInUrl . '?predicate_type=provenance';
         $this->httpDownloader->expects(self::once())
             ->method('get')
-            ->with(
-                $url,
-                [
-                    'retry-auth-failure' => true,
-                    'http' => [
-                        'method' => 'GET',
-                        'header' => [],
-                    ],
-                ],
-            )
+            ->with($url)
             ->willReturn(
                 new Response(
                     ['url' => $url],

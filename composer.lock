@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "14a9212a758a1601fc0c85a002b84cef",
+    "content-hash": "8489d4114679450950c9c7da0bab4247",
     "packages": [
         {
             "name": "composer/ca-bundle",
@@ -2507,16 +2507,16 @@
         },
         {
             "name": "thephpf/attestation",
-            "version": "0.0.6",
+            "version": "0.0.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ThePHPF/attestation.git",
-                "reference": "bd16b4183b8de45982c3088595751acfe365b836"
+                "reference": "c603fd7d41a44505f7bc67b8c687a7a65aef992a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ThePHPF/attestation/zipball/bd16b4183b8de45982c3088595751acfe365b836",
-                "reference": "bd16b4183b8de45982c3088595751acfe365b836",
+                "url": "https://api.github.com/repos/ThePHPF/attestation/zipball/c603fd7d41a44505f7bc67b8c687a7a65aef992a",
+                "reference": "c603fd7d41a44505f7bc67b8c687a7a65aef992a",
                 "shasum": ""
             },
             "require": {
@@ -2557,7 +2557,7 @@
             "description": "A PHP library to aid in verifying artifact attestations",
             "support": {
                 "issues": "https://github.com/ThePHPF/attestation/issues",
-                "source": "https://github.com/ThePHPF/attestation/tree/0.0.6"
+                "source": "https://github.com/ThePHPF/attestation/tree/0.0.7"
             },
             "funding": [
                 {
@@ -2569,7 +2569,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2026-07-17T10:26:43+00:00"
+            "time": "2026-07-20T18:42:42+00:00"
         },
         {
             "name": "webmozart/assert",
