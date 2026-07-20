@@ -17,7 +17,7 @@ use Php\Pie\SelfManage\Update\FetchPieReleaseFromGitHub;
 use Php\Pie\SelfManage\Update\IsBrewInstallation;
 use Php\Pie\SelfManage\Update\ReleaseIsNewer;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
-use Php\Pie\SelfManage\Verify\FailedToVerifyRelease;
+use Php\Pie\SelfManage\Verify\RecoverFromFailedVerification;
 use Php\Pie\SelfManage\Verify\VerifyPieReleaseUsingAttestation;
 use Php\Pie\Settings;
 use Php\Pie\Util\Emoji;
@@ -27,6 +27,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 
@@ -178,17 +179,17 @@ final class SelfUpdateCommand extends Command
 
         try {
             $verifyPiePhar->verify($latestRelease, $pharFilename, $this->io);
-        } catch (FailedToVerifyRelease $failedToVerifyRelease) {
-            $this->io->writeError(sprintf(
-                '<error>❌ Failed to verify the pie.phar release %s: %s</error>',
-                $latestRelease->tag,
-                $failedToVerifyRelease->getMessage(),
-            ));
+        } catch (Throwable $verificationFailure) {
+            $this->getApplication()?->renderThrowable(
+                $verificationFailure,
+                $output instanceof ConsoleOutputInterface ? $output->getErrorOutput() : $output,
+            );
 
-            $this->io->writeError('This means I could not verify that the PHAR we tried to update to was authentic, so I am aborting the self-update.');
-            unlink($pharFilename->filePath);
+            if (! (new RecoverFromFailedVerification())($this->io, $latestRelease, $verificationFailure)) {
+                unlink($pharFilename->filePath);
 
-            return Command::FAILURE;
+                return Command::FAILURE;
+            }
         }
 
         $pharContents = file_get_contents($pharFilename->filePath);
