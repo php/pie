@@ -45,6 +45,7 @@
         "ext-openssl": "*",
         "behat/behat": "^3.29.0",
         "bnf/phpstan-psr-container": "^1.1",
+        "cyclonedx/cyclonedx-php-composer": "^6.2.0",
         "doctrine/coding-standard": "^14.0.0",
         "phpstan/phpstan": "^2.2.5",
         "phpstan/phpstan-phpunit": "^2.0.18",
@@ -62,7 +63,8 @@
         "preferred-install": "dist",
         "bump-after-update": true,
         "allow-plugins": {
-            "dealerdirect/phpcodesniffer-composer-installer": true
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "cyclonedx/cyclonedx-php-composer": true
         },
         "platform": {
             "php": "8.1.99"

@@ -67,6 +67,10 @@ jobs:
         run: |
           gh attestation verify pie.phar --repo ${{ github.repository }} ;
           find executable-pie-binaries -type f -exec gh attestation verify {} --repo ${{ github.repository }} \;
+      - name: Verify the PHAR's SBOM attestation
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh attestation verify pie.phar --repo ${{ github.repository }} --predicate-type https://cyclonedx.org/bom
       # Once the PHAR and binaries have been attached to the release, it is
       # ready for review before publishing it. Note that if immutable releases
       # are enabled, the tag, pre-release/latest release flag, and all assets
