@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\Pie\File;
 
+use Composer\Util\Platform as ComposerPlatform;
 use Php\Pie\Platform;
 use Php\Pie\Platform\TargetPlatform;
 use Symfony\Component\Process\ExecutableFinder;
@@ -23,6 +24,10 @@ final class Sudo
      */
     public static function find(): string
     {
+        if (ComposerPlatform::isWindows()) {
+            throw SudoNotFoundOnSystem::new();
+        }
+
         if (! is_string(self::$memoizedSudo)) {
             $sudo = (new ExecutableFinder())->find('sudo');
 
