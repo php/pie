@@ -13,6 +13,12 @@ The following versions will receive security updates.
 
 ## Reporting a Vulnerability
 
+> [!IMPORTANT]
+> Please **only** report security vulnerabilities directly relating to the PIE tool itself on this repository.
+> This is **NOT** a place where you can report security vulnerabilities for individual extensions.
+>
+> **If you find a vulnerability in an extension, please locate the appropriate repository/author and reporting policy for that extension. Do NOT report it to PIE, as it will be closed.**
+
 Please do not publicly disclose security vulnerabilities.
 
 If you discover something that you think may be a vulnerability, please
