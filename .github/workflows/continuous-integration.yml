@@ -229,7 +229,7 @@ jobs:
           - '8.3'
           - '8.4'
           - '8.5'
-          - '8.6-dev'
+          #- '8.6' @todo behaviour tests depend on stable releases currently
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 #v7.0.0
         with:
