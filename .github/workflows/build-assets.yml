@@ -61,10 +61,22 @@ jobs:
         uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 #v4.1.0
         with:
           subject-path: '${{ github.workspace }}/pie.phar'
+      - name: Make SBOM
+        run: composer CycloneDX:make-sbom --output-format=JSON --output-file=sbom.json --omit=dev
+      - name: Attest the SBOM
+        if: github.event_name != 'pull_request' && github.event.repository.visibility == 'public'
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 #v4.1.0
+        with:
+          subject-path: '${{ github.workspace }}/pie.phar'
+          sbom-path: '${{ github.workspace }}/sbom.json'
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
         with:
           name: pie-${{ github.sha }}.phar
           path: pie.phar
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+        with:
+          name: pie-${{ github.sha }}-sbom.json
+          path: sbom.json
 
   build-executable:
     needs:

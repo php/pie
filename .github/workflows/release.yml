@@ -61,12 +61,20 @@ jobs:
           path: executable-pie-binaries
           pattern: pie-${{ github.sha }}-*.bin
           merge-multiple: true
+      - name: Fetch the PHAR's SBOM from artifacts
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c #v8.0.1
+        with:
+          name: pie-${{ github.sha }}-sbom.json
       - name: Verify the PHAR and binaries
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh attestation verify pie.phar --repo ${{ github.repository }} ;
           find executable-pie-binaries -type f -exec gh attestation verify {} --repo ${{ github.repository }} \;
+      - name: Verify the PHAR's SBOM attestation
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh attestation verify pie.phar --repo ${{ github.repository }} --predicate-type https://cyclonedx.org/bom
       # Once the PHAR and binaries have been attached to the release, it is
       # ready for review before publishing it. Note that if immutable releases
       # are enabled, the tag, pre-release/latest release flag, and all assets
@@ -77,6 +85,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release upload "${GITHUB_REF_NAME}" "pie.phar" --clobber ;
+          gh release upload "${GITHUB_REF_NAME}" "sbom.json" --clobber ;
           find executable-pie-binaries -type f -exec gh release upload "${GITHUB_REF_NAME}" {} --clobber \;
 
   build-and-push-docker-image:
