@@ -177,6 +177,7 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
                 ['gdlib', 'gdlib'],
                 ['gmp', 'gmp'],
                 ['gpgme', 'gpgme'],
+                ['pam', 'pam'],
                 ['sasl', 'libsasl2'],
                 ['onig', 'oniguruma'],
                 ['odbc', 'libiodbc'],

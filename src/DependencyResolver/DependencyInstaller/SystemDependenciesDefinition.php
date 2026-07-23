@@ -69,6 +69,13 @@ class SystemDependenciesDefinition
                 PackageManager::Microdnf->value => 'pkgconfig(gpgme)',
                 PackageManager::Yum->value => 'pkgconfig(gpgme)',
             ],
+            'pam' => [
+                PackageManager::Apt->value => 'libpam0g-dev',
+                PackageManager::Apk->value => 'linux-pam-dev',
+                PackageManager::Dnf->value => 'pkgconfig(pam)',
+                PackageManager::Microdnf->value => 'pkgconfig(pam)',
+                PackageManager::Yum->value => 'pkgconfig(pam)',
+            ],
         ]);
     }
 }

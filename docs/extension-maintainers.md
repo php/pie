@@ -396,6 +396,7 @@ is NOT working, then please [report a bug](https://github.com/php/pie/issues).
 | lib-gdlib     | ✅              | ❌                  |
 | lib-gmp       | ✅              | ❌                  |
 | lib-gpgme     | ✅              | apt, apk, dnf, yum |
+| lib-pam       | ✅              | apt, apk, dnf, yum |
 | lib-sasl      | ✅              | ❌                  |
 | lib-onig      | ✅              | ❌                  |
 | lib-odbc      | ✅              | ❌                  |
