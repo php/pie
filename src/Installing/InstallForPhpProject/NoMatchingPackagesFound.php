@@ -15,7 +15,7 @@ class NoMatchingPackagesFound extends RuntimeException
     public static function forExtension(ExtensionName $extensionName): self
     {
         return new self(sprintf(
-            'PIE could not find any potential matches for %s; if you know which package to use, specify --select=vendor/package in the `pie install` options.',
+            'PIE could not find any potential matches for %s; if you know which package to use, specify --select extension=vendor/package in the `pie install` options.',
             $extensionName->nameWithExtPrefix(),
         ));
     }
