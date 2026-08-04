@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "bbeb326cf52bdf49183176118718973c",
+    "content-hash": "b4a3c510277909695617f37c71009a20",
     "packages": [
         {
             "name": "asgrim/example-pie-extension",
-            "version": "2.0.9",
+            "version": "2.0.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/asgrim/example-pie-extension.git",
-                "reference": "963c8d70c57c23fa2098e499a0ebffabb64748b3"
+                "reference": "f4aa08c72cffd395e8ddbcb55622f33165da8660"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/asgrim/example-pie-extension/zipball/963c8d70c57c23fa2098e499a0ebffabb64748b3",
-                "reference": "963c8d70c57c23fa2098e499a0ebffabb64748b3",
+                "url": "https://api.github.com/repos/asgrim/example-pie-extension/zipball/f4aa08c72cffd395e8ddbcb55622f33165da8660",
+                "reference": "f4aa08c72cffd395e8ddbcb55622f33165da8660",
                 "shasum": ""
             },
             "require": {
@@ -53,9 +53,9 @@
             "description": "Example PIE extension",
             "support": {
                 "issues": "https://github.com/asgrim/example-pie-extension/issues",
-                "source": "https://github.com/asgrim/example-pie-extension/tree/2.0.9"
+                "source": "https://github.com/asgrim/example-pie-extension/tree/2.0.10"
             },
-            "time": "2026-02-04T17:27:25+00:00"
+            "time": "2026-08-04T20:36:11+00:00"
         },
         {
             "name": "xdebug/xdebug",

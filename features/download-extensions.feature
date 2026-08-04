@@ -13,7 +13,7 @@ Feature: Extensions can be downloaded with PIE
     Examples:
       | constraint | version  |
       | 2.0.5      | 2.0.5    |
-      | ^2.0       | 2.0.9    |
+      | ^2.0       | 2.0.10   |
 
   # pie download <ext>:dev-main
   @non-windows

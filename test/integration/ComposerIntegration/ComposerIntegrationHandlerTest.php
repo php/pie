@@ -44,7 +44,7 @@ final class ComposerIntegrationHandlerTest extends IsolatedWorkingDirectoryTestC
 {
     private const PACKAGE_NAME    = 'asgrim/example-pie-extension';
     private const EXTENSION_NAME  = 'example_pie_extension';
-    private const VERSION_CURRENT = '2.0.9';
+    private const VERSION_CURRENT = '2.0.10';
     private const VERSION_OTHER   = '2.0.2';
 
     private TargetPlatform $targetPlatform;
@@ -216,7 +216,7 @@ final class ComposerIntegrationHandlerTest extends IsolatedWorkingDirectoryTestC
     /** @param non-empty-string $version */
     private function makeComposerPackage(string $version): CompletePackage
     {
-        $sha                 = '963c8d70c57c23fa2098e499a0ebffabb64748b3';
+        $sha                 = 'f4aa08c72cffd395e8ddbcb55622f33165da8660';
         $extensionBinaryPath = $this->extensionBinaryPath();
 
         $package = new CompletePackage(self::PACKAGE_NAME, $version . '.0', $version);
