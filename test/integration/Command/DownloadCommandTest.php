@@ -7,6 +7,7 @@ namespace Php\PieIntegrationTest\Command;
 use Composer\Util\Platform;
 use Php\Pie\Command\DownloadCommand;
 use Php\Pie\Container;
+use Php\PieIntegrationTest\ExamplePieExtensionFixture;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\RequiresOperatingSystemFamily;
@@ -22,7 +23,7 @@ use const PHP_VERSION_ID;
 #[CoversClass(DownloadCommand::class)]
 class DownloadCommandTest extends IsolatedWorkingDirectoryTestCase
 {
-    private const TEST_PACKAGE_LATEST = '2.0.10';
+    private const TEST_PACKAGE_LATEST = ExamplePieExtensionFixture::LATEST_VERSION;
     private const TEST_PACKAGE        = 'asgrim/example-pie-extension';
 
     private CommandTester $commandTester;

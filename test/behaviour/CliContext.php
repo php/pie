@@ -11,6 +11,7 @@ use Behat\Step\Then;
 use Behat\Step\When;
 use Composer\Semver\VersionParser;
 use Composer\Util\Platform;
+use Php\PieIntegrationTest\ExamplePieExtensionFixture;
 use RuntimeException;
 use Safe\Exceptions\PcreException;
 use Symfony\Component\Process\Process;
@@ -674,9 +675,9 @@ class CliContext implements Context
         Assert::contains($pieInstallOutput, 'Removed extension derickr/quickhash:');
         self::assertPackageNotInstalledInPieShowOutput($pieShowOutput, 'derickr/quickhash');
 
-        // `example_pie_extension` 2.0.9 should have been installed (was not previously installed)
-        Assert::contains($pieInstallOutput, 'Extension asgrim/example-pie-extension:2.0.9 is enabled and loaded');
-        self::assertPackageVersionInstalledInPieShowOutput($pieShowOutput, 'asgrim/example-pie-extension', '2.0.9');
+        // `example_pie_extension` should have been installed (was not previously installed)
+        Assert::contains($pieInstallOutput, 'Extension asgrim/example-pie-extension:' . ExamplePieExtensionFixture::LATEST_VERSION . ' is enabled and loaded');
+        self::assertPackageVersionInstalledInPieShowOutput($pieShowOutput, 'asgrim/example-pie-extension', ExamplePieExtensionFixture::LATEST_VERSION);
 
         $this->restorePieJsonAndLock();
     }
