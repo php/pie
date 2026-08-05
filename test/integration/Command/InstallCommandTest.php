@@ -111,7 +111,7 @@ class InstallCommandTest extends IsolatedWorkingDirectoryTestCase
         }
 
         self::assertStringContainsString('Install complete: ', $outputString);
-        self::assertStringContainsString('You must now add "extension=example_pie_extension" to your php.ini', $outputString);
+        self::assertStringNotContainsString('You must now add "extension=example_pie_extension" to your php.ini', $outputString);
     }
 
     #[RequiresOperatingSystemFamily('Windows')]
@@ -135,6 +135,6 @@ class InstallCommandTest extends IsolatedWorkingDirectoryTestCase
         }
 
         self::assertStringContainsString('Copied DLL to: ', $outputString);
-        self::assertStringContainsString('You must now add "extension=example_pie_extension" to your php.ini', $outputString);
+        self::assertStringNotContainsString('You must now add "extension=example_pie_extension" to your php.ini', $outputString);
     }
 }

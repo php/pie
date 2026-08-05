@@ -250,7 +250,7 @@ class CliContext implements Context
     public function iRunACommandToInstallAnExtensionWithoutEnabling(): void
     {
         $this->interactions[] = ['extension' => 'example_pie_extension', 'package' => 'asgrim/example-pie-extension'];
-        $this->runPieCommand(['install', 'asgrim/example-pie-extension', '--skip-enable-extension']);
+        $this->runPieCommand(['install', 'asgrim/example-pie-extension', '--skip-enable-extension', '-v']);
     }
 
     #[When('I run a command to uninstall an extension')]
@@ -297,7 +297,9 @@ class CliContext implements Context
     {
         $this->assertCommandSuccessful();
 
-        Assert::contains($this->output, 'Extension has NOT been automatically enabled.');
+        Assert::contains($this->output, 'Automatic extension enabling was skipped.');
+        Assert::notContains($this->output, 'Extension has NOT been automatically enabled.');
+        Assert::notContains($this->output, 'You must now add');
 
         foreach ($this->interactions as $install) {
             if (Platform::isWindows()) {

@@ -39,11 +39,9 @@ class SetupIniFile
                 $downloadedPackage->package->prettyNameAndVersion(),
                 $targetPlatform->phpBinaryPath->phpBinaryPath,
             ));
+        } elseif (! $attemptToSetupIniFile) {
+            $io->write('Automatic extension enabling was skipped.', verbosity: IOInterface::VERBOSE);
         } else {
-            if (! $attemptToSetupIniFile) {
-                $io->write('Automatic extension enabling was skipped.', verbosity: IOInterface::VERY_VERBOSE);
-            }
-
             $io->write(sprintf('<comment>%s Extension has NOT been automatically enabled.</comment>', Emoji::WARNING));
             $io->write(sprintf(
                 '<comment>You must now add "%s=%s" to your php.ini</comment>',
