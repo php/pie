@@ -24,6 +24,7 @@ use Php\Pie\Platform\OperatingSystem;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
 use Php\PieIntegrationTest\Command\IsolatedWorkingDirectoryTestCase;
+use Php\PieIntegrationTest\ExamplePieExtensionFixture;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\RequiresOperatingSystemFamily;
 use Symfony\Component\Console\Output\BufferedOutput;
@@ -44,7 +45,7 @@ final class ComposerIntegrationHandlerTest extends IsolatedWorkingDirectoryTestC
 {
     private const PACKAGE_NAME    = 'asgrim/example-pie-extension';
     private const EXTENSION_NAME  = 'example_pie_extension';
-    private const VERSION_CURRENT = '2.0.9';
+    private const VERSION_CURRENT = ExamplePieExtensionFixture::LATEST_VERSION;
     private const VERSION_OTHER   = '2.0.2';
 
     private TargetPlatform $targetPlatform;
@@ -216,7 +217,7 @@ final class ComposerIntegrationHandlerTest extends IsolatedWorkingDirectoryTestC
     /** @param non-empty-string $version */
     private function makeComposerPackage(string $version): CompletePackage
     {
-        $sha                 = '963c8d70c57c23fa2098e499a0ebffabb64748b3';
+        $sha                 = ExamplePieExtensionFixture::LATEST_VERSION_REFERENCE;
         $extensionBinaryPath = $this->extensionBinaryPath();
 
         $package = new CompletePackage(self::PACKAGE_NAME, $version . '.0', $version);

@@ -15,4 +15,5 @@ enum WindowsCompiler
     case VC15;
     case VS16;
     case VS17;
+    case VS18;
 }

@@ -14,6 +14,7 @@ use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\DependencyResolver\ResolveDependencyWithComposer;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
+use Php\PieIntegrationTest\ExamplePieExtensionFixture;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
@@ -26,7 +27,7 @@ use const PHP_VERSION_ID;
 #[CoversClass(ResolveDependencyWithComposer::class)]
 final class ResolveDependencyWithComposerTest extends TestCase
 {
-    private const TEST_PACKAGE_LATEST        = '2.0.9';
+    private const TEST_PACKAGE_LATEST        = ExamplePieExtensionFixture::LATEST_VERSION;
     private const DOWNLOAD_URL_ANY           = 'https://api.github.com/repos/asgrim/example-pie-extension/zipball/%s';
     private const DOWNLOAD_URL_1_0_1_ALPHA_3 = 'https://api.github.com/repos/asgrim/example-pie-extension/zipball/115f8f8e01ee098a18ec2f47af4852be51ebece7';
     private const DOWNLOAD_URL_1_0_1         = 'https://api.github.com/repos/asgrim/example-pie-extension/zipball/769f906413d6d1e12152f6d34134cbcd347ca253';
