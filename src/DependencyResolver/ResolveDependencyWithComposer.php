@@ -114,7 +114,7 @@ final class ResolveDependencyWithComposer implements DependencyResolver
             throw BundledPhpExtensionRefusal::forPhpExtraVersion($targetPlatform->phpBinaryPath);
         }
 
-        $buildProvider           = $targetPlatform->phpBinaryPath->buildProvider();
+        $buildProvider = $targetPlatform->phpBinaryPath->buildProvider();
         if (! $buildProvider) {
             return;
         }
@@ -150,7 +150,7 @@ final class ResolveDependencyWithComposer implements DependencyResolver
             '|^Remi\'s RPM repository <https://rpms.remirepo.net/>|',
             'Rocky Enterprise Software Foundation',
         ];
-        foreach($rpmProviders as $rpmProvider) {
+        foreach ($rpmProviders as $rpmProvider) {
             if ($buildProvider === $rpmProvider || ($rpmProvider[0] === '|' && preg_match($rpmProvider, $buildProvider))) {
                 $identifiedBuildProvider = true;
                 $this->io->write(sprintf(
