@@ -115,6 +115,10 @@ final class ResolveDependencyWithComposer implements DependencyResolver
         }
 
         $buildProvider           = $targetPlatform->phpBinaryPath->buildProvider();
+        if (! $buildProvider) {
+            return;
+        }
+
         $identifiedBuildProvider = false;
         $note                    = '<options=bold,underscore;fg=red>Note:</> ';
 
