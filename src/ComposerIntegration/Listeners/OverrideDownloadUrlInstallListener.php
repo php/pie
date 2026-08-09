@@ -21,6 +21,7 @@ use Psr\Container\ContainerInterface;
 use Throwable;
 
 use function array_walk;
+use function in_array;
 use function pathinfo;
 
 use const PATHINFO_EXTENSION;
@@ -74,6 +75,25 @@ class OverrideDownloadUrlInstallListener
                 $piePackage         = Package::fromComposerCompletePackage($composerPackage);
                 $targetPlatform     = $this->composerRequest->targetPlatform;
                 $downloadUrlMethods = DownloadUrlMethod::possibleDownloadUrlMethodsForPackage($piePackage, $targetPlatform);
+
+                if ($this->composerRequest->suppressedDownloadUrlMethods !== []) {
+                    $remainingDownloadUrlMethods = [];
+
+                    foreach ($downloadUrlMethods as $downloadUrlMethod) {
+                        if (in_array($downloadUrlMethod, $this->composerRequest->suppressedDownloadUrlMethods, true)) {
+                            $this->io->write('Suppressing download method: ' . $downloadUrlMethod->value, verbosity: IOInterface::VERBOSE);
+                            continue;
+                        }
+
+                        $remainingDownloadUrlMethods[] = $downloadUrlMethod;
+                    }
+
+                    if ($remainingDownloadUrlMethods === []) {
+                        throw AllDownloadUrlMethodsSuppressed::forPackage($piePackage);
+                    }
+
+                    $downloadUrlMethods = $remainingDownloadUrlMethods;
+                }
 
                 $selectedDownloadUrlMethod = null;
                 $downloadMethodFailures    = [];
