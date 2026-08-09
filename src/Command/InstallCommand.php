@@ -195,6 +195,7 @@ final class InstallCommand extends Command
                 $configureOptionsValues,
                 CommandHelper::determineAttemptToSetupIniFile($input),
                 installAllPackages: $installFromLock,
+                suppressedDownloadUrlMethods: CommandHelper::determineSuppressedDownloadUrlMethods($input),
             ),
         );
 

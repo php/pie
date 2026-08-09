@@ -73,6 +73,7 @@ final class DownloadCommand extends Command
                 PieOperation::Download,
                 [], // Configure options are not needed for download only
                 false, // setting up INI not needed for download
+                suppressedDownloadUrlMethods: CommandHelper::determineSuppressedDownloadUrlMethods($input),
             ),
         );
 
