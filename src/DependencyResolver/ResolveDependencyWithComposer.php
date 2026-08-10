@@ -114,7 +114,11 @@ final class ResolveDependencyWithComposer implements DependencyResolver
             throw BundledPhpExtensionRefusal::forPhpExtraVersion($targetPlatform->phpBinaryPath);
         }
 
-        $buildProvider           = $targetPlatform->phpBinaryPath->buildProvider();
+        $buildProvider = $targetPlatform->phpBinaryPath->buildProvider();
+        if (! $buildProvider) {
+            return;
+        }
+
         $identifiedBuildProvider = false;
         $note                    = '<options=bold,underscore;fg=red>Note:</> ';
 
@@ -143,16 +147,19 @@ final class ResolveDependencyWithComposer implements DependencyResolver
             'CentOS',
             'Fedora Project',
             'Red Hat, Inc.',
-            'Remi\'s RPM repository <https://rpms.remirepo.net/> #StandWithUkraine',
+            '|^Remi\'s RPM repository <https://rpms.remirepo.net/>|',
             'Rocky Enterprise Software Foundation',
         ];
-        if (in_array($buildProvider, $rpmProviders)) {
-            $identifiedBuildProvider = true;
-            $this->io->write(sprintf(
-                '<comment>%sYou should probably use "dnf install php-%s" instead</comment>',
-                $note,
-                $piePackage->extensionName()->name(),
-            ));
+        foreach ($rpmProviders as $rpmProvider) {
+            if ($buildProvider === $rpmProvider || ($rpmProvider[0] === '|' && preg_match($rpmProvider, $buildProvider))) {
+                $identifiedBuildProvider = true;
+                $this->io->write(sprintf(
+                    '<comment>%sYou should probably use "dnf install php-%s" instead</comment>',
+                    $note,
+                    $piePackage->extensionName()->name(),
+                ));
+                break;
+            }
         }
 
         if ($buildProvider === 'Homebrew') {
