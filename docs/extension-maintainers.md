@@ -485,53 +485,12 @@ Windows-compatible releases is:
  - A CI pipeline runs to build the release assets, e.g. in a GitHub Action
  - The resulting build assets are published to the GitHub release in a ZIP file
 
-The name of the ZIP file, and the DLL contained within must be:
+##### PHP-provided GitHub automation (recommended)
 
-* `php_{extension-name}-{tag}-{php-maj/min}-{ts|nts}-{compiler}-{arch}.zip`
-* Example: `php_xdebug-3.3.2-8.3-ts-vs16-x86_64.zip`
-
-The descriptions of these items:
-
-* `extension-name` the name of the extension, e.g. `xdebug`
-* `tag` for example `3.3.0alpha3` - defined by the tag/release you have made
-* `php-maj/min` - for example `8.3` for PHP 8.3.*
-* `compiler` - usually something like `vc6`, `vs16` - fetch from
-  'PHP Extension Build' flags in `php -i`
-* `ts|nts` - Thread-safe or non-thread safe.
-* `arch` - for example `x86_64`.
-   * Windows: use a hint from `Architecture` from `php -i` (see below)
-   * non-Windows: check `PHP_INT_SIZE` - 4 for 32-bit, 8 for 64-bit.
-
-Note the architecture name will likely need normalising, since different
-platforms name architectures differently. PIE expects the following normalised
-architectures:
-
- * `x86_64` (normalised from `x64`, `x86_64`, `AMD64`)
- * `arm64` (normalised from `arm64`)
- * `x86` (any other value)
-
-For the latest map (in case documentation is not up to date), check out
-`\Php\Pie\Platform\Architecture::parseArchitecture`.
-
-#### Contents of the Windows ZIP
-
-The pre-built ZIP should contain at minimum a DLL named in the same way as the
-ZIP itself, for example
-`php_{extension-name}-{tag}-{php-maj/min}-{ts|nts}-{compiler}-{arch}.dll`.
-The `.dll` will be moved into the PHP extensions path, and renamed, e.g.
-to `C:\path\to\php\ext\php_{extension-name}.dll`. The ZIP file may include
-additional resources, such as:
-
-* `php_{extension-name}-{tag}-{php-maj/min}-{ts|nts}-{compiler}-{arch}.pdb` -
-  this will be moved alongside the `C:\path\to\php\ext\php_{extension-name}.dll`
-* `*.dll` - any other `.dll` would be moved alongside `C:\path\to\php\php.exe`
-* Any other file, which would be moved
-  into `C:\path\to\php\extras\{extension-name}\.`
-
-#### Automation of the Windows publishing
-
-PHP provides a [set of GitHub Actions](https://github.com/php/php-windows-builder)
-that enable extension maintainers to build and release the Windows compatible
+We **highly** recommend using the `php/php-windows-builder` action to automate
+this process. PHP provides a
+[set of GitHub Actions](https://github.com/php/php-windows-builder) that enable
+extension maintainers to easily build and release the Windows compatible
 assets. An example workflow that uses these actions:
 
 ```yaml
@@ -580,7 +539,64 @@ jobs:
               token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-Source: [https://github.com/php/php-windows-builder?tab=readme-ov-file#examples](https://github.com/php/php-windows-builder?tab=readme-ov-file#examples)
+Check out some more examples and usage here: [https://github.com/php/php-windows-builder?tab=readme-ov-file#examples](https://github.com/php/php-windows-builder?tab=readme-ov-file#examples)
+
+#### Manual definition
+
+> [!WARNING]
+> We highly recommend using the `php/php-windows-builder` action provided by
+> the PHP group as your automated release process, as mentioned above. If you
+> manually define your workflow, you must accept that there may be breakages,
+> or flow changes that mean you must maintain your own pipeline.
+
+##### Manual artifact naming scheme
+
+If, for some reason, the `php/php-windows-builder` automation above is not
+possible, you can manually build the PIE-compatible packages, but you must
+ensure you stick to the conventions defined here.
+
+The name of the ZIP file, and the DLL contained within must be:
+
+* `php_{extension-name}-{tag}-{php-maj/min}-{ts|nts}-{compiler}-{arch}.zip`
+* Example: `php_xdebug-3.3.2-8.3-ts-vs16-x86_64.zip`
+
+The descriptions of these items:
+
+* `extension-name` the name of the extension, e.g. `xdebug`
+* `tag` for example `3.3.0alpha3` - defined by the tag/release you have made
+* `php-maj/min` - for example `8.3` for PHP 8.3.*
+* `compiler` - usually something like `vc6`, `vs16` - fetch from
+  'PHP Extension Build' flags in `php -i`
+* `ts|nts` - Thread-safe or non-thread safe.
+* `arch` - for example `x86_64`.
+   * Windows: use a hint from `Architecture` from `php -i` (see below)
+   * non-Windows: check `PHP_INT_SIZE` - 4 for 32-bit, 8 for 64-bit.
+
+Note the architecture name will likely need normalising, since different
+platforms name architectures differently. PIE expects the following normalised
+architectures:
+
+ * `x86_64` (normalised from `x64`, `x86_64`, `AMD64`)
+ * `arm64` (normalised from `arm64`)
+ * `x86` (any other value)
+
+For the latest map (in case documentation is not up to date), check out
+`\Php\Pie\Platform\Architecture::parseArchitecture`.
+
+##### Contents of the Windows ZIP
+
+The pre-built ZIP should contain at minimum a DLL named in the same way as the
+ZIP itself, for example
+`php_{extension-name}-{tag}-{php-maj/min}-{ts|nts}-{compiler}-{arch}.dll`.
+The `.dll` will be moved into the PHP extensions path, and renamed, e.g.
+to `C:\path\to\php\ext\php_{extension-name}.dll`. The ZIP file may include
+additional resources, such as:
+
+* `php_{extension-name}-{tag}-{php-maj/min}-{ts|nts}-{compiler}-{arch}.pdb` -
+  this will be moved alongside the `C:\path\to\php\ext\php_{extension-name}.dll`
+* `*.dll` - any other `.dll` would be moved alongside `C:\path\to\php\php.exe`
+* Any other file, which would be moved
+  into `C:\path\to\php\extras\{extension-name}\.`
 
 ## Other features
 
