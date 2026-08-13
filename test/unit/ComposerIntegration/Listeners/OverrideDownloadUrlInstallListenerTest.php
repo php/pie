@@ -13,6 +13,7 @@ use Composer\Installer\InstallerEvents;
 use Composer\IO\IOInterface;
 use Composer\Package\CompletePackage;
 use Composer\Package\Package;
+use Php\Pie\ComposerIntegration\Listeners\AllDownloadUrlMethodsSuppressed;
 use Php\Pie\ComposerIntegration\Listeners\CouldNotDetermineDownloadUrlMethod;
 use Php\Pie\ComposerIntegration\Listeners\OverrideDownloadUrlInstallListener;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
@@ -675,6 +676,126 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
 
         $this->expectException(CouldNotDetermineDownloadUrlMethod::class);
         $this->expectExceptionMessage('Could not download foo/bar using pre-packaged-binary method: nope not found');
+        $listener($installerEvent);
+    }
+
+    public function testSuppressedDownloadUrlMethodIsSkipped(): void
+    {
+        $composerPackage = new CompletePackage('foo/bar', '1.2.3.0', '1.2.3');
+        $composerPackage->setDistType('zip');
+        $composerPackage->setDistUrl('https://example.com/git-archive-zip-url');
+        $composerPackage->setPhpExt([
+            'extension-name' => 'foobar',
+            'download-url-method' => ['pre-packaged-binary', 'composer-default'],
+        ]);
+
+        $installerEvent = new InstallerEvent(
+            InstallerEvents::PRE_OPERATIONS_EXEC,
+            $this->composer,
+            $this->io,
+            false,
+            true,
+            new Transaction([], [$composerPackage]),
+        );
+
+        $this->container
+            ->expects(self::never())
+            ->method('get');
+
+        /** @var list<string|array<string>> $writtenAtVerbose */
+        $writtenAtVerbose = [];
+        $this->io
+            ->method('write')
+            ->willReturnCallback(
+                static function (string|array $messages, bool $newline = true, int $verbosity = IOInterface::NORMAL) use (&$writtenAtVerbose): void {
+                    if ($verbosity !== IOInterface::VERBOSE) {
+                        return;
+                    }
+
+                    $writtenAtVerbose[] = $messages;
+                },
+            );
+
+        (new OverrideDownloadUrlInstallListener(
+            $this->composer,
+            $this->io,
+            $this->container,
+            new PieComposerRequest(
+                $this->createMock(IOInterface::class),
+                new TargetPlatform(
+                    OperatingSystem::NonWindows,
+                    OperatingSystemFamily::Linux,
+                    PhpBinaryPath::fromCurrentProcess(),
+                    Architecture::x86_64,
+                    ThreadSafetyMode::NonThreadSafe,
+                    1,
+                    WindowsCompiler::VC15,
+                    null,
+                ),
+                [new RequestedPackageAndVersion('foo/bar', '^1.1')],
+                PieOperation::Install,
+                [],
+                false,
+                suppressedDownloadUrlMethods: [DownloadUrlMethod::PrePackagedBinary],
+            ),
+        ))($installerEvent);
+
+        self::assertSame(
+            'https://example.com/git-archive-zip-url',
+            $composerPackage->getDistUrl(),
+        );
+        self::assertSame(DownloadUrlMethod::ComposerDefaultDownload, DownloadUrlMethod::fromComposerPackage($composerPackage));
+        self::assertContains('Suppressing download method: pre-packaged-binary', $writtenAtVerbose);
+    }
+
+    public function testSuppressingAllDownloadUrlMethodsWillThrowException(): void
+    {
+        $composerPackage = new CompletePackage('foo/bar', '1.2.3.0', '1.2.3');
+        $composerPackage->setDistType('zip');
+        $composerPackage->setDistUrl('https://example.com/git-archive-zip-url');
+        $composerPackage->setPhpExt([
+            'extension-name' => 'foobar',
+            'download-url-method' => ['pre-packaged-binary', 'composer-default'],
+        ]);
+
+        $installerEvent = new InstallerEvent(
+            InstallerEvents::PRE_OPERATIONS_EXEC,
+            $this->composer,
+            $this->io,
+            false,
+            true,
+            new Transaction([], [$composerPackage]),
+        );
+
+        $this->container
+            ->expects(self::never())
+            ->method('get');
+
+        $listener = new OverrideDownloadUrlInstallListener(
+            $this->composer,
+            $this->io,
+            $this->container,
+            new PieComposerRequest(
+                $this->createMock(IOInterface::class),
+                new TargetPlatform(
+                    OperatingSystem::NonWindows,
+                    OperatingSystemFamily::Linux,
+                    PhpBinaryPath::fromCurrentProcess(),
+                    Architecture::x86_64,
+                    ThreadSafetyMode::NonThreadSafe,
+                    1,
+                    WindowsCompiler::VC15,
+                    null,
+                ),
+                [new RequestedPackageAndVersion('foo/bar', '^1.1')],
+                PieOperation::Install,
+                [],
+                false,
+                suppressedDownloadUrlMethods: [DownloadUrlMethod::PrePackagedBinary, DownloadUrlMethod::ComposerDefaultDownload],
+            ),
+        );
+
+        $this->expectException(AllDownloadUrlMethodsSuppressed::class);
         $listener($installerEvent);
     }
 }

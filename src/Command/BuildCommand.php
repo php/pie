@@ -147,6 +147,7 @@ final class BuildCommand extends Command
                 PieOperation::Build,
                 $configureOptionsValues,
                 false, // setting up INI not needed for build
+                suppressedDownloadUrlMethods: CommandHelper::determineSuppressedDownloadUrlMethods($input),
             ),
         );
 

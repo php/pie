@@ -6,6 +6,7 @@ namespace Php\Pie\ComposerIntegration;
 
 use Composer\IO\IOInterface;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
+use Php\Pie\Downloading\DownloadUrlMethod;
 use Php\Pie\Platform\TargetPlatform;
 
 use function array_map;
@@ -23,7 +24,8 @@ final class PieComposerRequest
 
     /**
      * @param list<RequestedPackageAndVersion>      $requestedPackages
-     * @param array<string, list<non-empty-string>> $configureOptions  Keyed by package name
+     * @param array<string, list<non-empty-string>> $configureOptions             Keyed by package name
+     * @param list<DownloadUrlMethod>               $suppressedDownloadUrlMethods
      */
     public function __construct(
         public readonly IOInterface $pieOutput,
@@ -33,6 +35,7 @@ final class PieComposerRequest
         public readonly array $configureOptions,
         public readonly bool $attemptToSetupIniFile,
         public readonly bool $installAllPackages = false,
+        public readonly array $suppressedDownloadUrlMethods = [],
     ) {
         $this->requestedPackageNames = array_map(static fn (RequestedPackageAndVersion $request) => $request->package, $this->requestedPackages);
     }

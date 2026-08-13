@@ -23,6 +23,7 @@ use Php\Pie\DependencyResolver\Package;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\DependencyResolver\ResolvedPackageRequest;
 use Php\Pie\DependencyResolver\UnableToResolveRequirement;
+use Php\Pie\Downloading\DownloadUrlMethod;
 use Php\Pie\Platform\TargetPlatform;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -338,6 +339,41 @@ final class CommandHelperTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('The --with-phpize-path=/path/to/phpize cannot be used on Windows.');
         CommandHelper::determineTargetPlatformFromInputs($input, $io);
+    }
+
+    public function testDetermineSuppressedDownloadUrlMethodsDefaultsToEmpty(): void
+    {
+        $command = new Command();
+        $input   = new ArrayInput([]);
+        CommandHelper::configureDownloadBuildInstallOptions($command);
+        CommandHelper::validateInput($input, $command);
+
+        self::assertSame([], CommandHelper::determineSuppressedDownloadUrlMethods($input));
+    }
+
+    public function testDetermineSuppressedDownloadUrlMethodsParsesGivenValues(): void
+    {
+        $command = new Command();
+        $input   = new ArrayInput(['--suppress-download-url-method' => ['composer-default', 'pre-packaged-source']]);
+        CommandHelper::configureDownloadBuildInstallOptions($command);
+        CommandHelper::validateInput($input, $command);
+
+        self::assertSame(
+            [DownloadUrlMethod::ComposerDefaultDownload, DownloadUrlMethod::PrePackagedSourceDownload],
+            CommandHelper::determineSuppressedDownloadUrlMethods($input),
+        );
+    }
+
+    public function testDetermineSuppressedDownloadUrlMethodsThrowsForInvalidValue(): void
+    {
+        $command = new Command();
+        $input   = new ArrayInput(['--suppress-download-url-method' => ['not-a-real-method']]);
+        CommandHelper::configureDownloadBuildInstallOptions($command);
+        CommandHelper::validateInput($input, $command);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid value "not-a-real-method" for --suppress-download-url-method; valid values are: composer-default, windows-binary, pre-packaged-source, pre-packaged-binary');
+        CommandHelper::determineSuppressedDownloadUrlMethods($input);
     }
 
     public function testListRepositories(): void

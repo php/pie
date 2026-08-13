@@ -102,6 +102,7 @@ final class UpgradeCommand extends Command
                 $configureOptions,
                 CommandHelper::determineAttemptToSetupIniFile($input),
                 installAllPackages: true,
+                suppressedDownloadUrlMethods: CommandHelper::determineSuppressedDownloadUrlMethods($input),
             ),
         );
 

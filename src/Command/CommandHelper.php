@@ -23,6 +23,7 @@ use Php\Pie\DependencyResolver\Package;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\DependencyResolver\ResolvedPackageRequest;
 use Php\Pie\DependencyResolver\UnableToResolveRequirement;
+use Php\Pie\Downloading\DownloadUrlMethod;
 use Php\Pie\ExtensionName;
 use Php\Pie\Installing\InstallForPhpProject\FindMatchingPackages;
 use Php\Pie\Platform as PiePlatform;
@@ -36,6 +37,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Throwable;
+use ValueError;
 use Webmozart\Assert\Assert;
 
 use function array_key_exists;
@@ -44,6 +46,7 @@ use function array_values;
 use function assert;
 use function count;
 use function explode;
+use function implode;
 use function is_array;
 use function is_dir;
 use function is_string;
@@ -75,6 +78,7 @@ final class CommandHelper
     private const OPTION_MAKE_PARALLEL_JOBS                   = 'make-parallel-jobs';
     private const OPTION_SKIP_ENABLE_EXTENSION                = 'skip-enable-extension';
     private const OPTION_FORCE                                = 'force';
+    private const OPTION_SUPPRESS_DOWNLOAD_URL_METHOD         = 'suppress-download-url-method';
     private const OPTION_NO_CACHE                             = 'no-cache';
     private const OPTION_AUTO_INSTALL_BUILD_TOOLS             = 'auto-install-build-tools';
     private const OPTION_SUPPRESS_BUILD_TOOLS_CHECK           = 'no-build-tools-check';
@@ -150,6 +154,14 @@ final class CommandHelper
             null,
             InputOption::VALUE_NONE,
             'To attempt to install a version that doesn\'t match the version constraints from the meta-data, for instance to install an older version than recommended, or when the signature is not available.',
+        );
+
+        $command->addOption(
+            self::OPTION_SUPPRESS_DOWNLOAD_URL_METHOD,
+            null,
+            InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
+            'Do not use the specified download URL methods if they are supported by the extension. May be specified multiple times. Valid values: '
+            . implode(', ', array_map(static fn (DownloadUrlMethod $downloadUrlMethod): string => $downloadUrlMethod->value, DownloadUrlMethod::cases())),
         );
 
         $command->addOption(
@@ -291,6 +303,35 @@ final class CommandHelper
     public static function determineForceInstallingPackageVersion(InputInterface $input): bool
     {
         return $input->hasOption(self::OPTION_FORCE) && $input->getOption(self::OPTION_FORCE);
+    }
+
+    /** @return list<DownloadUrlMethod> */
+    public static function determineSuppressedDownloadUrlMethods(InputInterface $input): array
+    {
+        if (! $input->hasOption(self::OPTION_SUPPRESS_DOWNLOAD_URL_METHOD)) {
+            return [];
+        }
+
+        $suppressedDownloadUrlMethods = $input->getOption(self::OPTION_SUPPRESS_DOWNLOAD_URL_METHOD);
+        assert(is_array($suppressedDownloadUrlMethods));
+
+        return array_values(array_map(
+            static function (mixed $suppressedDownloadUrlMethod): DownloadUrlMethod {
+                assert(is_string($suppressedDownloadUrlMethod) && $suppressedDownloadUrlMethod !== '');
+
+                try {
+                    return DownloadUrlMethod::from($suppressedDownloadUrlMethod);
+                } catch (ValueError) {
+                    throw new InvalidArgumentException(sprintf(
+                        'Invalid value "%s" for --%s; valid values are: %s',
+                        $suppressedDownloadUrlMethod,
+                        self::OPTION_SUPPRESS_DOWNLOAD_URL_METHOD,
+                        implode(', ', array_map(static fn (DownloadUrlMethod $downloadUrlMethod): string => $downloadUrlMethod->value, DownloadUrlMethod::cases())),
+                    ));
+                }
+            },
+            $suppressedDownloadUrlMethods,
+        ));
     }
 
     public static function autoInstallBuildTools(InputInterface $input): bool
