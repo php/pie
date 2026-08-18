@@ -31,7 +31,7 @@ class DetermineExtensionsRequired
     }
 
     /** @return array<string, Link> */
-    public function forProject(Composer $composer): array
+    public function forProject(Composer $composer, bool $noDev = false): array
     {
         $requires          = [];
         $removeDevPackages = [];
@@ -44,8 +44,10 @@ class DetermineExtensionsRequired
             $removeDevPackages = $installedRepo->getDevPackageNames();
         }
 
-        foreach (array_filter($composer->getPackage()->getDevRequires(), [self::class, 'linkFilter']) as $require => $link) {
-            $requires[$require] = $link;
+        if (! $noDev) {
+            foreach (array_filter($composer->getPackage()->getDevRequires(), [self::class, 'linkFilter']) as $require => $link) {
+                $requires[$require] = $link;
+            }
         }
 
         $installedRepo = new InstalledRepository([$installedRepo, new RootPackageRepository(clone $composer->getPackage())]);
