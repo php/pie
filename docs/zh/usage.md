@@ -48,7 +48,10 @@ COPY --from=ghcr.io/php/pie:bin /pie /usr/bin/pie
 
 #### 在 Dockerfile 中使用 PIE 的示例
 
-这是如何在 Docker 镜像中使用 PIE 安装扩展的示例。注意，与 Composer 类似，您需要安装 `unzip`、[Zip](https://www.php.net/manual/zh/book.zip.php) 扩展或 `git`。
+这是如何在 Docker 镜像中使用 PIE 安装扩展的示例。注意，与 Composer 类似，您需要安装 `unzip` 或 [Zip](https://www.php.net/manual/zh/book.zip.php) 扩展，以便解压下载的软件包。
+
+> [!NOTE]
+> 以前只安装 `git` 也可以，因为解压失败时 Composer 会回退到从源代码检出。Composer 2.10 出于安全原因移除了该回退（[composer/composer#12885](https://github.com/composer/composer/pull/12885)），而 PIE 从 1.4.8 起使用 Composer 2.10，因此仅安装 `git` 已不再足够。对于 Composer 需要通过 git 读取的仓库（例如通过 `pie repository:add vcs ...` 添加的仓库），仍然需要 `git`。
 
 ```Dockerfile
 FROM php:8.4-cli

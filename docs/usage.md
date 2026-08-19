@@ -63,9 +63,18 @@ Instead of `bin` tag (which represents latest binary-only image) you can also us
 #### Example of PIE working in a Dockerfile
 
 This is an example of how PIE could be used to install an extension inside a
-Docker image. Note that, like Composer, you need something like `unzip`, the
-[Zip](https://www.php.net/manual/en/book.zip.php) extension, or `git` to be
-installed.
+Docker image. Note that, like Composer, you need `unzip` or the
+[Zip](https://www.php.net/manual/en/book.zip.php) extension to be installed, so
+that the downloaded package can be extracted.
+
+> [!NOTE]
+> Having `git` installed used to be an alternative, because Composer fell back
+> to a source checkout when extraction failed. Composer 2.10 removed that
+> fallback for security reasons
+> ([composer/composer#12885](https://github.com/composer/composer/pull/12885)),
+> and PIE uses Composer 2.10 as of 1.4.8, so `git` on its own is no longer
+> enough. It is still needed for repositories that Composer reads over git,
+> such as those added with `pie repository:add vcs ...`.
 
 ```Dockerfile
 FROM php:8.4-cli
