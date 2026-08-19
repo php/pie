@@ -23,7 +23,7 @@ use const PHP_VERSION_ID;
 #[CoversClass(DownloadCommand::class)]
 class DownloadCommandTest extends TestCase
 {
-    private const TEST_PACKAGE_LATEST = '2.0.9';
+    private const TEST_PACKAGE_LATEST = '2.0.10';
     private const TEST_PACKAGE        = 'asgrim/example-pie-extension';
 
     private CommandTester $commandTester;
