@@ -459,6 +459,16 @@ pie install \
 > The `--allow-non-interactive-project-install` will no longer work. You must
 > provide package selections from PIE 1.5 onwards.
 
+### Excluding require-dev extensions
+
+By default, PIE checks extensions declared in both `require` and
+`require-dev`. To skip extensions that are only declared in `require-dev`
+(for example, `ext-xdebug` in a production build), pass `--no-dev`:
+
+```bash
+pie install --no-dev
+```
+
 ## Install extensions from pie.lock
 
 If you have an existing `pie.json` and `pie.lock` for a given PHP install,

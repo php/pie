@@ -73,6 +73,7 @@ final class CommandHelper
     public const OPTION_WITH_PHP_PATH                         = 'with-php-path';
     public const OPTION_WITH_PHPIZE_PATH                      = 'with-phpize-path';
     public const OPTION_ALLOW_NON_INTERACTIVE_PROJECT_INSTALL = 'allow-non-interactive-project-install';
+    public const OPTION_NO_DEV                                = 'no-dev';
     private const OPTION_PACKAGE_SELECTION                    = 'select';
     private const OPTION_WORKING_DIRECTORY                    = 'working-dir';
     private const OPTION_MAKE_PARALLEL_JOBS                   = 'make-parallel-jobs';
@@ -178,6 +179,13 @@ final class CommandHelper
             null,
             InputOption::VALUE_NONE,
             'Deprecated and ignored. Will emit a warning if used.',
+        );
+
+        $command->addOption(
+            self::OPTION_NO_DEV,
+            null,
+            InputOption::VALUE_NONE,
+            'When checking a project for required extensions, exclude any extensions declared in the root package\'s require-dev.',
         );
 
         $command->addOption(
@@ -303,6 +311,11 @@ final class CommandHelper
     public static function determineForceInstallingPackageVersion(InputInterface $input): bool
     {
         return $input->hasOption(self::OPTION_FORCE) && $input->getOption(self::OPTION_FORCE);
+    }
+
+    public static function noDev(InputInterface $input): bool
+    {
+        return $input->hasOption(self::OPTION_NO_DEV) && $input->getOption(self::OPTION_NO_DEV);
     }
 
     /** @return list<DownloadUrlMethod> */

@@ -124,7 +124,10 @@ final class InstallExtensionsForProjectCommand extends Command
             getcwd(),
         ));
 
-        $extensionsRequired = $this->determineExtensionsRequired->forProject($this->composerFactoryForProject->composer($this->io));
+        $extensionsRequired = $this->determineExtensionsRequired->forProject(
+            $this->composerFactoryForProject->composer($this->io),
+            CommandHelper::noDev($input),
+        );
 
         $pieComposer = PieComposerFactory::createPieComposer(
             $this->container,
