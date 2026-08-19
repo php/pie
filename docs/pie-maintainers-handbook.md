@@ -33,6 +33,23 @@ may be duplicating work already in progress.
 > We try to stay on top of issues already being worked on with the `maintainer investigating` purple label. If you see
 > this on an issue, it is very likely we are already looking into this.
 
+### PR Checklist
+
+> [!CAUTION]
+> Completing the PR checklist is mandatory for all contributions.
+>
+> ```markdown
+> ## PR submitter checklist
+>
+> - [ ] I have read [CONTRIBUTING.md](https://github.com/php/pie/blob/HEAD/CONTRIBUTING.md)
+> - [ ] I discussed this <bug|feature> with the maintainers in #<issue_number> (complete as appropriate)
+> - [ ] I have added appropriate tests
+> - [ ] I confirm that I have the right to submit this under the project's open source licence
+> ```
+
+This is to state that you have understood this contributing guide, and critically, that you have the right to submit
+the work under the project's open source licence; that is to say, it is your own original work.
+
 ## Branching strategy
 
 Since 1.3.0, we operate a branch per minor release, with an `x` for the patch
