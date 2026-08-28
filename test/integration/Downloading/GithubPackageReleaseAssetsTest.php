@@ -11,6 +11,7 @@ use Composer\Util\HttpDownloader;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\DownloadUrlMethod;
 use Php\Pie\Downloading\GithubPackageReleaseAssets;
+use Php\Pie\Downloading\ReleaseAsset;
 use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
 use Php\Pie\Platform\Architecture;
@@ -60,10 +61,14 @@ final class GithubPackageReleaseAssetsTest extends TestCase
         $config = Factory::createConfig();
         $io->loadConfiguration($config);
 
-        self::assertSame(
-            'https://github.com/asgrim/example-pie-extension/releases/download/2.0.2/php_example_pie_extension-2.0.2-8.3-ts-vs16-x86_64.zip',
+        self::assertEquals(
+            new ReleaseAsset(
+                'https://api.github.com/repos/asgrim/example-pie-extension/releases/assets/197867674',
+                'php_example_pie_extension-2.0.2-8.3-ts-vs16-x86_64.zip',
+                ['Accept: application/octet-stream'],
+            ),
             (new GithubPackageReleaseAssets('https://api.github.com'))
-                ->findMatchingReleaseAssetUrl(
+                ->findMatchingReleaseAsset(
                     $targetPlatform,
                     $package,
                     new HttpDownloader($io, $config),

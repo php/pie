@@ -12,6 +12,7 @@ use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\DownloadUrlMethod;
 use Php\Pie\Downloading\Exception\CouldNotFindReleaseAsset;
 use Php\Pie\Downloading\GithubPackageReleaseAssets;
+use Php\Pie\Downloading\ReleaseAsset;
 use Php\Pie\ExtensionName;
 use Php\Pie\ExtensionType;
 use Php\Pie\Platform\Architecture;
@@ -28,6 +29,7 @@ use PHPUnit\Framework\TestCase;
 use function uniqid;
 
 #[CoversClass(GithubPackageReleaseAssets::class)]
+#[CoversClass(ReleaseAsset::class)]
 final class GithubPackageReleaseAssetsTest extends TestCase
 {
     public function testUrlIsReturnedWhenFindingWindowsDownloadUrl(): void
@@ -56,11 +58,11 @@ final class GithubPackageReleaseAssetsTest extends TestCase
                 'assets' => [
                     [
                         'name' => 'php_foo-1.2.3-8.3-vc14-nts-x86.zip',
-                        'browser_download_url' => 'wrong_download_url',
+                        'url' => 'wrong_download_url',
                     ],
                     [
                         'name' => 'php_foo-1.2.3-8.3-vc14-ts-x86.zip',
-                        'browser_download_url' => 'actual_download_url',
+                        'url' => 'actual_download_url',
                     ],
                 ],
             ]);
@@ -82,9 +84,9 @@ final class GithubPackageReleaseAssetsTest extends TestCase
 
         $releaseAssets = new GithubPackageReleaseAssets('https://test-github-api-base-url.thephp.foundation');
 
-        self::assertSame(
-            'actual_download_url',
-            $releaseAssets->findMatchingReleaseAssetUrl(
+        self::assertEquals(
+            new ReleaseAsset('actual_download_url', 'php_foo-1.2.3-8.3-vc14-ts-x86.zip', ['Accept: application/octet-stream']),
+            $releaseAssets->findMatchingReleaseAsset(
                 $targetPlatform,
                 $package,
                 $httpDownloader,
@@ -123,11 +125,11 @@ final class GithubPackageReleaseAssetsTest extends TestCase
                 'assets' => [
                     [
                         'name' => 'php_foo-1.2.3-8.3-nts-vc14-x86.zip',
-                        'browser_download_url' => 'wrong_download_url',
+                        'url' => 'wrong_download_url',
                     ],
                     [
                         'name' => 'php_foo-1.2.3-8.3-ts-vc14-x86.zip',
-                        'browser_download_url' => 'actual_download_url',
+                        'url' => 'actual_download_url',
                     ],
                 ],
             ]);
@@ -149,9 +151,9 @@ final class GithubPackageReleaseAssetsTest extends TestCase
 
         $releaseAssets = new GithubPackageReleaseAssets('https://test-github-api-base-url.thephp.foundation');
 
-        self::assertSame(
-            'actual_download_url',
-            $releaseAssets->findMatchingReleaseAssetUrl(
+        self::assertEquals(
+            new ReleaseAsset('actual_download_url', 'php_foo-1.2.3-8.3-ts-vc14-x86.zip', ['Accept: application/octet-stream']),
+            $releaseAssets->findMatchingReleaseAsset(
                 $targetPlatform,
                 $package,
                 $httpDownloader,
@@ -198,7 +200,7 @@ final class GithubPackageReleaseAssetsTest extends TestCase
         $releaseAssets = new GithubPackageReleaseAssets('https://test-github-api-base-url.thephp.foundation');
 
         $this->expectException(CouldNotFindReleaseAsset::class);
-        $releaseAssets->findMatchingReleaseAssetUrl(
+        $releaseAssets->findMatchingReleaseAsset(
             $targetPlatform,
             $package,
             $httpDownloader,

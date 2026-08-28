@@ -22,6 +22,7 @@ use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\Downloading\DownloadUrlMethod;
 use Php\Pie\Downloading\Exception\CouldNotFindReleaseAsset;
 use Php\Pie\Downloading\PackageReleaseAssets;
+use Php\Pie\Downloading\ReleaseAsset;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
 use Php\Pie\Platform\OperatingSystemFamily;
@@ -283,8 +284,8 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
         $packageReleaseAssets = $this->createMock(PackageReleaseAssets::class);
         $packageReleaseAssets
             ->expects(self::once())
-            ->method('findMatchingReleaseAssetUrl')
-            ->willReturn('https://example.com/windows-download-url');
+            ->method('findMatchingReleaseAsset')
+            ->willReturn(new ReleaseAsset('https://example.com/windows-download-url', 'windows-download-url.zip', ['Accept: application/octet-stream']));
 
         $this->container
             ->method('get')
@@ -319,6 +320,15 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
             $composerPackage->getDistUrl(),
         );
         self::assertSame(DownloadUrlMethod::WindowsBinaryDownload, DownloadUrlMethod::fromComposerPackage($composerPackage));
+        $transportOptions = $composerPackage->getTransportOptions();
+        self::assertArrayHasKey('http', $transportOptions);
+        self::assertIsArray($transportOptions['http']);
+        $httpOptions = $transportOptions['http'];
+        self::assertArrayHasKey('header', $httpOptions);
+        self::assertSame(
+            ['Accept: application/octet-stream'],
+            $httpOptions['header'],
+        );
     }
 
     public function testDistUrlIsUpdatedForPrePackagedTgzSource(): void
@@ -343,8 +353,8 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
         $packageReleaseAssets = $this->createMock(PackageReleaseAssets::class);
         $packageReleaseAssets
             ->expects(self::once())
-            ->method('findMatchingReleaseAssetUrl')
-            ->willReturn('https://example.com/pre-packaged-source-download-url.tgz');
+            ->method('findMatchingReleaseAsset')
+            ->willReturn(new ReleaseAsset('https://example.com/pre-packaged-source-download-url.tgz', 'pre-packaged-source-download-url.tgz'));
 
         $this->container
             ->method('get')
@@ -404,8 +414,8 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
         $packageReleaseAssets = $this->createMock(PackageReleaseAssets::class);
         $packageReleaseAssets
             ->expects(self::once())
-            ->method('findMatchingReleaseAssetUrl')
-            ->willReturn('https://example.com/pre-packaged-binary-download-url.tgz');
+            ->method('findMatchingReleaseAsset')
+            ->willReturn(new ReleaseAsset('https://example.com/pre-packaged-binary-download-url.tgz', 'pre-packaged-binary-download-url.tgz'));
 
         $this->container
             ->method('get')
@@ -465,7 +475,7 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
         $packageReleaseAssets = $this->createMock(PackageReleaseAssets::class);
         $packageReleaseAssets
             ->expects(self::once())
-            ->method('findMatchingReleaseAssetUrl')
+            ->method('findMatchingReleaseAsset')
             ->willThrowException(new CouldNotFindReleaseAsset('nope not found'));
 
         $this->container
@@ -583,8 +593,8 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
         $packageReleaseAssets = $this->createMock(PackageReleaseAssets::class);
         $packageReleaseAssets
             ->expects(self::once())
-            ->method('findMatchingReleaseAssetUrl')
-            ->willReturn('https://example.com/windows-download-url');
+            ->method('findMatchingReleaseAsset')
+            ->willReturn(new ReleaseAsset('https://example.com/windows-download-url', 'windows-download-url.zip'));
 
         $this->container
             ->method('get')
@@ -643,7 +653,7 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
         $packageReleaseAssets = $this->createMock(PackageReleaseAssets::class);
         $packageReleaseAssets
             ->expects(self::once())
-            ->method('findMatchingReleaseAssetUrl')
+            ->method('findMatchingReleaseAsset')
             ->willThrowException(new CouldNotFindReleaseAsset('nope not found'));
 
         $this->container

@@ -14,13 +14,13 @@ interface PackageReleaseAssets
     /**
      * @param non-empty-list<non-empty-string> $possibleReleaseAssetNames
      *
-     * @return non-empty-string
+     * @return ReleaseAsset
      */
-    public function findMatchingReleaseAssetUrl(
+    public function findMatchingReleaseAsset(
         TargetPlatform $targetPlatform,
         Package $package,
         HttpDownloader $httpDownloader,
         DownloadUrlMethod $downloadUrlMethod,
         array $possibleReleaseAssetNames,
-    ): string;
+    ): ReleaseAsset;
 }
