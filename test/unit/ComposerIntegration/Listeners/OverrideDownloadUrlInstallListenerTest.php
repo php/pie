@@ -21,6 +21,7 @@ use Php\Pie\ComposerIntegration\PieOperation;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\Downloading\DownloadUrlMethod;
 use Php\Pie\Downloading\Exception\CouldNotFindReleaseAsset;
+use Php\Pie\Downloading\MatchedReleaseAsset;
 use Php\Pie\Downloading\PackageReleaseAssets;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
@@ -283,8 +284,11 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
         $packageReleaseAssets = $this->createMock(PackageReleaseAssets::class);
         $packageReleaseAssets
             ->expects(self::once())
-            ->method('findMatchingReleaseAssetUrl')
-            ->willReturn('https://example.com/windows-download-url');
+            ->method('findMatchingReleaseAsset')
+            ->willReturn(new MatchedReleaseAsset(
+                'https://api.github.com/repos/foo/bar/releases/assets/12345',
+                'php_foo-1.2.3-8.3-vc14-ts-x86.zip',
+            ));
 
         $this->container
             ->method('get')
@@ -344,8 +348,11 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
         $packageReleaseAssets = $this->createMock(PackageReleaseAssets::class);
         $packageReleaseAssets
             ->expects(self::once())
-            ->method('findMatchingReleaseAssetUrl')
-            ->willReturn('https://example.com/pre-packaged-source-download-url.tgz');
+            ->method('findMatchingReleaseAsset')
+            ->willReturn(new MatchedReleaseAsset(
+                'https://api.github.com/repos/foo/bar/releases/assets/12345',
+                'php_foobar-1.2.3-src.tgz',
+            ));
 
         $this->container
             ->method('get')
@@ -405,8 +412,11 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
         $packageReleaseAssets = $this->createMock(PackageReleaseAssets::class);
         $packageReleaseAssets
             ->expects(self::once())
-            ->method('findMatchingReleaseAssetUrl')
-            ->willReturn('https://api.github.com/repos/foo/bar/releases/assets/12345');
+            ->method('findMatchingReleaseAsset')
+            ->willReturn(new MatchedReleaseAsset(
+                'https://api.github.com/repos/foo/bar/releases/assets/12345',
+                'php_foobar-1.2.3_php8.3-x86_64-linux-glibc-zts.tgz',
+            ));
 
         $this->container
             ->method('get')
@@ -467,7 +477,7 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
         $packageReleaseAssets = $this->createMock(PackageReleaseAssets::class);
         $packageReleaseAssets
             ->expects(self::once())
-            ->method('findMatchingReleaseAssetUrl')
+            ->method('findMatchingReleaseAsset')
             ->willThrowException(new CouldNotFindReleaseAsset('nope not found'));
 
         $this->container
@@ -585,8 +595,11 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
         $packageReleaseAssets = $this->createMock(PackageReleaseAssets::class);
         $packageReleaseAssets
             ->expects(self::once())
-            ->method('findMatchingReleaseAssetUrl')
-            ->willReturn('https://example.com/windows-download-url');
+            ->method('findMatchingReleaseAsset')
+            ->willReturn(new MatchedReleaseAsset(
+                'https://api.github.com/repos/foo/bar/releases/assets/12345',
+                'php_foo-1.2.3-8.3-vc14-ts-x86.zip',
+            ));
 
         $this->container
             ->method('get')
@@ -645,7 +658,7 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
         $packageReleaseAssets = $this->createMock(PackageReleaseAssets::class);
         $packageReleaseAssets
             ->expects(self::once())
-            ->method('findMatchingReleaseAssetUrl')
+            ->method('findMatchingReleaseAsset')
             ->willThrowException(new CouldNotFindReleaseAsset('nope not found'));
 
         $this->container

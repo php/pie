@@ -22,18 +22,14 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
     ) {
     }
 
-    /**
-     * @param non-empty-list<non-empty-string> $possibleReleaseAssetNames
-     *
-     * @return non-empty-string
-     */
-    public function findMatchingReleaseAssetUrl(
+    /** @param non-empty-list<non-empty-string> $possibleReleaseAssetNames */
+    public function findMatchingReleaseAsset(
         TargetPlatform $targetPlatform,
         Package $package,
         HttpDownloader $httpDownloader,
         DownloadUrlMethod $downloadUrlMethod,
         array $possibleReleaseAssetNames,
-    ): string {
+    ): MatchedReleaseAsset {
         $releaseAsset = $this->selectMatchingReleaseAsset(
             $targetPlatform,
             $package,
@@ -42,7 +38,7 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
             $possibleReleaseAssetNames,
         );
 
-        return $releaseAsset['url'];
+        return new MatchedReleaseAsset($releaseAsset['url'], $releaseAsset['name']);
     }
 
     /** @link https://github.com/squizlabs/PHP_CodeSniffer/issues/3734 */

@@ -11,16 +11,12 @@ use Php\Pie\Platform\TargetPlatform;
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 interface PackageReleaseAssets
 {
-    /**
-     * @param non-empty-list<non-empty-string> $possibleReleaseAssetNames
-     *
-     * @return non-empty-string
-     */
-    public function findMatchingReleaseAssetUrl(
+    /** @param non-empty-list<non-empty-string> $possibleReleaseAssetNames */
+    public function findMatchingReleaseAsset(
         TargetPlatform $targetPlatform,
         Package $package,
         HttpDownloader $httpDownloader,
         DownloadUrlMethod $downloadUrlMethod,
         array $possibleReleaseAssetNames,
-    ): string;
+    ): MatchedReleaseAsset;
 }

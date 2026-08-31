@@ -84,7 +84,7 @@ final class GithubPackageReleaseAssetsTest extends TestCase
 
         self::assertSame(
             'actual_download_url',
-            $releaseAssets->findMatchingReleaseAssetUrl(
+            $releaseAssets->findMatchingReleaseAsset(
                 $targetPlatform,
                 $package,
                 $httpDownloader,
@@ -93,7 +93,7 @@ final class GithubPackageReleaseAssetsTest extends TestCase
                     $targetPlatform,
                     $package,
                 ),
-            ),
+            )->url,
         );
     }
 
@@ -151,7 +151,7 @@ final class GithubPackageReleaseAssetsTest extends TestCase
 
         self::assertSame(
             'actual_download_url',
-            $releaseAssets->findMatchingReleaseAssetUrl(
+            $releaseAssets->findMatchingReleaseAsset(
                 $targetPlatform,
                 $package,
                 $httpDownloader,
@@ -160,7 +160,7 @@ final class GithubPackageReleaseAssetsTest extends TestCase
                     $targetPlatform,
                     $package,
                 ),
-            ),
+            )->url,
         );
     }
 
@@ -198,7 +198,7 @@ final class GithubPackageReleaseAssetsTest extends TestCase
         $releaseAssets = new GithubPackageReleaseAssets('https://test-github-api-base-url.thephp.foundation');
 
         $this->expectException(CouldNotFindReleaseAsset::class);
-        $releaseAssets->findMatchingReleaseAssetUrl(
+        $releaseAssets->findMatchingReleaseAsset(
             $targetPlatform,
             $package,
             $httpDownloader,
