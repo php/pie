@@ -22,18 +22,14 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
     ) {
     }
 
-    /**
-     * @param non-empty-list<non-empty-string> $possibleReleaseAssetNames
-     *
-     * @return non-empty-string
-     */
-    public function findMatchingReleaseAssetUrl(
+    /** @param non-empty-list<non-empty-string> $possibleReleaseAssetNames */
+    public function findMatchingReleaseAsset(
         TargetPlatform $targetPlatform,
         Package $package,
         HttpDownloader $httpDownloader,
         DownloadUrlMethod $downloadUrlMethod,
         array $possibleReleaseAssetNames,
-    ): string {
+    ): MatchedReleaseAsset {
         $releaseAsset = $this->selectMatchingReleaseAsset(
             $targetPlatform,
             $package,
@@ -42,16 +38,16 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
             $possibleReleaseAssetNames,
         );
 
-        return $releaseAsset['browser_download_url'];
+        return new MatchedReleaseAsset($releaseAsset['url'], $releaseAsset['name']);
     }
 
     /** @link https://github.com/squizlabs/PHP_CodeSniffer/issues/3734 */
     // phpcs:disable Squiz.Commenting.FunctionComment.MissingParamName
     /**
-     * @param list<array{name: non-empty-string, browser_download_url: non-empty-string, ...}> $releaseAssets
+     * @param list<array{name: non-empty-string, url: non-empty-string, ...}> $releaseAssets
      * @param non-empty-list<non-empty-string> $possibleReleaseAssetNames
      *
-     * @return array{name: non-empty-string, browser_download_url: non-empty-string, ...}
+     * @return array{name: non-empty-string, url: non-empty-string, ...}
      */
     // phpcs:enable
     private function selectMatchingReleaseAsset(
@@ -70,7 +66,7 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
         throw Exception\CouldNotFindReleaseAsset::forPackage($targetPlatform, $package, $downloadUrlMethod, $possibleReleaseAssetNames);
     }
 
-    /** @return list<array{name: non-empty-string, browser_download_url: non-empty-string, ...}> */
+    /** @return list<array{name: non-empty-string, url: non-empty-string, ...}> */
     private function getReleaseAssetsForPackage(
         Package $package,
         HttpDownloader $httpDownloader,
@@ -106,8 +102,8 @@ final class GithubPackageReleaseAssets implements PackageReleaseAssets
             static function (array $asset): array {
                 Assert::keyExists($asset, 'name');
                 Assert::stringNotEmpty($asset['name']);
-                Assert::keyExists($asset, 'browser_download_url');
-                Assert::stringNotEmpty($asset['browser_download_url']);
+                Assert::keyExists($asset, 'url');
+                Assert::stringNotEmpty($asset['url']);
 
                 return $asset;
             },

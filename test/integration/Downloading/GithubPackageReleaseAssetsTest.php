@@ -60,10 +60,10 @@ final class GithubPackageReleaseAssetsTest extends TestCase
         $config = Factory::createConfig();
         $io->loadConfiguration($config);
 
-        self::assertSame(
-            'https://github.com/asgrim/example-pie-extension/releases/download/2.0.2/php_example_pie_extension-2.0.2-8.3-ts-vs16-x86_64.zip',
+        self::assertMatchesRegularExpression(
+            '~^https://api\.github\.com/repos/asgrim/example-pie-extension/releases/assets/\d+$~',
             (new GithubPackageReleaseAssets('https://api.github.com'))
-                ->findMatchingReleaseAssetUrl(
+                ->findMatchingReleaseAsset(
                     $targetPlatform,
                     $package,
                     new HttpDownloader($io, $config),
@@ -72,7 +72,7 @@ final class GithubPackageReleaseAssetsTest extends TestCase
                         $targetPlatform,
                         $package,
                     ),
-                ),
+                )->url,
         );
     }
 }
