@@ -56,11 +56,11 @@ final class GithubPackageReleaseAssetsTest extends TestCase
                 'assets' => [
                     [
                         'name' => 'php_foo-1.2.3-8.3-vc14-nts-x86.zip',
-                        'browser_download_url' => 'wrong_download_url',
+                        'url' => 'wrong_download_url',
                     ],
                     [
                         'name' => 'php_foo-1.2.3-8.3-vc14-ts-x86.zip',
-                        'browser_download_url' => 'actual_download_url',
+                        'url' => 'actual_download_url',
                     ],
                 ],
             ]);
@@ -123,11 +123,11 @@ final class GithubPackageReleaseAssetsTest extends TestCase
                 'assets' => [
                     [
                         'name' => 'php_foo-1.2.3-8.3-nts-vc14-x86.zip',
-                        'browser_download_url' => 'wrong_download_url',
+                        'url' => 'wrong_download_url',
                     ],
                     [
                         'name' => 'php_foo-1.2.3-8.3-ts-vc14-x86.zip',
-                        'browser_download_url' => 'actual_download_url',
+                        'url' => 'actual_download_url',
                     ],
                 ],
             ]);

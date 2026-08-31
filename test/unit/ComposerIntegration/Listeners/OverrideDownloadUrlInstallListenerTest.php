@@ -405,7 +405,7 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
         $packageReleaseAssets
             ->expects(self::once())
             ->method('findMatchingReleaseAssetUrl')
-            ->willReturn('https://example.com/pre-packaged-binary-download-url.tgz');
+            ->willReturn('https://api.github.com/repos/foo/bar/releases/assets/12345');
 
         $this->container
             ->method('get')
@@ -436,7 +436,7 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
         ))($installerEvent);
 
         self::assertSame(
-            'https://example.com/pre-packaged-binary-download-url.tgz',
+            'https://api.github.com/repos/foo/bar/releases/assets/12345',
             $composerPackage->getDistUrl(),
         );
         self::assertSame(DownloadUrlMethod::PrePackagedBinary, DownloadUrlMethod::fromComposerPackage($composerPackage));
