@@ -319,6 +319,7 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
             $composerPackage->getDistUrl(),
         );
         self::assertSame(DownloadUrlMethod::WindowsBinaryDownload, DownloadUrlMethod::fromComposerPackage($composerPackage));
+        self::assertSame(['http' => ['header' => ['Accept: application/octet-stream']]], $composerPackage->getTransportOptions());
     }
 
     public function testDistUrlIsUpdatedForPrePackagedTgzSource(): void
@@ -441,6 +442,7 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
         );
         self::assertSame(DownloadUrlMethod::PrePackagedBinary, DownloadUrlMethod::fromComposerPackage($composerPackage));
         self::assertSame('tar', $composerPackage->getDistType());
+        self::assertSame(['http' => ['header' => ['Accept: application/octet-stream']]], $composerPackage->getTransportOptions());
     }
 
     public function testDistUrlIsUpdatedForPrePackagedTgzBinaryWhenBinaryIsNotFound(): void

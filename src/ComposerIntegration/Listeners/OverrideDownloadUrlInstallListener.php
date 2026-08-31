@@ -20,6 +20,7 @@ use Php\Pie\Downloading\PackageReleaseAssets;
 use Psr\Container\ContainerInterface;
 use Throwable;
 
+use function array_merge_recursive;
 use function array_walk;
 use function in_array;
 use function pathinfo;
@@ -149,6 +150,11 @@ class OverrideDownloadUrlInstallListener
 
                     $this->composerRequest->pieOutput->write('Found prebuilt archive: ' . $url);
                     $composerPackage->setDistUrl($url);
+
+                    $composerPackage->setTransportOptions(array_merge_recursive(
+                        $composerPackage->getTransportOptions(),
+                        ['http' => ['header' => ['Accept: application/octet-stream']]],
+                    ));
 
                     // Composer's dist-sha was computed against the original
                     // Packagist URL; once we swap to a release-asset URL the
