@@ -286,7 +286,7 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
             ->expects(self::once())
             ->method('findMatchingReleaseAsset')
             ->willReturn(new MatchedReleaseAsset(
-                'https://api.github.com/repos/foo/bar/releases/assets/12345',
+                'https://api.github.com/repos/foo/bar/releases/assets/11111',
                 'php_foo-1.2.3-8.3-vc14-ts-x86.zip',
             ));
 
@@ -319,7 +319,7 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
         ))($installerEvent);
 
         self::assertSame(
-            'https://example.com/windows-download-url',
+            'https://api.github.com/repos/foo/bar/releases/assets/11111',
             $composerPackage->getDistUrl(),
         );
         self::assertSame(DownloadUrlMethod::WindowsBinaryDownload, DownloadUrlMethod::fromComposerPackage($composerPackage));
@@ -350,7 +350,7 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
             ->expects(self::once())
             ->method('findMatchingReleaseAsset')
             ->willReturn(new MatchedReleaseAsset(
-                'https://api.github.com/repos/foo/bar/releases/assets/12345',
+                'https://api.github.com/repos/foo/bar/releases/assets/22222',
                 'php_foobar-1.2.3-src.tgz',
             ));
 
@@ -383,7 +383,7 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
         ))($installerEvent);
 
         self::assertSame(
-            'https://example.com/pre-packaged-source-download-url.tgz',
+            'https://api.github.com/repos/foo/bar/releases/assets/22222',
             $composerPackage->getDistUrl(),
         );
         self::assertSame(DownloadUrlMethod::PrePackagedSourceDownload, DownloadUrlMethod::fromComposerPackage($composerPackage));
@@ -597,7 +597,7 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
             ->expects(self::once())
             ->method('findMatchingReleaseAsset')
             ->willReturn(new MatchedReleaseAsset(
-                'https://api.github.com/repos/foo/bar/releases/assets/12345',
+                'https://api.github.com/repos/foo/bar/releases/assets/33333',
                 'php_foo-1.2.3-8.3-vc14-ts-x86.zip',
             ));
 
@@ -630,7 +630,7 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
         ))($installerEvent);
 
         self::assertSame(
-            'https://example.com/windows-download-url',
+            'https://api.github.com/repos/foo/bar/releases/assets/33333',
             $targetPackage->getDistUrl(),
         );
         self::assertSame(DownloadUrlMethod::WindowsBinaryDownload, DownloadUrlMethod::fromComposerPackage($targetPackage));
