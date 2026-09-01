@@ -58,14 +58,14 @@ jobs:
         # code, which would store attestation that `php/pie` built the PHAR, and
         # it would look genuine. So this should NOT run for PR builds.
         if: github.event_name != 'pull_request' && github.event.repository.visibility == 'public'
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 #v4.1.0
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 #v4.2.2
         with:
           subject-path: '${{ github.workspace }}/pie.phar'
       - name: Make SBOM
         run: composer CycloneDX:make-sbom --output-format=JSON --output-file=sbom.json --omit=dev
       - name: Attest the SBOM
         if: github.event_name != 'pull_request' && github.event.repository.visibility == 'public'
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 #v4.1.0
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 #v4.2.2
         with:
           subject-path: '${{ github.workspace }}/pie.phar'
           sbom-path: '${{ github.workspace }}/sbom.json'
@@ -172,7 +172,7 @@ jobs:
         # code, which would store attestation that `php/pie` built the binaries,
         # and it would look genuine. So this should NOT run for PR builds.
         if: github.event_name != 'pull_request' && github.event.repository.visibility == 'public'
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 #v4.1.0
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 #v4.2.2
         with:
           subject-path: ${{ github.workspace }}/pie-${{ runner.os }}-${{ runner.arch }}${{ runner.os == 'Windows' && '.exe' || '' }}
 
