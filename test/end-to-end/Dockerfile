@@ -45,7 +45,7 @@ FROM homebrew_base AS test_pie_installs_build_tools_with_brew
 RUN brew update && brew install php
 COPY --from=build_pie_phar /app/pie.phar /usr/local/bin/pie
 USER root
-RUN apt-get update && apt-get install -y unzip
+RUN rm -f /etc/apt/sources.list.d/github-cli.list && apt-get update && apt-get install -y unzip
 RUN apt-get remove --allow-remove-essential -y apt
 USER linuxbrew
 RUN pie install --auto-install-build-tools -v asgrim/example-pie-extension:2.0.5
