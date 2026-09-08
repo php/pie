@@ -115,7 +115,6 @@ stable releases can be downloaded from these links:
 | OS X             | ARM 64 / aarch64 | https://github.com/php/pie/releases/latest/download/pie-macOS-ARM64     |
 | Windows          | x86_64           | https://github.com/php/pie/releases/latest/download/pie-Windows-X64.exe |
 | Linux            | ARM 64 / aarch64 | https://github.com/php/pie/releases/latest/download/pie-Linux-ARM64     |
-| OS X             | Intel / x86_64   | https://github.com/php/pie/releases/latest/download/pie-macOS-X64       |
 
 The "nightly" versions of these can be found here:
 
@@ -125,7 +124,6 @@ The "nightly" versions of these can be found here:
 | OS X             | ARM 64 / aarch64 | https://php.github.io/pie/pie-macOS-ARM64     |
 | Windows          | x86_64           | https://php.github.io/pie/pie-Windows-X64.exe |
 | Linux            | ARM 64 / aarch64 | https://php.github.io/pie/pie-Linux-ARM64     |
-| OS X             | Intel / x86_64   | https://php.github.io/pie/pie-macOS-X64       |
 
 We *highly* recommend you verify the file came from the PHP GitHub repository
 before running it, for example:
