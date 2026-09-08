@@ -90,7 +90,6 @@ jobs:
         operating-system:
           - ubuntu-24.04
           - ubuntu-24.04-arm
-          - macos-15-intel
           - macos-26
           - windows-2022
     permissions:
@@ -116,10 +115,6 @@ jobs:
 
             ubuntu-24.04-arm)
               curl -fsSL -o spc.tgz https://github.com/crazywhalecc/static-php-cli/releases/download/${{ env.SPC_VERSION }}/spc-linux-aarch64.tar.gz
-              ;;
-
-            macos-15-intel)
-              curl -fsSL -o spc.tgz https://github.com/crazywhalecc/static-php-cli/releases/download/${{ env.SPC_VERSION }}/spc-macos-x86_64.tar.gz
               ;;
 
             macos-26)
