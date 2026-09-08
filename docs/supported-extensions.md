@@ -69,6 +69,7 @@ The following extensions have already added support for PIE:
 | mongodb        | [mongodb/mongodb-extension](https://packagist.org/packages/mongodb/mongodb-extension)               |
 | mysqlnd        | php/mysqlnd                                                                                         |
 | mysqli         | php/mysqli                                                                                          |
+| oci8           | [oci8/oci8](https://packagist.org/packages/oci8/oci8)                                               |
 | opcache        | php/opcache                                                                                         |
 | operator       | [jblo/operator](https://packagist.org/packages/jblo/operator)                                       |
 | opentelemetry  | [open-telemetry/ext-opentelemetry](https://packagist.org/packages/open-telemetry/ext-opentelemetry) |
@@ -227,7 +228,6 @@ The following extensions exist on PECL, but either have not added support for PI
 * nsq
 * oauth
 * ocal
-* oci8
 * openal
 * opencensus
 * opengl
