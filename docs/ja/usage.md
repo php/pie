@@ -48,7 +48,10 @@ COPY --from=ghcr.io/php/pie:bin /pie /usr/bin/pie
 
 #### Dockerfile での PIE の動作例
 
-これは Docker イメージ内で PIE を使用して拡張機能をインストールする方法の例です。Composer と同様に、`unzip`、[Zip](https://www.php.net/manual/ja/book.zip.php) 拡張機能、または `git` のようなものが必要です。
+これは Docker イメージ内で PIE を使用して拡張機能をインストールする方法の例です。Composer と同様に、ダウンロードしたパッケージを展開するために `unzip` または [Zip](https://www.php.net/manual/ja/book.zip.php) 拡張機能が必要です。
+
+> [!NOTE]
+> 以前は `git` がインストールされていれば代替となりました。展開に失敗した場合、Composer がソースからのチェックアウトにフォールバックしていたためです。Composer 2.10 はセキュリティ上の理由でこのフォールバックを削除し（[composer/composer#12885](https://github.com/composer/composer/pull/12885)）、PIE は 1.4.8 以降 Composer 2.10 を使用するため、`git` だけでは不十分です。`pie repository:add vcs ...` で追加したリポジトリなど、Composer が git 経由で読み取るリポジトリには引き続き必要です。
 
 ```Dockerfile
 FROM php:8.4-cli
