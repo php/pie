@@ -24,11 +24,17 @@ use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\DependencyResolver\ResolvedPackageRequest;
 use Php\Pie\DependencyResolver\UnableToResolveRequirement;
 use Php\Pie\Downloading\DownloadUrlMethod;
+use Php\Pie\Platform\Architecture;
+use Php\Pie\Platform\OperatingSystem;
+use Php\Pie\Platform\OperatingSystemFamily;
+use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
+use Php\Pie\Platform\ThreadSafetyMode;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\RequiresOperatingSystemFamily;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputDefinition;
@@ -374,6 +380,85 @@ final class CommandHelperTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid value "not-a-real-method" for --suppress-download-url-method; valid values are: composer-default, windows-binary, pre-packaged-source, pre-packaged-binary');
         CommandHelper::determineSuppressedDownloadUrlMethods($input);
+    }
+
+    private function targetPlatformWithExtensionPaths(string|null $phpConfigExtensionPath, string $iniExtensionPath): TargetPlatform
+    {
+        $phpBinary = $this->createMock(PhpBinaryPath::class);
+        $phpBinary->method('phpConfigExtensionPath')->willReturn($phpConfigExtensionPath);
+        $phpBinary->method('extensionPath')->willReturn($iniExtensionPath);
+
+        return new TargetPlatform(
+            OperatingSystem::NonWindows,
+            OperatingSystemFamily::Linux,
+            $phpBinary,
+            Architecture::x86_64,
+            ThreadSafetyMode::NonThreadSafe,
+            1,
+            null,
+            null,
+        );
+    }
+
+    public function testAssertExtensionPathDoesNothingWhenPhpConfigNotUsed(): void
+    {
+        $targetPlatform = $this->targetPlatformWithExtensionPaths(null, '/ini/extension/dir');
+        $io             = new BufferIO();
+
+        CommandHelper::assertExtensionPathIsConsistent($targetPlatform, new ArrayInput([]), $io);
+
+        self::assertSame('', $io->getOutput());
+    }
+
+    public function testAssertExtensionPathDoesNothingWhenPathsMatch(): void
+    {
+        $targetPlatform = $this->targetPlatformWithExtensionPaths('/same/extension/dir', '/same/extension/dir');
+        $io             = new BufferIO();
+
+        CommandHelper::assertExtensionPathIsConsistent($targetPlatform, new ArrayInput([]), $io);
+
+        self::assertSame('', $io->getOutput());
+    }
+
+    public function testAssertExtensionPathThrowsWhenPathsMatch(): void
+    {
+        $targetPlatform = $this->targetPlatformWithExtensionPaths('/php-config/extension/dir', '/ini/extension/dir');
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage(<<<'EXCEPTION'
+            The php.ini `extension_dir` directive (/ini/extension/dir) does not match `php-config --extension-dir` (/php-config/extension/dir). This means
+            that installs will likely fail (as the extension will be installed in one place, but PHP is looking in
+            another place).
+
+            Re-run with --force to attempt the install anyway.
+            EXCEPTION);
+
+        CommandHelper::assertExtensionPathIsConsistent($targetPlatform, new ArrayInput([]), new BufferIO());
+    }
+
+    public function testAssertExtensionPathWarnsWhenPathsMatchButLukeUsesTheForce(): void
+    {
+        $targetPlatform = $this->targetPlatformWithExtensionPaths('/php-config/extension/dir', '/ini/extension/dir');
+
+        $command = new Command();
+        CommandHelper::configureDownloadBuildInstallOptions($command);
+        $input = new ArrayInput(['--force' => true]);
+        CommandHelper::validateInput($input, $command);
+
+        $io = new BufferIO();
+
+        CommandHelper::assertExtensionPathIsConsistent($targetPlatform, $input, $io);
+
+        self::assertStringContainsString(
+            <<<'WARNING'
+            Warning: The php.ini `extension_dir` directive (/ini/extension/dir) does not match `php-config --extension-dir` (/php-config/extension/dir). This means
+            that installs will likely fail (as the extension will be installed in one place, but PHP is looking in
+            another place).
+
+            Proceeding anyway because --force was used.
+            WARNING,
+            $io->getOutput(),
+        );
     }
 
     public function testListRepositories(): void
