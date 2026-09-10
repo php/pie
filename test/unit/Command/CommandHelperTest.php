@@ -438,6 +438,10 @@ final class CommandHelperTest extends TestCase
 
     public function testAssertExtensionPathDoesNothingWhenPathsAreSymlinkedToTheSameRealPath(): void
     {
+        if (Platform::isWindows()) {
+            self::markTestSkipped('Skipping for Windows as ineffective');
+        }
+
         $realDir = $this->realTempDir();
 
         $symlinkPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('pie-test-extension-dir-symlink-', true);

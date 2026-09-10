@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\PieUnitTest\Util;
 
+use Composer\Util\Platform;
 use Php\Pie\Util\Realpath;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
@@ -41,6 +42,10 @@ final class RealpathTest extends TestCase
 
     public function testSymlinkedPathIsEqualToItsRealTarget(): void
     {
+        if (Platform::isWindows()) {
+            self::markTestSkipped('Skipping for Windows as ineffective');
+        }
+
         $realDir = $this->realTempDir();
 
         $symlinkPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('pie-test-realpath-symlink-', true);
