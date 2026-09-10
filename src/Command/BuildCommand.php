@@ -54,6 +54,7 @@ final class BuildCommand extends Command
     public function execute(InputInterface $input, OutputInterface $output): int
     {
         $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $this->io);
+        CommandHelper::assertExtensionPathIsConsistent($targetPlatform, $input, $this->io);
         try {
             $requestedNamesAndVersions = CommandHelper::requestedNameAndVersionPairs($input);
         } catch (InvalidPackageName $invalidPackageName) {
