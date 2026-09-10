@@ -31,6 +31,7 @@ use Php\Pie\Platform\OperatingSystem;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPhp\PhpizePath;
 use Php\Pie\Platform\TargetPlatform;
+use Php\Pie\Util\Realpath;
 use Psr\Container\ContainerInterface;
 use RuntimeException;
 use Symfony\Component\Console\Command\Command;
@@ -319,7 +320,7 @@ final class CommandHelper
         $phpConfigExtensionPath = $targetPlatform->phpBinaryPath->phpConfigExtensionPath();
         $iniExtensionPath       = $targetPlatform->phpBinaryPath->extensionPath();
 
-        if ($phpConfigExtensionPath === null || $phpConfigExtensionPath === $iniExtensionPath) {
+        if ($phpConfigExtensionPath === null || Realpath::compare($phpConfigExtensionPath, $iniExtensionPath)) {
             return;
         }
 

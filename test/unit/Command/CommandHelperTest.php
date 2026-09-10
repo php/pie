@@ -43,8 +43,14 @@ use Symfony\Component\Console\Input\InputOption;
 
 use function array_combine;
 use function array_map;
+use function Safe\mkdir;
+use function Safe\symlink;
 use function str_replace;
+use function sys_get_temp_dir;
 use function trim;
+use function uniqid;
+
+use const DIRECTORY_SEPARATOR;
 
 #[CoversClass(CommandHelper::class)]
 final class CommandHelperTest extends TestCase
@@ -400,9 +406,18 @@ final class CommandHelperTest extends TestCase
         );
     }
 
+    /** @return non-empty-string */
+    private function realTempDir(): string
+    {
+        $dir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('pie-test-extension-dir-', true);
+        mkdir($dir, 0777, true);
+
+        return $dir;
+    }
+
     public function testAssertExtensionPathDoesNothingWhenPhpConfigNotUsed(): void
     {
-        $targetPlatform = $this->targetPlatformWithExtensionPaths(null, '/ini/extension/dir');
+        $targetPlatform = $this->targetPlatformWithExtensionPaths(null, $this->realTempDir());
         $io             = new BufferIO();
 
         CommandHelper::assertExtensionPathIsConsistent($targetPlatform, new ArrayInput([]), $io);
@@ -412,7 +427,23 @@ final class CommandHelperTest extends TestCase
 
     public function testAssertExtensionPathDoesNothingWhenPathsMatch(): void
     {
-        $targetPlatform = $this->targetPlatformWithExtensionPaths('/same/extension/dir', '/same/extension/dir');
+        $dir            = $this->realTempDir();
+        $targetPlatform = $this->targetPlatformWithExtensionPaths($dir, $dir);
+        $io             = new BufferIO();
+
+        CommandHelper::assertExtensionPathIsConsistent($targetPlatform, new ArrayInput([]), $io);
+
+        self::assertSame('', $io->getOutput());
+    }
+
+    public function testAssertExtensionPathDoesNothingWhenPathsAreSymlinkedToTheSameRealPath(): void
+    {
+        $realDir = $this->realTempDir();
+
+        $symlinkPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('pie-test-extension-dir-symlink-', true);
+        symlink($realDir, $symlinkPath);
+
+        $targetPlatform = $this->targetPlatformWithExtensionPaths($symlinkPath, $realDir);
         $io             = new BufferIO();
 
         CommandHelper::assertExtensionPathIsConsistent($targetPlatform, new ArrayInput([]), $io);
@@ -422,11 +453,13 @@ final class CommandHelperTest extends TestCase
 
     public function testAssertExtensionPathThrowsWhenPathsMatch(): void
     {
-        $targetPlatform = $this->targetPlatformWithExtensionPaths('/php-config/extension/dir', '/ini/extension/dir');
+        $phpConfigExtensionPath = $this->realTempDir();
+        $iniExtensionPath       = $this->realTempDir();
+        $targetPlatform         = $this->targetPlatformWithExtensionPaths($phpConfigExtensionPath, $iniExtensionPath);
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage(<<<'EXCEPTION'
-            The php.ini `extension_dir` directive (/ini/extension/dir) does not match `php-config --extension-dir` (/php-config/extension/dir). This means
+        $this->expectExceptionMessage(<<<EXCEPTION
+            The php.ini `extension_dir` directive ($iniExtensionPath) does not match `php-config --extension-dir` ($phpConfigExtensionPath). This means
             that installs will likely fail (as the extension will be installed in one place, but PHP is looking in
             another place).
 
@@ -438,7 +471,9 @@ final class CommandHelperTest extends TestCase
 
     public function testAssertExtensionPathWarnsWhenPathsMatchButLukeUsesTheForce(): void
     {
-        $targetPlatform = $this->targetPlatformWithExtensionPaths('/php-config/extension/dir', '/ini/extension/dir');
+        $phpConfigExtensionPath = $this->realTempDir();
+        $iniExtensionPath       = $this->realTempDir();
+        $targetPlatform         = $this->targetPlatformWithExtensionPaths($phpConfigExtensionPath, $iniExtensionPath);
 
         $command = new Command();
         CommandHelper::configureDownloadBuildInstallOptions($command);
@@ -450,8 +485,8 @@ final class CommandHelperTest extends TestCase
         CommandHelper::assertExtensionPathIsConsistent($targetPlatform, $input, $io);
 
         self::assertStringContainsString(
-            <<<'WARNING'
-            Warning: The php.ini `extension_dir` directive (/ini/extension/dir) does not match `php-config --extension-dir` (/php-config/extension/dir). This means
+            <<<WARNING
+            Warning: The php.ini `extension_dir` directive ($iniExtensionPath) does not match `php-config --extension-dir` ($phpConfigExtensionPath). This means
             that installs will likely fail (as the extension will be installed in one place, but PHP is looking in
             another place).
 
