@@ -154,6 +154,18 @@ class PhpBinaryPath
         throw ExtensionPathProblem::new($this, $extensionPath);
     }
 
+    /** @return non-empty-string|null */
+    public function phpConfigExtensionPath(): string|null
+    {
+        if ($this->phpConfigPath === null) {
+            return null;
+        }
+
+        $extensionDir = self::cleanWarningAndDeprecationsFromOutput(Process::run([$this->phpConfigPath, '--extension-dir']));
+
+        return $extensionDir !== '' ? $extensionDir : null;
+    }
+
     public function assertExtensionIsLoadedInRuntime(ExtensionName $extension, IOInterface|null $io = null): void
     {
         if (! in_array(strtolower($extension->name()), array_map('strtolower', array_keys($this->extensions())))) {
