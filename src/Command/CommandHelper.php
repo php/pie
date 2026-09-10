@@ -31,7 +31,9 @@ use Php\Pie\Platform\OperatingSystem;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPhp\PhpizePath;
 use Php\Pie\Platform\TargetPlatform;
+use Php\Pie\Util\Realpath;
 use Psr\Container\ContainerInterface;
+use RuntimeException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -311,6 +313,34 @@ final class CommandHelper
     public static function determineForceInstallingPackageVersion(InputInterface $input): bool
     {
         return $input->hasOption(self::OPTION_FORCE) && $input->getOption(self::OPTION_FORCE);
+    }
+
+    public static function assertExtensionPathIsConsistent(TargetPlatform $targetPlatform, InputInterface $input, IOInterface $io): void
+    {
+        $phpConfigExtensionPath = $targetPlatform->phpBinaryPath->phpConfigExtensionPath();
+        $iniExtensionPath       = $targetPlatform->phpBinaryPath->extensionPath();
+
+        if ($phpConfigExtensionPath === null || Realpath::compare($phpConfigExtensionPath, $iniExtensionPath)) {
+            return;
+        }
+
+        $message = sprintf(
+            <<<'ERROR'
+            The php.ini `extension_dir` directive (%s) does not match `php-config --extension-dir` (%s). This means
+            that installs will likely fail (as the extension will be installed in one place, but PHP is looking in
+            another place).
+
+
+            ERROR,
+            $iniExtensionPath,
+            $phpConfigExtensionPath,
+        );
+
+        if (! self::determineForceInstallingPackageVersion($input)) {
+            throw new RuntimeException($message . 'Re-run with --force to attempt the install anyway.');
+        }
+
+        $io->writeError('<comment>Warning: ' . $message . 'Proceeding anyway because --force was used.</comment>');
     }
 
     public static function noDev(InputInterface $input): bool

@@ -24,11 +24,17 @@ use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\DependencyResolver\ResolvedPackageRequest;
 use Php\Pie\DependencyResolver\UnableToResolveRequirement;
 use Php\Pie\Downloading\DownloadUrlMethod;
+use Php\Pie\Platform\Architecture;
+use Php\Pie\Platform\OperatingSystem;
+use Php\Pie\Platform\OperatingSystemFamily;
+use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
+use Php\Pie\Platform\ThreadSafetyMode;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\RequiresOperatingSystemFamily;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputDefinition;
@@ -37,8 +43,14 @@ use Symfony\Component\Console\Input\InputOption;
 
 use function array_combine;
 use function array_map;
+use function Safe\mkdir;
+use function Safe\symlink;
 use function str_replace;
+use function sys_get_temp_dir;
 use function trim;
+use function uniqid;
+
+use const DIRECTORY_SEPARATOR;
 
 #[CoversClass(CommandHelper::class)]
 final class CommandHelperTest extends TestCase
@@ -374,6 +386,118 @@ final class CommandHelperTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid value "not-a-real-method" for --suppress-download-url-method; valid values are: composer-default, windows-binary, pre-packaged-source, pre-packaged-binary');
         CommandHelper::determineSuppressedDownloadUrlMethods($input);
+    }
+
+    private function targetPlatformWithExtensionPaths(string|null $phpConfigExtensionPath, string $iniExtensionPath): TargetPlatform
+    {
+        $phpBinary = $this->createMock(PhpBinaryPath::class);
+        $phpBinary->method('phpConfigExtensionPath')->willReturn($phpConfigExtensionPath);
+        $phpBinary->method('extensionPath')->willReturn($iniExtensionPath);
+
+        return new TargetPlatform(
+            OperatingSystem::NonWindows,
+            OperatingSystemFamily::Linux,
+            $phpBinary,
+            Architecture::x86_64,
+            ThreadSafetyMode::NonThreadSafe,
+            1,
+            null,
+            null,
+        );
+    }
+
+    /** @return non-empty-string */
+    private function realTempDir(): string
+    {
+        $dir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('pie-test-extension-dir-', true);
+        mkdir($dir, 0777, true);
+
+        return $dir;
+    }
+
+    public function testAssertExtensionPathDoesNothingWhenPhpConfigNotUsed(): void
+    {
+        $targetPlatform = $this->targetPlatformWithExtensionPaths(null, $this->realTempDir());
+        $io             = new BufferIO();
+
+        CommandHelper::assertExtensionPathIsConsistent($targetPlatform, new ArrayInput([]), $io);
+
+        self::assertSame('', $io->getOutput());
+    }
+
+    public function testAssertExtensionPathDoesNothingWhenPathsMatch(): void
+    {
+        $dir            = $this->realTempDir();
+        $targetPlatform = $this->targetPlatformWithExtensionPaths($dir, $dir);
+        $io             = new BufferIO();
+
+        CommandHelper::assertExtensionPathIsConsistent($targetPlatform, new ArrayInput([]), $io);
+
+        self::assertSame('', $io->getOutput());
+    }
+
+    public function testAssertExtensionPathDoesNothingWhenPathsAreSymlinkedToTheSameRealPath(): void
+    {
+        if (Platform::isWindows()) {
+            self::markTestSkipped('Skipping for Windows as ineffective');
+        }
+
+        $realDir = $this->realTempDir();
+
+        $symlinkPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('pie-test-extension-dir-symlink-', true);
+        symlink($realDir, $symlinkPath);
+
+        $targetPlatform = $this->targetPlatformWithExtensionPaths($symlinkPath, $realDir);
+        $io             = new BufferIO();
+
+        CommandHelper::assertExtensionPathIsConsistent($targetPlatform, new ArrayInput([]), $io);
+
+        self::assertSame('', $io->getOutput());
+    }
+
+    public function testAssertExtensionPathThrowsWhenPathsMatch(): void
+    {
+        $phpConfigExtensionPath = $this->realTempDir();
+        $iniExtensionPath       = $this->realTempDir();
+        $targetPlatform         = $this->targetPlatformWithExtensionPaths($phpConfigExtensionPath, $iniExtensionPath);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage(<<<EXCEPTION
+            The php.ini `extension_dir` directive ($iniExtensionPath) does not match `php-config --extension-dir` ($phpConfigExtensionPath). This means
+            that installs will likely fail (as the extension will be installed in one place, but PHP is looking in
+            another place).
+
+            Re-run with --force to attempt the install anyway.
+            EXCEPTION);
+
+        CommandHelper::assertExtensionPathIsConsistent($targetPlatform, new ArrayInput([]), new BufferIO());
+    }
+
+    public function testAssertExtensionPathWarnsWhenPathsMatchButLukeUsesTheForce(): void
+    {
+        $phpConfigExtensionPath = $this->realTempDir();
+        $iniExtensionPath       = $this->realTempDir();
+        $targetPlatform         = $this->targetPlatformWithExtensionPaths($phpConfigExtensionPath, $iniExtensionPath);
+
+        $command = new Command();
+        CommandHelper::configureDownloadBuildInstallOptions($command);
+        $input = new ArrayInput(['--force' => true]);
+        CommandHelper::validateInput($input, $command);
+
+        $io = new BufferIO();
+
+        CommandHelper::assertExtensionPathIsConsistent($targetPlatform, $input, $io);
+
+        self::assertStringContainsString(
+            <<<WARNING
+            Warning: The php.ini `extension_dir` directive ($iniExtensionPath) does not match `php-config --extension-dir` ($phpConfigExtensionPath). This means
+            that installs will likely fail (as the extension will be installed in one place, but PHP is looking in
+            another place).
+
+            Proceeding anyway because --force was used.
+            WARNING,
+            $io->getOutput(),
+        );
     }
 
     public function testListRepositories(): void

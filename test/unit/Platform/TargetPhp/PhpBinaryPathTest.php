@@ -194,6 +194,21 @@ final class PhpBinaryPathTest extends TestCase
         );
 
         self::assertSame($phpConfigPath, $phpBinary->phpConfigPath());
+
+        self::assertSame(
+            Process::run([$phpConfigPath, '--extension-dir']),
+            $phpBinary->phpConfigExtensionPath(),
+        );
+    }
+
+    public function testPhpConfigExtensionPathIsNullWhenPhpConfigIsNotPresent(): void
+    {
+        $phpExecutable = trim((string) (new PhpExecutableFinder())->find());
+        assert($phpExecutable !== '');
+
+        $phpBinary = PhpBinaryPath::fromPhpBinaryPath($phpExecutable);
+
+        self::assertNull($phpBinary->phpConfigExtensionPath());
     }
 
     public function testExtensions(): void

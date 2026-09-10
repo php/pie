@@ -55,6 +55,7 @@ final class UpgradeCommand extends Command
         }
 
         $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $this->io);
+        CommandHelper::assertExtensionPathIsConsistent($targetPlatform, $input, $this->io);
 
         $forceInstallPackageVersion = CommandHelper::determineForceInstallingPackageVersion($input);
         CommandHelper::applyNoCacheOptionIfSet($input, $this->io);

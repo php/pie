@@ -109,6 +109,7 @@ final class InstallExtensionsForProjectCommand extends Command
     {
         $extensionToPackageSelections = CommandHelper::determineExtensionToPackageSelections($input);
         $targetPlatform               = CommandHelper::determineTargetPlatformFromInputs($input, $this->io);
+        CommandHelper::assertExtensionPathIsConsistent($targetPlatform, $input, $this->io);
 
         $allowNonInteractive = $input->hasOption(CommandHelper::OPTION_ALLOW_NON_INTERACTIVE_PROJECT_INSTALL) && $input->getOption(CommandHelper::OPTION_ALLOW_NON_INTERACTIVE_PROJECT_INSTALL);
         if ($allowNonInteractive) {

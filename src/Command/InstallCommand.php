@@ -92,6 +92,7 @@ final class InstallCommand extends Command
         }
 
         $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $this->io);
+        CommandHelper::assertExtensionPathIsConsistent($targetPlatform, $input, $this->io);
         try {
             $requestedNamesAndVersions = CommandHelper::requestedNameAndVersionPairs($input);
         } catch (InvalidPackageName $invalidPackageName) {
