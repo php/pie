@@ -517,6 +517,24 @@ Move your `pie.json` and `pie.lock` into this path, then you can run
 `pie install --from-lock` which will install the locked extension dependencies
 specified in that `pie.lock`.
 
+## Update all PIE extensions
+
+You can now conveniently update all extensions that have been installed with
+PIE, by using `pie upgrade` for a target PHP install. PIE will check to see if
+all the PIE-enabled extensions for your PHP install have updates available
+within the constraints each extension was originally installed with. This is
+ideal where an extension supports [Semantic Versioning](https://semver.org/),
+for example:
+
+ - PIE extension `foo/bar` was installed like `pie install foo/bar:^1.0`
+ - PIE installed version `1.0.5` of `foo/bar`
+ - When you later run `pie upgrade`, PIE picks up a new release `1.1.0`, and
+   will install this new version
+ - Later again, you run `pie upgrade`. There is a new `2.0.0` release, but PIE
+   will not install this version, since it does not match the original
+   constraint you used. To upgrade to the `2.0.0` release, you would have to
+   run `pie install foo/bar:^2.0`, for example.
+
 ## Comparison with PECL
 
 Since PIE is a replacement for PECL, here is a comparison of the commands that
@@ -571,4 +589,4 @@ applicable to the new tooling.
 | `pecl uninstall`               |                                                                                                                          |
 | `pecl update-channels`         |                                                                                                                          |
 | `pecl upgrade xdebug`          | `pie install xdebug/xdebug`                                                                                              |
-| `pecl upgrade-all`             |                                                                                                                          |
+| `pecl upgrade-all`             | `pie upgrade`                                                                                                            |
