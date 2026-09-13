@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "abb3575cc3bca7039e1ee57d4ca44622",
+    "content-hash": "129b838284f60e87b9f0936324acb7af",
     "packages": [
         {
             "name": "composer/ca-bundle",
@@ -2650,16 +2650,16 @@
         },
         {
             "name": "thephpf/attestation",
-            "version": "dev-sigstore-conformance",
+            "version": "0.0.8",
             "source": {
                 "type": "git",
-                "url": "https://github.com/asgrim/attestation.git",
-                "reference": "3902d680d1bd34a448edc69b55b407a3db9fc377"
+                "url": "https://github.com/ThePHPF/attestation.git",
+                "reference": "4b9aa7aa317e5092290176a174308fde085c3cf9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/asgrim/attestation/zipball/3902d680d1bd34a448edc69b55b407a3db9fc377",
-                "reference": "3902d680d1bd34a448edc69b55b407a3db9fc377",
+                "url": "https://api.github.com/repos/ThePHPF/attestation/zipball/4b9aa7aa317e5092290176a174308fde085c3cf9",
+                "reference": "4b9aa7aa317e5092290176a174308fde085c3cf9",
                 "shasum": ""
             },
             "require": {
@@ -2687,19 +2687,14 @@
             ],
             "type": "library",
             "autoload": {
-                "psr-4": {
-                    "ThePhpFoundation\\Attestation\\": "src/"
-                },
                 "files": [
                     "src/FlowSnappy/polyfill.php"
-                ]
-            },
-            "autoload-dev": {
+                ],
                 "psr-4": {
-                    "ThePhpFoundation\\UnitTest\\Attestation\\": "test/unit",
-                    "ThePhpFoundation\\IntegrationTest\\Attestation\\": "test/integration"
+                    "ThePhpFoundation\\Attestation\\": "src/"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause"
             ],
@@ -2711,10 +2706,20 @@
             ],
             "description": "A PHP library to aid in verifying artifact attestations",
             "support": {
-                "source": "https://github.com/asgrim/attestation/tree/sigstore-conformance",
-                "issues": "https://github.com/asgrim/attestation/issues"
+                "issues": "https://github.com/ThePHPF/attestation/issues",
+                "source": "https://github.com/ThePHPF/attestation/tree/0.0.8"
             },
-            "time": "2026-09-11T21:01:17+00:00"
+            "funding": [
+                {
+                    "url": "https://github.com/ThePHPF",
+                    "type": "github"
+                },
+                {
+                    "url": "https://opencollective.com/phpfoundation",
+                    "type": "open_collective"
+                }
+            ],
+            "time": "2026-09-13T19:02:47+00:00"
         },
         {
             "name": "webmozart/assert",
@@ -6180,9 +6185,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "thephpf/attestation": 20
-    },
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
