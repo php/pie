@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f1906c1e84a2f711ef071de36ed7d53c",
+    "content-hash": "129b838284f60e87b9f0936324acb7af",
     "packages": [
         {
             "name": "composer/ca-bundle",
@@ -2650,23 +2650,24 @@
         },
         {
             "name": "thephpf/attestation",
-            "version": "0.0.7",
+            "version": "0.0.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ThePHPF/attestation.git",
-                "reference": "c603fd7d41a44505f7bc67b8c687a7a65aef992a"
+                "reference": "4b9aa7aa317e5092290176a174308fde085c3cf9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ThePHPF/attestation/zipball/c603fd7d41a44505f7bc67b8c687a7a65aef992a",
-                "reference": "c603fd7d41a44505f7bc67b8c687a7a65aef992a",
+                "url": "https://api.github.com/repos/ThePHPF/attestation/zipball/4b9aa7aa317e5092290176a174308fde085c3cf9",
+                "reference": "4b9aa7aa317e5092290176a174308fde085c3cf9",
                 "shasum": ""
             },
             "require": {
                 "composer/composer": "^2.2",
                 "ext-json": "*",
-                "php": "^7.4||^8.0",
-                "webmozart/assert": "^1.11"
+                "php": "^8.0",
+                "symfony/console": "^5.4 || ^6.0 || ^7.0 || ^8.0",
+                "webmozart/assert": "^1.11 || ^2.0"
             },
             "require-dev": {
                 "doctrine/coding-standard": "^13.0 || ^14.0",
@@ -2675,9 +2676,15 @@
                 "phpunit/phpunit": "^9.6.25"
             },
             "suggest": {
+                "ext-bcmath": "Needed to verify message-signature bundles when only a digest, not the real artifact, is available (used if ext-gmp is not present)",
+                "ext-gmp": "Preferred over ext-bcmath for verifying message-signature bundles from a digest alone; consistently fast regardless of PHP version",
                 "ext-openssl": "Needed to verify certificates using OpenSSL",
-                "ext-snappy": "Decompress bundle attestations faster; if not, flow-php/snappy PHP fallback is used"
+                "ext-snappy": "Decompress bundle attestations faster; if not, flow-php/snappy PHP fallback is used",
+                "ext-sodium": "Needed to verify Ed25519 transparency log signatures"
             },
+            "bin": [
+                "bin/cli.php"
+            ],
             "type": "library",
             "autoload": {
                 "files": [
@@ -2700,7 +2707,7 @@
             "description": "A PHP library to aid in verifying artifact attestations",
             "support": {
                 "issues": "https://github.com/ThePHPF/attestation/issues",
-                "source": "https://github.com/ThePHPF/attestation/tree/0.0.7"
+                "source": "https://github.com/ThePHPF/attestation/tree/0.0.8"
             },
             "funding": [
                 {
@@ -2712,7 +2719,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2026-07-20T18:42:42+00:00"
+            "time": "2026-09-13T19:02:47+00:00"
         },
         {
             "name": "webmozart/assert",

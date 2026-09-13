@@ -134,7 +134,12 @@ final class SelfUpdateCommand extends Command
             $composer->getConfig(),
             $this->githubApiBaseUrl,
         );
-        $verifyPiePhar         = VerifyPieReleaseUsingAttestation::factory($fetchLatestPieRelease);
+        $verifyPiePhar         = VerifyPieReleaseUsingAttestation::factory(
+            $fetchLatestPieRelease,
+            $this->quieterConsoleIo,
+            $composer->getConfig(),
+            $this->githubApiBaseUrl,
+        );
 
         if ($updateChannel === Channel::Nightly) {
             $latestRelease = new ReleaseMetadata(

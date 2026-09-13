@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Php\Pie\SelfManage\Verify;
 
+use Composer\Config;
 use Composer\IO\IOInterface;
+use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use Php\Pie\File\BinaryFile;
 use Php\Pie\SelfManage\Update\FetchPieRelease;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
 use Symfony\Component\Process\ExecutableFinder;
-use ThePhpFoundation\Attestation\Verification\VerifyAttestationWithOpenSsl;
 
 use function extension_loaded;
 
@@ -22,11 +23,12 @@ final class VerifyPieReleaseUsingAttestation implements VerifyPiePhar
     ) {
     }
 
-    public static function factory(FetchPieRelease $fetchPieRelease): self
+    /** @param non-empty-string $githubApiBaseUrl */
+    public static function factory(FetchPieRelease $fetchPieRelease, QuieterConsoleIO $io, Config $config, string $githubApiBaseUrl): self
     {
         return new VerifyPieReleaseUsingAttestation(
             new GithubCliAttestationVerification(new ExecutableFinder(), $fetchPieRelease),
-            new FallbackVerificationUsingOpenSsl(VerifyAttestationWithOpenSsl::factory(), $fetchPieRelease),
+            FallbackVerificationUsingOpenSsl::factory($fetchPieRelease, $io, $config, $githubApiBaseUrl),
         );
     }
 

@@ -4,16 +4,21 @@ declare(strict_types=1);
 
 namespace Php\Pie\SelfManage\Verify;
 
+use Composer\Config;
 use Composer\Downloader\TransportException;
 use Composer\IO\IOInterface;
+use Composer\Util\HttpDownloader;
+use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use Php\Pie\File\BinaryFile;
 use Php\Pie\SelfManage\Update\FetchPieRelease;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
 use Php\Pie\Util\Emoji;
+use ThePhpFoundation\Attestation\BundleSource\BundleSource;
+use ThePhpFoundation\Attestation\BundleSource\DownloadGitHubBundle;
 use ThePhpFoundation\Attestation\FilenameWithChecksum;
 use ThePhpFoundation\Attestation\FulcioSigstoreOidExtensions;
 use ThePhpFoundation\Attestation\Verification\Exception\FailedToVerifyArtifact;
-use ThePhpFoundation\Attestation\Verification\VerifyAttestation;
+use ThePhpFoundation\Attestation\Verification\VerifyBundleWithOpenSsl;
 use Throwable;
 
 use function sprintf;
@@ -23,56 +28,56 @@ final class FallbackVerificationUsingOpenSsl implements VerifyPiePhar
 {
     /** @link https://github.com/sigstore/fulcio/blob/main/docs/oid-info.md#136141572641--fulcio */
     private const ATTESTATION_CERTIFICATE_EXPECTED_EXTENSION_VALUES = [
-        FulcioSigstoreOidExtensions::ISSUER_V2 => 'https://token.actions.githubusercontent.com',
         FulcioSigstoreOidExtensions::SOURCE_REPOSITORY_URI => 'https://github.com/php/pie',
         FulcioSigstoreOidExtensions::SOURCE_REPOSITORY_OWNER_URI => 'https://github.com/php',
     ];
 
+    private const OIDC_ISSUER = 'https://token.actions.githubusercontent.com';
+
     private const ORGANISATION = 'php';
 
-    private const ARTIFACT_FILENAME = 'pie.phar';
-
-    /** @link https://github.com/sigstore/fulcio/blob/main/docs/oid-info.md#13614157264114--source-repository-ref */
-    private const SOURCE_REPOSITORY_REF = '1.3.6.1.4.1.57264.1.14';
-
-    /** @link https://github.com/sigstore/fulcio/blob/main/docs/oid-info.md#1361415726419--build-signer-uri */
-    private const BUILD_SIGNER_URI = '1.3.6.1.4.1.57264.1.9';
-
     public function __construct(
-        private readonly VerifyAttestation $verifyAttestation,
         private readonly FetchPieRelease $fetchPieRelease,
+        private readonly BundleSource $bundleSource,
     ) {
+    }
+
+    /** @param non-empty-string $githubApiBaseUrl */
+    public static function factory(FetchPieRelease $fetchPieRelease, QuieterConsoleIO $io, Config $config, string $githubApiBaseUrl): self
+    {
+        return new self(
+            $fetchPieRelease,
+            new DownloadGitHubBundle(self::ORGANISATION, $githubApiBaseUrl, new HttpDownloader($io, $config)),
+        );
     }
 
     public function verify(ReleaseMetadata $releaseMetadata, BinaryFile $pharFilename, IOInterface $io): void
     {
-        // The fallback verifier checks cert chain, cert extension claims, DSSE
-        // subject digest, and DSSE signature, but does NOT validate Rekor
-        // transparency-log inclusion. `gh attestation verify` does. Surface the
-        // reduced guarantees so users on shared / air-gapped hosts know.
         $io->writeError(
-            '<warning>Falling back to OpenSSL verification (no Rekor inclusion check). Install `gh` for full attestation verification.</warning>',
+            '<warning>Falling back to OpenSSL verification. Install `gh` to verify using the GitHub CLI instead.</warning>',
         );
 
-        $expectedExtensions = self::ATTESTATION_CERTIFICATE_EXPECTED_EXTENSION_VALUES;
-
         if ($releaseMetadata->tag === 'nightly') {
-            $expectedExtensions[self::BUILD_SIGNER_URI] = sprintf(
+            $expectedCertificateIdentity = sprintf(
                 'https://github.com/php/pie/.github/workflows/build-assets.yml@refs/heads/%s',
                 $this->fetchPieRelease->trunkBranch(),
             );
         } else {
-            $expectedExtensions[self::SOURCE_REPOSITORY_REF] = 'refs/tags/' . $releaseMetadata->tag;
+            $expectedCertificateIdentity = sprintf(
+                'https://github.com/php/pie/.github/workflows/build-assets.yml@refs/tags/%s',
+                $releaseMetadata->tag,
+            );
         }
 
         try {
-            /** @psalm-suppress InvalidArgument */
-            $this->verifyAttestation->verify(
-                FilenameWithChecksum::fromFilenameAndChecksum($pharFilename->filePath, $pharFilename->checksum),
-                self::ORGANISATION,
-                self::ARTIFACT_FILENAME,
-                $expectedExtensions,
-            );
+            $file    = FilenameWithChecksum::fromFilenameAndChecksum($pharFilename->filePath, $pharFilename->checksum);
+            $bundles = $this->bundleSource->getBundles($file);
+
+            VerifyBundleWithOpenSsl::factory(
+                self::ATTESTATION_CERTIFICATE_EXPECTED_EXTENSION_VALUES,
+                $expectedCertificateIdentity,
+                self::OIDC_ISSUER,
+            )->verify($bundles, $file);
         } catch (FailedToVerifyArtifact $failedToVerifyArtifact) {
             throw FailedToVerifyRelease::fromAttestationException($failedToVerifyArtifact);
         } catch (TransportException $transportException) {

@@ -93,7 +93,12 @@ final class SelfVerifyCommand extends Command
 
         $latestRelease = new ReleaseMetadata($expectedVersion, 'blah');
         $pharFilename  = BinaryFile::fromFileWithSha256Checksum(($this->fullPathToSelf)());
-        $verifyPiePhar = VerifyPieReleaseUsingAttestation::factory($fetchLatestPieRelease);
+        $verifyPiePhar = VerifyPieReleaseUsingAttestation::factory(
+            $fetchLatestPieRelease,
+            $this->quieterConsoleIo,
+            $composer->getConfig(),
+            $this->githubApiBaseUrl,
+        );
 
         try {
             $verifyPiePhar->verify($latestRelease, $pharFilename, $this->io);

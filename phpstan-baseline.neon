@@ -300,38 +300,3 @@ parameters:
 			count: 4
 			path: test/unit/SelfManage/BuildTools/PhpizeBuildToolFinderTest.php
 
-		-
-			message: '#^Parameter \#1 \$csr of function Safe\\openssl_csr_sign expects OpenSSLCertificateSigningRequest\|string, bool\|OpenSSLCertificateSigningRequest given\.$#'
-			identifier: argument.type
-			count: 2
-			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
-
-		-
-			message: '#^Parameter \#3 \$private_key of function Safe\\openssl_csr_sign expects array\|OpenSSLAsymmetricKey\|OpenSSLCertificate\|string, OpenSSLAsymmetricKey\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
-
-		-
-			message: '#^Parameter \#3 \$private_key of function Safe\\openssl_sign expects array\|OpenSSLAsymmetricKey\|OpenSSLCertificate\|string, OpenSSLAsymmetricKey\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
-
-		-
-			message: '#^Parameter \#3 \$signature of method Php\\PieUnitTest\\SelfManage\\Verify\\FallbackVerificationUsingOpenSslTest\:\:mockAttestationResponse\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
-
-		-
-			message: '#^Parameter \#3 \$subject of function str_replace expects array\<string\>\|string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
-
-		-
-			message: '#^Parameter \#4 \$pemCertificate of method Php\\PieUnitTest\\SelfManage\\Verify\\FallbackVerificationUsingOpenSslTest\:\:mockAttestationResponse\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: test/unit/SelfManage/Verify/FallbackVerificationUsingOpenSslTest.php
