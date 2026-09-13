@@ -207,7 +207,18 @@ PIE has the ability to:
 
 When installing an extension with PIE, you must use its Composer package name.
 You can find a list of PIE-compatible packages on
-[https://packagist.org/extensions](https://packagist.org/extensions).
+[https://packagist.org/extensions](https://packagist.org/extensions), or by
+searching with `pie search <term>` (from PIE 1.5.0+):
+
+```shell
+$ pie search xdebug
+🥧 PHP Installer for Extensions (PIE) 1.5.0-rc.3, from The PHP Foundation
+You are running PHP 8.5.10
+Target PHP installation: 8.5.10 nts, on Linux/OSX/etc x86_64 (from /usr/bin/php8.5)
+
+Found 1 package(s) matching "xdebug":
+ - xdebug/xdebug (provides extension: xdebug): Xdebug is a debugging and productivity extension for PHP
+```
 
 Once you know the extension name, you can install it with:
 
@@ -513,51 +524,51 @@ you may be familiar with in PECL, with an approximate equivalent in PIE. Note
 that some concepts are different or omitted from PIE as they may simply be not
 applicable to the new tooling.
 
-| PECL                           | PIE                                                                                                                     |
-|--------------------------------|-------------------------------------------------------------------------------------------------------------------------|
-| `pecl build xdebug`            | `pie build xdebug/xdebug`                                                                                               |
-| `pecl bundle xdebug`           | `pie download xdebug/xdebug`                                                                                            |
-| `pecl channel-add channel.xml` | `pie repository:add vcs https://github.com/my/extension`                                                                |
-| `pecl channel-alias`           |                                                                                                                         |
-| `pecl channel-delete channel`  | `pie repository:remove https://github.com/my/extension`                                                                 |
-| `pecl channel-discover`        |                                                                                                                         |
-| `pecl channel-login`           |                                                                                                                         |
-| `pecl channel-logout`          |                                                                                                                         |
-| `pecl channel-update`          |                                                                                                                         |
-| `pecl clear-cache`             |                                                                                                                         |
-| `pecl config-create`           |                                                                                                                         |
-| `pecl config-get`              |                                                                                                                         |
-| `pecl config-help`             |                                                                                                                         |
-| `pecl config-set`              |                                                                                                                         |
-| `pecl config-show`             |                                                                                                                         |
-| `pecl convert`                 |                                                                                                                         |
-| `pecl cvsdiff`                 |                                                                                                                         |
-| `pecl cvstag`                  |                                                                                                                         |
-| `pecl download xdebug`         | `pie download xdebug/xdebug`                                                                                            |
-| `pecl download-all`            |                                                                                                                         |
-| `pecl info xdebug`             | `pie info xdebug/xdebug`                                                                                                |
-| `pecl install xdebug`          | `pie install xdebug/xdebug`                                                                                             |
-| `pecl list`                    | `pie show`                                                                                                              |
-| `pecl list-all`                | Visit [Packagist Extension list](https://packagist.org/extensions)                                                      |
-| `pecl list-channels`           | `pie repository:list`                                                                                                   |
-| `pecl list-files`              |                                                                                                                         |
-| `pecl list-upgrades`           |                                                                                                                         |
-| `pecl login`                   |                                                                                                                         |
-| `pecl logout`                  |                                                                                                                         |
-| `pecl makerpm`                 |                                                                                                                         |
+| PECL                           | PIE                                                                                                                      |
+|--------------------------------|--------------------------------------------------------------------------------------------------------------------------|
+| `pecl build xdebug`            | `pie build xdebug/xdebug`                                                                                                |
+| `pecl bundle xdebug`           | `pie download xdebug/xdebug`                                                                                             |
+| `pecl channel-add channel.xml` | `pie repository:add vcs https://github.com/my/extension`                                                                 |
+| `pecl channel-alias`           |                                                                                                                          |
+| `pecl channel-delete channel`  | `pie repository:remove https://github.com/my/extension`                                                                  |
+| `pecl channel-discover`        |                                                                                                                          |
+| `pecl channel-login`           |                                                                                                                          |
+| `pecl channel-logout`          |                                                                                                                          |
+| `pecl channel-update`          |                                                                                                                          |
+| `pecl clear-cache`             |                                                                                                                          |
+| `pecl config-create`           |                                                                                                                          |
+| `pecl config-get`              |                                                                                                                          |
+| `pecl config-help`             |                                                                                                                          |
+| `pecl config-set`              |                                                                                                                          |
+| `pecl config-show`             |                                                                                                                          |
+| `pecl convert`                 |                                                                                                                          |
+| `pecl cvsdiff`                 |                                                                                                                          |
+| `pecl cvstag`                  |                                                                                                                          |
+| `pecl download xdebug`         | `pie download xdebug/xdebug`                                                                                             |
+| `pecl download-all`            |                                                                                                                          |
+| `pecl info xdebug`             | `pie info xdebug/xdebug`                                                                                                 |
+| `pecl install xdebug`          | `pie install xdebug/xdebug`                                                                                              |
+| `pecl list`                    | `pie show`                                                                                                               |
+| `pecl list-all`                | Visit [Packagist Extension list](https://packagist.org/extensions)                                                       |
+| `pecl list-channels`           | `pie repository:list`                                                                                                    |
+| `pecl list-files`              |                                                                                                                          |
+| `pecl list-upgrades`           |                                                                                                                          |
+| `pecl login`                   |                                                                                                                          |
+| `pecl logout`                  |                                                                                                                          |
+| `pecl makerpm`                 |                                                                                                                          |
 | `pecl package`                 | Linux - just tag a release. Windows - use [`php/php-windows-builder` action](https://github.com/php/php-windows-builder) |
-| `pecl package-dependencies`    |                                                                                                                         |
-| `pecl package-validate`        | In your extension checkout: `composer validate`                                                                         |
-| `pecl pickle`                  |                                                                                                                         |
-| `pecl remote-info xdebug`      | `pie info xdebug/xdebug`                                                                                                |
-| `pecl remote-list`             | Visit [Packagist Extension list](https://packagist.org/extensions)                                                      |
-| `pecl run-scripts`             |                                                                                                                         |
-| `pecl run-tests`               |                                                                                                                         |
-| `pecl search`                  | Visit [Packagist Extension list](https://packagist.org/extensions)                                                      |
-| `pecl shell-test`              |                                                                                                                         |
-| `pecl sign`                    |                                                                                                                         |
-| `pecl svntag`                  |                                                                                                                         |
-| `pecl uninstall`               |                                                                                                                         |
-| `pecl update-channels`         |                                                                                                                         |
-| `pecl upgrade xdebug`          | `pie install xdebug/xdebug`                                                                                             |
-| `pecl upgrade-all`             |                                                                                                                         |
+| `pecl package-dependencies`    |                                                                                                                          |
+| `pecl package-validate`        | In your extension checkout: `composer validate`                                                                          |
+| `pecl pickle`                  |                                                                                                                          |
+| `pecl remote-info xdebug`      | `pie info xdebug/xdebug`                                                                                                 |
+| `pecl remote-list`             | Visit [Packagist Extension list](https://packagist.org/extensions)                                                       |
+| `pecl run-scripts`             |                                                                                                                          |
+| `pecl run-tests`               |                                                                                                                          |
+| `pecl search`                  | `pie search <term>`                                                                                                      |
+| `pecl shell-test`              |                                                                                                                          |
+| `pecl sign`                    |                                                                                                                          |
+| `pecl svntag`                  |                                                                                                                          |
+| `pecl uninstall`               |                                                                                                                          |
+| `pecl update-channels`         |                                                                                                                          |
+| `pecl upgrade xdebug`          | `pie install xdebug/xdebug`                                                                                              |
+| `pecl upgrade-all`             |                                                                                                                          |
