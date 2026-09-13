@@ -336,6 +336,26 @@ install these tools automatically. If you would like to install the build tools
 in a non-interactive terminal, pass the `--auto-install-build-tools` and the
 prompt will be skipped.
 
+From PIE 1.5.0 you can run this check separately with `pie check-build-tools`:
+
+```bash
+$ pie check-build-tools
+🥧 PHP Installer for Extensions (PIE) 1.5.0-rc.3, from The PHP Foundation
+You are running PHP 8.5.10
+Target PHP installation: 8.5.10 nts, on Linux/OSX/etc x86_64 (from /usr/bin/php8.5)
+
+Build tools typically required to build extensions:
+  ✅ cc/gcc
+  ✅ make
+  ✅ autoconf
+  ✅ pkg-config
+  ✅ libtoolize/glibtoolize
+  ✅ unzip
+  ✅ phpize
+
+✅ All build tools are installed.
+```
+
 To skip the build tools check entirely, pass the `--no-build-tools-check` flag.
 
 ### System library dependencies check
