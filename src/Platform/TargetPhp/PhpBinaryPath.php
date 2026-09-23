@@ -166,6 +166,28 @@ class PhpBinaryPath
         return $extensionDir !== '' ? $extensionDir : null;
     }
 
+    /** @return non-empty-string|null */
+    public function phpConfigLibdir(): string|null
+    {
+        if ($this->phpConfigPath === null) {
+            return null;
+        }
+
+        $configureOptions = self::cleanWarningAndDeprecationsFromOutput(Process::run([$this->phpConfigPath, '--configure-options']));
+
+        return self::libdirFromConfigureOptions($configureOptions);
+    }
+
+    /** @return non-empty-string|null */
+    private static function libdirFromConfigureOptions(string $configureOptions): string|null
+    {
+        if (! preg_match('/--with-libdir=([^\s\'"]+)/', $configureOptions, $matches)) {
+            return null;
+        }
+
+        return $matches[1];
+    }
+
     public function assertExtensionIsLoadedInRuntime(ExtensionName $extension, IOInterface|null $io = null): void
     {
         if (! in_array(strtolower($extension->name()), array_map('strtolower', array_keys($this->extensions())))) {

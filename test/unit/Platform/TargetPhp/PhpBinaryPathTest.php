@@ -116,6 +116,37 @@ final class PhpBinaryPathTest extends TestCase
         self::assertSame(self::VALID_PHP_WITH_WARNINGS, $phpBinary->phpBinaryPath);
     }
 
+    /** @return array<string, array{string, string|null}> */
+    public static function configureOptionsProvider(): array
+    {
+        return [
+            'unquoted' => ['--prefix=/usr --libdir=/usr/lib64 --with-libdir=lib64 --enable-cli', 'lib64'],
+            'quoted' => ["'--prefix=/usr' '--with-libdir=lib64' '--enable-cli'", 'lib64'],
+            'multiarch value' => ['--with-libdir=lib/x86_64-linux-gnu --enable-cli', 'lib/x86_64-linux-gnu'],
+            'full path' => ['--with-libdir=/opt/php/lib64 --enable-cli', '/opt/php/lib64'],
+            'only --libdir' => ['--prefix=/usr --libdir=/usr/lib/x86_64-linux-gnu --enable-cli', null],
+            'empty' => ['', null],
+        ];
+    }
+
+    #[DataProvider('configureOptionsProvider')]
+    public function testPhpConfigLibdirFromConfigureOptions(string $configureOptions, string|null $expectedLibdir): void
+    {
+        if (Platform::isWindows()) {
+            self::markTestSkipped('Bash script does not run on Windows.');
+        }
+
+        $tmpSh = tempnam(sys_get_temp_dir(), uniqid('pie_php_config_libdir_test'));
+        file_put_contents($tmpSh, "#!/usr/bin/env bash\necho \"" . $configureOptions . "\";\n");
+        chmod($tmpSh, 0777);
+
+        $phpBinary = $this->createPartialMock(PhpBinaryPath::class, []);
+        (new ReflectionMethod($phpBinary, '__construct'))->invoke($phpBinary, $tmpSh, $tmpSh);
+
+        self::assertSame($expectedLibdir, $phpBinary->phpConfigLibdir());
+        unlink($tmpSh);
+    }
+
     public function testVersionFromCurrentProcess(): void
     {
         $phpBinary = PhpBinaryPath::fromCurrentProcess();
