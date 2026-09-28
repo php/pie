@@ -664,6 +664,27 @@ class CliContext implements Context
         (new Process(['git', 'checkout', '--quiet', '-B', 'main', $reference], $this->developmentBranchRepositoryPath))->mustRun();
     }
 
+    #[Given('I have no PIE extensions installed')]
+    public function iHaveNoPieExtensionsInstalled(): void
+    {
+        $this->copyPieJsonAndLock('pie-upgrade-no-extensions');
+    }
+
+    #[Then('I should see there is nothing to upgrade')]
+    public function iShouldSeeThereIsNothingToUpgrade(): void
+    {
+        $upgradeExitCode    = $this->exitCode;
+        $upgradeErrorOutput = (string) $this->errorOutput;
+
+        $this->restorePieJsonAndLock();
+
+        Assert::contains(
+            $upgradeErrorOutput,
+            'No PIE extensions are currently installed, so there is nothing to upgrade.',
+            sprintf("Upgrade exited with code %d. Error output:\n%%s", (int) $upgradeExitCode),
+        );
+    }
+
     #[Given('I have a lock file')]
     public function iHaveALockfile(): void
     {

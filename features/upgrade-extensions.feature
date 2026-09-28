@@ -23,3 +23,9 @@ Feature: PIE extensions can be upgraded with PIE
     Given I have installed a PIE extension from a development branch that has no new commits
     When I run a command to upgrade my extensions
     Then the extension should not have been re-installed
+
+  # pie upgrade
+  Example: Upgrading when no PIE extensions are installed tells me there is nothing to upgrade
+    Given I have no PIE extensions installed
+    When I run a command to upgrade my extensions
+    Then I should see there is nothing to upgrade
