@@ -63,5 +63,6 @@ COPY --from=build_pie_phar /app/pie.phar /usr/local/bin/pie
 COPY --from=build_pie_phar /app/pie.phar /usr/local/bin/pie.original
 
 ENV USING_PIE_BEHAT_DOCKERFILE=1
+ENV BEHAT_ALLOW_XDEBUG=1
 ENTRYPOINT ["php", "vendor/bin/behat"]
 CMD ["--no-snippets"]

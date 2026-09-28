@@ -17,9 +17,9 @@ use Safe\Exceptions\PcreException;
 use Symfony\Component\Process\Process;
 use Webmozart\Assert\Assert;
 
-use function array_combine;
 use function array_map;
 use function array_merge;
+use function implode;
 use function preg_quote;
 use function Safe\copy;
 use function Safe\file_get_contents;
@@ -34,6 +34,8 @@ use function substr;
 use function sys_get_temp_dir;
 use function trim;
 use function uniqid;
+
+use const PREG_SET_ORDER;
 
 class CliContext implements Context
 {
@@ -681,43 +683,54 @@ class CliContext implements Context
         $this->runPieCommand(['upgrade', '-v']);
     }
 
-    /** @return array<string, string> */
-    private static function installedExtensionPackagesAndVersions(string $pieShowOutput): array
+    /** @return array<string, non-empty-list<string>> */
+    private static function verifiedPiePackageVersions(string $pieShowOutput): array
     {
-        if (! preg_match_all('#([a-zA-Z0-9-_]+/[a-zA-Z0-9-_]+):([^ ]+)#', $pieShowOutput, $matches)) {
-            throw new RuntimeException('no packages found in pie show');
+        preg_match_all('#\(from 🥧 ([a-zA-Z0-9-_]+/[a-zA-Z0-9-_]+):(\S+) ✅\)#u', $pieShowOutput, $matches, PREG_SET_ORDER);
+
+        $verifiedPiePackageVersions = [];
+        foreach ($matches as $match) {
+            $verifiedPiePackageVersions[$match[1]][] = $match[2];
         }
 
-        return array_combine($matches[1], $matches[2]);
+        return $verifiedPiePackageVersions;
     }
 
     private static function assertPackageVersionInstalledInPieShowOutput(string $pieShowOutput, string $expectedPackage, string|null $expectedVersion = null): void
     {
-        $installedExtensionPackagesAndVersions = self::installedExtensionPackagesAndVersions($pieShowOutput);
-        Assert::keyExists($installedExtensionPackagesAndVersions, $expectedPackage);
+        $verifiedPiePackageVersions = self::verifiedPiePackageVersions($pieShowOutput);
+        Assert::keyExists(
+            $verifiedPiePackageVersions,
+            $expectedPackage,
+            sprintf("%s is not a loaded and verified PIE extension in pie show output:\n%s", $expectedPackage, $pieShowOutput),
+        );
 
         if ($expectedVersion === null) {
             return;
         }
 
-        $versionParser       = new VersionParser();
-        $installedConstraint = $versionParser->parseConstraints($installedExtensionPackagesAndVersions[$expectedPackage]);
-        $expectedConstraint  = $versionParser->parseConstraints($expectedVersion);
-        Assert::true(
-            $expectedConstraint->matches($installedConstraint),
-            sprintf(
-                'Installed version %s does not match expected constraint %s',
-                $installedConstraint->getPrettyString(),
-                $expectedConstraint->getPrettyString(),
-            ),
-        );
+        $versionParser      = new VersionParser();
+        $expectedConstraint = $versionParser->parseConstraints($expectedVersion);
+        foreach ($verifiedPiePackageVersions[$expectedPackage] as $installedVersion) {
+            if ($expectedConstraint->matches($versionParser->parseConstraints($installedVersion))) {
+                return;
+            }
+        }
+
+        throw new RuntimeException(sprintf(
+            'Installed version(s) %s of %s do not match expected constraint %s',
+            implode(', ', $verifiedPiePackageVersions[$expectedPackage]),
+            $expectedPackage,
+            $expectedConstraint->getPrettyString(),
+        ));
     }
 
     private static function assertPackageNotInstalledInPieShowOutput(string $pieShowOutput, string $notExpectedPackage): void
     {
-        Assert::keyNotExists(
-            self::installedExtensionPackagesAndVersions($pieShowOutput),
-            $notExpectedPackage,
+        Assert::notContains(
+            $pieShowOutput,
+            $notExpectedPackage . ':',
+            sprintf("%s should not be listed in pie show output:\n%s", $notExpectedPackage, $pieShowOutput),
         );
     }
 
@@ -804,5 +817,9 @@ class CliContext implements Context
             ->getOutput();
 
         Assert::same(trim($exampleTest), 'Hello, UpgradeDevBranchTest!');
+
+        $this->runPieCommand(['show']);
+        $this->assertCommandSuccessful();
+        self::assertPackageVersionInstalledInPieShowOutput($this->output, 'asgrim/example-pie-extension', 'dev-main');
     }
 }
