@@ -20,7 +20,7 @@ RUN export DEBIAN_FRONTEND="noninteractive"; \
     set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
-      unzip curl jq wget g++ gcc make autoconf libtool bison re2c pkg-config \
+      unzip git curl jq wget g++ gcc make autoconf libtool bison re2c pkg-config \
       ca-certificates libxml2-dev libssl-dev; \
     update-ca-certificates ; \
     rm -rf /var/lib/apt/lists/*

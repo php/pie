@@ -30,7 +30,10 @@ use function Safe\realpath;
 use function sprintf;
 use function str_contains;
 use function str_replace;
+use function substr;
+use function sys_get_temp_dir;
 use function trim;
+use function uniqid;
 
 class CliContext implements Context
 {
@@ -49,6 +52,8 @@ class CliContext implements Context
     private string $pieLockFilename;
     private string $pieJsonContentBackup;
     private string $pieLockContentBackup;
+    /** @var non-empty-string|null */
+    private string|null $developmentBranchRepositoryPath = null;
 
     /** @throws PcreException */
     #[AfterScenario]
@@ -66,6 +71,18 @@ class CliContext implements Context
 
             $this->runPieCommand(['uninstall', $extensionPackageName]);
         }
+    }
+
+    #[AfterScenario]
+    public function removeDevelopmentBranchRepository(): void
+    {
+        if ($this->developmentBranchRepositoryPath === null) {
+            return;
+        }
+
+        $this->runPieCommand(['repository:remove', $this->developmentBranchRepositoryPath]);
+        (new Process(['rm', '-rf', $this->developmentBranchRepositoryPath]))->mustRun();
+        $this->developmentBranchRepositoryPath = null;
     }
 
     #[When('I run a command to download the latest version of an extension')]
@@ -597,6 +614,45 @@ class CliContext implements Context
         $this->copyPieJsonAndLock('pie-upgrade-lock');
     }
 
+    #[Given('I have installed a PIE extension from a development branch with configure options that has new commits')]
+    public function iHaveInstalledAPieExtensionFromADevelopmentBranchThatHasNewCommits(): void
+    {
+        $this->installExampleExtensionFromMainBranchAt(
+            ExamplePieExtensionFixture::MAIN_BRANCH_PREVIOUS_REFERENCE,
+            ['--with-hello-name=UpgradeDevBranchTest'],
+        );
+        $this->moveMainBranchTo(ExamplePieExtensionFixture::MAIN_BRANCH_LATEST_REFERENCE);
+    }
+
+    #[Given('I have installed a PIE extension from a development branch that has no new commits')]
+    public function iHaveInstalledAPieExtensionFromADevelopmentBranchThatHasNoNewCommits(): void
+    {
+        $this->installExampleExtensionFromMainBranchAt(ExamplePieExtensionFixture::MAIN_BRANCH_LATEST_REFERENCE, []);
+    }
+
+    /** @param list<non-empty-string> $installOptions */
+    private function installExampleExtensionFromMainBranchAt(string $reference, array $installOptions): void
+    {
+        $repositoryPath                        = sys_get_temp_dir() . '/pie-git-checkout-' . uniqid($reference, true);
+        $this->developmentBranchRepositoryPath = $repositoryPath;
+        (new Process(['git', 'clone', '--quiet', '/example-pie-extension', $repositoryPath]))->mustRun();
+        $this->moveMainBranchTo($reference);
+
+        $this->runPieCommand(['repository:add', 'vcs', $repositoryPath]);
+        $this->assertCommandSuccessful();
+
+        $this->interactions[] = ['extension' => 'example_pie_extension', 'package' => 'asgrim/example-pie-extension'];
+        $this->runPieCommand(['install', 'asgrim/example-pie-extension:dev-main', ...$installOptions]);
+        $this->assertCommandSuccessful();
+    }
+
+    private function moveMainBranchTo(string $reference): void
+    {
+        Assert::notNull($this->developmentBranchRepositoryPath);
+
+        (new Process(['git', 'checkout', '--quiet', '-B', 'main', $reference], $this->developmentBranchRepositoryPath))->mustRun();
+    }
+
     #[Given('I have a lock file')]
     public function iHaveALockfile(): void
     {
@@ -720,5 +776,24 @@ class CliContext implements Context
         Assert::same(trim($exampleTest), 'Hello, UpgradeTest!');
 
         $this->restorePieJsonAndLock();
+    }
+
+    #[Then('the extension has been upgraded to the latest commit with the previous configure options')]
+    public function theExtensionHasBeenUpgradedToTheLatestCommitWithThePreviousConfigureOptions(): void
+    {
+        $this->assertCommandSuccessful();
+
+        Assert::notNull($this->errorOutput);
+        Assert::contains(
+            $this->errorOutput,
+            'Installing asgrim/example-pie-extension (dev-main ' . substr(ExamplePieExtensionFixture::MAIN_BRANCH_LATEST_REFERENCE, 0, 7) . ')',
+        );
+        Assert::contains($this->output, 'Extension asgrim/example-pie-extension:dev-main is enabled and loaded');
+
+        $exampleTest = (new Process([self::PHP_BINARY, '-r', 'example_pie_extension_test();']))
+            ->mustRun()
+            ->getOutput();
+
+        Assert::same(trim($exampleTest), 'Hello, UpgradeDevBranchTest!');
     }
 }
