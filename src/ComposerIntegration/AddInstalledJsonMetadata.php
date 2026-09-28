@@ -12,6 +12,7 @@ use Webmozart\Assert\Assert;
 
 use function array_merge;
 use function implode;
+use function in_array;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 class AddInstalledJsonMetadata
@@ -114,15 +115,24 @@ class AddInstalledJsonMetadata
         string $key,
         string|null $value,
     ): void {
-        $localRepositoryPackage = $composer
-            ->getRepositoryManager()
-            ->getLocalRepository()
-            ->findPackages($composerPackage->getName())[0];
+        $localRepository         = $composer->getRepositoryManager()->getLocalRepository();
+        $localRepositoryPackages = $localRepository->getPackages();
+        $localRepositoryPackage  = null;
 
-        if ($localRepositoryPackage instanceof CompleteAliasPackage) {
-            $localRepositoryPackage = $localRepositoryPackage->getAliasOf();
+        foreach ($localRepository->findPackages($composerPackage->getName()) as $candidatePackage) {
+            if ($candidatePackage instanceof CompleteAliasPackage) {
+                $candidatePackage = $candidatePackage->getAliasOf();
+            }
+
+            if (! in_array($candidatePackage, $localRepositoryPackages, true)) {
+                continue;
+            }
+
+            $localRepositoryPackage = $candidatePackage;
+            break;
         }
 
+        Assert::notNull($localRepositoryPackage);
         Assert::methodExists($localRepositoryPackage, 'setExtra');
 
         $localRepositoryPackage->setExtra(array_merge($localRepositoryPackage->getExtra(), [$key => $value]));
