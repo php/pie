@@ -307,6 +307,14 @@ class CliContext implements Context
                 sprintf("Failed to remove extension.\n\nOutput:\n%s\n\nError output:\n%s\n", $this->output, $this->errorOutput),
             );
         }
+
+        $this->runPieCommand(['show']);
+        $this->assertCommandSuccessful();
+        $pieShowOutput = $this->output;
+
+        foreach ($this->interactions as $uninstall) {
+            self::assertPackageNotInstalledInPieShowOutput($pieShowOutput, $uninstall['package']);
+        }
     }
 
     #[Then('the extension should have been installed')]
@@ -625,6 +633,7 @@ class CliContext implements Context
     }
 
     #[Given('I have installed a PIE extension from a development branch that has no new commits')]
+    #[Given('an extension from a development branch was previously installed and enabled')]
     public function iHaveInstalledAPieExtensionFromADevelopmentBranchThatHasNoNewCommits(): void
     {
         $this->installExampleExtensionFromMainBranchAt(ExamplePieExtensionFixture::MAIN_BRANCH_LATEST_REFERENCE, []);
