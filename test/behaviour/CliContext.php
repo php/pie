@@ -18,9 +18,9 @@ use Safe\Exceptions\PcreException;
 use Symfony\Component\Process\Process;
 use Webmozart\Assert\Assert;
 
-use function array_combine;
 use function array_map;
 use function array_merge;
+use function implode;
 use function preg_quote;
 use function Safe\copy;
 use function Safe\file_get_contents;
@@ -31,7 +31,12 @@ use function Safe\realpath;
 use function sprintf;
 use function str_contains;
 use function str_replace;
+use function substr;
+use function sys_get_temp_dir;
 use function trim;
+use function uniqid;
+
+use const PREG_SET_ORDER;
 
 class CliContext implements Context
 {
@@ -50,6 +55,8 @@ class CliContext implements Context
     private string $pieLockFilename;
     private string $pieJsonContentBackup;
     private string $pieLockContentBackup;
+    /** @var non-empty-string|null */
+    private string|null $developmentBranchRepositoryPath = null;
 
     /** @throws PcreException */
     #[AfterScenario]
@@ -67,6 +74,18 @@ class CliContext implements Context
 
             $this->runPieCommand(['uninstall', $extensionPackageName]);
         }
+    }
+
+    #[AfterScenario]
+    public function removeDevelopmentBranchRepository(): void
+    {
+        if ($this->developmentBranchRepositoryPath === null) {
+            return;
+        }
+
+        $this->runPieCommand(['repository:remove', $this->developmentBranchRepositoryPath]);
+        (new Process(['rm', '-rf', $this->developmentBranchRepositoryPath]))->mustRun();
+        $this->developmentBranchRepositoryPath = null;
     }
 
     #[When('I run a command to download the latest version of an extension')]
@@ -290,6 +309,14 @@ class CliContext implements Context
                 'no',
                 sprintf("Failed to remove extension.\n\nOutput:\n%s\n\nError output:\n%s\n", $this->output, $this->errorOutput),
             );
+        }
+
+        $this->runPieCommand(['show']);
+        $this->assertCommandSuccessful();
+        $pieShowOutput = $this->output;
+
+        foreach ($this->interactions as $uninstall) {
+            self::assertPackageNotInstalledInPieShowOutput($pieShowOutput, $uninstall['package']);
         }
     }
 
@@ -602,6 +629,67 @@ class CliContext implements Context
         $this->copyPieJsonAndLock('pie-upgrade-lock');
     }
 
+    #[Given('I have installed a PIE extension from a development branch with configure options that has new commits')]
+    public function iHaveInstalledAPieExtensionFromADevelopmentBranchThatHasNewCommits(): void
+    {
+        $this->installExampleExtensionFromMainBranchAt(
+            ExamplePieExtensionFixture::MAIN_BRANCH_PREVIOUS_REFERENCE,
+            ['--with-hello-name=UpgradeDevBranchTest'],
+        );
+        $this->moveMainBranchTo(ExamplePieExtensionFixture::MAIN_BRANCH_LATEST_REFERENCE);
+    }
+
+    #[Given('I have installed a PIE extension from a development branch that has no new commits')]
+    #[Given('an extension from a development branch was previously installed and enabled')]
+    public function iHaveInstalledAPieExtensionFromADevelopmentBranchThatHasNoNewCommits(): void
+    {
+        $this->installExampleExtensionFromMainBranchAt(ExamplePieExtensionFixture::MAIN_BRANCH_LATEST_REFERENCE, []);
+    }
+
+    /** @param list<non-empty-string> $installOptions */
+    private function installExampleExtensionFromMainBranchAt(string $reference, array $installOptions): void
+    {
+        $repositoryPath                        = sys_get_temp_dir() . '/pie-git-checkout-' . uniqid($reference, true);
+        $this->developmentBranchRepositoryPath = $repositoryPath;
+        (new Process(['git', 'clone', '--quiet', '/example-pie-extension', $repositoryPath]))->mustRun();
+        $this->moveMainBranchTo($reference);
+
+        $this->runPieCommand(['repository:add', 'vcs', $repositoryPath]);
+        $this->assertCommandSuccessful();
+
+        $this->interactions[] = ['extension' => 'example_pie_extension', 'package' => 'asgrim/example-pie-extension'];
+        $this->runPieCommand(['install', 'asgrim/example-pie-extension:dev-main', ...$installOptions]);
+        $this->assertCommandSuccessful();
+    }
+
+    private function moveMainBranchTo(string $reference): void
+    {
+        Assert::notNull($this->developmentBranchRepositoryPath);
+
+        (new Process(['git', 'checkout', '--quiet', '-B', 'main', $reference], $this->developmentBranchRepositoryPath))->mustRun();
+    }
+
+    #[Given('I have no PIE extensions installed')]
+    public function iHaveNoPieExtensionsInstalled(): void
+    {
+        $this->copyPieJsonAndLock('pie-upgrade-no-extensions');
+    }
+
+    #[Then('I should see there is nothing to upgrade')]
+    public function iShouldSeeThereIsNothingToUpgrade(): void
+    {
+        $upgradeExitCode    = $this->exitCode;
+        $upgradeErrorOutput = (string) $this->errorOutput;
+
+        $this->restorePieJsonAndLock();
+
+        Assert::contains(
+            $upgradeErrorOutput,
+            'No PIE extensions are currently installed, so there is nothing to upgrade.',
+            sprintf("Upgrade exited with code %d. Error output:\n%%s", (int) $upgradeExitCode),
+        );
+    }
+
     #[Given('I have a lock file')]
     public function iHaveALockfile(): void
     {
@@ -621,43 +709,54 @@ class CliContext implements Context
         $this->runPieCommand(['upgrade', '-v']);
     }
 
-    /** @return array<string, string> */
-    private static function installedExtensionPackagesAndVersions(string $pieShowOutput): array
+    /** @return array<string, non-empty-list<string>> */
+    private static function verifiedPiePackageVersions(string $pieShowOutput): array
     {
-        if (! preg_match_all('#([a-zA-Z0-9-_]+/[a-zA-Z0-9-_]+):([^ ]+)#', $pieShowOutput, $matches)) {
-            throw new RuntimeException('no packages found in pie show');
+        preg_match_all('#\(from 🥧 ([a-zA-Z0-9-_]+/[a-zA-Z0-9-_]+):(\S+) ✅\)#u', $pieShowOutput, $matches, PREG_SET_ORDER);
+
+        $verifiedPiePackageVersions = [];
+        foreach ($matches as $match) {
+            $verifiedPiePackageVersions[$match[1]][] = $match[2];
         }
 
-        return array_combine($matches[1], $matches[2]);
+        return $verifiedPiePackageVersions;
     }
 
     private static function assertPackageVersionInstalledInPieShowOutput(string $pieShowOutput, string $expectedPackage, string|null $expectedVersion = null): void
     {
-        $installedExtensionPackagesAndVersions = self::installedExtensionPackagesAndVersions($pieShowOutput);
-        Assert::keyExists($installedExtensionPackagesAndVersions, $expectedPackage);
+        $verifiedPiePackageVersions = self::verifiedPiePackageVersions($pieShowOutput);
+        Assert::keyExists(
+            $verifiedPiePackageVersions,
+            $expectedPackage,
+            sprintf("%s is not a loaded and verified PIE extension in pie show output:\n%s", $expectedPackage, $pieShowOutput),
+        );
 
         if ($expectedVersion === null) {
             return;
         }
 
-        $versionParser       = new VersionParser();
-        $installedConstraint = $versionParser->parseConstraints($installedExtensionPackagesAndVersions[$expectedPackage]);
-        $expectedConstraint  = $versionParser->parseConstraints($expectedVersion);
-        Assert::true(
-            $expectedConstraint->matches($installedConstraint),
-            sprintf(
-                'Installed version %s does not match expected constraint %s',
-                $installedConstraint->getPrettyString(),
-                $expectedConstraint->getPrettyString(),
-            ),
-        );
+        $versionParser      = new VersionParser();
+        $expectedConstraint = $versionParser->parseConstraints($expectedVersion);
+        foreach ($verifiedPiePackageVersions[$expectedPackage] as $installedVersion) {
+            if ($expectedConstraint->matches($versionParser->parseConstraints($installedVersion))) {
+                return;
+            }
+        }
+
+        throw new RuntimeException(sprintf(
+            'Installed version(s) %s of %s do not match expected constraint %s',
+            implode(', ', $verifiedPiePackageVersions[$expectedPackage]),
+            $expectedPackage,
+            $expectedConstraint->getPrettyString(),
+        ));
     }
 
     private static function assertPackageNotInstalledInPieShowOutput(string $pieShowOutput, string $notExpectedPackage): void
     {
-        Assert::keyNotExists(
-            self::installedExtensionPackagesAndVersions($pieShowOutput),
-            $notExpectedPackage,
+        Assert::notContains(
+            $pieShowOutput,
+            $notExpectedPackage . ':',
+            sprintf("%s should not be listed in pie show output:\n%s", $notExpectedPackage, $pieShowOutput),
         );
     }
 
@@ -725,5 +824,28 @@ class CliContext implements Context
         Assert::same(trim($exampleTest), 'Hello, UpgradeTest!');
 
         $this->restorePieJsonAndLock();
+    }
+
+    #[Then('the extension has been upgraded to the latest commit with the previous configure options')]
+    public function theExtensionHasBeenUpgradedToTheLatestCommitWithThePreviousConfigureOptions(): void
+    {
+        $this->assertCommandSuccessful();
+
+        Assert::notNull($this->errorOutput);
+        Assert::contains(
+            $this->errorOutput,
+            'Installing asgrim/example-pie-extension (dev-main ' . substr(ExamplePieExtensionFixture::MAIN_BRANCH_LATEST_REFERENCE, 0, 7) . ')',
+        );
+        Assert::contains($this->output, 'Extension asgrim/example-pie-extension:dev-main is enabled and loaded');
+
+        $exampleTest = (new Process([self::PHP_BINARY, '-r', 'example_pie_extension_test();']))
+            ->mustRun()
+            ->getOutput();
+
+        Assert::same(trim($exampleTest), 'Hello, UpgradeDevBranchTest!');
+
+        $this->runPieCommand(['show']);
+        $this->assertCommandSuccessful();
+        self::assertPackageVersionInstalledInPieShowOutput($this->output, 'asgrim/example-pie-extension', 'dev-main');
     }
 }
