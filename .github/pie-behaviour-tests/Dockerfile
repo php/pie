@@ -20,7 +20,7 @@ RUN export DEBIAN_FRONTEND="noninteractive"; \
     set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
-      unzip curl jq wget g++ gcc make autoconf libtool bison re2c pkg-config \
+      unzip git curl jq wget g++ gcc make autoconf libtool bison re2c pkg-config \
       ca-certificates libxml2-dev libssl-dev; \
     update-ca-certificates ; \
     rm -rf /var/lib/apt/lists/*
@@ -63,5 +63,6 @@ COPY --from=build_pie_phar /app/pie.phar /usr/local/bin/pie
 COPY --from=build_pie_phar /app/pie.phar /usr/local/bin/pie.original
 
 ENV USING_PIE_BEHAT_DOCKERFILE=1
+ENV BEHAT_ALLOW_XDEBUG=1
 ENTRYPOINT ["php", "vendor/bin/behat"]
 CMD ["--no-snippets"]
