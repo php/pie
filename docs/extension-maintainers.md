@@ -184,7 +184,10 @@ Note that it is not possible for end users of PIE to specify configuration
 options that have not been defined in your extension's `configure-options`
 definition. Using the same example above `composer.json`, invoking PIE with
 an invalid option, such as `pie install myvendor/myext --something-else` will
-result in an error `The "--something-else" option does not exist.`.
+result in an error `The "--something-else" option does not exist.`. The
+exception is `--with-libdir`, which PIE supports for every extension, and
+passes automatically when the target PHP was built with it; you do not need to
+declare it in `configure-options`.
 
 If an end user does not specify a flag defined in the `configure-options`
 definition, it will not be passed to `./configure`. There is no way to specify

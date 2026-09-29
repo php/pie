@@ -337,6 +337,18 @@ pie install example/some-extension --with-some-library-name=/path/to/the/lib --e
 > `pre-packaged-binary` download method, PIE will fall back to compiling the
 > extension using the configure options you have specified.
 
+#### Library directory (`--with-libdir`)
+
+You may override the libraries directory using `--with-libdir`. When building
+from source, PIE passes the same `--with-libdir` value that the target PHP was
+built with (as reported by `php-config --configure-options`), if available.
+
+You may override this behaviour with:
+
+```shell
+pie install example/some-extension --with-libdir=lib64
+```
+
 ### Build tools check
 
 PIE will attempt to check the presence of build tools (such as gcc, make, etc.)
