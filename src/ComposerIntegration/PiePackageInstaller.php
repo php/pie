@@ -16,6 +16,7 @@ use Php\Pie\ExtensionType;
 
 use function array_map;
 use function implode;
+use function React\Promise\resolve;
 use function sprintf;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
@@ -71,6 +72,13 @@ class PiePackageInstaller extends LibraryInstaller
                     );
                 },
             ));
+    }
+
+    /** @inheritDoc */
+    protected function updateCode(PackageInterface $initial, PackageInterface $target)
+    {
+        return ($this->removeCode($initial) ?? resolve(null))
+            ->then(fn () => $this->installCode($target));
     }
 
     /** @inheritDoc */

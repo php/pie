@@ -31,6 +31,8 @@ use function file_exists;
 )]
 final class UpgradeCommand extends Command
 {
+    private const NOTHING_TO_UPGRADE = '<error>No PIE extensions are currently installed, so there is nothing to upgrade.</error>';
+
     public function __construct(
         private readonly ContainerInterface $container,
         private readonly ComposerIntegrationHandler $composerIntegrationHandler,
@@ -70,7 +72,7 @@ final class UpgradeCommand extends Command
         }
 
         if (! file_exists(PieComposerFactory::getLockFile(Platform::getPieJsonFilename($targetPlatform)))) {
-            $this->io->writeError('<error>No PIE extensions are currently installed, so there is nothing to upgrade.</error>');
+            $this->io->writeError(self::NOTHING_TO_UPGRADE);
 
             return Command::INVALID;
         }
@@ -79,6 +81,12 @@ final class UpgradeCommand extends Command
             $this->container,
             PieComposerRequest::noOperation($this->io, $targetPlatform),
         );
+
+        if ($existingComposer->getLocker()->getLockedRepository()->getPackages() === []) {
+            $this->io->writeError(self::NOTHING_TO_UPGRADE);
+
+            return Command::INVALID;
+        }
 
         $configureOptions = [];
         foreach ($this->installedPiePackages->allPiePackages($existingComposer)->packages() as $installedPackage) {

@@ -6,14 +6,18 @@ namespace Php\PieUnitTest\ComposerIntegration\Listeners;
 
 use Composer\Composer;
 use Composer\DependencyResolver\Operation\InstallOperation;
+use Composer\DependencyResolver\Operation\MarkAliasUninstalledOperation;
 use Composer\DependencyResolver\Operation\OperationInterface;
+use Composer\DependencyResolver\Operation\UninstallOperation;
 use Composer\DependencyResolver\Operation\UpdateOperation;
 use Composer\DependencyResolver\Transaction;
 use Composer\EventDispatcher\EventDispatcher;
 use Composer\Installer\InstallerEvent;
 use Composer\Installer\InstallerEvents;
 use Composer\IO\IOInterface;
+use Composer\Package\CompleteAliasPackage;
 use Composer\Package\CompletePackage;
+use Composer\Package\Version\VersionParser;
 use Php\Pie\ComposerIntegration\Listeners\RemoveUnrelatedInstallOperations;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieOperation;
@@ -31,6 +35,8 @@ use PHPUnit\Framework\TestCase;
 
 use function array_filter;
 use function array_map;
+use function array_values;
+use function assert;
 
 #[CoversClass(RemoveUnrelatedInstallOperations::class)]
 final class RemoveUnrelatedInstallOperationsTest extends TestCase
@@ -182,6 +188,64 @@ final class RemoveUnrelatedInstallOperationsTest extends TestCase
                     static fn (OperationInterface $operation): bool => $operation instanceof UpdateOperation,
                 ),
             ),
+        );
+    }
+
+    public function testDefaultBranchAliasOfRequestedPackageIsUninstalled(): void
+    {
+        $keepPackage    = new CompletePackage('bat/baz', 'dev-main', 'dev-main');
+        $discardPackage = new CompletePackage('foo/bar', 'dev-main', 'dev-main');
+
+        $installerEvent = new InstallerEvent(
+            InstallerEvents::PRE_OPERATIONS_EXEC,
+            $this->composer,
+            $this->createMock(IOInterface::class),
+            false,
+            true,
+            new Transaction(
+                [
+                    $keepPackage,
+                    new CompleteAliasPackage($keepPackage, VersionParser::DEFAULT_BRANCH_ALIAS, VersionParser::DEFAULT_BRANCH_ALIAS),
+                    $discardPackage,
+                    new CompleteAliasPackage($discardPackage, VersionParser::DEFAULT_BRANCH_ALIAS, VersionParser::DEFAULT_BRANCH_ALIAS),
+                ],
+                [],
+            ),
+        );
+
+        (new RemoveUnrelatedInstallOperations(
+            new PieComposerRequest(
+                $this->createMock(IOInterface::class),
+                new TargetPlatform(
+                    OperatingSystem::NonWindows,
+                    OperatingSystemFamily::Linux,
+                    PhpBinaryPath::fromCurrentProcess(),
+                    Architecture::x86_64,
+                    ThreadSafetyMode::NonThreadSafe,
+                    1,
+                    null,
+                    null,
+                ),
+                [new RequestedPackageAndVersion('bat/baz', 'dev-main')],
+                PieOperation::Uninstall,
+                [],
+                false,
+            ),
+        ))($installerEvent);
+
+        self::assertSame(
+            [
+                UninstallOperation::class . ' bat/baz dev-main',
+                MarkAliasUninstalledOperation::class . ' bat/baz ' . VersionParser::DEFAULT_BRANCH_ALIAS,
+            ],
+            array_values(array_map(
+                static function (OperationInterface $operation): string {
+                    assert($operation instanceof UninstallOperation || $operation instanceof MarkAliasUninstalledOperation);
+
+                    return $operation::class . ' ' . $operation->getPackage()->getName() . ' ' . $operation->getPackage()->getPrettyVersion();
+                },
+                $installerEvent->getTransaction()?->getOperations() ?? [],
+            )),
         );
     }
 }

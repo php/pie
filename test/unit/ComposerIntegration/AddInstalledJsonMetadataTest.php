@@ -6,8 +6,10 @@ namespace Php\PieUnitTest\ComposerIntegration;
 
 use Composer\Composer;
 use Composer\IO\IOInterface;
+use Composer\Package\CompleteAliasPackage;
 use Composer\Package\CompletePackage;
 use Composer\Package\CompletePackageInterface;
+use Composer\Package\Version\VersionParser;
 use Composer\Repository\InstalledArrayRepository;
 use Composer\Repository\RepositoryManager;
 use Php\Pie\ComposerIntegration\AddInstalledJsonMetadata;
@@ -31,8 +33,11 @@ final class AddInstalledJsonMetadataTest extends TestCase
 {
     private function mockComposerInstalledRepositoryWith(CompletePackageInterface $package): Composer&MockObject
     {
-        $installedRepository = new InstalledArrayRepository([$package]);
+        return $this->mockComposerWithLocalRepository(new InstalledArrayRepository([$package]));
+    }
 
+    private function mockComposerWithLocalRepository(InstalledArrayRepository $installedRepository): Composer&MockObject
+    {
         $repositoryManager = $this->createMock(RepositoryManager::class);
         $repositoryManager->method('getLocalRepository')->willReturn($installedRepository);
 
@@ -134,6 +139,49 @@ final class AddInstalledJsonMetadataTest extends TestCase
         self::assertSame(
             ['pie-installed-binary' => '/path/to/installed'],
             $package->getExtra(),
+        );
+    }
+
+    public function testMetadataIsAddedToAliasedPackageForDefaultBranchAlias(): void
+    {
+        $package = new CompletePackage('foo/bar', 'dev-main', 'dev-main');
+
+        $installedRepository = new InstalledArrayRepository([
+            new CompleteAliasPackage($package, VersionParser::DEFAULT_BRANCH_ALIAS, VersionParser::DEFAULT_BRANCH_ALIAS),
+        ]);
+
+        (new AddInstalledJsonMetadata())->addInstallMetadata(
+            $this->mockComposerWithLocalRepository($installedRepository),
+            clone $package,
+            new BinaryFile('/path/to/installed', 'ignore'),
+        );
+
+        self::assertSame(
+            ['pie-installed-binary' => '/path/to/installed'],
+            $package->getExtra(),
+        );
+    }
+
+    public function testMetadataIsAddedToCurrentPackageAfterUpdateOfDefaultBranchAlias(): void
+    {
+        $replacedPackage = new CompletePackage('foo/bar', 'dev-main', 'dev-main');
+        $currentPackage  = new CompletePackage('foo/bar', 'dev-main', 'dev-main');
+
+        $installedRepository = new InstalledArrayRepository([
+            new CompleteAliasPackage($replacedPackage, VersionParser::DEFAULT_BRANCH_ALIAS, VersionParser::DEFAULT_BRANCH_ALIAS),
+        ]);
+        $installedRepository->removePackage($replacedPackage);
+        $installedRepository->addPackage($currentPackage);
+
+        (new AddInstalledJsonMetadata())->addInstallMetadata(
+            $this->mockComposerWithLocalRepository($installedRepository),
+            clone $currentPackage,
+            new BinaryFile('/path/to/installed', 'ignore'),
+        );
+
+        self::assertSame(
+            ['pie-installed-binary' => '/path/to/installed'],
+            $currentPackage->getExtra(),
         );
     }
 }

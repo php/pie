@@ -7,6 +7,7 @@ namespace Php\Pie\ComposerIntegration\Listeners;
 use Closure;
 use Composer\Composer;
 use Composer\DependencyResolver\Operation\InstallOperation;
+use Composer\DependencyResolver\Operation\MarkAliasUninstalledOperation;
 use Composer\DependencyResolver\Operation\OperationInterface;
 use Composer\DependencyResolver\Operation\UninstallOperation;
 use Composer\DependencyResolver\Operation\UpdateOperation;
@@ -47,7 +48,12 @@ class RemoveUnrelatedInstallOperations
         $newOperations = array_filter(
             $installerEvent->getTransaction()?->getOperations() ?? [],
             function (OperationInterface $operation) use ($pieOutput): bool {
-                if (! $operation instanceof InstallOperation && ! $operation instanceof UninstallOperation && ! $operation instanceof UpdateOperation) {
+                if (
+                    ! $operation instanceof InstallOperation
+                    && ! $operation instanceof UninstallOperation
+                    && ! $operation instanceof UpdateOperation
+                    && ! $operation instanceof MarkAliasUninstalledOperation
+                ) {
                     $pieOutput->writeError(
                         sprintf(
                             'Unexpected operation during installer: %s',
