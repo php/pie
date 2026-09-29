@@ -26,10 +26,11 @@ use function dirname;
 #[CoversClass(UnixBuild::class)]
 final class UnixBuildTest extends TestCase
 {
-    private const COMPOSER_PACKAGE_EXTRA_KEY = 'download-url-method';
-    private const TEST_EXTENSION_PATH        = __DIR__ . '/../../assets/pie_test_ext';
-    private const TEST_PREBUILT_PATH_VALID   = __DIR__ . '/../../assets/pre-packaged-binary-examples/valid';
-    private const TEST_PREBUILT_PATH_INVALID = __DIR__ . '/../../assets/pre-packaged-binary-examples/invalid';
+    private const COMPOSER_PACKAGE_EXTRA_KEY              = 'download-url-method';
+    private const TEST_EXTENSION_PATH                     = __DIR__ . '/../../assets/pie_test_ext';
+    private const FAKE_PHP_CONFIG_CONFIGURE_OPTIONS_PROXY = __DIR__ . '/../../assets/fake-php-config-configure-options-proxy.sh';
+    private const TEST_PREBUILT_PATH_VALID                = __DIR__ . '/../../assets/pre-packaged-binary-examples/valid';
+    private const TEST_PREBUILT_PATH_INVALID              = __DIR__ . '/../../assets/pre-packaged-binary-examples/invalid';
 
     public function testUnixSourceBuildCanBuildExtension(): void
     {
@@ -324,5 +325,76 @@ final class UnixBuildTest extends TestCase
         $outputString = $output->getOutput();
         self::assertStringContainsString('Running phpize --clean step', $outputString);
         self::assertStringContainsString('Build files cleaned up', $outputString);
+    }
+
+    private function useFakeConfigureOptions(string $configureOptions): void
+    {
+        $realPhpConfig = PhpBinaryPath::fromCurrentProcess()->phpConfigPath();
+        if ($realPhpConfig === null) {
+            self::markTestSkipped('No system php-config found to build a wrapper from.');
+        }
+
+        $_ENV['PIE_TEST_FAKE_CONFIGURE_OPTIONS'] = $configureOptions;
+        $_ENV['PIE_TEST_REAL_PHP_CONFIG']        = $realPhpConfig;
+    }
+
+    /** @param list<non-empty-string> $configureOptions */
+    private function buildPieTestExtAndCaptureOutput(array $configureOptions): string
+    {
+        $output = new BufferIO();
+
+        $composerPackage = $this->createMock(CompletePackageInterface::class);
+        $composerPackage
+            ->method('getExtra')
+            ->willReturn([self::COMPOSER_PACKAGE_EXTRA_KEY => DownloadUrlMethod::ComposerDefaultDownload->value]);
+
+        $downloadedPackage = DownloadedPackage::fromPackageAndExtractedPath(
+            new Package(
+                $composerPackage,
+                ExtensionType::PhpModule,
+                ExtensionName::normaliseFromString('pie_test_ext'),
+                'pie_test_ext',
+                '0.1.0',
+                null,
+            ),
+            self::TEST_EXTENSION_PATH,
+        );
+
+        (new UnixBuild())->__invoke(
+            $downloadedPackage,
+            TargetPlatform::fromPhpBinaryPath(PhpBinaryPath::fromPhpConfigExecutable(self::FAKE_PHP_CONFIG_CONFIGURE_OPTIONS_PROXY), null, null),
+            $configureOptions,
+            $output,
+        );
+
+        (new Process(['make', 'clean'], $downloadedPackage->extractedSourcePath))->mustRun();
+        (new Process(['phpize', '--clean'], $downloadedPackage->extractedSourcePath))->mustRun();
+
+        return $output->getOutput();
+    }
+
+    public function testWithLibdirIsAutoDetectedFromPhpConfig(): void
+    {
+        if (Platform::isWindows()) {
+            self::markTestSkipped('Unix build test cannot be run on Windows');
+        }
+
+        $this->useFakeConfigureOptions('--prefix=/usr --with-libdir=lib64');
+        $outputString = $this->buildPieTestExtAndCaptureOutput(['--enable-pie_test_ext']);
+
+        self::assertStringContainsString('Configure complete with options: --enable-pie_test_ext --with-libdir=lib64', $outputString);
+    }
+
+    public function testWithLibdirIsNotOverriddenWhenAlreadyProvided(): void
+    {
+        if (Platform::isWindows()) {
+            self::markTestSkipped('Unix build test cannot be run on Windows');
+        }
+
+        $this->useFakeConfigureOptions('--prefix=/usr --with-libdir=lib64');
+        $outputString = $this->buildPieTestExtAndCaptureOutput(['--enable-pie_test_ext', '--with-libdir=custom']);
+
+        self::assertStringContainsString('Configure complete with options: --enable-pie_test_ext --with-libdir=custom', $outputString);
+        self::assertStringNotContainsString('lib64', $outputString);
     }
 }
