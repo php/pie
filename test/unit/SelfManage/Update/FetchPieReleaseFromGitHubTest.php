@@ -6,6 +6,7 @@ namespace Php\PieUnitTest\SelfManage\Update;
 
 use Composer\Util\Http\Response;
 use Composer\Util\HttpDownloader;
+use Php\Pie\SelfManage\Update\Channel;
 use Php\Pie\SelfManage\Update\FetchPieReleaseFromGitHub;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -87,5 +88,33 @@ final class FetchPieReleaseFromGitHubTest extends TestCase
             'arbitrary'       => ['some-malicious-branch'],
             'almost-main'     => ['main-fix'],
         ];
+    }
+
+    public function testLatestReleaseMetadataSelectsTheExecutableAsset(): void
+    {
+        $response = $this->createMock(Response::class);
+        $response->method('decodeJson')->willReturn([
+            [
+                'tag_name' => '1.5.1',
+                'assets' => [
+                    ['name' => 'pie.phar', 'browser_download_url' => 'https://github.com/php/pie/releases/download/1.5.1/pie.phar'],
+                    ['name' => 'pie-Linux-ARM64', 'browser_download_url' => 'https://github.com/php/pie/releases/download/1.5.1/pie-Linux-ARM64'],
+                    ['name' => 'pie-Linux-X64', 'browser_download_url' => 'https://github.com/php/pie/releases/download/1.5.1/pie-Linux-X64'],
+                    ['name' => 'pie-macOS-ARM64', 'browser_download_url' => 'https://github.com/php/pie/releases/download/1.5.1/pie-macOS-ARM64'],
+                    ['name' => 'pie-Windows-X64.exe', 'browser_download_url' => 'https://github.com/php/pie/releases/download/1.5.1/pie-Windows-X64.exe'],
+                ],
+            ],
+        ]);
+
+        $this->httpDownloader->expects(self::once())
+            ->method('get')
+            ->with('https://api.github.com/repos/php/pie/releases')
+            ->willReturn($response);
+
+        $release = (new FetchPieReleaseFromGitHub('https://api.github.com', $this->httpDownloader, 'pie-Linux-X64'))
+            ->latestReleaseMetadata(Channel::Stable);
+
+        self::assertSame('1.5.1', $release->tag);
+        self::assertSame('https://github.com/php/pie/releases/download/1.5.1/pie-Linux-X64', $release->downloadUrl);
     }
 }
