@@ -15,6 +15,7 @@ use Php\Pie\Platform;
 use Php\Pie\SelfManage\Update\Channel;
 use Php\Pie\SelfManage\Update\FetchPieReleaseFromGitHub;
 use Php\Pie\SelfManage\Update\IsBrewInstallation;
+use Php\Pie\SelfManage\Update\PieAssetName;
 use Php\Pie\SelfManage\Update\ReleaseIsNewer;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
 use Php\Pie\SelfManage\Verify\RecoverFromFailedVerification;
@@ -133,6 +134,7 @@ final class SelfUpdateCommand extends Command
             $this->quieterConsoleIo,
             $composer->getConfig(),
             $this->githubApiBaseUrl,
+            PieAssetName::forRunningPie(),
         );
         $verifyPiePhar         = VerifyPieReleaseUsingAttestation::factory(
             $fetchLatestPieRelease,

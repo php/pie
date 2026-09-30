@@ -12,6 +12,7 @@ use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use Php\Pie\File\BinaryFile;
 use Php\Pie\File\FullPathToSelf;
 use Php\Pie\SelfManage\Update\FetchPieReleaseFromGitHub;
+use Php\Pie\SelfManage\Update\PieAssetName;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
 use Php\Pie\SelfManage\Verify\VerifyPieReleaseUsingAttestation;
 use Php\Pie\Util\Emoji;
@@ -89,6 +90,7 @@ final class SelfVerifyCommand extends Command
             $this->quieterConsoleIo,
             $composer->getConfig(),
             $this->githubApiBaseUrl,
+            PieAssetName::forRunningPie(),
         );
 
         $latestRelease = new ReleaseMetadata($expectedVersion, 'blah');

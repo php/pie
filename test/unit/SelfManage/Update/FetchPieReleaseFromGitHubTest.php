@@ -8,6 +8,7 @@ use Composer\Util\Http\Response;
 use Composer\Util\HttpDownloader;
 use Php\Pie\SelfManage\Update\Channel;
 use Php\Pie\SelfManage\Update\FetchPieReleaseFromGitHub;
+use Php\Pie\SelfManage\Update\PieAssetName;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -27,7 +28,7 @@ final class FetchPieReleaseFromGitHubTest extends TestCase
     protected function setUp(): void
     {
         $this->httpDownloader = $this->createMock(HttpDownloader::class);
-        $this->fetcher        = new FetchPieReleaseFromGitHub('https://api.github.com', $this->httpDownloader);
+        $this->fetcher        = new FetchPieReleaseFromGitHub('https://api.github.com', $this->httpDownloader, PieAssetName::Phar);
     }
 
     #[DataProvider('validBranchProvider')]
@@ -111,7 +112,7 @@ final class FetchPieReleaseFromGitHubTest extends TestCase
             ->with('https://api.github.com/repos/php/pie/releases')
             ->willReturn($response);
 
-        $release = (new FetchPieReleaseFromGitHub('https://api.github.com', $this->httpDownloader, 'pie-Linux-X64'))
+        $release = (new FetchPieReleaseFromGitHub('https://api.github.com', $this->httpDownloader, PieAssetName::LinuxX64))
             ->latestReleaseMetadata(Channel::Stable);
 
         self::assertSame('1.5.1', $release->tag);

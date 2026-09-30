@@ -27,19 +27,19 @@ use function sys_get_temp_dir;
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class FetchPieReleaseFromGitHub implements FetchPieRelease
 {
-    private const PIE_PHAR_NAME    = 'pie.phar';
     private const PIE_REPO_URL     = '/repos/php/pie';
     private const PIE_RELEASES_URL = '/repos/php/pie/releases';
 
     public function __construct(
         private readonly string $githubApiBaseUrl,
         private readonly HttpDownloader $httpDownloader,
+        private readonly PieAssetName $assetName,
     ) {
     }
 
-    public static function factory(QuieterConsoleIO $io, Config $config, string $githubApiBaseUrl): self
+    public static function factory(QuieterConsoleIO $io, Config $config, string $githubApiBaseUrl, PieAssetName $assetName): self
     {
-        return new self($githubApiBaseUrl, new HttpDownloader($io, $config));
+        return new self($githubApiBaseUrl, new HttpDownloader($io, $config), $assetName);
     }
 
     public function trunkBranch(): string
@@ -94,14 +94,14 @@ final class FetchPieReleaseFromGitHub implements FetchPieRelease
 
         $releases = array_filter(
             array_map(
-                static function (array $releaseResponse): ReleaseMetadata|null {
+                function (array $releaseResponse): ReleaseMetadata|null {
                     Assert::keyExists($releaseResponse, 'tag_name');
                     Assert::stringNotEmpty($releaseResponse['tag_name']);
                     Assert::keyExists($releaseResponse, 'assets');
                     Assert::isList($releaseResponse['assets']);
                     Assert::allIsArray($releaseResponse['assets']);
 
-                    $assetsNamedPiePhar = array_filter(
+                    $assetsWithExpectedName = array_filter(
                         array_map(
                             static function (array $asset): array {
                                 Assert::keyExists($asset, 'name');
@@ -113,20 +113,18 @@ final class FetchPieReleaseFromGitHub implements FetchPieRelease
                             },
                             $releaseResponse['assets'],
                         ),
-                        static function (array $asset): bool {
-                            return $asset['name'] === self::PIE_PHAR_NAME;
-                        },
+                        fn (array $asset): bool => $asset['name'] === $this->assetName->value,
                     );
 
-                    if (! count($assetsNamedPiePhar)) {
+                    if (! count($assetsWithExpectedName)) {
                         return null;
                     }
 
-                    $firstAssetNamedPiePhar = reset($assetsNamedPiePhar);
+                    $firstAssetWithExpectedName = reset($assetsWithExpectedName);
 
                     return new ReleaseMetadata(
                         $releaseResponse['tag_name'],
-                        $firstAssetNamedPiePhar['browser_download_url'],
+                        $firstAssetWithExpectedName['browser_download_url'],
                     );
                 },
                 array_filter(
