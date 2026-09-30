@@ -118,4 +118,26 @@ final class FetchPieReleaseFromGitHubTest extends TestCase
         self::assertSame('1.5.1', $release->tag);
         self::assertSame('https://github.com/php/pie/releases/download/1.5.1/pie-Linux-X64', $release->downloadUrl);
     }
+
+    /** @return array<string, array{0: PieAssetName, 1: non-empty-string}> */
+    public static function nightlyDownloadUrlProvider(): array
+    {
+        return [
+            'PHAR' => [PieAssetName::Phar, 'https://php.github.io/pie/pie-nightly.phar'],
+            'Linux x86_64' => [PieAssetName::LinuxX64, 'https://php.github.io/pie/pie-Linux-X64'],
+            'Linux arm64' => [PieAssetName::LinuxArm64, 'https://php.github.io/pie/pie-Linux-ARM64'],
+            'macOS arm64' => [PieAssetName::MacOsArm64, 'https://php.github.io/pie/pie-macOS-ARM64'],
+            'Windows x86_64' => [PieAssetName::WindowsX64, 'https://php.github.io/pie/pie-Windows-X64.exe'],
+        ];
+    }
+
+    #[DataProvider('nightlyDownloadUrlProvider')]
+    public function testNightlyReleaseMetadata(PieAssetName $assetName, string $expectedDownloadUrl): void
+    {
+        $release = (new FetchPieReleaseFromGitHub('https://api.github.com', $this->httpDownloader, $assetName))
+            ->nightlyReleaseMetadata();
+
+        self::assertSame('nightly', $release->tag);
+        self::assertSame($expectedDownloadUrl, $release->downloadUrl);
+    }
 }

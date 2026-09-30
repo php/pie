@@ -17,7 +17,6 @@ use Php\Pie\SelfManage\Update\FetchPieReleaseFromGitHub;
 use Php\Pie\SelfManage\Update\IsBrewInstallation;
 use Php\Pie\SelfManage\Update\PieAssetName;
 use Php\Pie\SelfManage\Update\ReleaseIsNewer;
-use Php\Pie\SelfManage\Update\ReleaseMetadata;
 use Php\Pie\SelfManage\Verify\RecoverFromFailedVerification;
 use Php\Pie\SelfManage\Verify\VerifyPieReleaseUsingAttestation;
 use Php\Pie\Settings;
@@ -144,10 +143,7 @@ final class SelfUpdateCommand extends Command
         );
 
         if ($updateChannel === Channel::Nightly) {
-            $latestRelease = new ReleaseMetadata(
-                'nightly',
-                'https://php.github.io/pie/pie-nightly.phar',
-            );
+            $latestRelease = $fetchLatestPieRelease->nightlyReleaseMetadata();
 
             $this->io->write('Downloading the latest nightly release.');
         } else {

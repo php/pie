@@ -57,6 +57,25 @@ final class PieAssetNameTest extends TestCase
         self::invokeForExecutable($osFamily, $architecture);
     }
 
+    /** @return array<string, array{0: PieAssetName, 1: PieAssetName}> */
+    public static function nightlyProvider(): array
+    {
+        return [
+            'PHAR' => [PieAssetName::Phar, PieAssetName::PharNightly],
+            'PHAR nightly' => [PieAssetName::PharNightly, PieAssetName::PharNightly],
+            'Linux x86_64' => [PieAssetName::LinuxX64, PieAssetName::LinuxX64],
+            'Linux arm64' => [PieAssetName::LinuxArm64, PieAssetName::LinuxArm64],
+            'macOS arm64' => [PieAssetName::MacOsArm64, PieAssetName::MacOsArm64],
+            'Windows x86_64' => [PieAssetName::WindowsX64, PieAssetName::WindowsX64],
+        ];
+    }
+
+    #[DataProvider('nightlyProvider')]
+    public function testNightly(PieAssetName $assetName, PieAssetName $expectedNightlyAssetName): void
+    {
+        self::assertSame($expectedNightlyAssetName, $assetName->nightly());
+    }
+
     private static function invokeForExecutable(string $osFamily, Architecture $architecture): mixed
     {
         return (new ReflectionMethod(PieAssetName::class, 'forExecutable'))->invoke(null, $osFamily, $architecture);

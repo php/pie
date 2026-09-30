@@ -11,6 +11,8 @@ interface FetchPieRelease
 {
     public function latestReleaseMetadata(Channel $updateChannel): ReleaseMetadata;
 
+    public function nightlyReleaseMetadata(): ReleaseMetadata;
+
     /** @return non-empty-string */
     public function trunkBranch(): string;
 

@@ -29,6 +29,7 @@ final class FetchPieReleaseFromGitHub implements FetchPieRelease
 {
     private const PIE_REPO_URL     = '/repos/php/pie';
     private const PIE_RELEASES_URL = '/repos/php/pie/releases';
+    private const NIGHTLY_BASE_URL = 'https://php.github.io/pie/';
 
     public function __construct(
         private readonly string $githubApiBaseUrl,
@@ -151,6 +152,14 @@ final class FetchPieReleaseFromGitHub implements FetchPieRelease
         }
 
         return $first;
+    }
+
+    public function nightlyReleaseMetadata(): ReleaseMetadata
+    {
+        return new ReleaseMetadata(
+            'nightly',
+            self::NIGHTLY_BASE_URL . $this->assetName->nightly()->value,
+        );
     }
 
     public function downloadContent(ReleaseMetadata $releaseMetadata): BinaryFile
