@@ -77,3 +77,12 @@ FROM fedora_base AS test_pie_installs_system_deps_on_fedora
 RUN dnf install -y php php-pecl-zip unzip gcc make autoconf bison re2c libtool php-devel
 COPY --from=build_pie_phar /app/pie.phar /usr/local/bin/pie
 RUN pie install -v --auto-install-system-dependencies --force php/sodium
+
+FROM quay.io/rockylinux/rockylinux:8 AS test_lib64_detection_on_rocky8
+RUN dnf module enable -y php:8.2 && dnf install -y php-cli php-devel unzip gcc gcc-c++ make autoconf bison flex libtool git cmake openssl-devel cyrus-sasl-devel
+RUN git clone --depth 1 --branch 1.1.4 https://github.com/awesomized/libmemcached /tmp/libmemcached \
+    && cmake -S /tmp/libmemcached -B /tmp/libmemcached/build -DBUILD_TESTING=OFF -DBUILD_DOCSONLY=OFF -DENABLE_SASL=ON \
+    && cmake --build /tmp/libmemcached/build -j$(nproc) \
+    && cmake --install /tmp/libmemcached/build
+COPY --from=build_pie_phar /app/pie.phar /usr/local/bin/pie
+RUN pie install -v php-memcached/php-memcached

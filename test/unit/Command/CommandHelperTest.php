@@ -308,6 +308,39 @@ final class CommandHelperTest extends TestCase
         CommandHelper::bindConfigureOptionsFromPackage($command, [$packageA, $packageB], $input);
     }
 
+    /** @param list<array{name: string, needs-value?: bool}> $configureOptions */
+    private function packageWithConfigureOptions(string $name, array $configureOptions): Package
+    {
+        $composerPackage = $this->createMock(CompletePackageInterface::class);
+        $composerPackage->method('getPrettyName')->willReturn($name);
+        $composerPackage->method('getPrettyVersion')->willReturn('1.0.0');
+        $composerPackage->method('getType')->willReturn('php-ext');
+        $composerPackage->method('getPhpExt')->willReturn(['configure-options' => $configureOptions]);
+
+        return Package::fromComposerCompletePackage($composerPackage);
+    }
+
+    public function testWithLibdirIsPassedToEveryPackage(): void
+    {
+        $packages = [
+            $this->packageWithConfigureOptions('foo/bar', [['name' => 'with-libdir', 'needs-value' => true]]),
+            $this->packageWithConfigureOptions('baz/qux', []),
+        ];
+
+        $command = new Command();
+        $input   = new ArrayInput(['--with-libdir' => 'lib64']);
+
+        CommandHelper::bindConfigureOptionsFromPackage($command, $packages, $input);
+
+        self::assertSame(
+            [
+                'foo/bar' => ['--with-libdir=lib64'],
+                'baz/qux' => ['--with-libdir=lib64'],
+            ],
+            CommandHelper::processConfigureOptionsFromInput($packages, $input),
+        );
+    }
+
     #[RequiresOperatingSystemFamily('Windows')]
     public function testWindowsMachinesCannotUseWithPhpConfigOption(): void
     {

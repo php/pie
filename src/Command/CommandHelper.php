@@ -83,6 +83,7 @@ final class CommandHelper
     private const OPTION_FORCE                                = 'force';
     private const OPTION_SUPPRESS_DOWNLOAD_URL_METHOD         = 'suppress-download-url-method';
     private const OPTION_NO_CACHE                             = 'no-cache';
+    private const OPTION_WITH_LIBDIR                          = 'with-libdir';
     private const OPTION_AUTO_INSTALL_BUILD_TOOLS             = 'auto-install-build-tools';
     private const OPTION_SUPPRESS_BUILD_TOOLS_CHECK           = 'no-build-tools-check';
     private const OPTION_AUTO_INSTALL_SYSTEM_DEPENDENCIES     = 'auto-install-system-dependencies';
@@ -499,6 +500,10 @@ final class CommandHelper
 
         foreach ($packages as $package) {
             foreach ($package->configureOptions() as $configureOption) {
+                if ($configureOption->name === self::OPTION_WITH_LIBDIR) {
+                    continue;
+                }
+
                 if (array_key_exists($configureOption->name, $optionOwners)) {
                     throw ConfigureOptionCollision::forOptionName(
                         $configureOption->name,
@@ -518,6 +523,13 @@ final class CommandHelper
             }
         }
 
+        $command->addOption(
+            self::OPTION_WITH_LIBDIR,
+            null,
+            InputOption::VALUE_REQUIRED,
+            'Look for libraries in .../NAME rather than .../lib, e.g. --' . self::OPTION_WITH_LIBDIR . '=lib64. If omitted, PIE uses the value the target PHP was built with.',
+        );
+
         self::validateInput($input, $command);
     }
 
@@ -528,11 +540,13 @@ final class CommandHelper
      */
     public static function processConfigureOptionsFromInput(array $packages, InputInterface $input): array
     {
+        $withLibdir = $input->hasOption(self::OPTION_WITH_LIBDIR) ? $input->getOption(self::OPTION_WITH_LIBDIR) : null;
+
         $configureOptionsValues = [];
         foreach ($packages as $package) {
             $optionsForPackage = [];
             foreach ($package->configureOptions() as $configureOption) {
-                if (! $input->hasOption($configureOption->name)) {
+                if ($configureOption->name === self::OPTION_WITH_LIBDIR || ! $input->hasOption($configureOption->name)) {
                     continue;
                 }
 
@@ -552,6 +566,10 @@ final class CommandHelper
                 }
 
                 $optionsForPackage[] = '--' . $configureOption->name;
+            }
+
+            if (is_string($withLibdir) && $withLibdir !== '') {
+                $optionsForPackage[] = '--' . self::OPTION_WITH_LIBDIR . '=' . $withLibdir;
             }
 
             $configureOptionsValues[$package->name()] = $optionsForPackage;

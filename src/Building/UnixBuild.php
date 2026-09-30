@@ -23,6 +23,7 @@ use function file_exists;
 use function implode;
 use function Safe\rename;
 use function sprintf;
+use function str_starts_with;
 
 use const DIRECTORY_SEPARATOR;
 
@@ -96,6 +97,8 @@ final class UnixBuild implements Build
 
         $io->write('<info>phpize complete</info>.');
 
+        $configureOptions = $this->withDetectedLibdirOption($configureOptions, $targetPlatform);
+
         $phpConfigPath = $targetPlatform->phpBinaryPath->phpConfigPath();
         if ($phpConfigPath !== null) {
             $configureOptions[] = '--with-php-config=' . $phpConfigPath;
@@ -124,6 +127,37 @@ final class UnixBuild implements Build
         ));
 
         return BinaryFile::fromFileWithSha256Checksum($expectedSoFile);
+    }
+
+    /**
+     * @param list<non-empty-string> $configureOptions
+     *
+     * @return list<non-empty-string>
+     */
+    private function withDetectedLibdirOption(array $configureOptions, TargetPlatform $targetPlatform): array
+    {
+        if ($this->hasLibdirOption($configureOptions)) {
+            return $configureOptions;
+        }
+
+        $phpConfigLibdir = $targetPlatform->phpBinaryPath->phpConfigLibdir();
+        if ($phpConfigLibdir !== null) {
+            $configureOptions[] = '--with-libdir=' . $phpConfigLibdir;
+        }
+
+        return $configureOptions;
+    }
+
+    /** @param list<non-empty-string> $configureOptions */
+    private function hasLibdirOption(array $configureOptions): bool
+    {
+        foreach ($configureOptions as $configureOption) {
+            if (str_starts_with($configureOption, '--with-libdir')) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function renamesToConfigM4(DownloadedPackage $downloadedPackage, IOInterface $io): void
