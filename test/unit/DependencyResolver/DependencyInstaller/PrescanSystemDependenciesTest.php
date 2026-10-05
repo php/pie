@@ -17,8 +17,13 @@ use Php\Pie\DependencyResolver\FetchDependencyStatuses;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\DependencyResolver\ResolvedPackageRequest;
+use Php\Pie\Platform\Architecture;
+use Php\Pie\Platform\OperatingSystem;
+use Php\Pie\Platform\OperatingSystemFamily;
 use Php\Pie\Platform\PackageManager;
+use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
+use Php\Pie\Platform\ThreadSafetyMode;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -31,7 +36,7 @@ final class PrescanSystemDependenciesTest extends TestCase
     private readonly FetchDependencyStatuses&MockObject $fetchDependencyStatuses;
     private readonly BufferIO $io;
     private readonly Composer&MockObject $composer;
-    private readonly TargetPlatform&MockObject $targetPlatform;
+    private readonly TargetPlatform $targetPlatform;
 
     public function setUp(): void
     {
@@ -41,7 +46,16 @@ final class PrescanSystemDependenciesTest extends TestCase
         $this->fetchDependencyStatuses = $this->createMock(FetchDependencyStatuses::class);
         $this->io                      = new BufferIO(verbosity: StreamOutput::VERBOSITY_VERBOSE);
         $this->composer                = $this->createMock(Composer::class);
-        $this->targetPlatform          = $this->createMock(TargetPlatform::class);
+        $this->targetPlatform          = new TargetPlatform(
+            OperatingSystem::NonWindows,
+            OperatingSystemFamily::Linux,
+            $this->createMock(PhpBinaryPath::class),
+            Architecture::x86_64,
+            ThreadSafetyMode::NonThreadSafe,
+            1,
+            null,
+            null,
+        );
     }
 
     public function testNoPackageManager(): void

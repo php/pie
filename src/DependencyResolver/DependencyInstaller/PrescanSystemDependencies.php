@@ -112,6 +112,9 @@ class PrescanSystemDependencies
             $this->io->write('<info>Missing system dependencies have been installed.</info>');
         } catch (Throwable $anything) {
             $this->io->writeError(sprintf('<info>Failed to install missing system dependencies:</info> %s', $anything->getMessage()));
+        } finally {
+            $targetPlatform->phpBinaryPath->pkgConfig()->clear();
+            $targetPlatform->phpBinaryPath->refreshRuntimeInformation();
         }
     }
 

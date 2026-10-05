@@ -39,6 +39,21 @@ final class UnixInstall implements Install
         IOInterface $io,
         bool $attemptToSetupIniFile,
     ): BinaryFile {
+        $targetPlatform->phpBinaryPath->refreshRuntimeInformation();
+        try {
+            return $this->install($downloadedPackage, $targetPlatform, $builtBinaryFile, $io, $attemptToSetupIniFile);
+        } finally {
+            $targetPlatform->phpBinaryPath->refreshRuntimeInformation();
+        }
+    }
+
+    private function install(
+        DownloadedPackage $downloadedPackage,
+        TargetPlatform $targetPlatform,
+        BinaryFile|null $builtBinaryFile,
+        IOInterface $io,
+        bool $attemptToSetupIniFile,
+    ): BinaryFile {
         $env         = [];
         $installRoot = (string) ComposerPlatform::getEnv('INSTALL_ROOT');
         if ($installRoot !== '') {

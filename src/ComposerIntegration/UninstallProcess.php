@@ -28,6 +28,18 @@ class UninstallProcess
         PieComposerRequest $composerRequest,
         CompletePackageInterface $composerPackage,
     ): void {
+        $composerRequest->targetPlatform->phpBinaryPath->refreshRuntimeInformation();
+        try {
+            $this->uninstall($composerRequest, $composerPackage);
+        } finally {
+            $composerRequest->targetPlatform->phpBinaryPath->refreshRuntimeInformation();
+        }
+    }
+
+    private function uninstall(
+        PieComposerRequest $composerRequest,
+        CompletePackageInterface $composerPackage,
+    ): void {
         $io             = $composerRequest->pieOutput;
         $targetPlatform = $composerRequest->targetPlatform;
 

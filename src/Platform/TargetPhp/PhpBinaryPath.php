@@ -12,6 +12,7 @@ use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\DebugBuild;
 use Php\Pie\Platform\OperatingSystem;
 use Php\Pie\Platform\OperatingSystemFamily;
+use Php\Pie\Platform\PkgConfig;
 use Php\Pie\Platform\TargetPhp\Exception\ExtensionPathProblem;
 use Php\Pie\Util\Process;
 use RuntimeException;
@@ -37,19 +38,22 @@ use function rtrim;
 use function Safe\mkdir;
 use function Safe\preg_match;
 use function Safe\preg_replace;
+use function serialize;
 use function sprintf;
+use function str_starts_with;
 use function strtolower;
 use function trim;
 
 use const DIRECTORY_SEPARATOR;
 
-/**
- * @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks
- *
- * @immutable
- */
+/** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 class PhpBinaryPath
 {
+    /** @var array<string, string> */
+    private array $queryResults = [];
+
+    private PkgConfig|null $pkgConfig = null;
+
     /**
      * @param non-empty-string      $phpBinaryPath
      * @param non-empty-string|null $phpConfigPath
@@ -168,6 +172,8 @@ class PhpBinaryPath
 
     public function assertExtensionIsLoadedInRuntime(ExtensionName $extension, IOInterface|null $io = null): void
     {
+        $this->refreshRuntimeInformation();
+
         if (! in_array(strtolower($extension->name()), array_map('strtolower', array_keys($this->extensions())))) {
             throw Exception\ExtensionIsNotLoaded::fromExpectedExtension(
                 $this,
@@ -244,7 +250,7 @@ class PhpBinaryPath
      */
     public function extensions(): array
     {
-        $extVersionsList = self::cleanWarningAndDeprecationsFromOutput(Process::run([
+        $extVersionsList = self::cleanWarningAndDeprecationsFromOutput($this->query('extensions', [
             $this->phpBinaryPath,
             '-r',
             <<<'PHP'
@@ -282,7 +288,7 @@ PHP,
 
     public function operatingSystem(): OperatingSystem
     {
-        $winOrNot = self::cleanWarningAndDeprecationsFromOutput(Process::run([
+        $winOrNot = self::cleanWarningAndDeprecationsFromOutput($this->query('php', [
             $this->phpBinaryPath,
             '-r',
             'echo \\defined(\'PHP_WINDOWS_VERSION_BUILD\') ? \'win\' : \'not\';',
@@ -296,7 +302,7 @@ PHP,
     {
         /** @link https://github.com/sebastianbergmann/environment/commit/eb6dd721cfaca04c27ac61c7201493a8f62f7f1d */
         $osFamily = OperatingSystemFamily::tryFrom(strtolower(trim(
-            self::cleanWarningAndDeprecationsFromOutput(Process::run([
+            self::cleanWarningAndDeprecationsFromOutput($this->query('php', [
                 $this->phpBinaryPath,
                 '-r',
                 <<<'PHP'
@@ -336,7 +342,7 @@ PHP,
     /** @return non-empty-string */
     public function version(): string
     {
-        $phpVersion = self::cleanWarningAndDeprecationsFromOutput(Process::run([
+        $phpVersion = self::cleanWarningAndDeprecationsFromOutput($this->query('php', [
             $this->phpBinaryPath,
             '-r',
             'echo PHP_MAJOR_VERSION . "." . PHP_MINOR_VERSION . "." . PHP_RELEASE_VERSION;',
@@ -352,7 +358,7 @@ PHP,
     /** @return non-empty-string */
     public function phpVersionWithExtra(): string
     {
-        $phpVersionWithExtra = self::cleanWarningAndDeprecationsFromOutput(Process::run([
+        $phpVersionWithExtra = self::cleanWarningAndDeprecationsFromOutput($this->query('php', [
             $this->phpBinaryPath,
             '-r',
             'echo PHP_VERSION;',
@@ -365,7 +371,7 @@ PHP,
     /** @return non-empty-string */
     public function majorMinorVersion(): string
     {
-        $phpVersion = self::cleanWarningAndDeprecationsFromOutput(Process::run([
+        $phpVersion = self::cleanWarningAndDeprecationsFromOutput($this->query('php', [
             $this->phpBinaryPath,
             '-r',
             'echo PHP_MAJOR_VERSION . "." . PHP_MINOR_VERSION;',
@@ -380,7 +386,7 @@ PHP,
 
     public function majorVersion(): int
     {
-        $phpVersion = self::cleanWarningAndDeprecationsFromOutput(Process::run([
+        $phpVersion = self::cleanWarningAndDeprecationsFromOutput($this->query('php', [
             $this->phpBinaryPath,
             '-r',
             'echo PHP_MAJOR_VERSION;',
@@ -392,7 +398,7 @@ PHP,
 
     public function minorVersion(): int
     {
-        $phpVersion = self::cleanWarningAndDeprecationsFromOutput(Process::run([
+        $phpVersion = self::cleanWarningAndDeprecationsFromOutput($this->query('php', [
             $this->phpBinaryPath,
             '-r',
             'echo PHP_MINOR_VERSION;',
@@ -418,7 +424,7 @@ PHP,
             return Architecture::parseArchitecture($m[2]);
         }
 
-        $phpMachineType = self::cleanWarningAndDeprecationsFromOutput(Process::run([
+        $phpMachineType = self::cleanWarningAndDeprecationsFromOutput($this->query('php', [
             $this->phpBinaryPath,
             '-r',
             'echo php_uname("m");',
@@ -437,7 +443,7 @@ PHP,
 
     public function phpIntSize(): int
     {
-        $phpIntSize = self::cleanWarningAndDeprecationsFromOutput(Process::run([
+        $phpIntSize = self::cleanWarningAndDeprecationsFromOutput($this->query('php', [
             $this->phpBinaryPath,
             '-r',
             'echo PHP_INT_SIZE;',
@@ -451,7 +457,7 @@ PHP,
     /** @return non-empty-string */
     public function phpinfo(): string
     {
-        $phpInfo = self::cleanWarningAndDeprecationsFromOutput(Process::run([
+        $phpInfo = self::cleanWarningAndDeprecationsFromOutput($this->query('phpinfo', [
             $this->phpBinaryPath,
             '-i',
         ]));
@@ -541,6 +547,31 @@ PHP,
         }
 
         return $phpBinaryPath;
+    }
+
+    public function pkgConfig(): PkgConfig
+    {
+        return $this->pkgConfig ??= new PkgConfig();
+    }
+
+    /** Discard information that can change after installing or enabling an extension. */
+    public function refreshRuntimeInformation(): void
+    {
+        foreach ($this->queryResults as $key => $result) {
+            if (! str_starts_with($key, 'extensions:') && ! str_starts_with($key, 'phpinfo:')) {
+                continue;
+            }
+
+            unset($this->queryResults[$key]);
+        }
+    }
+
+    /** @param list<string> $command */
+    private function query(string $category, array $command): string
+    {
+        $key = $category . ':' . serialize($command);
+
+        return $this->queryResults[$key] ??= Process::run($command);
     }
 
     private static function cleanWarningAndDeprecationsFromOutput(string $testOutput): string

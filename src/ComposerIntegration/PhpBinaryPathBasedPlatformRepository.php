@@ -12,9 +12,8 @@ use Composer\Repository\PlatformRepository;
 use Composer\Semver\VersionParser;
 use Php\Pie\ExtensionName;
 use Php\Pie\Platform\InstalledPiePackages;
+use Php\Pie\Platform\PkgConfig;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
-use Php\Pie\Util\Process;
-use Symfony\Component\Process\Exception\ProcessFailedException;
 use UnexpectedValueException;
 
 use function array_map;
@@ -31,9 +30,12 @@ class PhpBinaryPathBasedPlatformRepository extends PlatformRepository
 {
     private VersionParser $versionParser;
 
+    private readonly PkgConfig $pkgConfig;
+
     /** @param list<ExtensionName> $extensionsBeingInstalled */
     public function __construct(PhpBinaryPath $phpBinaryPath, Composer $composer, InstalledPiePackages $installedPiePackages, array $extensionsBeingInstalled)
     {
+        $this->pkgConfig     = $phpBinaryPath->pkgConfig();
         $this->versionParser = new VersionParser();
         $this->packages      = [];
 
@@ -128,9 +130,8 @@ class PhpBinaryPathBasedPlatformRepository extends PlatformRepository
      */
     private function detectLibraryWithPkgConfig(string $alias, string $library): void
     {
-        try {
-            $pkgConfigResult = Process::run(['pkg-config', '--print-provides', '--print-errors', $library]);
-        } catch (ProcessFailedException) {
+        $pkgConfigResult = $this->pkgConfig->provides($library);
+        if ($pkgConfigResult === null) {
             return;
         }
 
