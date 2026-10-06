@@ -9,6 +9,7 @@ use Composer\Package\CompletePackageInterface;
 use Composer\Semver\Constraint\Constraint;
 use Php\Pie\ComposerIntegration\PhpBinaryPathBasedPlatformRepository;
 use Php\Pie\Platform\InstalledPiePackages;
+use Php\Pie\Platform\PkgConfig;
 use Php\Pie\Platform\TargetPlatform;
 
 use function array_key_exists;
@@ -28,7 +29,7 @@ class FetchDependencyStatuses
 
         /** @var array<string, Constraint> $platformConstraints */
         $platformConstraints = [];
-        $composerPlatform    = new PhpBinaryPathBasedPlatformRepository($targetPlatform->phpBinaryPath, $composer, new InstalledPiePackages(), []);
+        $composerPlatform    = new PhpBinaryPathBasedPlatformRepository($targetPlatform->phpBinaryPath, $composer, new InstalledPiePackages(), PkgConfig::detect(), []);
         foreach ($composerPlatform->getPackages() as $platformPackage) {
             $platformConstraints[$platformPackage->getName()] = new Constraint('==', $platformPackage->getVersion());
         }

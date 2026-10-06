@@ -10,6 +10,7 @@ use Composer\IO\IOInterface;
 use Composer\Repository\PlatformRepository;
 use Php\Pie\ExtensionName;
 use Php\Pie\Platform\InstalledPiePackages;
+use Php\Pie\Platform\PkgConfig;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Webmozart\Assert\Assert;
 
@@ -28,7 +29,7 @@ class PieComposerInstaller extends Installer
         Assert::allIsInstanceOf($this->extensionsBeingInstalled, ExtensionName::class, '$extensionsBeingInstalled were not all ExtensionName instances');
         Assert::notNull($this->composer, '$composer was not set, maybe createWithPhpBinary was not used?');
 
-        return new PhpBinaryPathBasedPlatformRepository($this->phpBinaryPath, $this->composer, new InstalledPiePackages(), $this->extensionsBeingInstalled);
+        return new PhpBinaryPathBasedPlatformRepository($this->phpBinaryPath, $this->composer, new InstalledPiePackages(), PkgConfig::detect(), $this->extensionsBeingInstalled);
     }
 
     /** @param list<ExtensionName> $extensionsBeingInstalled */

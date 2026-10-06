@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+case "$1" in
+    --list-all)
+        echo "libcurl                        libcurl - Library to transfer files with HTTP, FTP, etc."
+        echo "libpng                         libpng - Loads and saves PNG files"
+        echo "broken                         broken - Listed, but fails when asked for its version"
+        exit 0
+        ;;
+    --modversion)
+        shift
+        for library in "$@"; do
+            case "$library" in
+                libcurl)
+                    echo "8.12.1"
+                    ;;
+                libpng)
+                    echo "1.6.47"
+                    ;;
+                *)
+                    echo "Package $library was not found in the pkg-config search path." >&2
+                    exit 1
+            esac
+        done
+        exit 0
+        ;;
+esac
+
+echo "unknown fake pkg-config command: $*" >&2
+exit 1

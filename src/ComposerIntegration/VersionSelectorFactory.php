@@ -11,6 +11,7 @@ use Composer\Repository\RepositorySet;
 use Php\Pie\DependencyResolver\DetermineMinimumStability;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\Platform\InstalledPiePackages;
+use Php\Pie\Platform\PkgConfig;
 use Php\Pie\Platform\TargetPlatform;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
@@ -35,7 +36,7 @@ final class VersionSelectorFactory
     ): VersionSelector {
         return new VersionSelector(
             self::factoryRepositorySet($composer, $requestedPackageAndVersion),
-            new PhpBinaryPathBasedPlatformRepository($targetPlatform->phpBinaryPath, $composer, new InstalledPiePackages(), []),
+            new PhpBinaryPathBasedPlatformRepository($targetPlatform->phpBinaryPath, $composer, new InstalledPiePackages(), PkgConfig::detect(), []),
         );
     }
 }
