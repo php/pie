@@ -7,6 +7,7 @@ namespace Php\Pie\Command;
 use Composer\IO\IOInterface;
 use Composer\IO\NullIO;
 use InvalidArgumentException;
+use Php\Pie\ComposerIntegration\PhpBinaryPathBasedPlatformRepository;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\DependencyResolver\BundledPhpExtensionRefusal;
@@ -96,6 +97,7 @@ final class ShowCommand extends Command
         $phpEnabledExtensions = $targetPlatform->phpBinaryPath->extensions();
         $piePackagesMatched   = [];
         $rootPackageRequires  = $composer->getPackage()->getRequires();
+        $platformRepository   = PhpBinaryPathBasedPlatformRepository::forTargetPlatform($targetPlatform, $composer);
 
         $this->io->write(sprintf(
             "\n" . '<options=bold,underscore>%s:</>',
@@ -103,7 +105,7 @@ final class ShowCommand extends Command
         ));
         array_walk(
             $phpEnabledExtensions,
-            function (string $version, string $phpExtensionName) use ($composer, $rootPackageRequires, $targetPlatform, $showAll, $piePackages, &$piePackagesMatched): void {
+            function (string $version, string $phpExtensionName) use ($composer, $rootPackageRequires, $targetPlatform, $platformRepository, $showAll, $piePackages, &$piePackagesMatched): void {
                 $pieMatchesForExtension = $piePackages->findByPhpFormattedExtensionName($phpExtensionName);
 
                 if (! count($pieMatchesForExtension)) {
@@ -137,6 +139,7 @@ final class ShowCommand extends Command
                         $latestConstrainedPackage = ($this->resolveDependencyWithComposer)(
                             $composer,
                             $targetPlatform,
+                            $platformRepository,
                             new RequestedPackageAndVersion($packageName, $packageRequirement),
                             false,
                         );
@@ -144,6 +147,7 @@ final class ShowCommand extends Command
                         $latestPackage = ($this->resolveDependencyWithComposer)(
                             $composer,
                             $targetPlatform,
+                            $platformRepository,
                             new RequestedPackageAndVersion($packageName, '*'),
                             false,
                         );

@@ -9,6 +9,7 @@ use Composer\IO\NullIO;
 use Composer\Json\JsonFile;
 use Composer\Package\CompletePackage;
 use Composer\Package\Dumper\ArrayDumper;
+use Composer\Util\Platform as ComposerPlatform;
 use Php\Pie\ComposerIntegration\ComposerIntegrationHandler;
 use Php\Pie\ComposerIntegration\InstalledJsonMetadata;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
@@ -36,9 +37,13 @@ use function Safe\file_put_contents;
 use function Safe\hash_file;
 use function Safe\json_decode;
 use function Safe\mkdir;
+use function Safe\tempnam;
 use function Safe\unlink;
+use function substr_count;
+use function sys_get_temp_dir;
 
 use const DIRECTORY_SEPARATOR;
+use const PHP_BINARY;
 
 #[CoversClass(ComposerIntegrationHandler::class)]
 final class ComposerIntegrationHandlerTest extends IsolatedWorkingDirectoryTestCase
@@ -47,6 +52,8 @@ final class ComposerIntegrationHandlerTest extends IsolatedWorkingDirectoryTestC
     private const EXTENSION_NAME  = 'example_pie_extension';
     private const VERSION_CURRENT = ExamplePieExtensionFixture::LATEST_VERSION;
     private const VERSION_OTHER   = '2.0.2';
+
+    private const PHP_RECORDING_ARGUMENTS = __DIR__ . '/../../assets/php-recording-arguments.sh';
 
     private TargetPlatform $targetPlatform;
     private BufferedOutput $capturedOutput;
@@ -181,6 +188,52 @@ final class ComposerIntegrationHandlerTest extends IsolatedWorkingDirectoryTestC
             self::PACKAGE_NAME . ' (' . self::EXTENSION_NAME . ') is already installed and verified',
             $output,
         );
+    }
+
+    public function testTargetPhpIsNotAskedForItsExtensionsAgainForEachPackageAddedToPieJson(): void
+    {
+        if (ComposerPlatform::isWindows()) {
+            self::markTestSkipped('Bash script does not run on Windows.');
+        }
+
+        $argumentsLog = tempnam(sys_get_temp_dir(), 'pie_php_arguments_');
+        $oldEnv       = $_ENV;
+
+        $_ENV['PIE_TEST_PHP_ARGUMENTS_LOG'] = $argumentsLog;
+        $_ENV['PIE_TEST_REAL_PHP']          = PHP_BINARY;
+
+        try {
+            $this->targetPlatform = TargetPlatform::fromPhpBinaryPath(PhpBinaryPath::fromPhpBinaryPath(self::PHP_RECORDING_ARGUMENTS), null, null);
+
+            PieJsonEditor::fromTargetPlatform($this->targetPlatform)
+                ->ensureExists()
+                ->addRequire(self::PACKAGE_NAME, self::VERSION_CURRENT);
+            $this->setUpInstalledJson(self::VERSION_CURRENT);
+            $this->setUpLockFile();
+
+            $resolvedRequest = $this->makeResolvedRequest(self::VERSION_CURRENT);
+
+            $extensionsQueriesForOnePackage  = $this->extensionsQueriesDuringRunInstall([$resolvedRequest], $argumentsLog);
+            $extensionsQueriesForTwoPackages = $this->extensionsQueriesDuringRunInstall([$resolvedRequest, $resolvedRequest], $argumentsLog);
+        } finally {
+            $_ENV = $oldEnv;
+            unlink($argumentsLog);
+        }
+
+        self::assertGreaterThan(0, $extensionsQueriesForOnePackage);
+        self::assertSame($extensionsQueriesForOnePackage, $extensionsQueriesForTwoPackages);
+    }
+
+    /** @param list<ResolvedPackageRequest> $resolvedRequests */
+    private function extensionsQueriesDuringRunInstall(array $resolvedRequests, string $argumentsLog): int
+    {
+        $composer = $this->makeComposer(self::VERSION_CURRENT);
+
+        file_put_contents($argumentsLog, '');
+
+        $this->handler->runInstall($resolvedRequests, $composer, $this->targetPlatform, false, false);
+
+        return substr_count(file_get_contents($argumentsLog), 'get_loaded_extensions');
     }
 
     public function testRunUninstallRemovesPackageFromPieJson(): void

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\Pie\DependencyResolver;
 
 use Composer\Composer;
+use Composer\Repository\PlatformRepository;
 use Php\Pie\Platform\TargetPlatform;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
@@ -14,6 +15,7 @@ interface DependencyResolver
     public function __invoke(
         Composer $composer,
         TargetPlatform $targetPlatform,
+        PlatformRepository $platformRepository,
         RequestedPackageAndVersion $requestedPackageAndVersion,
         bool $forceInstallPackageVersion,
     ): ResolvedPackageRequest;

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\Pie\Command;
 
 use Composer\IO\IOInterface;
+use Php\Pie\ComposerIntegration\PhpBinaryPathBasedPlatformRepository;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieOperation;
@@ -88,12 +89,15 @@ final class InfoCommand extends Command
             ),
         );
 
+        $platformRepository = PhpBinaryPathBasedPlatformRepository::forTargetPlatform($targetPlatform, $composer);
+
         try {
             $resolvedPackages = CommandHelper::resolveRequestedPackages(
                 $this->dependencyResolver,
                 $this->io,
                 $composer,
                 $targetPlatform,
+                $platformRepository,
                 $requestedNamesAndVersions,
                 true,
             );
@@ -135,7 +139,7 @@ final class InfoCommand extends Command
 
         $this->io->write("\n<options=bold,underscore>Dependencies:</>");
 
-        $dependencyStatuses = ($this->fetchDependencyStatuses)($targetPlatform, $composer, $package->composerPackage());
+        $dependencyStatuses = ($this->fetchDependencyStatuses)($platformRepository, $package->composerPackage());
         if (count($dependencyStatuses) > 0) {
             foreach ($dependencyStatuses as $dependencyStatus) {
                 $this->io->write('    ' . $dependencyStatus->asPrettyString());

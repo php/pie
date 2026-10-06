@@ -8,6 +8,7 @@ use Composer\Composer;
 use Composer\Filter\PlatformRequirementFilter\PlatformRequirementFilterFactory;
 use Composer\IO\IOInterface;
 use Composer\Package\CompletePackageInterface;
+use Composer\Repository\PlatformRepository;
 use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use Php\Pie\ComposerIntegration\VersionSelectorFactory;
 use Php\Pie\ExtensionType;
@@ -31,10 +32,11 @@ final class ResolveDependencyWithComposer implements DependencyResolver
     public function __invoke(
         Composer $composer,
         TargetPlatform $targetPlatform,
+        PlatformRepository $platformRepository,
         RequestedPackageAndVersion $requestedPackageAndVersion,
         bool $forceInstallPackageVersion,
     ): ResolvedPackageRequest {
-        $versionSelector = VersionSelectorFactory::make($composer, $requestedPackageAndVersion, $targetPlatform);
+        $versionSelector = VersionSelectorFactory::make($composer, $requestedPackageAndVersion, $platformRepository);
 
         $package = $versionSelector->findBestCandidate(
             $requestedPackageAndVersion->package,

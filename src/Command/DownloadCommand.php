@@ -7,6 +7,7 @@ namespace Php\Pie\Command;
 use Composer\IO\IOInterface;
 use Php\Pie\ComposerIntegration\ComposerIntegrationHandler;
 use Php\Pie\ComposerIntegration\ComposerRunFailed;
+use Php\Pie\ComposerIntegration\PhpBinaryPathBasedPlatformRepository;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieOperation;
@@ -83,6 +84,7 @@ final class DownloadCommand extends Command
                 $this->io,
                 $composer,
                 $targetPlatform,
+                PhpBinaryPathBasedPlatformRepository::forTargetPlatform($targetPlatform, $composer),
                 $requestedNamesAndVersions,
                 $forceInstallPackageVersion,
             );

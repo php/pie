@@ -14,6 +14,7 @@ use Php\Pie\ExtensionName;
 use Php\Pie\Platform\InstalledPiePackages;
 use Php\Pie\Platform\PkgConfig;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
+use Php\Pie\Platform\TargetPlatform;
 use UnexpectedValueException;
 
 use function array_key_exists;
@@ -124,6 +125,11 @@ class PhpBinaryPathBasedPlatformRepository extends PlatformRepository
         $this->addLibrariesUsingPkgConfig($pkgConfig);
 
         parent::__construct();
+    }
+
+    public static function forTargetPlatform(TargetPlatform $targetPlatform, Composer $composer): self
+    {
+        return new self($targetPlatform->phpBinaryPath, $composer, new InstalledPiePackages(), PkgConfig::detect(), []);
     }
 
     private function packageForExtension(string $name, string $prettyVersion): CompletePackageInterface

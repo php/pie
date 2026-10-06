@@ -11,6 +11,7 @@ use Composer\Repository\ArrayRepository;
 use Composer\Repository\InstalledRepositoryInterface;
 use Composer\Repository\RepositoryManager;
 use Composer\Semver\Constraint\Constraint;
+use Php\Pie\ComposerIntegration\PhpBinaryPathBasedPlatformRepository;
 use Php\Pie\ComposerIntegration\VersionSelectorFactory;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\Platform\Architecture;
@@ -58,15 +59,18 @@ final class VersionSelectorFactoryTest extends TestCase
         $versionSelector = VersionSelectorFactory::make(
             $composer,
             new RequestedPackageAndVersion('foo/bar', '^1.0'),
-            new TargetPlatform(
-                OperatingSystem::NonWindows,
-                OperatingSystemFamily::Linux,
-                PhpBinaryPath::fromCurrentProcess(),
-                Architecture::x86_64,
-                ThreadSafetyMode::NonThreadSafe,
-                1,
-                null,
-                null,
+            PhpBinaryPathBasedPlatformRepository::forTargetPlatform(
+                new TargetPlatform(
+                    OperatingSystem::NonWindows,
+                    OperatingSystemFamily::Linux,
+                    PhpBinaryPath::fromCurrentProcess(),
+                    Architecture::x86_64,
+                    ThreadSafetyMode::NonThreadSafe,
+                    1,
+                    null,
+                    null,
+                ),
+                $composer,
             ),
         );
 

@@ -7,6 +7,7 @@ namespace Php\Pie\Command;
 use Composer\IO\IOInterface;
 use Php\Pie\ComposerIntegration\ComposerIntegrationHandler;
 use Php\Pie\ComposerIntegration\ComposerRunFailed;
+use Php\Pie\ComposerIntegration\PhpBinaryPathBasedPlatformRepository;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieOperation;
@@ -91,15 +92,22 @@ final class BuildCommand extends Command
             ),
         );
 
+        $platformRepository = PhpBinaryPathBasedPlatformRepository::forTargetPlatform($targetPlatform, $composer);
+
         if (CommandHelper::shouldCheckSystemDependencies($input)) {
             foreach ($requestedNamesAndVersions as $requestedNameAndVersion) {
                 try {
-                    ($this->prescanSystemDependencies)(
+                    $systemDependenciesWereInstalled = ($this->prescanSystemDependencies)(
                         $composer,
                         $targetPlatform,
+                        $platformRepository,
                         $requestedNameAndVersion,
                         CommandHelper::autoInstallSystemDependencies($input),
                     );
+
+                    if ($systemDependenciesWereInstalled) {
+                        $platformRepository = PhpBinaryPathBasedPlatformRepository::forTargetPlatform($targetPlatform, $composer);
+                    }
                 } catch (Throwable $anything) {
                     $this->io->writeError(
                         '<comment>Skipping system dependency pre-scan due to exception:</comment> ' . $anything->getMessage(),
@@ -115,6 +123,7 @@ final class BuildCommand extends Command
                 $this->io,
                 $composer,
                 $targetPlatform,
+                $platformRepository,
                 $requestedNamesAndVersions,
                 $forceInstallPackageVersion,
             );

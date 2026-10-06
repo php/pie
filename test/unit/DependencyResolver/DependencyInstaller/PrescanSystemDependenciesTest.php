@@ -7,8 +7,13 @@ namespace Php\PieUnitTest\DependencyResolver\DependencyInstaller;
 use Composer\Composer;
 use Composer\IO\BufferIO;
 use Composer\Package\CompletePackage;
+use Composer\Package\Link;
+use Composer\Repository\InstalledRepositoryInterface;
+use Composer\Repository\PlatformRepository;
+use Composer\Repository\RepositoryManager;
 use Composer\Semver\Constraint\Constraint;
 use Composer\Semver\VersionParser;
+use Php\Pie\ComposerIntegration\PhpBinaryPathBasedPlatformRepository;
 use Php\Pie\DependencyResolver\DependencyInstaller\PrescanSystemDependencies;
 use Php\Pie\DependencyResolver\DependencyInstaller\SystemDependenciesDefinition;
 use Php\Pie\DependencyResolver\DependencyResolver;
@@ -17,8 +22,13 @@ use Php\Pie\DependencyResolver\FetchDependencyStatuses;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\DependencyResolver\ResolvedPackageRequest;
+use Php\Pie\Platform\Architecture;
+use Php\Pie\Platform\OperatingSystem;
+use Php\Pie\Platform\OperatingSystemFamily;
 use Php\Pie\Platform\PackageManager;
+use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
+use Php\Pie\Platform\ThreadSafetyMode;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -32,6 +42,7 @@ final class PrescanSystemDependenciesTest extends TestCase
     private readonly BufferIO $io;
     private readonly Composer&MockObject $composer;
     private readonly TargetPlatform&MockObject $targetPlatform;
+    private readonly PlatformRepository&MockObject $platformRepository;
 
     public function setUp(): void
     {
@@ -42,6 +53,7 @@ final class PrescanSystemDependenciesTest extends TestCase
         $this->io                      = new BufferIO(verbosity: StreamOutput::VERBOSITY_VERBOSE);
         $this->composer                = $this->createMock(Composer::class);
         $this->targetPlatform          = $this->createMock(TargetPlatform::class);
+        $this->platformRepository      = $this->createMock(PlatformRepository::class);
     }
 
     public function testNoPackageManager(): void
@@ -54,10 +66,61 @@ final class PrescanSystemDependenciesTest extends TestCase
             $this->io,
         );
 
-        ($scanner)($this->composer, $this->targetPlatform, new RequestedPackageAndVersion('foo/foo', null), true);
+        $systemDependenciesWereInstalled = ($scanner)($this->composer, $this->targetPlatform, $this->platformRepository, new RequestedPackageAndVersion('foo/foo', null), true);
+
+        self::assertFalse($systemDependenciesWereInstalled);
 
         self::assertStringContainsString(
             'Skipping pre-scan of system dependencies, as a supported package manager could not be detected.',
+            $this->io->getOutput(),
+        );
+    }
+
+    public function testTargetPhpIsAskedForItsExtensionsOnceWhenAllDependenciesAreSatisfied(): void
+    {
+        $phpBinaryPath = $this->createMock(PhpBinaryPath::class);
+        $phpBinaryPath->method('version')->willReturn('8.3.0');
+        $phpBinaryPath->expects(self::once())
+            ->method('extensions')
+            ->willReturn(['Core' => '8.3.0']);
+
+        $targetPlatform = new TargetPlatform(
+            OperatingSystem::NonWindows,
+            OperatingSystemFamily::Linux,
+            $phpBinaryPath,
+            Architecture::x86_64,
+            ThreadSafetyMode::NonThreadSafe,
+            1,
+            null,
+            null,
+        );
+
+        $localRepository = $this->createMock(InstalledRepositoryInterface::class);
+        $localRepository->method('getPackages')->willReturn([]);
+        $repositoryManager = $this->createMock(RepositoryManager::class);
+        $repositoryManager->method('getLocalRepository')->willReturn($localRepository);
+        $this->composer->method('getRepositoryManager')->willReturn($repositoryManager);
+
+        $request         = new RequestedPackageAndVersion('foo/foo', null);
+        $composerPackage = new CompletePackage('foo/foo', '1.0.0.0', '1.0.0');
+        $composerPackage->setRequires([
+            'php' => new Link('foo/foo', 'php', (new VersionParser())->parseConstraints('^8.0')),
+        ]);
+        $this->dependencyResolver->method('__invoke')
+            ->willReturn(new ResolvedPackageRequest(Package::fromComposerCompletePackage($composerPackage), $request));
+
+        $scanner = new PrescanSystemDependencies(
+            $this->dependencyResolver,
+            new FetchDependencyStatuses(),
+            new SystemDependenciesDefinition([]),
+            PackageManager::Test,
+            $this->io,
+        );
+
+        ($scanner)($this->composer, $targetPlatform, PhpBinaryPathBasedPlatformRepository::forTargetPlatform($targetPlatform, $this->composer), $request, true);
+
+        self::assertStringContainsString(
+            'All system dependencies are already installed.',
             $this->io->getOutput(),
         );
     }
@@ -77,20 +140,22 @@ final class PrescanSystemDependenciesTest extends TestCase
         $piePackage      = Package::fromComposerCompletePackage($composerPackage);
         $this->dependencyResolver->expects(self::once())
             ->method('__invoke')
-            ->with($this->composer, $this->targetPlatform, $request, true)
+            ->with($this->composer, $this->targetPlatform, $this->platformRepository, $request, true)
             ->willReturn(new ResolvedPackageRequest($piePackage, $request));
 
         $versionParser = new VersionParser();
 
         $this->fetchDependencyStatuses->expects(self::once())
             ->method('__invoke')
-            ->with($this->targetPlatform, $this->composer, $composerPackage)
+            ->with($this->platformRepository, $composerPackage)
             ->willReturn([
                 new DependencyStatus('lib-foo', $versionParser->parseConstraints('^1.0'), new Constraint('=', '1.0.0.0')),
                 new DependencyStatus('lib-bar', $versionParser->parseConstraints('^2.0'), new Constraint('=', '2.5.1.0')),
             ]);
 
-        ($scanner)($this->composer, $this->targetPlatform, $request, true);
+        $systemDependenciesWereInstalled = ($scanner)($this->composer, $this->targetPlatform, $this->platformRepository, $request, true);
+
+        self::assertFalse($systemDependenciesWereInstalled);
 
         self::assertStringContainsString(
             'All system dependencies are already installed.',
@@ -113,19 +178,21 @@ final class PrescanSystemDependenciesTest extends TestCase
         $piePackage      = Package::fromComposerCompletePackage($composerPackage);
         $this->dependencyResolver->expects(self::once())
             ->method('__invoke')
-            ->with($this->composer, $this->targetPlatform, $request, true)
+            ->with($this->composer, $this->targetPlatform, $this->platformRepository, $request, true)
             ->willReturn(new ResolvedPackageRequest($piePackage, $request));
 
         $versionParser = new VersionParser();
 
         $this->fetchDependencyStatuses->expects(self::once())
             ->method('__invoke')
-            ->with($this->targetPlatform, $this->composer, $composerPackage)
+            ->with($this->platformRepository, $composerPackage)
             ->willReturn([
                 new DependencyStatus('lib-bar', $versionParser->parseConstraints('^1.0'), null),
             ]);
 
-        ($scanner)($this->composer, $this->targetPlatform, $request, true);
+        $systemDependenciesWereInstalled = ($scanner)($this->composer, $this->targetPlatform, $this->platformRepository, $request, true);
+
+        self::assertFalse($systemDependenciesWereInstalled);
 
         $outputString = $this->io->getOutput();
         self::assertStringContainsString('Extension foo/foo has unmet dependencies: lib-bar', $outputString);
@@ -153,19 +220,21 @@ final class PrescanSystemDependenciesTest extends TestCase
         $piePackage      = Package::fromComposerCompletePackage($composerPackage);
         $this->dependencyResolver->expects(self::once())
             ->method('__invoke')
-            ->with($this->composer, $this->targetPlatform, $request, true)
+            ->with($this->composer, $this->targetPlatform, $this->platformRepository, $request, true)
             ->willReturn(new ResolvedPackageRequest($piePackage, $request));
 
         $versionParser = new VersionParser();
 
         $this->fetchDependencyStatuses->expects(self::once())
             ->method('__invoke')
-            ->with($this->targetPlatform, $this->composer, $composerPackage)
+            ->with($this->platformRepository, $composerPackage)
             ->willReturn([
                 new DependencyStatus('lib-bar', $versionParser->parseConstraints('^1.0'), null),
             ]);
 
-        ($scanner)($this->composer, $this->targetPlatform, $request, true);
+        $systemDependenciesWereInstalled = ($scanner)($this->composer, $this->targetPlatform, $this->platformRepository, $request, true);
+
+        self::assertFalse($systemDependenciesWereInstalled);
 
         $outputString = $this->io->getOutput();
         self::assertStringContainsString('Extension foo/foo has unmet dependencies: lib-bar', $outputString);
@@ -193,19 +262,21 @@ final class PrescanSystemDependenciesTest extends TestCase
         $piePackage      = Package::fromComposerCompletePackage($composerPackage);
         $this->dependencyResolver->expects(self::once())
             ->method('__invoke')
-            ->with($this->composer, $this->targetPlatform, $request, true)
+            ->with($this->composer, $this->targetPlatform, $this->platformRepository, $request, true)
             ->willReturn(new ResolvedPackageRequest($piePackage, $request));
 
         $versionParser = new VersionParser();
 
         $this->fetchDependencyStatuses->expects(self::once())
             ->method('__invoke')
-            ->with($this->targetPlatform, $this->composer, $composerPackage)
+            ->with($this->platformRepository, $composerPackage)
             ->willReturn([
                 new DependencyStatus('lib-bar', $versionParser->parseConstraints('^1.0'), null),
             ]);
 
-        ($scanner)($this->composer, $this->targetPlatform, $request, true);
+        $systemDependenciesWereInstalled = ($scanner)($this->composer, $this->targetPlatform, $this->platformRepository, $request, true);
+
+        self::assertTrue($systemDependenciesWereInstalled);
 
         $outputString = $this->io->getOutput();
         self::assertStringContainsString('Extension foo/foo has unmet dependencies: lib-bar', $outputString);
@@ -233,19 +304,21 @@ final class PrescanSystemDependenciesTest extends TestCase
         $piePackage      = Package::fromComposerCompletePackage($composerPackage);
         $this->dependencyResolver->expects(self::once())
             ->method('__invoke')
-            ->with($this->composer, $this->targetPlatform, $request, true)
+            ->with($this->composer, $this->targetPlatform, $this->platformRepository, $request, true)
             ->willReturn(new ResolvedPackageRequest($piePackage, $request));
 
         $versionParser = new VersionParser();
 
         $this->fetchDependencyStatuses->expects(self::once())
             ->method('__invoke')
-            ->with($this->targetPlatform, $this->composer, $composerPackage)
+            ->with($this->platformRepository, $composerPackage)
             ->willReturn([
                 new DependencyStatus('lib-bar', $versionParser->parseConstraints('^1.0'), null),
             ]);
 
-        ($scanner)($this->composer, $this->targetPlatform, $request, true);
+        $systemDependenciesWereInstalled = ($scanner)($this->composer, $this->targetPlatform, $this->platformRepository, $request, true);
+
+        self::assertTrue($systemDependenciesWereInstalled);
 
         $outputString = $this->io->getOutput();
         self::assertStringContainsString('Extension foo/foo has unmet dependencies: lib-bar', $outputString);
@@ -274,19 +347,21 @@ final class PrescanSystemDependenciesTest extends TestCase
         $piePackage      = Package::fromComposerCompletePackage($composerPackage);
         $this->dependencyResolver->expects(self::once())
             ->method('__invoke')
-            ->with($this->composer, $this->targetPlatform, $request, true)
+            ->with($this->composer, $this->targetPlatform, $this->platformRepository, $request, true)
             ->willReturn(new ResolvedPackageRequest($piePackage, $request));
 
         $versionParser = new VersionParser();
 
         $this->fetchDependencyStatuses->expects(self::once())
             ->method('__invoke')
-            ->with($this->targetPlatform, $this->composer, $composerPackage)
+            ->with($this->platformRepository, $composerPackage)
             ->willReturn([
                 new DependencyStatus('lib-bar', $versionParser->parseConstraints('^1.0'), null),
             ]);
 
-        ($scanner)($this->composer, $this->targetPlatform, $request, false);
+        $systemDependenciesWereInstalled = ($scanner)($this->composer, $this->targetPlatform, $this->platformRepository, $request, false);
+
+        self::assertFalse($systemDependenciesWereInstalled);
 
         $outputString = $this->io->getOutput();
         self::assertStringContainsString('Extension foo/foo has unmet dependencies: lib-bar', $outputString);

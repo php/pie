@@ -15,7 +15,9 @@ use Composer\Repository\InstalledRepositoryInterface;
 use Composer\Repository\RepositoryFactory;
 use Composer\Repository\RepositoryManager;
 use Composer\Semver\Constraint\Constraint;
+use Php\Pie\Command\CommandHelper;
 use Php\Pie\ComposerIntegration\BundledPhpExtensionsRepository;
+use Php\Pie\ComposerIntegration\PhpBinaryPathBasedPlatformRepository;
 use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use Php\Pie\DependencyResolver\BundledPhpExtensionRefusal;
 use Php\Pie\DependencyResolver\IncompatibleOperatingSystemFamily;
@@ -95,10 +97,48 @@ final class ResolveDependencyWithComposerTest extends TestCase
         $package = (new ResolveDependencyWithComposer(
             $this->createMock(IOInterface::class),
             $this->createMock(QuieterConsoleIO::class),
-        ))($this->composer, $targetPlatform, new RequestedPackageAndVersion('asgrim/example-pie-extension', '^1.0'), false);
+        ))($this->composer, $targetPlatform, PhpBinaryPathBasedPlatformRepository::forTargetPlatform($targetPlatform, $this->composer), new RequestedPackageAndVersion('asgrim/example-pie-extension', '^1.0'), false);
 
         self::assertSame('asgrim/example-pie-extension', $package->piePackage->name());
         self::assertStringStartsWith('1.', $package->piePackage->version());
+    }
+
+    public function testTargetPhpIsAskedForItsExtensionsOnceWhenResolvingSeveralPackages(): void
+    {
+        $phpBinaryPath = $this->createMock(PhpBinaryPath::class);
+        $phpBinaryPath->method('version')->willReturn('8.3.0');
+        $phpBinaryPath->expects(self::once())
+            ->method('extensions')
+            ->willReturn(['Core' => '8.3.0']);
+
+        $targetPlatform = new TargetPlatform(
+            OperatingSystem::NonWindows,
+            OperatingSystemFamily::Linux,
+            $phpBinaryPath,
+            Architecture::x86_64,
+            ThreadSafetyMode::ThreadSafe,
+            1,
+            null,
+            null,
+        );
+
+        $resolvedPackages = CommandHelper::resolveRequestedPackages(
+            new ResolveDependencyWithComposer(
+                $this->createMock(IOInterface::class),
+                $this->createMock(QuieterConsoleIO::class),
+            ),
+            new NullIO(),
+            $this->composer,
+            $targetPlatform,
+            PhpBinaryPathBasedPlatformRepository::forTargetPlatform($targetPlatform, $this->composer),
+            [
+                new RequestedPackageAndVersion('asgrim/example-pie-extension', '^1.0'),
+                new RequestedPackageAndVersion('apcu/apcu', null),
+            ],
+            false,
+        );
+
+        self::assertCount(2, $resolvedPackages);
     }
 
     /** @return array<string, array{0: array<string, string>, 1: non-empty-string, 2: non-empty-string}> */
@@ -143,6 +183,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
         ))(
             $this->composer,
             $targetPlatform,
+            PhpBinaryPathBasedPlatformRepository::forTargetPlatform($targetPlatform, $this->composer),
             new RequestedPackageAndVersion(
                 $package,
                 $version,
@@ -183,6 +224,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
         ))(
             $this->composer,
             $targetPlatform,
+            PhpBinaryPathBasedPlatformRepository::forTargetPlatform($targetPlatform, $this->composer),
             new RequestedPackageAndVersion(
                 $package,
                 $version,
@@ -236,6 +278,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
         ))(
             $this->composer,
             $targetPlatform,
+            PhpBinaryPathBasedPlatformRepository::forTargetPlatform($targetPlatform, $this->composer),
             new RequestedPackageAndVersion(
                 'test-vendor/test-package',
                 '1.0.0',
@@ -286,6 +329,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
         ))(
             $this->composer,
             $targetPlatform,
+            PhpBinaryPathBasedPlatformRepository::forTargetPlatform($targetPlatform, $this->composer),
             new RequestedPackageAndVersion(
                 'test-vendor/test-package',
                 '1.0.0',
@@ -336,6 +380,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
         ))(
             $this->composer,
             $targetPlatform,
+            PhpBinaryPathBasedPlatformRepository::forTargetPlatform($targetPlatform, $this->composer),
             new RequestedPackageAndVersion(
                 'test-vendor/test-package',
                 '1.0.0',
@@ -386,6 +431,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
         ))(
             $this->composer,
             $targetPlatform,
+            PhpBinaryPathBasedPlatformRepository::forTargetPlatform($targetPlatform, $this->composer),
             new RequestedPackageAndVersion(
                 'test-vendor/test-package',
                 '1.0.0',
@@ -421,7 +467,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
         $package = (new ResolveDependencyWithComposer(
             $this->createMock(IOInterface::class),
             $this->createMock(QuieterConsoleIO::class),
-        ))($this->composer, $targetPlatform, new RequestedPackageAndVersion('asgrim/example-pie-extension', '^1.0'), false);
+        ))($this->composer, $targetPlatform, PhpBinaryPathBasedPlatformRepository::forTargetPlatform($targetPlatform, $this->composer), new RequestedPackageAndVersion('asgrim/example-pie-extension', '^1.0'), false);
 
         self::assertSame('asgrim/example-pie-extension', $package->piePackage->name());
         self::assertStringStartsWith('1.', $package->piePackage->version());
@@ -456,7 +502,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
 
         $this->expectException(BundledPhpExtensionRefusal::class);
         $this->expectExceptionMessage('Cannot install bundled PHP extension for non-stable versions of PHP');
-        $resolver->__invoke($this->composer, $targetPlatform, $requestedPackage, false);
+        $resolver->__invoke($this->composer, $targetPlatform, PhpBinaryPathBasedPlatformRepository::forTargetPlatform($targetPlatform, $this->composer), $requestedPackage, false);
     }
 
     /** @return array<non-empty-string, array{0: non-empty-string}> */
@@ -503,7 +549,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
 
         $this->expectException(BundledPhpExtensionRefusal::class);
         $this->expectExceptionMessage('Bundled PHP extension php/bundled should be installed by your distribution, not by PIE');
-        $resolver->__invoke($this->composer, $targetPlatform, $requestedPackage, false);
+        $resolver->__invoke($this->composer, $targetPlatform, PhpBinaryPathBasedPlatformRepository::forTargetPlatform($targetPlatform, $this->composer), $requestedPackage, false);
     }
 
     #[DataProvider('buildProvidersWithBundledExtensionWarnings')]
@@ -537,7 +583,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
         );
         $requestedPackage = new RequestedPackageAndVersion('php/bundled', null);
 
-        $package = $resolver->__invoke($this->composer, $targetPlatform, $requestedPackage, true);
+        $package = $resolver->__invoke($this->composer, $targetPlatform, PhpBinaryPathBasedPlatformRepository::forTargetPlatform($targetPlatform, $this->composer), $requestedPackage, true);
 
         self::assertSame('php/bundled', $package->piePackage->name());
     }

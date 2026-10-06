@@ -10,6 +10,7 @@ use Composer\IO\NullIO;
 use Composer\Package\CompletePackageInterface;
 use Composer\Repository\ComposerRepository;
 use Composer\Repository\PathRepository;
+use Composer\Repository\PlatformRepository;
 use Composer\Repository\RepositoryManager;
 use Composer\Repository\Vcs\GitHubDriver;
 use Composer\Repository\VcsRepository;
@@ -157,16 +158,18 @@ final class CommandHelperTest extends TestCase
         $resolvedA = new ResolvedPackageRequest(self::packageNamed('foo/bar', '1.0.0'), $requestedA);
         $resolvedB = new ResolvedPackageRequest(self::packageNamed('baz/qux', '2.0.0'), $requestedB);
 
-        $composer       = $this->createMock(Composer::class);
-        $targetPlatform = $this->createMock(TargetPlatform::class);
+        $composer           = $this->createMock(Composer::class);
+        $targetPlatform     = $this->createMock(TargetPlatform::class);
+        $platformRepository = $this->createMock(PlatformRepository::class);
 
         $dependencyResolver = $this->createMock(DependencyResolver::class);
         $dependencyResolver->expects(self::exactly(2))
             ->method('__invoke')
             ->willReturnCallback(
-                static function (Composer $givenComposer, TargetPlatform $givenTargetPlatform, RequestedPackageAndVersion $requested, bool $force) use ($composer, $targetPlatform, $requestedA, $requestedB, $resolvedA, $resolvedB): ResolvedPackageRequest {
+                static function (Composer $givenComposer, TargetPlatform $givenTargetPlatform, PlatformRepository $givenPlatformRepository, RequestedPackageAndVersion $requested, bool $force) use ($composer, $targetPlatform, $platformRepository, $requestedA, $requestedB, $resolvedA, $resolvedB): ResolvedPackageRequest {
                     self::assertSame($composer, $givenComposer);
                     self::assertSame($targetPlatform, $givenTargetPlatform);
+                    self::assertSame($platformRepository, $givenPlatformRepository);
                     self::assertTrue($force);
 
                     if ($requested === $requestedA) {
@@ -186,6 +189,7 @@ final class CommandHelperTest extends TestCase
             $io,
             $composer,
             $targetPlatform,
+            $platformRepository,
             [$requestedA, $requestedB],
             true,
         );
@@ -213,6 +217,7 @@ final class CommandHelperTest extends TestCase
             new NullIO(),
             $this->createMock(Composer::class),
             $this->createMock(TargetPlatform::class),
+            $this->createMock(PlatformRepository::class),
             [$requested],
             false,
         );
@@ -234,6 +239,7 @@ final class CommandHelperTest extends TestCase
             new NullIO(),
             $this->createMock(Composer::class),
             $this->createMock(TargetPlatform::class),
+            $this->createMock(PlatformRepository::class),
             [$requested],
             false,
         );
