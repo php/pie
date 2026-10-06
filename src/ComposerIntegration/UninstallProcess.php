@@ -33,7 +33,7 @@ class UninstallProcess
 
         $piePackage = Package::fromComposerCompletePackage($composerPackage);
 
-        $status = $piePackage->verifyPackageStatus($composerRequest->targetPlatform);
+        $status = $piePackage->verifyPackageStatus($targetPlatform, $targetPlatform->phpBinaryPath->extensionPath());
 
         if ($status->isVerified()) {
             $io->write(sprintf(

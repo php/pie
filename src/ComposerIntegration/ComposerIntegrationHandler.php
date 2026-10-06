@@ -96,6 +96,7 @@ class ComposerIntegrationHandler
         }
 
         $localRepository = $composer->getRepositoryManager()->getLocalRepository();
+        $extensionPath   = null;
 
         foreach ($localRepository->getPackages() as $localRepoPackage) {
             $extName = ExtensionName::determineFromComposerPackage($localRepoPackage);
@@ -107,7 +108,8 @@ class ComposerIntegrationHandler
             assert($localRepoPackage instanceof CompletePackageInterface);
             $piePackage            = Package::fromComposerCompletePackage($localRepoPackage);
             $installedJsonMetadata = $piePackage->installedJsonMetadata();
-            $status                = $piePackage->verifyPackageStatus($targetPlatform);
+            $extensionPath       ??= $targetPlatform->phpBinaryPath->extensionPath();
+            $status                = $piePackage->verifyPackageStatus($targetPlatform, $extensionPath);
 
             $this->arrayCollectionIo->write(sprintf(
                 'Install status %s (%s) status=%s',

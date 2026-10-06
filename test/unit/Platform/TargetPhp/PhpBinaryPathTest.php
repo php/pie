@@ -61,14 +61,16 @@ use const PHP_MAJOR_VERSION;
 use const PHP_MINOR_VERSION;
 use const PHP_OS_FAMILY;
 use const PHP_RELEASE_VERSION;
+use const PHP_VERSION;
 
 #[CoversClass(PhpBinaryPath::class)]
 final class PhpBinaryPathTest extends TestCase
 {
-    private const FAKE_PHP_EXECUTABLE     = __DIR__ . '/../../../assets/fake-php.sh';
-    private const PHP_INVALID_VERSION     = __DIR__ . '/../../../assets/fake-php-invalid-version.sh';
-    private const VALID_PHP_WITH_WARNINGS = __DIR__ . '/../../../assets/valid-php-with-warnings.sh';
-    private const PHP_RECORDING_ARGUMENTS = __DIR__ . '/../../../assets/php-recording-arguments.sh';
+    private const FAKE_PHP_EXECUTABLE             = __DIR__ . '/../../../assets/fake-php.sh';
+    private const PHP_INVALID_VERSION             = __DIR__ . '/../../../assets/fake-php-invalid-version.sh';
+    private const VALID_PHP_WITH_WARNINGS         = __DIR__ . '/../../../assets/valid-php-with-warnings.sh';
+    private const PHP_RECORDING_ARGUMENTS         = __DIR__ . '/../../../assets/php-recording-arguments.sh';
+    private const PHP_WITH_WARNINGS_AROUND_OUTPUT = __DIR__ . '/../../../assets/php-with-warnings-around-output.sh';
 
     public function testNonExistentPhpBinaryIsRejected(): void
     {
@@ -147,10 +149,31 @@ final class PhpBinaryPathTest extends TestCase
         chmod($tmpSh, 0777);
 
         $phpBinary = $this->createPartialMock(PhpBinaryPath::class, []);
-        (new ReflectionMethod($phpBinary, '__construct'))->invoke($phpBinary, $tmpSh, $tmpSh);
+        (new ReflectionMethod($phpBinary, '__construct'))->invoke($phpBinary, $tmpSh, $tmpSh, PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION, PHP_VERSION);
 
         self::assertSame($expectedLibdir, $phpBinary->phpConfigLibdir());
         unlink($tmpSh);
+    }
+
+    public function testVersionDetailsAreReadCorrectlyWhenSurroundedByWarningsAndDeprecations(): void
+    {
+        if (Platform::isWindows()) {
+            self::markTestSkipped('Bash script does not run on Windows.');
+        }
+
+        $_ENV['PIE_TEST_REAL_PHP'] = PHP_BINARY;
+
+        try {
+            $phpBinary = PhpBinaryPath::fromPhpBinaryPath(self::PHP_WITH_WARNINGS_AROUND_OUTPUT);
+
+            self::assertSame(PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION . '.' . PHP_RELEASE_VERSION, $phpBinary->version());
+            self::assertSame(PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION, $phpBinary->majorMinorVersion());
+            self::assertSame(PHP_MAJOR_VERSION, $phpBinary->majorVersion());
+            self::assertSame(PHP_MINOR_VERSION, $phpBinary->minorVersion());
+            self::assertSame(PHP_VERSION, $phpBinary->phpVersionWithExtra());
+        } finally {
+            unset($_ENV['PIE_TEST_REAL_PHP']);
+        }
     }
 
     public function testVersionFromCurrentProcess(): void
@@ -328,7 +351,7 @@ final class PhpBinaryPathTest extends TestCase
         chmod($tmpSh, 0777);
 
         $phpBinary = $this->createPartialMock(PhpBinaryPath::class, ['operatingSystem', 'phpinfo', 'phpIntSize']);
-        (new ReflectionMethod($phpBinary, '__construct'))->invoke($phpBinary, $tmpSh, null);
+        (new ReflectionMethod($phpBinary, '__construct'))->invoke($phpBinary, $tmpSh, null, PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION, PHP_VERSION);
 
         $phpBinary->method('operatingSystem')->willReturn($os);
         $phpBinary->method('phpinfo')->willReturn($phpinfo);
@@ -405,7 +428,7 @@ final class PhpBinaryPathTest extends TestCase
     {
         $phpBinary = $this->createPartialMock(PhpBinaryPath::class, ['phpinfo']);
         (new ReflectionMethod($phpBinary, '__construct'))
-            ->invoke($phpBinary, trim((string) (new PhpExecutableFinder())->find()), null);
+            ->invoke($phpBinary, trim((string) (new PhpExecutableFinder())->find()), null, PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION, PHP_VERSION);
 
         $configuredExtensionPath = 'foo';
         self::assertDirectoryDoesNotExist($configuredExtensionPath, 'test cannot run if the same-named extension dir already exists in cwd');
@@ -425,7 +448,7 @@ final class PhpBinaryPathTest extends TestCase
     {
         $phpBinary = $this->createPartialMock(PhpBinaryPath::class, ['phpinfo']);
         (new ReflectionMethod($phpBinary, '__construct'))
-            ->invoke($phpBinary, trim((string) (new PhpExecutableFinder())->find()), null);
+            ->invoke($phpBinary, trim((string) (new PhpExecutableFinder())->find()), null, PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION, PHP_VERSION);
 
         $configuredExtensionPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('PIE_non_existent_extension_path', true);
         self::assertDirectoryDoesNotExist($configuredExtensionPath);
@@ -613,6 +636,21 @@ final class PhpBinaryPathTest extends TestCase
                 static fn (string $invocation): bool => preg_match('/(^| )-n( |$)/', $invocation) !== 1,
             )),
         );
+    }
+
+    public function testPhpIsStartedOnceWhenAskedForEachOfItsVersionDetails(): void
+    {
+        $invocations = $this->invocationsOfPhpRecordingArguments(
+            static fn (PhpBinaryPath $php): array => [
+                $php->version(),
+                $php->majorMinorVersion(),
+                $php->majorVersion(),
+                $php->minorVersion(),
+                $php->phpVersionWithExtra(),
+            ],
+        );
+
+        self::assertCount(1, $invocations);
     }
 
     /** @return array<string, array{0: callable(PhpBinaryPath): mixed}> */

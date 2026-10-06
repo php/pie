@@ -44,9 +44,15 @@ final class PiePackageList implements Countable
 
     public function onlyVerifiedFor(TargetPlatform $targetPlatform): self
     {
+        if ($this->piePackages === []) {
+            return new self([]);
+        }
+
+        $extensionPath = $targetPlatform->phpBinaryPath->extensionPath();
+
         return new self(array_values(array_filter(
             $this->piePackages,
-            static fn (Package $piePackage) => $piePackage->verifyPackageStatus($targetPlatform) === PackageVerificationStatus::Verified,
+            static fn (Package $piePackage) => $piePackage->verifyPackageStatus($targetPlatform, $extensionPath) === PackageVerificationStatus::Verified,
         )));
     }
 
