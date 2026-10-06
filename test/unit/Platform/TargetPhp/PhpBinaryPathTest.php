@@ -29,19 +29,23 @@ use function array_filter;
 use function array_key_exists;
 use function array_map;
 use function array_unique;
+use function array_values;
 use function assert;
 use function count;
 use function defined;
 use function dirname;
+use function explode;
 use function file_exists;
 use function get_loaded_extensions;
 use function is_dir;
 use function is_executable;
 use function phpversion;
 use function Safe\chmod;
+use function Safe\file_get_contents;
 use function Safe\file_put_contents;
 use function Safe\ini_get;
 use function Safe\mkdir;
+use function Safe\preg_match;
 use function Safe\tempnam;
 use function Safe\unlink;
 use function sprintf;
@@ -51,6 +55,7 @@ use function trim;
 use function uniqid;
 
 use const DIRECTORY_SEPARATOR;
+use const PHP_BINARY;
 use const PHP_INT_SIZE;
 use const PHP_MAJOR_VERSION;
 use const PHP_MINOR_VERSION;
@@ -63,6 +68,7 @@ final class PhpBinaryPathTest extends TestCase
     private const FAKE_PHP_EXECUTABLE     = __DIR__ . '/../../../assets/fake-php.sh';
     private const PHP_INVALID_VERSION     = __DIR__ . '/../../../assets/fake-php-invalid-version.sh';
     private const VALID_PHP_WITH_WARNINGS = __DIR__ . '/../../../assets/valid-php-with-warnings.sh';
+    private const PHP_RECORDING_ARGUMENTS = __DIR__ . '/../../../assets/php-recording-arguments.sh';
 
     public function testNonExistentPhpBinaryIsRejected(): void
     {
@@ -574,5 +580,83 @@ final class PhpBinaryPathTest extends TestCase
             ->willReturn('Debug Build => yes');
 
         self::assertSame(DebugBuild::Debug, $phpBinary->debugMode());
+    }
+
+    /** @return array<string, array{0: callable(PhpBinaryPath): mixed}> */
+    public static function iniIndependentProbeProvider(): array
+    {
+        return [
+            'valid PHP binary check' => [static fn (PhpBinaryPath $php): string => $php->phpBinaryPath],
+            'operatingSystem' => [static fn (PhpBinaryPath $php): OperatingSystem => $php->operatingSystem()],
+            'operatingSystemFamily' => [static fn (PhpBinaryPath $php): OperatingSystemFamily => $php->operatingSystemFamily()],
+            'version' => [static fn (PhpBinaryPath $php): string => $php->version()],
+            'phpVersionWithExtra' => [static fn (PhpBinaryPath $php): string => $php->phpVersionWithExtra()],
+            'majorMinorVersion' => [static fn (PhpBinaryPath $php): string => $php->majorMinorVersion()],
+            'majorVersion' => [static fn (PhpBinaryPath $php): int => $php->majorVersion()],
+            'minorVersion' => [static fn (PhpBinaryPath $php): int => $php->minorVersion()],
+            'machineType' => [static fn (PhpBinaryPath $php): Architecture => $php->machineType()],
+            'phpIntSize' => [static fn (PhpBinaryPath $php): int => $php->phpIntSize()],
+        ];
+    }
+
+    /** @param callable(PhpBinaryPath): mixed $probe */
+    #[DataProvider('iniIndependentProbeProvider')]
+    public function testIniIndependentProbesSkipLoadingIniFiles(callable $probe): void
+    {
+        $invocations = $this->invocationsOfPhpRecordingArguments($probe);
+
+        self::assertNotEmpty($invocations);
+        self::assertSame(
+            [],
+            array_values(array_filter(
+                $invocations,
+                static fn (string $invocation): bool => preg_match('/(^| )-n( |$)/', $invocation) !== 1,
+            )),
+        );
+    }
+
+    /** @return array<string, array{0: callable(PhpBinaryPath): mixed}> */
+    public static function iniDependentProbeProvider(): array
+    {
+        return [
+            'extensions' => [static fn (PhpBinaryPath $php): array => $php->extensions()],
+            'phpinfo' => [static fn (PhpBinaryPath $php): string => $php->phpinfo()],
+        ];
+    }
+
+    /** @param callable(PhpBinaryPath): mixed $probe */
+    #[DataProvider('iniDependentProbeProvider')]
+    public function testIniDependentProbesStillLoadIniFiles(callable $probe): void
+    {
+        $invocations = $this->invocationsOfPhpRecordingArguments($probe);
+
+        self::assertCount(2, $invocations);
+        self::assertDoesNotMatchRegularExpression('/(^| )-n( |$)/', $invocations[1]);
+    }
+
+    /**
+     * @param callable(PhpBinaryPath): mixed $probe
+     *
+     * @return list<string>
+     */
+    private function invocationsOfPhpRecordingArguments(callable $probe): array
+    {
+        if (Platform::isWindows()) {
+            self::markTestSkipped('Bash script does not run on Windows.');
+        }
+
+        $argumentsLog = tempnam(sys_get_temp_dir(), 'pie_php_arguments_');
+
+        $_ENV['PIE_TEST_PHP_ARGUMENTS_LOG'] = $argumentsLog;
+        $_ENV['PIE_TEST_REAL_PHP']          = PHP_BINARY;
+
+        try {
+            $probe(PhpBinaryPath::fromPhpBinaryPath(self::PHP_RECORDING_ARGUMENTS));
+
+            return array_values(array_filter(explode("\n", file_get_contents($argumentsLog))));
+        } finally {
+            unset($_ENV['PIE_TEST_PHP_ARGUMENTS_LOG'], $_ENV['PIE_TEST_REAL_PHP']);
+            unlink($argumentsLog);
+        }
     }
 }

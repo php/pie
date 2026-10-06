@@ -73,7 +73,7 @@ class PhpBinaryPath
 
         // This is somewhat of a rudimentary check that the target PHP really is a PHP instance; not sure why you
         // WOULDN'T want to use a real PHP, but this should stop obvious hiccups at least (rather than for security)
-        $testOutput = self::cleanWarningAndDeprecationsFromOutput(Process::run([$phpBinaryPath, '-r', 'echo "PHP";']));
+        $testOutput = self::cleanWarningAndDeprecationsFromOutput(Process::run([$phpBinaryPath, '-n', '-r', 'echo "PHP";']));
 
         if ($testOutput !== 'PHP') {
             throw Exception\InvalidPhpBinaryPath::fromInvalidPhpBinary($phpBinaryPath);
@@ -306,6 +306,7 @@ PHP,
     {
         $winOrNot = self::cleanWarningAndDeprecationsFromOutput(Process::run([
             $this->phpBinaryPath,
+            '-n',
             '-r',
             'echo \\defined(\'PHP_WINDOWS_VERSION_BUILD\') ? \'win\' : \'not\';',
         ]));
@@ -320,6 +321,7 @@ PHP,
         $osFamily = OperatingSystemFamily::tryFrom(strtolower(trim(
             self::cleanWarningAndDeprecationsFromOutput(Process::run([
                 $this->phpBinaryPath,
+                '-n',
                 '-r',
                 <<<'PHP'
                 if (defined('PHP_OS_FAMILY')) {
@@ -360,6 +362,7 @@ PHP,
     {
         $phpVersion = self::cleanWarningAndDeprecationsFromOutput(Process::run([
             $this->phpBinaryPath,
+            '-n',
             '-r',
             'echo PHP_MAJOR_VERSION . "." . PHP_MINOR_VERSION . "." . PHP_RELEASE_VERSION;',
         ]));
@@ -376,6 +379,7 @@ PHP,
     {
         $phpVersionWithExtra = self::cleanWarningAndDeprecationsFromOutput(Process::run([
             $this->phpBinaryPath,
+            '-n',
             '-r',
             'echo PHP_VERSION;',
         ]));
@@ -389,6 +393,7 @@ PHP,
     {
         $phpVersion = self::cleanWarningAndDeprecationsFromOutput(Process::run([
             $this->phpBinaryPath,
+            '-n',
             '-r',
             'echo PHP_MAJOR_VERSION . "." . PHP_MINOR_VERSION;',
         ]));
@@ -404,6 +409,7 @@ PHP,
     {
         $phpVersion = self::cleanWarningAndDeprecationsFromOutput(Process::run([
             $this->phpBinaryPath,
+            '-n',
             '-r',
             'echo PHP_MAJOR_VERSION;',
         ]));
@@ -416,6 +422,7 @@ PHP,
     {
         $phpVersion = self::cleanWarningAndDeprecationsFromOutput(Process::run([
             $this->phpBinaryPath,
+            '-n',
             '-r',
             'echo PHP_MINOR_VERSION;',
         ]));
@@ -442,6 +449,7 @@ PHP,
 
         $phpMachineType = self::cleanWarningAndDeprecationsFromOutput(Process::run([
             $this->phpBinaryPath,
+            '-n',
             '-r',
             'echo php_uname("m");',
         ]));
@@ -461,6 +469,7 @@ PHP,
     {
         $phpIntSize = self::cleanWarningAndDeprecationsFromOutput(Process::run([
             $this->phpBinaryPath,
+            '-n',
             '-r',
             'echo PHP_INT_SIZE;',
         ]));
