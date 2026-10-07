@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+printf '%s\n' "$*" >> "$PIE_TEST_PKG_CONFIG_INVOCATIONS_LOG"
+
+exec "$PIE_TEST_REAL_PKG_CONFIG" "$@"

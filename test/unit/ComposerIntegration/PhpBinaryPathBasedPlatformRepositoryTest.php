@@ -15,6 +15,7 @@ use Php\Pie\DependencyResolver\Package;
 use Php\Pie\ExtensionName;
 use Php\Pie\Platform\InstalledPiePackages;
 use Php\Pie\Platform\PiePackageList;
+use Php\Pie\Platform\PkgConfig;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Util\Process;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -25,6 +26,7 @@ use Symfony\Component\Process\Exception\ProcessFailedException;
 use function array_combine;
 use function array_filter;
 use function array_map;
+use function array_values;
 use function in_array;
 use function str_starts_with;
 
@@ -51,7 +53,7 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
                 'another' => '1.2.3-alpha.34',
             ]);
 
-        $platformRepository = new PhpBinaryPathBasedPlatformRepository($phpBinaryPath, $composer, $installedPiePackages, []);
+        $platformRepository = new PhpBinaryPathBasedPlatformRepository($phpBinaryPath, $composer, $installedPiePackages, $this->createMock(PkgConfig::class), []);
 
         self::assertSame(
             [
@@ -91,7 +93,7 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
                 'extension_being_installed' => '1.2.3',
             ]);
 
-        $platformRepository = new PhpBinaryPathBasedPlatformRepository($phpBinaryPath, $composer, $installedPiePackages, [$extensionBeingInstalled]);
+        $platformRepository = new PhpBinaryPathBasedPlatformRepository($phpBinaryPath, $composer, $installedPiePackages, $this->createMock(PkgConfig::class), [$extensionBeingInstalled]);
 
         self::assertSame(
             [
@@ -134,7 +136,7 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
                 'replaced_extension' => '3.0.0',
             ]);
 
-        $platformRepository = new PhpBinaryPathBasedPlatformRepository($phpBinaryPath, $composer, $installedPiePackages, [$extensionBeingInstalled]);
+        $platformRepository = new PhpBinaryPathBasedPlatformRepository($phpBinaryPath, $composer, $installedPiePackages, $this->createMock(PkgConfig::class), [$extensionBeingInstalled]);
 
         self::assertSame(
             [
@@ -148,6 +150,43 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
                     static fn (PackageInterface $package): bool => ! str_starts_with($package->getName(), 'lib-'),
                 ),
             ),
+        );
+    }
+
+    public function testPlatformRepositoryContainsLibrariesReportedByPkgConfig(): void
+    {
+        $installedPiePackages = $this->createMock(InstalledPiePackages::class);
+        $installedPiePackages->method('allPiePackages')->willReturn(new PiePackageList([]));
+
+        $phpBinaryPath = $this->createMock(PhpBinaryPath::class);
+        $phpBinaryPath->method('version')->willReturn('8.1.0');
+        $phpBinaryPath->method('extensions')->willReturn(['foo' => '8.1.0']);
+
+        $pkgConfig = $this->createMock(PkgConfig::class);
+        $pkgConfig->expects(self::once())
+            ->method('versionsOf')
+            ->with(self::containsIdentical('libpcre2-8'))
+            ->willReturn([
+                'libpcre2-8' => '10.45',
+                'libcurl' => '8.12.1',
+                'gdlib' => 'not-a-version',
+            ]);
+
+        $platformRepository = new PhpBinaryPathBasedPlatformRepository($phpBinaryPath, $this->createMock(Composer::class), $installedPiePackages, $pkgConfig, []);
+
+        self::assertSame(
+            [
+                'lib-curl:8.12.1:8.12.1.0',
+                'lib-gdlib:not-a-version:*',
+                'lib-pcre:10.45:10.45.0.0',
+            ],
+            array_values(array_map(
+                static fn (PackageInterface $package): string => $package->getName() . ':' . $package->getPrettyVersion() . ':' . $package->getVersion(),
+                array_filter(
+                    $platformRepository->getPackages(),
+                    static fn (PackageInterface $package): bool => str_starts_with($package->getName(), 'lib-'),
+                ),
+            )),
         );
     }
 
@@ -230,6 +269,7 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
                     PhpBinaryPath::fromCurrentProcess(),
                     $this->createMock(Composer::class),
                     $installedPiePackages,
+                    PkgConfig::detect(),
                     [ExtensionName::normaliseFromString('extension_being_installed')],
                 ))->getPackages(),
             ),

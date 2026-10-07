@@ -10,6 +10,7 @@ use Composer\Package\CompletePackageInterface;
 use Composer\Package\Version\VersionParser;
 use Composer\Repository\ComposerRepository;
 use Composer\Repository\PathRepository;
+use Composer\Repository\PlatformRepository;
 use Composer\Repository\VcsRepository;
 use Composer\Util\Platform;
 use InvalidArgumentException;
@@ -464,14 +465,16 @@ final class CommandHelper
         IOInterface $io,
         Composer $composer,
         TargetPlatform $targetPlatform,
+        PlatformRepository $platformRepository,
         array $requestedNamesAndVersions,
         bool $forceInstallPackageVersion,
     ): array {
         return array_map(
-            static function (RequestedPackageAndVersion $requestedNameAndVersion) use ($dependencyResolver, $io, $composer, $targetPlatform, $forceInstallPackageVersion): ResolvedPackageRequest {
+            static function (RequestedPackageAndVersion $requestedNameAndVersion) use ($dependencyResolver, $io, $composer, $targetPlatform, $platformRepository, $forceInstallPackageVersion): ResolvedPackageRequest {
                 $resolvedPackage = $dependencyResolver(
                     $composer,
                     $targetPlatform,
+                    $platformRepository,
                     $requestedNameAndVersion,
                     $forceInstallPackageVersion,
                 );

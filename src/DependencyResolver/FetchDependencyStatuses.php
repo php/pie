@@ -4,12 +4,9 @@ declare(strict_types=1);
 
 namespace Php\Pie\DependencyResolver;
 
-use Composer\Composer;
 use Composer\Package\CompletePackageInterface;
+use Composer\Repository\PlatformRepository;
 use Composer\Semver\Constraint\Constraint;
-use Php\Pie\ComposerIntegration\PhpBinaryPathBasedPlatformRepository;
-use Php\Pie\Platform\InstalledPiePackages;
-use Php\Pie\Platform\TargetPlatform;
 
 use function array_key_exists;
 use function count;
@@ -18,7 +15,7 @@ use function count;
 class FetchDependencyStatuses
 {
     /** @return list<DependencyStatus> */
-    public function __invoke(TargetPlatform $targetPlatform, Composer $composer, CompletePackageInterface $package): array
+    public function __invoke(PlatformRepository $platformRepository, CompletePackageInterface $package): array
     {
         $requires = $package->getRequires();
 
@@ -28,8 +25,7 @@ class FetchDependencyStatuses
 
         /** @var array<string, Constraint> $platformConstraints */
         $platformConstraints = [];
-        $composerPlatform    = new PhpBinaryPathBasedPlatformRepository($targetPlatform->phpBinaryPath, $composer, new InstalledPiePackages(), []);
-        foreach ($composerPlatform->getPackages() as $platformPackage) {
+        foreach ($platformRepository->getPackages() as $platformPackage) {
             $platformConstraints[$platformPackage->getName()] = new Constraint('==', $platformPackage->getVersion());
         }
 

@@ -12,13 +12,14 @@ use Composer\Repository\PlatformRepository;
 use Composer\Semver\VersionParser;
 use Php\Pie\ExtensionName;
 use Php\Pie\Platform\InstalledPiePackages;
+use Php\Pie\Platform\PkgConfig;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
-use Php\Pie\Util\Process;
-use Symfony\Component\Process\Exception\ProcessFailedException;
+use Php\Pie\Platform\TargetPlatform;
 use UnexpectedValueException;
 
+use function array_key_exists;
 use function array_map;
-use function explode;
+use function array_values;
 use function in_array;
 use function str_replace;
 use function str_starts_with;
@@ -29,10 +30,46 @@ use function substr;
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 class PhpBinaryPathBasedPlatformRepository extends PlatformRepository
 {
+    /**
+     * The key is the name of the dependency in `composer.json`, but without
+     * the `lib-` prefix; e.g. `curl` would be `lib-curl` in the
+     * `composer.json`. The value is the name of the library to look up using
+     * `pkg-config`.
+     */
+    private const PKG_CONFIG_LIBRARIES = [
+        'curl' => 'libcurl',
+        'enchant' => 'enchant',
+        'enchant-2' => 'enchant-2',
+        'sodium' => 'libsodium',
+        'ffi' => 'libffi',
+        'xslt' => 'libxslt',
+        'zip' => 'libzip',
+        'png' => 'libpng',
+        'avif' => 'libavif',
+        'webp' => 'libwebp',
+        'jpeg' => 'libjpeg',
+        'xpm' => 'xpm',
+        'freetype2' => 'freetype2',
+        'gdlib' => 'gdlib',
+        'gmp' => 'gmp',
+        'gpgme' => 'gpgme',
+        'pam' => 'pam',
+        'sasl' => 'libsasl2',
+        'onig' => 'oniguruma',
+        'odbc' => 'libiodbc',
+        'capstone' => 'capstone',
+        'pcre' => 'libpcre2-8',
+        'edit' => 'libedit',
+        'snmp' => 'netsnmp',
+        'argon2' => 'libargon2',
+        'uriparser' => 'liburiparser',
+        'exslt' => 'libexslt',
+    ];
+
     private VersionParser $versionParser;
 
     /** @param list<ExtensionName> $extensionsBeingInstalled */
-    public function __construct(PhpBinaryPath $phpBinaryPath, Composer $composer, InstalledPiePackages $installedPiePackages, array $extensionsBeingInstalled)
+    public function __construct(PhpBinaryPath $phpBinaryPath, Composer $composer, InstalledPiePackages $installedPiePackages, PkgConfig $pkgConfig, array $extensionsBeingInstalled)
     {
         $this->versionParser = new VersionParser();
         $this->packages      = [];
@@ -85,9 +122,14 @@ class PhpBinaryPathBasedPlatformRepository extends PlatformRepository
             $this->addPackage($this->packageForExtension($extension, $extensionVersion));
         }
 
-        $this->addLibrariesUsingPkgConfig();
+        $this->addLibrariesUsingPkgConfig($pkgConfig);
 
         parent::__construct();
+    }
+
+    public static function forTargetPlatform(TargetPlatform $targetPlatform, Composer $composer): self
+    {
+        return new self($targetPlatform->phpBinaryPath, $composer, new InstalledPiePackages(), PkgConfig::detect(), []);
     }
 
     private function packageForExtension(string $name, string $prettyVersion): CompletePackageInterface
@@ -119,69 +161,29 @@ class PhpBinaryPathBasedPlatformRepository extends PlatformRepository
     }
 
     /**
-     * The `$alias` parameter is the name of the dependency in `composer.json`,
-     * but without the `lib-` prefix; e.g. `curl` would be `lib-curl` in the
-     * `composer.json`.
-     *
-     * The `$library` parameter should be the name of the library to look up
-     * using `pkg-config`.
-     */
-    private function detectLibraryWithPkgConfig(string $alias, string $library): void
-    {
-        try {
-            $pkgConfigResult = Process::run(['pkg-config', '--print-provides', '--print-errors', $library]);
-        } catch (ProcessFailedException) {
-            return;
-        }
-
-        [$library, $prettyVersion] = explode('=', $pkgConfigResult);
-        if (! $library || ! $prettyVersion) {
-            return;
-        }
-
-        try {
-            $version = $this->versionParser->normalize($prettyVersion);
-        } catch (UnexpectedValueException) {
-            $version = '*'; // @todo check this is the best way to handle unparsed versions?
-        }
-
-        $lib = new CompletePackage('lib-' . $alias, $version, $prettyVersion);
-        $lib->setDescription('The ' . $alias . ' library, ' . $library);
-        $this->addPackage($lib);
-    }
-
-    /**
      * Instructions for PIE to install these libraries, if they are missing, should be added
      * into {@see \Php\Pie\DependencyResolver\DependencyInstaller\SystemDependenciesDefinition::default()}
      */
-    private function addLibrariesUsingPkgConfig(): void
+    private function addLibrariesUsingPkgConfig(PkgConfig $pkgConfig): void
     {
-        $this->detectLibraryWithPkgConfig('curl', 'libcurl');
-        $this->detectLibraryWithPkgConfig('enchant', 'enchant');
-        $this->detectLibraryWithPkgConfig('enchant-2', 'enchant-2');
-        $this->detectLibraryWithPkgConfig('sodium', 'libsodium');
-        $this->detectLibraryWithPkgConfig('ffi', 'libffi');
-        $this->detectLibraryWithPkgConfig('xslt', 'libxslt');
-        $this->detectLibraryWithPkgConfig('zip', 'libzip');
-        $this->detectLibraryWithPkgConfig('png', 'libpng');
-        $this->detectLibraryWithPkgConfig('avif', 'libavif');
-        $this->detectLibraryWithPkgConfig('webp', 'libwebp');
-        $this->detectLibraryWithPkgConfig('jpeg', 'libjpeg');
-        $this->detectLibraryWithPkgConfig('xpm', 'xpm');
-        $this->detectLibraryWithPkgConfig('freetype2', 'freetype2');
-        $this->detectLibraryWithPkgConfig('gdlib', 'gdlib');
-        $this->detectLibraryWithPkgConfig('gmp', 'gmp');
-        $this->detectLibraryWithPkgConfig('gpgme', 'gpgme');
-        $this->detectLibraryWithPkgConfig('pam', 'pam');
-        $this->detectLibraryWithPkgConfig('sasl', 'libsasl2');
-        $this->detectLibraryWithPkgConfig('onig', 'oniguruma');
-        $this->detectLibraryWithPkgConfig('odbc', 'libiodbc');
-        $this->detectLibraryWithPkgConfig('capstone', 'capstone');
-        $this->detectLibraryWithPkgConfig('pcre', 'libpcre2-8');
-        $this->detectLibraryWithPkgConfig('edit', 'libedit');
-        $this->detectLibraryWithPkgConfig('snmp', 'netsnmp');
-        $this->detectLibraryWithPkgConfig('argon2', 'libargon2');
-        $this->detectLibraryWithPkgConfig('uriparser', 'liburiparser');
-        $this->detectLibraryWithPkgConfig('exslt', 'libexslt');
+        $libraryVersions = $pkgConfig->versionsOf(array_values(self::PKG_CONFIG_LIBRARIES));
+
+        foreach (self::PKG_CONFIG_LIBRARIES as $alias => $library) {
+            if (! array_key_exists($library, $libraryVersions)) {
+                continue;
+            }
+
+            $prettyVersion = $libraryVersions[$library];
+
+            try {
+                $version = $this->versionParser->normalize($prettyVersion);
+            } catch (UnexpectedValueException) {
+                $version = '*'; // @todo check this is the best way to handle unparsed versions?
+            }
+
+            $lib = new CompletePackage('lib-' . $alias, $version, $prettyVersion);
+            $lib->setDescription('The ' . $alias . ' library, ' . $library);
+            $this->addPackage($lib);
+        }
     }
 }

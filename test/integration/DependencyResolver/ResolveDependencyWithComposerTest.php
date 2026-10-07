@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\PieIntegrationTest\DependencyResolver;
 
 use Composer\IO\IOInterface;
+use Php\Pie\ComposerIntegration\PhpBinaryPathBasedPlatformRepository;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieOperation;
@@ -78,19 +79,22 @@ final class ResolveDependencyWithComposerTest extends TestCase
             $requestedVersion,
         );
 
-        $package = $resolve->__invoke(
-            PieComposerFactory::createPieComposer(
-                $container,
-                new PieComposerRequest(
-                    $this->createMock(IOInterface::class),
-                    $targetPlatform,
-                    [$requestedPackageAndVersion],
-                    PieOperation::Resolve,
-                    [],
-                    false,
-                ),
+        $composer = PieComposerFactory::createPieComposer(
+            $container,
+            new PieComposerRequest(
+                $this->createMock(IOInterface::class),
+                $targetPlatform,
+                [$requestedPackageAndVersion],
+                PieOperation::Resolve,
+                [],
+                false,
             ),
+        );
+
+        $package = $resolve->__invoke(
+            $composer,
             $targetPlatform,
+            PhpBinaryPathBasedPlatformRepository::forTargetPlatform($targetPlatform, $composer),
             $requestedPackageAndVersion,
             false,
         );

@@ -10,6 +10,8 @@ use Composer\Installer;
 use Composer\IO\IOInterface;
 use Composer\Package\CompleteAliasPackage;
 use Composer\Package\CompletePackageInterface;
+use Composer\Package\Version\VersionSelector;
+use Composer\Repository\RepositorySet;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\DependencyResolver\ResolvedPackageRequest;
 use Php\Pie\ExtensionName;
@@ -36,17 +38,15 @@ class ComposerIntegrationHandler
 
     private function addPackageIntoPieJson(
         ResolvedPackageRequest $resolvedPackageRequest,
-        Composer $composer,
-        TargetPlatform $targetPlatform,
         PieJsonEditor $pieJsonEditor,
     ): void {
-        $versionSelector = VersionSelectorFactory::make($composer, $resolvedPackageRequest->requestedPackageAndVersion, $targetPlatform);
-
         $recommendedRequireVersion = $resolvedPackageRequest->requestedPackageAndVersion->version;
 
         // If user did not request a specific require version, use Composer to recommend one for the pie.json
         if ($recommendedRequireVersion === null) {
-            $recommendedRequireVersion = $versionSelector->findRecommendedRequireVersion($resolvedPackageRequest->piePackage->composerPackage());
+            // The recommendation is derived from the package alone, so the selector needs no repositories
+            $recommendedRequireVersion = (new VersionSelector(new RepositorySet()))
+                ->findRecommendedRequireVersion($resolvedPackageRequest->piePackage->composerPackage());
         }
 
         if ($resolvedPackageRequest->piePackage->isBundledPhpExtension()) {
@@ -82,8 +82,6 @@ class ComposerIntegrationHandler
         array_map(
             fn (ResolvedPackageRequest $resolvedPackageRequest) => $this->addPackageIntoPieJson(
                 $resolvedPackageRequest,
-                $composer,
-                $targetPlatform,
                 $pieJsonEditor,
             ),
             $resolvedRequestedPackages,
@@ -98,6 +96,7 @@ class ComposerIntegrationHandler
         }
 
         $localRepository = $composer->getRepositoryManager()->getLocalRepository();
+        $extensionPath   = null;
 
         foreach ($localRepository->getPackages() as $localRepoPackage) {
             $extName = ExtensionName::determineFromComposerPackage($localRepoPackage);
@@ -109,7 +108,8 @@ class ComposerIntegrationHandler
             assert($localRepoPackage instanceof CompletePackageInterface);
             $piePackage            = Package::fromComposerCompletePackage($localRepoPackage);
             $installedJsonMetadata = $piePackage->installedJsonMetadata();
-            $status                = $piePackage->verifyPackageStatus($targetPlatform);
+            $extensionPath       ??= $targetPlatform->phpBinaryPath->extensionPath();
+            $status                = $piePackage->verifyPackageStatus($targetPlatform, $extensionPath);
 
             $this->arrayCollectionIo->write(sprintf(
                 'Install status %s (%s) status=%s',

@@ -276,9 +276,9 @@ final class Package
         return $this->installedJsonMetadata;
     }
 
-    public function verifyPackageStatus(TargetPlatform $targetPlatform): PackageVerificationStatus
+    /** @param non-empty-string $extensionPath */
+    public function verifyPackageStatus(TargetPlatform $targetPlatform, string $extensionPath): PackageVerificationStatus
     {
-        $extensionPath    = $targetPlatform->phpBinaryPath->extensionPath();
         $isWindows        = $targetPlatform->operatingSystem === OperatingSystem::Windows;
         $phpExtensionName = $this->extensionName->name();
 

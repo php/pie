@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Php\Pie\Platform\TargetPhp;
 
 use Composer\IO\IOInterface;
-use Composer\Semver\VersionParser;
 use Composer\Util\Platform;
 use Php\Pie\ExtensionName;
 use Php\Pie\Platform\Architecture;
@@ -24,7 +23,10 @@ use function array_filter;
 use function array_key_exists;
 use function array_keys;
 use function array_map;
+use function array_values;
 use function assert;
+use function count;
+use function ctype_digit;
 use function dirname;
 use function explode;
 use function file_exists;
@@ -53,15 +55,23 @@ class PhpBinaryPath
     /**
      * @param non-empty-string      $phpBinaryPath
      * @param non-empty-string|null $phpConfigPath
+     * @param non-empty-string      $versionWithExtra
      */
     private function __construct(
         public readonly string $phpBinaryPath,
         private readonly string|null $phpConfigPath,
+        private readonly int $majorVersion,
+        private readonly int $minorVersion,
+        private readonly int $releaseVersion,
+        private readonly string $versionWithExtra,
     ) {
     }
 
-    /** @param non-empty-string $phpBinaryPath */
-    private static function assertValidLookingPhpBinary(string $phpBinaryPath): void
+    /**
+     * @param non-empty-string      $phpBinaryPath
+     * @param non-empty-string|null $phpConfigPath
+     */
+    private static function fromValidLookingPhpBinary(string $phpBinaryPath, string|null $phpConfigPath): self
     {
         if (! file_exists($phpBinaryPath)) {
             throw Exception\InvalidPhpBinaryPath::fromNonExistentPhpBinary($phpBinaryPath);
@@ -73,11 +83,36 @@ class PhpBinaryPath
 
         // This is somewhat of a rudimentary check that the target PHP really is a PHP instance; not sure why you
         // WOULDN'T want to use a real PHP, but this should stop obvious hiccups at least (rather than for security)
-        $testOutput = self::cleanWarningAndDeprecationsFromOutput(Process::run([$phpBinaryPath, '-r', 'echo "PHP";']));
+        $versionDetails = array_values(array_filter(
+            array_map(
+                'trim',
+                explode("\n", self::cleanWarningAndDeprecationsFromOutput(Process::run([
+                    $phpBinaryPath,
+                    '-n',
+                    '-r',
+                    'echo PHP_MAJOR_VERSION . "\n" . PHP_MINOR_VERSION . "\n" . PHP_RELEASE_VERSION . "\n" . PHP_VERSION;',
+                ]))),
+            ),
+            static fn (string $line): bool => $line !== '',
+        ));
 
-        if ($testOutput !== 'PHP') {
+        if (
+            count($versionDetails) !== 4
+            || ! ctype_digit($versionDetails[0])
+            || ! ctype_digit($versionDetails[1])
+            || ! ctype_digit($versionDetails[2])
+        ) {
             throw Exception\InvalidPhpBinaryPath::fromInvalidPhpBinary($phpBinaryPath);
         }
+
+        return new self(
+            $phpBinaryPath,
+            $phpConfigPath,
+            (int) $versionDetails[0],
+            (int) $versionDetails[1],
+            (int) $versionDetails[2],
+            $versionDetails[3],
+        );
     }
 
     /** @return non-empty-string */
@@ -306,6 +341,7 @@ PHP,
     {
         $winOrNot = self::cleanWarningAndDeprecationsFromOutput(Process::run([
             $this->phpBinaryPath,
+            '-n',
             '-r',
             'echo \\defined(\'PHP_WINDOWS_VERSION_BUILD\') ? \'win\' : \'not\';',
         ]));
@@ -320,6 +356,7 @@ PHP,
         $osFamily = OperatingSystemFamily::tryFrom(strtolower(trim(
             self::cleanWarningAndDeprecationsFromOutput(Process::run([
                 $this->phpBinaryPath,
+                '-n',
                 '-r',
                 <<<'PHP'
                 if (defined('PHP_OS_FAMILY')) {
@@ -358,70 +395,29 @@ PHP,
     /** @return non-empty-string */
     public function version(): string
     {
-        $phpVersion = self::cleanWarningAndDeprecationsFromOutput(Process::run([
-            $this->phpBinaryPath,
-            '-r',
-            'echo PHP_MAJOR_VERSION . "." . PHP_MINOR_VERSION . "." . PHP_RELEASE_VERSION;',
-        ]));
-        Assert::stringNotEmpty($phpVersion, 'Could not determine PHP version');
-
-        // normalizing the version will throw an exception if it is not a valid version
-        (new VersionParser())->normalize($phpVersion);
-
-        return $phpVersion;
+        return $this->majorVersion . '.' . $this->minorVersion . '.' . $this->releaseVersion;
     }
 
     /** @return non-empty-string */
     public function phpVersionWithExtra(): string
     {
-        $phpVersionWithExtra = self::cleanWarningAndDeprecationsFromOutput(Process::run([
-            $this->phpBinaryPath,
-            '-r',
-            'echo PHP_VERSION;',
-        ]));
-        Assert::stringNotEmpty($phpVersionWithExtra, 'Could not determine PHP_VERSION');
-
-        return $phpVersionWithExtra;
+        return $this->versionWithExtra;
     }
 
     /** @return non-empty-string */
     public function majorMinorVersion(): string
     {
-        $phpVersion = self::cleanWarningAndDeprecationsFromOutput(Process::run([
-            $this->phpBinaryPath,
-            '-r',
-            'echo PHP_MAJOR_VERSION . "." . PHP_MINOR_VERSION;',
-        ]));
-        Assert::stringNotEmpty($phpVersion, 'Could not determine PHP version');
-
-        // normalizing the version will throw an exception if it is not a valid version
-        (new VersionParser())->normalize($phpVersion);
-
-        return $phpVersion;
+        return $this->majorVersion . '.' . $this->minorVersion;
     }
 
     public function majorVersion(): int
     {
-        $phpVersion = self::cleanWarningAndDeprecationsFromOutput(Process::run([
-            $this->phpBinaryPath,
-            '-r',
-            'echo PHP_MAJOR_VERSION;',
-        ]));
-        Assert::stringNotEmpty($phpVersion, 'Could not determine PHP version');
-
-        return (int) $phpVersion;
+        return $this->majorVersion;
     }
 
     public function minorVersion(): int
     {
-        $phpVersion = self::cleanWarningAndDeprecationsFromOutput(Process::run([
-            $this->phpBinaryPath,
-            '-r',
-            'echo PHP_MINOR_VERSION;',
-        ]));
-        Assert::stringNotEmpty($phpVersion, 'Could not determine PHP version');
-
-        return (int) $phpVersion;
+        return $this->minorVersion;
     }
 
     public function machineType(): Architecture
@@ -442,6 +438,7 @@ PHP,
 
         $phpMachineType = self::cleanWarningAndDeprecationsFromOutput(Process::run([
             $this->phpBinaryPath,
+            '-n',
             '-r',
             'echo php_uname("m");',
         ]));
@@ -461,6 +458,7 @@ PHP,
     {
         $phpIntSize = self::cleanWarningAndDeprecationsFromOutput(Process::run([
             $this->phpBinaryPath,
+            '-n',
             '-r',
             'echo PHP_INT_SIZE;',
         ]));
@@ -500,17 +498,13 @@ PHP,
         $phpExecutable = self::cleanWarningAndDeprecationsFromOutput(Process::run([$phpConfig, '--php-binary']));
         Assert::stringNotEmpty($phpExecutable, 'Could not find path to PHP executable.');
 
-        self::assertValidLookingPhpBinary($phpExecutable);
-
-        return new self($phpExecutable, $phpConfig);
+        return self::fromValidLookingPhpBinary($phpExecutable, $phpConfig);
     }
 
     /** @param non-empty-string $phpBinary */
     public static function fromPhpBinaryPath(string $phpBinary): self
     {
-        self::assertValidLookingPhpBinary($phpBinary);
-
-        return new self($phpBinary, null);
+        return self::fromValidLookingPhpBinary($phpBinary, null);
     }
 
     public static function fromCurrentProcess(): self
@@ -518,9 +512,20 @@ PHP,
         $phpExecutable = trim((string) (new PhpExecutableFinder())->find());
         Assert::stringNotEmpty($phpExecutable, 'Could not find path to PHP executable.');
 
-        self::assertValidLookingPhpBinary($phpExecutable);
+        return self::guessWithPhpConfig(self::fromValidLookingPhpBinary($phpExecutable, null));
+    }
 
-        return self::guessWithPhpConfig(new self($phpExecutable, null));
+    /** @param non-empty-string $phpConfigPath */
+    private function withPhpConfigPath(string $phpConfigPath): self
+    {
+        return new self(
+            $this->phpBinaryPath,
+            $phpConfigPath,
+            $this->majorVersion,
+            $this->minorVersion,
+            $this->releaseVersion,
+            $this->versionWithExtra,
+        );
     }
 
     private static function guessWithPhpConfig(self $phpBinaryPath): self
@@ -554,11 +559,11 @@ PHP,
 
             // older versions of php-config did not have `--phpapi`, so we can't perform this validation
             if ($phpConfigApiVersionProcess->run() !== 0) {
-                return new self($phpBinaryPath->phpBinaryPath, $phpConfigAttempt);
+                return $phpBinaryPath->withPhpConfigPath($phpConfigAttempt);
             }
 
             if (trim($phpConfigApiVersionProcess->getOutput()) === $phpBinaryPath->phpApiVersion()) {
-                return new self($phpBinaryPath->phpBinaryPath, $phpConfigAttempt);
+                return $phpBinaryPath->withPhpConfigPath($phpConfigAttempt);
             }
         }
 

@@ -6,6 +6,7 @@ namespace Php\Pie\DependencyResolver\DependencyInstaller;
 
 use Composer\Composer;
 use Composer\IO\IOInterface;
+use Composer\Repository\PlatformRepository;
 use Php\Pie\DependencyResolver\DependencyResolver;
 use Php\Pie\DependencyResolver\DependencyStatus;
 use Php\Pie\DependencyResolver\FetchDependencyStatuses;
@@ -39,13 +40,14 @@ class PrescanSystemDependencies
     public function __invoke(
         Composer $composer,
         TargetPlatform $targetPlatform,
+        PlatformRepository $platformRepository,
         RequestedPackageAndVersion $requestedNameAndVersion,
         bool $autoInstallIfMissing,
-    ): void {
+    ): bool {
         if ($this->packageManager === null) {
             $this->io->writeError('<comment>Skipping pre-scan of system dependencies, as a supported package manager could not be detected.</comment>', verbosity: IOInterface::VERBOSE);
 
-            return;
+            return false;
         }
 
         $this->io->write(sprintf('Checking system dependencies are present for extension %s', $requestedNameAndVersion->prettyNameAndVersion()), verbosity: IOInterface::VERBOSE);
@@ -53,12 +55,13 @@ class PrescanSystemDependencies
         $package = ($this->dependencyResolver)(
             $composer,
             $targetPlatform,
+            $platformRepository,
             $requestedNameAndVersion,
             true,
         );
 
         $unmetDependencies = array_filter(
-            ($this->fetchDependencyStatuses)($targetPlatform, $composer, $package->piePackage->composerPackage()),
+            ($this->fetchDependencyStatuses)($platformRepository, $package->piePackage->composerPackage()),
             static function (DependencyStatus $dependencyStatus): bool {
                 return ! $dependencyStatus->satisfied();
             },
@@ -67,7 +70,7 @@ class PrescanSystemDependencies
         if (! count($unmetDependencies)) {
             $this->io->write('All system dependencies are already installed.', verbosity: IOInterface::VERBOSE);
 
-            return;
+            return false;
         }
 
         $this->io->write(
@@ -83,7 +86,7 @@ class PrescanSystemDependencies
         if (! count($packageManagerPackages)) {
             $this->io->writeError('No system dependencies could be installed automatically by PIE.', verbosity: IOInterface::VERBOSE);
 
-            return;
+            return false;
         }
 
         $proposedInstallCommand = implode(' ', $this->packageManager->installCommand($packageManagerPackages));
@@ -93,7 +96,7 @@ class PrescanSystemDependencies
             $this->io->writeError('You may need to run: ' . $proposedInstallCommand . '</warning>');
             $this->io->writeError('');
 
-            return;
+            return false;
         }
 
         $this->io->write(sprintf('<info>Need to install missing system dependencies:</info> %s', $proposedInstallCommand));
@@ -102,7 +105,7 @@ class PrescanSystemDependencies
             if (! $this->io->askConfirmation('<question>Would you like to install them now? [y/N]</question>', false)) {
                 $this->io->write('<comment>Ok, but things might not work. Just so you know.</comment>');
 
-                return;
+                return false;
             }
         }
 
@@ -113,6 +116,8 @@ class PrescanSystemDependencies
         } catch (Throwable $anything) {
             $this->io->writeError(sprintf('<info>Failed to install missing system dependencies:</info> %s', $anything->getMessage()));
         }
+
+        return true;
     }
 
     private function packageManagerPackageForDependency(DependencyStatus $unmetDependency, PackageManager $packageManager): string|null

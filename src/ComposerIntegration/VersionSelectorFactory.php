@@ -7,11 +7,10 @@ namespace Php\Pie\ComposerIntegration;
 use Composer\Composer;
 use Composer\Package\Version\VersionSelector;
 use Composer\Repository\CompositeRepository;
+use Composer\Repository\PlatformRepository;
 use Composer\Repository\RepositorySet;
 use Php\Pie\DependencyResolver\DetermineMinimumStability;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
-use Php\Pie\Platform\InstalledPiePackages;
-use Php\Pie\Platform\TargetPlatform;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class VersionSelectorFactory
@@ -31,11 +30,11 @@ final class VersionSelectorFactory
     public static function make(
         Composer $composer,
         RequestedPackageAndVersion $requestedPackageAndVersion,
-        TargetPlatform $targetPlatform,
+        PlatformRepository $platformRepository,
     ): VersionSelector {
         return new VersionSelector(
             self::factoryRepositorySet($composer, $requestedPackageAndVersion),
-            new PhpBinaryPathBasedPlatformRepository($targetPlatform->phpBinaryPath, $composer, new InstalledPiePackages(), []),
+            $platformRepository,
         );
     }
 }

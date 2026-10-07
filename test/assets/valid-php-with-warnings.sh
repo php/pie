@@ -10,4 +10,7 @@ echo "Deprecated: PHP Startup: session.sid_length INI setting is deprecated in U
 echo "PHP Deprecated:  PHP Startup: session.sid_length INI setting is deprecated in Unknown on line 0"
 
 # This is the expected output of PIE:
-echo "PHP";
+echo "8";
+echo "3";
+echo "1";
+echo "8.3.1";

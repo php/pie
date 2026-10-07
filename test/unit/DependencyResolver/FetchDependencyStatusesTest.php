@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Php\PieUnitTest\DependencyResolver;
 
-use Composer\Composer;
 use Composer\Factory;
 use Composer\IO\IOInterface;
 use Composer\Package\CompletePackage;
 use Composer\Package\Link;
+use Composer\Repository\PlatformRepository;
 use Composer\Semver\Constraint\Constraint;
 use Composer\Semver\VersionParser;
+use Php\Pie\ComposerIntegration\PhpBinaryPathBasedPlatformRepository;
 use Php\Pie\DependencyResolver\FetchDependencyStatuses;
 use Php\Pie\Platform\Architecture;
 use Php\Pie\Platform\OperatingSystem;
@@ -35,7 +36,7 @@ final class FetchDependencyStatusesTest extends TestCase
     {
         $package = new CompletePackage('vendor/foo', '1.2.3.0', '1.2.3');
 
-        self::assertEquals([], (new FetchDependencyStatuses())(TargetPlatform::fromPhpBinaryPath(PhpBinaryPath::fromCurrentProcess(), null, null), $this->createMock(Composer::class), $package));
+        self::assertEquals([], (new FetchDependencyStatuses())($this->createMock(PlatformRepository::class), $package));
     }
 
     /** @return array<non-empty-string, array{0: non-empty-string, 1: non-empty-string}> */
@@ -79,8 +80,10 @@ final class FetchDependencyStatusesTest extends TestCase
         ]);
 
         $deps = (new FetchDependencyStatuses())(
-            TargetPlatform::fromPhpBinaryPath($php, null, null),
-            Factory::create($this->createMock(IOInterface::class)),
+            PhpBinaryPathBasedPlatformRepository::forTargetPlatform(
+                TargetPlatform::fromPhpBinaryPath($php, null, null),
+                Factory::create($this->createMock(IOInterface::class)),
+            ),
             $package,
         );
 

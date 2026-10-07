@@ -7,6 +7,7 @@ namespace Php\Pie\Command;
 use Composer\IO\IOInterface;
 use Composer\IO\NullIO;
 use InvalidArgumentException;
+use Php\Pie\ComposerIntegration\PhpBinaryPathBasedPlatformRepository;
 use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\DependencyResolver\BundledPhpExtensionRefusal;
@@ -96,6 +97,8 @@ final class ShowCommand extends Command
         $phpEnabledExtensions = $targetPlatform->phpBinaryPath->extensions();
         $piePackagesMatched   = [];
         $rootPackageRequires  = $composer->getPackage()->getRequires();
+        $platformRepository   = PhpBinaryPathBasedPlatformRepository::forTargetPlatform($targetPlatform, $composer);
+        $extensionPath        = null;
 
         $this->io->write(sprintf(
             "\n" . '<options=bold,underscore>%s:</>',
@@ -103,7 +106,7 @@ final class ShowCommand extends Command
         ));
         array_walk(
             $phpEnabledExtensions,
-            function (string $version, string $phpExtensionName) use ($composer, $rootPackageRequires, $targetPlatform, $showAll, $piePackages, &$piePackagesMatched): void {
+            function (string $version, string $phpExtensionName) use ($composer, $rootPackageRequires, $targetPlatform, $platformRepository, $showAll, $piePackages, &$piePackagesMatched, &$extensionPath): void {
                 $pieMatchesForExtension = $piePackages->findByPhpFormattedExtensionName($phpExtensionName);
 
                 if (! count($pieMatchesForExtension)) {
@@ -116,7 +119,8 @@ final class ShowCommand extends Command
 
                 foreach ($pieMatchesForExtension->packages() as $piePackage) {
                     $packageName        = $piePackage->name();
-                    $verificationStatus = $piePackage->verifyPackageStatus($targetPlatform);
+                    $extensionPath    ??= $targetPlatform->phpBinaryPath->extensionPath();
+                    $verificationStatus = $piePackage->verifyPackageStatus($targetPlatform, $extensionPath);
                     $packageRequirement = array_key_exists($packageName, $rootPackageRequires) ? $rootPackageRequires[$packageName]->getPrettyConstraint() : null;
 
                     if ($verificationStatus === PackageVerificationStatus::InstalledBinaryMetadataMissing) {
@@ -137,6 +141,7 @@ final class ShowCommand extends Command
                         $latestConstrainedPackage = ($this->resolveDependencyWithComposer)(
                             $composer,
                             $targetPlatform,
+                            $platformRepository,
                             new RequestedPackageAndVersion($packageName, $packageRequirement),
                             false,
                         );
@@ -144,6 +149,7 @@ final class ShowCommand extends Command
                         $latestPackage = ($this->resolveDependencyWithComposer)(
                             $composer,
                             $targetPlatform,
+                            $platformRepository,
                             new RequestedPackageAndVersion($packageName, '*'),
                             false,
                         );
@@ -198,7 +204,9 @@ final class ShowCommand extends Command
             foreach ($unmatchedPiePackageNames as $unmatchedPiePackageName) {
                 $unmatchedPiePackage = $piePackages->findByPackageName($unmatchedPiePackageName);
 
-                $message = match ($unmatchedPiePackage->verifyPackageStatus($targetPlatform)) {
+                $extensionPath ??= $targetPlatform->phpBinaryPath->extensionPath();
+
+                $message = match ($unmatchedPiePackage->verifyPackageStatus($targetPlatform, $extensionPath)) {
                     PackageVerificationStatus::ChecksumMetadataMissing => '- was built but not installed yet.',
                     PackageVerificationStatus::InstalledBinaryMetadataMissing => '- was downloaded but has not been built yet.',
                     default => '- installed but not enabled in INI file',
