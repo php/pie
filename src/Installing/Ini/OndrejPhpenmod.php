@@ -16,12 +16,14 @@ use Php\Pie\Util\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 
 use function array_unshift;
+use function dirname;
 use function file_exists;
 use function is_dir;
 use function is_writable;
 use function rtrim;
 use function Safe\preg_match;
 use function sprintf;
+use function str_starts_with;
 
 use const DIRECTORY_SEPARATOR;
 
@@ -40,7 +42,22 @@ final class OndrejPhpenmod implements SetupIniApproach
 
     public function canBeUsed(TargetPlatform $targetPlatform): bool
     {
-        return $this->phpenmodPath() !== null;
+        return $this->phpenmodPath() !== null
+            && $this->targetPhpScansDirectoryManagedByPhpenmod($targetPlatform);
+    }
+
+    private function targetPhpScansDirectoryManagedByPhpenmod(TargetPlatform $targetPlatform): bool
+    {
+        $additionalPhpIniPath = $targetPlatform->phpBinaryPath->additionalIniDirectory();
+
+        if ($additionalPhpIniPath === null) {
+            return false;
+        }
+
+        return str_starts_with(
+            $additionalPhpIniPath,
+            dirname(sprintf($this->modsAvailablePath, $targetPlatform->phpBinaryPath->majorMinorVersion())) . DIRECTORY_SEPARATOR,
+        );
     }
 
     public function setup(
