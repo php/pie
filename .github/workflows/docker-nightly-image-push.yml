@@ -18,7 +18,7 @@ jobs:
       contents: read
       id-token: write
       attestations: write
-    uses: ./.github/workflows/build-assets.yml
+    uses: $/.github/workflows/build-assets.yml
 
   build-and-push-docker-image:
     if: github.ref_name == github.event.repository.default_branch
@@ -29,7 +29,7 @@ jobs:
       id-token: write
       attestations: write
       packages: write
-    uses: ./.github/workflows/build-and-push-docker-image.yml
+    uses: $/.github/workflows/build-and-push-docker-image.yml
     with:
       tags: |
         type=raw,value=nightly-bin

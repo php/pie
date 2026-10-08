@@ -8,7 +8,7 @@
 #      id-token: write
 #      attestations: write
 #      packages: write
-#    uses: ./.github/workflows/build-and-push-docker-image.yml
+#    uses: $/.github/workflows/build-and-push-docker-image.yml
 #    with:
 #      tags: |
 #        type=raw,value=bin
