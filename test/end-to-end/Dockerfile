@@ -42,15 +42,21 @@ COPY --from=build_pie_phar /app/pie.phar /usr/local/bin/pie
 RUN pie install --auto-install-build-tools -v asgrim/example-pie-extension:2.0.5
 RUN pie show
 
-FROM homebrew_base AS test_pie_installs_build_tools_with_brew
+FROM homebrew_base AS homebrew_base_with_pie
 RUN brew update && brew install php
 COPY --from=build_pie_phar /app/pie.phar /usr/local/bin/pie
 USER root
 RUN rm -f /etc/apt/sources.list.d/github-cli.list && apt-get update && apt-get install -y unzip
 RUN apt-get remove --allow-remove-essential -y apt
 USER linuxbrew
+
+FROM homebrew_base_with_pie AS test_pie_installs_build_tools_with_brew
 RUN pie install --auto-install-build-tools -v asgrim/example-pie-extension:2.0.5
 RUN pie show
+
+FROM homebrew_base_with_pie AS test_pie_installs_extension_using_pcre_with_brew
+RUN pie install --auto-install-build-tools -v apcu/apcu
+RUN php -m | grep -i apcu
 
 FROM ubuntu_base AS test_pie_installs_system_deps_on_ubuntu
 RUN apt-get update && apt install -y unzip curl wget gcc make autoconf libtool bison re2c pkg-config libzip-dev libssl-dev libonig-dev

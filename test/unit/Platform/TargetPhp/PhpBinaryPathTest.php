@@ -523,6 +523,30 @@ final class PhpBinaryPathTest extends TestCase
         self::assertNull($phpBinary->buildProvider());
     }
 
+    /** @return array<string, array{0: string, 1: bool}> */
+    public static function externalPcreProvider(): array
+    {
+        return [
+            'configured with external PCRE' => ["Configure Command =>  './configure'  '--prefix=/opt/homebrew/Cellar/php/8.5.11' '--with-external-pcre' '--with-zlib'", true],
+            'configured with bundled PCRE' => ["Configure Command =>  './configure'  '--prefix=/usr/local' '--with-openssl'", false],
+            'configured without external PCRE' => ["Configure Command =>  './configure'  '--without-external-pcre'", false],
+            'no configure command reported' => ["PHP Version => 8.4.1\nBuild Provider => Debian", false],
+            'option mentioned outside the configure command' => ["Configure Command =>  './configure'  '--with-openssl'\nSomething Else => --with-external-pcre", false],
+        ];
+    }
+
+    #[DataProvider('externalPcreProvider')]
+    public function testUsesExternalPcre(string $phpinfo, bool $expectedUsesExternalPcre): void
+    {
+        $phpBinary = $this->createPartialMock(PhpBinaryPath::class, ['phpinfo']);
+
+        $phpBinary->expects(self::once())
+            ->method('phpinfo')
+            ->willReturn($phpinfo);
+
+        self::assertSame($expectedUsesExternalPcre, $phpBinary->usesExternalPcre());
+    }
+
     public function testDebugBuildModeReturnsDebugWhenYes(): void
     {
         $phpBinary = $this->createPartialMock(PhpBinaryPath::class, ['phpinfo']);
