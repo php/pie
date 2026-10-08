@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+if [ "$*" = "--cflags libpcre2-8" ]; then
+    echo "$PIE_TEST_PCRE_CFLAGS"
+    exit 0
+fi
+
+echo "unknown fake pkg-config command: $*" >&2
+exit 1

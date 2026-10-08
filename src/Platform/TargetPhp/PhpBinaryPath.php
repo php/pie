@@ -237,6 +237,11 @@ class PhpBinaryPath
         return null;
     }
 
+    public function usesExternalPcre(): bool
+    {
+        return preg_match('/^Configure Command\s*=>.*--with-external-pcre\b/m', $this->phpinfo()) === 1;
+    }
+
     /**
      * Returns a map where the key is the name of the extension and the value is the version ('0' if not defined)
      *
