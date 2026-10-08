@@ -80,6 +80,7 @@ The following extensions have already added support for PIE:
 | pdo_mysql      | php/pdo_mysql                                                                                       |
 | pdo_pgsql      | php/pdo_pgsql                                                                                       |
 | pdo_sqlite     | php/pdo_sqlite                                                                                      |
+| pdo_sqlsrv     | [microsoft/pdo_sqlsrv](https://packagist.org/packages/microsoft/pdo_sqlsrv)                         |
 | pgsql          | php/pgsql                                                                                           |
 | posix          | php/posix                                                                                           |
 | rar            | [php-win-ext/rar](https://packagist.org/packages/php-win-ext/rar)                                   |
@@ -99,6 +100,7 @@ The following extensions have already added support for PIE:
 | sodium         | php/sodium                                                                                          |                                                                              
 | spi            | [embedded-php/spi](https://packagist.org/packages/embedded-php/spi)                                 |
 | sqlite3        | php/sqlite3                                                                                         |
+| sqlsrv         | [microsoft/sqlsrv](https://packagist.org/packages/microsoft/sqlsrv)                                 |
 | swoole         | [swoole/swoole](https://packagist.org/packages/swoole/swoole)                                       |
 | sync           | [php-win-ext/sync](https://packagist.org/packages/php-win-ext/sync)                                 |
 | sysvmsg        | php/sysvmsg                                                                                         |
@@ -241,7 +243,6 @@ The following extensions exist on PECL, but either have not added support for PI
 * PDO_IBM
 * PDO_OCI
 * PDO_SQLANYWHERE
-* pdo_sqlsrv
 * PDO_TAOS
 * pecl_http
 * perforce
@@ -285,7 +286,6 @@ The following extensions exist on PECL, but either have not added support for PI
 * solr
 * spplus
 * spread
-* sqlsrv
 * ssdeep
 * ssh2
 * stackdriver_debugger
