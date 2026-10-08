@@ -2,6 +2,7 @@ FROM boxproject/box:4.7.0 AS box_base
 FROM alpine:3.24 AS alpine_base
 FROM fedora:44 AS fedora_base
 FROM ubuntu:26.04 AS ubuntu_base
+FROM ubuntu:22.04 AS ubuntu_2204_base
 FROM homebrew/brew:4.6.20 AS homebrew_base
 FROM redhat/ubi9-minimal:9.8 AS ubi9_base
 
@@ -77,3 +78,10 @@ FROM fedora_base AS test_pie_installs_system_deps_on_fedora
 RUN dnf install -y php php-pecl-zip unzip gcc make autoconf bison re2c libtool php-devel
 COPY --from=build_pie_phar /app/pie.phar /usr/local/bin/pie
 RUN pie install -v --auto-install-system-dependencies --force php/sodium
+
+FROM ubuntu_2204_base AS test_pie_installs_on_php_with_three_argument_hash_file
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y php8.1-cli php8.1-dev unzip ca-certificates gcc make autoconf libtool
+RUN php -r 'exit(version_compare(PHP_VERSION, "8.1.20", "<") ? 0 : 1);'
+COPY --from=build_pie_phar /app/pie.phar /usr/local/bin/pie
+RUN pie install -v apcu/apcu
+RUN pie show
