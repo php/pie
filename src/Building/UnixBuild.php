@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Php\Pie\Building;
 
 use Composer\IO\IOInterface;
+use Composer\Util\Platform;
 use LogicException;
 use Php\Pie\ComposerIntegration\BundledPhpExtensionsRepository;
 use Php\Pie\Downloading\DownloadedPackage;
@@ -24,6 +25,7 @@ use function implode;
 use function Safe\rename;
 use function sprintf;
 use function str_starts_with;
+use function trim;
 
 use const DIRECTORY_SEPARATOR;
 
@@ -104,7 +106,7 @@ final class UnixBuild implements Build
             $configureOptions[] = '--with-php-config=' . $phpConfigPath;
         }
 
-        $this->configure($downloadedPackage, $configureOptions, $io, $outputCallback);
+        $this->configure($downloadedPackage, $targetPlatform, $configureOptions, $io, $outputCallback);
 
         $optionsOutput = count($configureOptions) ? ' with options: ' . implode(' ', $configureOptions) : '.';
         $io->write('<info>Configure complete</info>' . $optionsOutput);
@@ -208,11 +210,23 @@ final class UnixBuild implements Build
      */
     private function configure(
         DownloadedPackage $downloadedPackage,
+        TargetPlatform $targetPlatform,
         array $configureOptions,
         IOInterface $io,
         callable|null $outputCallback,
     ): void {
         $configureCommand = ['./configure', ...$configureOptions];
+        $configureEnv     = null;
+
+        $pcreCompilerFlags = PcreCompilerFlags::forTargetPlatform($targetPlatform);
+        if ($pcreCompilerFlags !== null) {
+            $configureEnv = ['CPPFLAGS' => trim(Platform::getEnv('CPPFLAGS') . ' ' . $pcreCompilerFlags)];
+
+            $io->write(
+                '<comment>PHP uses an external PCRE library, adding to CPPFLAGS: ' . $pcreCompilerFlags . '</comment>',
+                verbosity: IOInterface::VERBOSE,
+            );
+        }
 
         $io->write(
             '<comment>Running configure step with: ' . implode(' ', $configureCommand) . '</comment>',
@@ -223,6 +237,7 @@ final class UnixBuild implements Build
             $configureCommand,
             $downloadedPackage->extractedSourcePath,
             outputCallback: $outputCallback,
+            env: $configureEnv,
         );
     }
 

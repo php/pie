@@ -115,11 +115,53 @@ final class OndrejPhpenmodTest extends TestCase
     #[RequiresOperatingSystemFamily('Linux')]
     public function testCanBeUsedReturnsTrueWhenPhpenmodInPath(): void
     {
+        $this->mockPhpBinary
+            ->method('additionalIniDirectory')
+            ->willReturn('/etc/php/8.4/cli/conf.d');
+        $this->mockPhpBinary
+            ->method('majorMinorVersion')
+            ->willReturn('8.4');
+
         self::assertTrue(
             (new OndrejPhpenmod(
                 $this->checkAndAddExtensionToIniIfNeeded,
                 self::GOOD_PHPENMOD,
-                self::NON_EXISTENT_MODS_AVAILABLE_PATH,
+            ))->canBeUsed($this->targetPlatform),
+        );
+    }
+
+    #[RequiresOperatingSystemFamily('Linux')]
+    public function testCanBeUsedReturnsFalseWhenTargetPhpScansTheOndrejConfDirectoryOfAnotherVersion(): void
+    {
+        $this->mockPhpBinary
+            ->method('additionalIniDirectory')
+            ->willReturn('/etc/php/8.3/cli/conf.d');
+        $this->mockPhpBinary
+            ->method('majorMinorVersion')
+            ->willReturn('8.4');
+
+        self::assertFalse(
+            (new OndrejPhpenmod(
+                $this->checkAndAddExtensionToIniIfNeeded,
+                self::GOOD_PHPENMOD,
+            ))->canBeUsed($this->targetPlatform),
+        );
+    }
+
+    #[RequiresOperatingSystemFamily('Linux')]
+    public function testCanBeUsedReturnsFalseWhenTargetPhpDoesNotScanTheOndrejConfDirectory(): void
+    {
+        $this->mockPhpBinary
+            ->method('additionalIniDirectory')
+            ->willReturn('/home/someone/php-src-build/lib/php.ini.d');
+        $this->mockPhpBinary
+            ->method('majorMinorVersion')
+            ->willReturn('8.4');
+
+        self::assertFalse(
+            (new OndrejPhpenmod(
+                $this->checkAndAddExtensionToIniIfNeeded,
+                self::GOOD_PHPENMOD,
             ))->canBeUsed($this->targetPlatform),
         );
     }
