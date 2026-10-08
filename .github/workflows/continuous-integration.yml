@@ -66,7 +66,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Test in FreeBSD
-        uses: vmactions/freebsd-vm@f0552d3b69211736abd97f02ff3d4674c56b73b1 #v1.5.5
+        uses: vmactions/freebsd-vm@4469451fe39bee80be4066836c5170362e9349f3 #v1.5.7
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -311,7 +311,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
         with:
           persist-credentials: false
-      - uses: zizmorcore/zizmor-action@6fc4b006235f201fdab3722e17240ab420d580e5 #v0.6.1
+      - uses: zizmorcore/zizmor-action@cc914d7f3750a2d13d75c7f184a1060aa0e9d482 #v0.6.4
         with:
           advanced-security: false
 
@@ -325,4 +325,4 @@ jobs:
       contents: read
       id-token: write
       attestations: write
-    uses: ./.github/workflows/build-assets.yml
+    uses: $/.github/workflows/build-assets.yml

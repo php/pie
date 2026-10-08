@@ -15,7 +15,7 @@ jobs:
       contents: read
       id-token: write
       attestations: write
-    uses: ./.github/workflows/build-assets.yml
+    uses: $/.github/workflows/build-assets.yml
 
   create-draft-release:
     runs-on: ubuntu-latest
@@ -98,7 +98,7 @@ jobs:
       id-token: write
       attestations: write
       packages: write
-    uses: ./.github/workflows/build-and-push-docker-image.yml
+    uses: $/.github/workflows/build-and-push-docker-image.yml
     with:
       tags: |
         ${{ ((!contains(github.ref, 'alpha') && !contains(github.ref, 'beta') && !contains(github.ref, 'rc')) && 'type=raw,value=bin') || '' }}
