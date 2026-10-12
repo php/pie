@@ -16,6 +16,11 @@ Feature: Extensions can be built with PIE
     When I run a command to build an extension with configure options
     Then the extension should have been built with options
 
+  # pie build <ext> --suppress-download-url-method=pre-packaged-source
+  Example: A pre-packaged binary can be used for a build when explicitly requested
+    When I run a command to build an extension suppressing a different download method
+    Then the pre-packaged binary should have been used instead of building
+
   # pie build <ext1> <ext2>
   Example: Multiple extensions can be built at once
     When I run a command to build multiple extensions

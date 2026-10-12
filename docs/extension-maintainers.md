@@ -329,6 +329,12 @@ in the traditional manner.
 }
 ```
 
+> [!NOTE]
+> The `pie build` command does not use `pre-packaged-binary` by default, so
+> that it always compiles from source. If `pre-packaged-binary` is the only
+> `download-url-method` listed, `pie build` will fail for your extension, and
+> end users will need to use `pie install` instead.
+
 ##### `os-families` restrictions
 
 The `os-families` and `os-families-exclude` directive allow extention maintainers

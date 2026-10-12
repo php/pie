@@ -813,4 +813,56 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
         $this->expectException(AllDownloadUrlMethodsSuppressed::class);
         $listener($installerEvent);
     }
+
+    public function testBuildingPackageThatOnlyProvidesPrePackagedBinariesExplainsItCannotBeBuilt(): void
+    {
+        $composerPackage = new CompletePackage('foo/bar', '1.2.3.0', '1.2.3');
+        $composerPackage->setDistType('zip');
+        $composerPackage->setDistUrl('https://example.com/git-archive-zip-url');
+        $composerPackage->setPhpExt([
+            'extension-name' => 'foobar',
+            'download-url-method' => ['pre-packaged-binary'],
+        ]);
+
+        $installerEvent = new InstallerEvent(
+            InstallerEvents::PRE_OPERATIONS_EXEC,
+            $this->composer,
+            $this->io,
+            false,
+            true,
+            new Transaction([], [$composerPackage]),
+        );
+
+        $this->container
+            ->expects(self::never())
+            ->method('get');
+
+        $listener = new OverrideDownloadUrlInstallListener(
+            $this->composer,
+            $this->io,
+            $this->container,
+            new PieComposerRequest(
+                $this->createMock(IOInterface::class),
+                new TargetPlatform(
+                    OperatingSystem::NonWindows,
+                    OperatingSystemFamily::Linux,
+                    PhpBinaryPath::fromCurrentProcess(),
+                    Architecture::x86_64,
+                    ThreadSafetyMode::NonThreadSafe,
+                    1,
+                    WindowsCompiler::VC15,
+                    null,
+                ),
+                [new RequestedPackageAndVersion('foo/bar', '^1.1')],
+                PieOperation::Build,
+                [],
+                false,
+                suppressedDownloadUrlMethods: [DownloadUrlMethod::PrePackagedBinary],
+            ),
+        );
+
+        $this->expectException(AllDownloadUrlMethodsSuppressed::class);
+        $this->expectExceptionMessage('Cannot build foo/bar from source, as it only provides pre-packaged binaries. Use "pie install foo/bar" to install the pre-packaged binary instead.');
+        $listener($installerEvent);
+    }
 }

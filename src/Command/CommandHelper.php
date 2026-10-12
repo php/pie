@@ -350,6 +350,17 @@ final class CommandHelper
         return $input->hasOption(self::OPTION_NO_DEV) && $input->getOption(self::OPTION_NO_DEV);
     }
 
+    public static function suppressDownloadUrlMethodsByDefault(Command $command, DownloadUrlMethod ...$downloadUrlMethods): void
+    {
+        $command
+            ->getDefinition()
+            ->getOption(self::OPTION_SUPPRESS_DOWNLOAD_URL_METHOD)
+            ->setDefault(array_values(array_map(
+                static fn (DownloadUrlMethod $downloadUrlMethod): string => $downloadUrlMethod->value,
+                $downloadUrlMethods,
+            )));
+    }
+
     /** @return list<DownloadUrlMethod> */
     public static function determineSuppressedDownloadUrlMethods(InputInterface $input): array
     {
