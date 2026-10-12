@@ -71,9 +71,8 @@ Use [GitHub registry](https://ghcr.io/php/pie) to find available tags.
 #### Example of PIE working in a Dockerfile
 
 This is an example of how PIE could be used to install an extension inside a
-Docker image. Note that, like Composer, you need something like `unzip`, the
-[Zip](https://www.php.net/manual/en/book.zip.php) extension, or `git` to be
-installed.
+Docker image. Note that, like Composer, you need something like `unzip` or the
+[Zip](https://www.php.net/manual/en/book.zip.php) extension to be installed.
 
 A quick summary of what the below example does:
 
