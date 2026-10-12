@@ -46,6 +46,10 @@ curl -fL --output /tmp/pie.phar https://github.com/php/pie/releases/latest/downl
   && sudo chmod +x /usr/local/bin/pie
 ```
 
+> [!TIP]
+> For usage in a Docker image build, we have a recommended usage example in
+> [usage#example-of-pie-working-in-a-dockerfile](./docs/usage.md#example-of-pie-working-in-a-dockerfile).
+
 ## Using PIE
 
 ### Installing a single extension using PIE
