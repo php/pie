@@ -75,6 +75,13 @@ Docker image. Note that, like Composer, you need something like `unzip`, the
 [Zip](https://www.php.net/manual/en/book.zip.php) extension, or `git` to be
 installed.
 
+A quick summary of what the below example does:
+
+ - Mount PIE on `/usr/local/bin/pie` - this means PIE is only present at build time; it doesn't need to be in the runtime/final image
+ - Install `unzip` from apt; additional library dependencies for the extension could be added here
+ - Use `pie install` to install any relevant extension(s)
+ - Remove `unzip` and clear up `apt` lists
+
 ```Dockerfile
 FROM php:8.4-cli
 
