@@ -17,6 +17,7 @@ use Php\Pie\DependencyResolver\DependencyResolver;
 use Php\Pie\DependencyResolver\InvalidPackageName;
 use Php\Pie\DependencyResolver\ResolvedPackageRequest;
 use Php\Pie\DependencyResolver\UnableToResolveRequirement;
+use Php\Pie\Downloading\DownloadUrlMethod;
 use Php\Pie\Installing\InstallForPhpProject\FindMatchingPackages;
 use Php\Pie\Platform\PackageManager;
 use Php\Pie\SelfManage\BuildTools\CheckAllBuildTools;
@@ -50,6 +51,7 @@ final class BuildCommand extends Command
         parent::configure();
 
         CommandHelper::configureDownloadBuildInstallOptions($this);
+        CommandHelper::suppressDownloadUrlMethodsByDefault($this, DownloadUrlMethod::PrePackagedBinary);
     }
 
     public function execute(InputInterface $input, OutputInterface $output): int

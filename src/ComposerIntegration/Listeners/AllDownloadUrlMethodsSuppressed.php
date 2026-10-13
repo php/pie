@@ -18,4 +18,12 @@ class AllDownloadUrlMethodsSuppressed extends RuntimeException
             $piePackage->name(),
         ));
     }
+
+    public static function forBuildOfPackageOnlyProvidingPrePackagedBinaries(Package $piePackage): self
+    {
+        return new self(sprintf(
+            'Cannot build %1$s from source, as it only provides pre-packaged binaries. Use "pie install %1$s" to install the pre-packaged binary instead.',
+            $piePackage->name(),
+        ));
+    }
 }

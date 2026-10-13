@@ -14,6 +14,7 @@ use Composer\IO\IOInterface;
 use Composer\Package\CompletePackageInterface;
 use Composer\Util\HttpDownloader;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
+use Php\Pie\ComposerIntegration\PieOperation;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\DownloadUrlMethod;
 use Php\Pie\Downloading\PackageReleaseAssets;
@@ -90,6 +91,10 @@ class OverrideDownloadUrlInstallListener
                     }
 
                     if ($remainingDownloadUrlMethods === []) {
+                        if ($this->composerRequest->operation === PieOperation::Build && $downloadUrlMethods === [DownloadUrlMethod::PrePackagedBinary]) {
+                            throw AllDownloadUrlMethodsSuppressed::forBuildOfPackageOnlyProvidingPrePackagedBinaries($piePackage);
+                        }
+
                         throw AllDownloadUrlMethodsSuppressed::forPackage($piePackage);
                     }
 

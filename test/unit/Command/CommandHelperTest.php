@@ -415,6 +415,34 @@ final class CommandHelperTest extends TestCase
         );
     }
 
+    public function testDownloadUrlMethodsSuppressedByDefaultAreUsedWhenOptionIsNotGiven(): void
+    {
+        $command = new Command();
+        $input   = new ArrayInput([]);
+        CommandHelper::configureDownloadBuildInstallOptions($command);
+        CommandHelper::suppressDownloadUrlMethodsByDefault($command, DownloadUrlMethod::PrePackagedBinary);
+        CommandHelper::validateInput($input, $command);
+
+        self::assertSame(
+            [DownloadUrlMethod::PrePackagedBinary],
+            CommandHelper::determineSuppressedDownloadUrlMethods($input),
+        );
+    }
+
+    public function testDownloadUrlMethodsSuppressedByDefaultAreReplacedWhenOptionIsGiven(): void
+    {
+        $command = new Command();
+        $input   = new ArrayInput(['--suppress-download-url-method' => ['pre-packaged-source']]);
+        CommandHelper::configureDownloadBuildInstallOptions($command);
+        CommandHelper::suppressDownloadUrlMethodsByDefault($command, DownloadUrlMethod::PrePackagedBinary);
+        CommandHelper::validateInput($input, $command);
+
+        self::assertSame(
+            [DownloadUrlMethod::PrePackagedSourceDownload],
+            CommandHelper::determineSuppressedDownloadUrlMethods($input),
+        );
+    }
+
     public function testDetermineSuppressedDownloadUrlMethodsThrowsForInvalidValue(): void
     {
         $command = new Command();
