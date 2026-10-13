@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\Pie\File;
 
+use Composer\Util\Platform;
 use Php\Pie\Util\Process;
 use Safe\Exceptions\FilesystemException;
 use Symfony\Component\Process\Exception\ProcessFailedException;
@@ -31,6 +32,12 @@ final class ReplaceRunningExecutable
     {
         $directory = dirname($filename);
 
+        if (is_writable($directory) && Platform::isWindows() && file_exists($filename)) {
+            self::replaceByRenamingAside($directory, $filename, $content);
+
+            return;
+        }
+
         if (is_writable($directory)) {
             self::replaceWithoutSudo($directory, $filename, $content);
 
@@ -47,6 +54,29 @@ final class ReplaceRunningExecutable
         try {
             rename($tempFilename, $filename);
         } catch (FilesystemException $e) {
+            unlink($tempFilename);
+
+            throw FailedToWriteFile::fromFilePutContentError($filename, $e);
+        }
+    }
+
+    private static function replaceByRenamingAside(string $directory, string $filename, string $content): void
+    {
+        $tempFilename = self::writeTempFile($directory, $filename, $content);
+        $oldFilename  = $filename . '.old';
+
+        try {
+            rename($filename, $oldFilename);
+        } catch (FilesystemException $e) {
+            unlink($tempFilename);
+
+            throw FailedToWriteFile::fromFilePutContentError($filename, $e);
+        }
+
+        try {
+            rename($tempFilename, $filename);
+        } catch (FilesystemException $e) {
+            rename($oldFilename, $filename);
             unlink($tempFilename);
 
             throw FailedToWriteFile::fromFilePutContentError($filename, $e);
