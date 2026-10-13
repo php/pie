@@ -122,6 +122,17 @@ final class CommandHelper
         );
     }
 
+    public static function warnPhpConfigOptionsHaveNoEffect(InputInterface $input, IOInterface $io): void
+    {
+        foreach ([self::OPTION_WITH_PHP_CONFIG, self::OPTION_WITH_PHP_PATH, self::OPTION_WITH_PHPIZE_PATH] as $option) {
+            if (! $input->hasOption($option) || $input->getOption($option) === null) {
+                continue;
+            }
+
+            $io->writeError(sprintf('<warning>The --%s option is now deprecated and has no effect for this command.</warning>', $option));
+        }
+    }
+
     public static function configureBuildToolsCheckOptions(Command $command): void
     {
         $command->addOption(

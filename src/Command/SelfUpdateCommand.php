@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace Php\Pie\Command;
 
+use Composer\Factory;
 use Composer\IO\IOInterface;
-use Composer\IO\NullIO;
-use Php\Pie\ComposerIntegration\PieComposerFactory;
-use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use Php\Pie\File\FullPathToSelf;
 use Php\Pie\File\ReplaceRunningExecutable;
@@ -23,7 +21,6 @@ use Php\Pie\SelfManage\Verify\VerifyPieReleaseUsingAttestation;
 use Php\Pie\Settings;
 use Php\Pie\Util\Emoji;
 use Php\Pie\Util\PieVersion;
-use Psr\Container\ContainerInterface;
 use Safe\Exceptions\FilesystemException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -54,7 +51,6 @@ final class SelfUpdateCommand extends Command
         private readonly string $githubApiBaseUrl,
         private readonly IOInterface $io,
         private readonly QuieterConsoleIO $quieterConsoleIo,
-        private readonly ContainerInterface $container,
         private readonly FullPathToSelf $fullPathToSelf,
     ) {
         parent::__construct();
@@ -87,6 +83,8 @@ final class SelfUpdateCommand extends Command
 
     public function execute(InputInterface $input, OutputInterface $output): int
     {
+        CommandHelper::warnPhpConfigOptionsHaveNoEffect($input, $this->io);
+
         if (! PieVersion::isPharBuild()) {
             $this->io->writeError('<comment>Aborting! You are not running a PHAR, cannot self-update.</comment>');
 
@@ -118,28 +116,21 @@ final class SelfUpdateCommand extends Command
 
         $this->io->write(sprintf('Updating using the <info>%s</> channel.', $updateChannel->value));
 
-        $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $this->io);
-
         CommandHelper::applyNoCacheOptionIfSet($input, $this->io);
 
-        $composer = PieComposerFactory::createPieComposer(
-            $this->container,
-            PieComposerRequest::noOperation(
-                new NullIO(),
-                $targetPlatform,
-            ),
-        );
+        $composerConfig = Factory::createConfig($this->quieterConsoleIo);
+        $this->quieterConsoleIo->loadConfiguration($composerConfig);
 
         $fetchLatestPieRelease = FetchPieReleaseFromGitHub::factory(
             $this->quieterConsoleIo,
-            $composer->getConfig(),
+            $composerConfig,
             $this->githubApiBaseUrl,
             PieAssetName::forRunningPie(),
         );
         $verifyPiePhar         = VerifyPieReleaseUsingAttestation::factory(
             $fetchLatestPieRelease,
             $this->quieterConsoleIo,
-            $composer->getConfig(),
+            $composerConfig,
             $this->githubApiBaseUrl,
         );
 
