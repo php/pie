@@ -10,6 +10,7 @@ use Php\Pie\ComposerIntegration\PieComposerFactory;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use Php\Pie\File\FullPathToSelf;
+use Php\Pie\File\ReplaceRunningExecutable;
 use Php\Pie\File\SudoFilePut;
 use Php\Pie\Platform;
 use Php\Pie\SelfManage\Update\Channel;
@@ -86,7 +87,7 @@ final class SelfUpdateCommand extends Command
 
     public function execute(InputInterface $input, OutputInterface $output): int
     {
-        if (! PieVersion::isPharBuild() || Platform::isRunningStaticPhp()) {
+        if (! PieVersion::isPharBuild()) {
             $this->io->writeError('<comment>Aborting! You are not running a PHAR, cannot self-update.</comment>');
 
             return Command::FAILURE;
@@ -199,7 +200,7 @@ final class SelfUpdateCommand extends Command
         try {
             $pharContents = file_get_contents($pharFilename->filePath);
         } catch (FilesystemException) {
-            $this->io->writeError(sprintf('<error>%s Failed to read the downloaded PHAR file %s</error>', Emoji::CROSS, $pharFilename->filePath));
+            $this->io->writeError(sprintf('<error>%s Failed to read the downloaded PIE release file %s</error>', Emoji::CROSS, $pharFilename->filePath));
             unlink($pharFilename->filePath);
 
             return Command::FAILURE;
@@ -208,7 +209,7 @@ final class SelfUpdateCommand extends Command
         try {
             $pharFilename->verifyContent($pharContents);
         } catch (Throwable) {
-            $this->io->writeError(sprintf('<error>%s PHAR contents changed after verification; aborting self-update</error>', Emoji::CROSS));
+            $this->io->writeError(sprintf('<error>%s Downloaded PIE release contents changed after verification; aborting self-update</error>', Emoji::CROSS));
             unlink($pharFilename->filePath);
 
             return Command::FAILURE;
@@ -218,7 +219,12 @@ final class SelfUpdateCommand extends Command
             sprintf('Writing new version to %s', $fullPathToSelf),
             verbosity: IOInterface::VERBOSE,
         );
-        SudoFilePut::contents($fullPathToSelf, $pharContents);
+        if (Platform::isRunningStaticPhp()) {
+            ReplaceRunningExecutable::contents($fullPathToSelf, $pharContents);
+        } else {
+            SudoFilePut::contents($fullPathToSelf, $pharContents);
+        }
+
         unlink($pharFilename->filePath);
 
         $this->io->write(sprintf(
