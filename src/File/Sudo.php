@@ -21,6 +21,7 @@ final class Sudo
      * @return non-empty-string
      *
      * @throws SudoNotFoundOnSystem
+     * @throws SudoRequiresInteractiveTerminal
      */
     public static function find(): string
     {
