@@ -122,6 +122,17 @@ final class CommandHelper
         );
     }
 
+    public static function writeRunningPhpVersion(IOInterface $io): void
+    {
+        if (PiePlatform::isRunningStaticPhp()) {
+            $io->write(sprintf('<info>You are running a PIE Static PHP %s build</info>', PHP_VERSION));
+
+            return;
+        }
+
+        $io->write(sprintf('<info>You are running PHP %s</info>', PHP_VERSION));
+    }
+
     public static function warnPhpConfigOptionsHaveNoEffect(InputInterface $input, IOInterface $io): void
     {
         foreach ([self::OPTION_WITH_PHP_CONFIG, self::OPTION_WITH_PHP_PATH, self::OPTION_WITH_PHPIZE_PATH] as $option) {
@@ -292,11 +303,7 @@ final class CommandHelper
 
         $targetPlatform = TargetPlatform::fromPhpBinaryPath($phpBinaryPath, $makeParallelJobs, $phpizePath);
 
-        if (PiePlatform::isRunningStaticPhp()) {
-            $io->write(sprintf('<info>You are running a PIE Static PHP %s build</info>', PHP_VERSION));
-        } else {
-            $io->write(sprintf('<info>You are running PHP %s</info>', PHP_VERSION));
-        }
+        self::writeRunningPhpVersion($io);
 
         $io->write(sprintf(
             '<info>Target PHP installation:</info> %s %s%s, on %s %s (from %s)',

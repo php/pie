@@ -115,6 +115,7 @@ final class SelfUpdateCommand extends Command
         }
 
         $this->io->write(sprintf('Updating using the <info>%s</> channel.', $updateChannel->value));
+        CommandHelper::writeRunningPhpVersion($this->io);
 
         CommandHelper::applyNoCacheOptionIfSet($input, $this->io);
 

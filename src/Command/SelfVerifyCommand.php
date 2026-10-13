@@ -72,6 +72,8 @@ final class SelfVerifyCommand extends Command
             $this->io->write(sprintf('<comment>No version specified, verifying against the version this PHAR claims to be (%s).</comment>', $expectedVersion));
         }
 
+        CommandHelper::writeRunningPhpVersion($this->io);
+
         CommandHelper::applyNoCacheOptionIfSet($input, $this->io);
 
         $composerConfig = Factory::createConfig($this->quieterConsoleIo);
