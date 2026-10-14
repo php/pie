@@ -11,3 +11,9 @@ Feature: Extensions for a PHP project can be installed with PIE
     Given I am in a PHP project that has missing extensions
     When I run a command to install the extensions without package selections
     Then I should see information on how to select packages for install
+
+  # pie install
+  Example: PIE running in a PHP project with out of date extensions
+    Given I am in a PHP project that has an outdated extension
+    When I run a command to install the extensions with package selections
+    Then I should see the outdated extension is updated

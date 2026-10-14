@@ -489,6 +489,26 @@ class CliContext implements Context
         );
     }
 
+    #[Given('I am in a PHP project that has an outdated extension')]
+    public function iAmInAPHPProjectThatHasAnOutdatedExtensions(): void
+    {
+        // Ensure we have an older example ext, but redis is up to date
+        $this->runPieCommand(['install', 'asgrim/example-pie-extension:^1.0', 'phpredis/phpredis']);
+        $this->assertCommandSuccessful();
+
+        $this->runPieCommand(['show']);
+        $this->assertCommandSuccessful();
+
+        // should've been updated from ^1.0 to ^2.0
+        self::assertPackageVersionInstalledInPieShowOutput(
+            $this->output,
+            'asgrim/example-pie-extension',
+            '^1.0',
+        );
+
+        $this->workingDirectory = realpath(__DIR__ . '/../assets/example-php-project');
+    }
+
     #[Given('I am in a PHP project that has missing extensions')]
     public function iAmInAPHPProjectThatHasMissingExtensions(): void
     {
@@ -525,6 +545,23 @@ class CliContext implements Context
 
         self::assertPackageVersionInstalledInPieShowOutput($pieShowOutput, 'asgrim/example-pie-extension');
         self::assertPackageVersionInstalledInPieShowOutput($pieShowOutput, 'phpredis/phpredis');
+    }
+
+    #[Then('I should see the outdated extension is updated')]
+    public function iShouldSeeTheOutdatedExtensionsIsUpdated(): void
+    {
+        $this->workingDirectory = null;
+        $this->assertCommandSuccessful();
+
+        $this->runPieCommand(['show']);
+        $this->assertCommandSuccessful();
+
+        // should've been updated from ^1.0 to ^2.0
+        self::assertPackageVersionInstalledInPieShowOutput(
+            $this->output,
+            'asgrim/example-pie-extension',
+            '^2.0',
+        );
     }
 
     #[Then('I should see information on how to select packages for install')]
