@@ -12,6 +12,7 @@ use Behat\Step\Then;
 use Behat\Step\When;
 use Composer\Semver\VersionParser;
 use Composer\Util\Platform;
+use Php\Pie\Util\Emoji;
 use Php\PieIntegrationTest\ExamplePieExtensionFixture;
 use RuntimeException;
 use Safe\Exceptions\PcreException;
@@ -57,6 +58,10 @@ class CliContext implements Context
     private string $pieLockContentBackup;
     /** @var non-empty-string|null */
     private string|null $developmentBranchRepositoryPath = null;
+    /** @var list<string> */
+    private array $externalExtensionPaths    = [];
+    private string|null $phpIniPath          = null;
+    private string|null $phpIniContentBackup = null;
 
     /** @throws PcreException */
     #[AfterScenario]
@@ -489,8 +494,8 @@ class CliContext implements Context
         );
     }
 
-    #[Given('I am in a PHP project that has an outdated extension')]
-    public function iAmInAPHPProjectThatHasAnOutdatedExtensions(): void
+    #[Given('I am in a PHP project that has an outdated extension installed with PIE')]
+    public function iAmInAPHPProjectThatHasAnOutdatedExtensionsInstalledWithPie(): void
     {
         // Ensure we have an older example ext, but redis is up to date
         $this->runPieCommand(['install', 'asgrim/example-pie-extension:^1.0', 'phpredis/phpredis']);
@@ -507,6 +512,56 @@ class CliContext implements Context
         );
 
         $this->workingDirectory = realpath(__DIR__ . '/../assets/example-php-project');
+    }
+
+    #[Given('I am in a PHP project that has an outdated extension installed externally')]
+    public function iAmInAPHPProjectThatHasAnOutdatedExtensionInstalledExternally(): void
+    {
+        $this->runPieCommand(['install', 'phpredis/phpredis']);
+        $this->assertCommandSuccessful();
+
+        $sourcePath                   = sys_get_temp_dir() . '/pie-external-ext-' . uniqid('', true);
+        $this->externalExtensionPaths = [$sourcePath];
+        (new Process(['git', 'clone', '--quiet', '--branch', '1.0.1', '/example-pie-extension', $sourcePath]))->mustRun();
+        (new Process(['phpize'], $sourcePath))->mustRun();
+        (new Process(['./configure'], $sourcePath, timeout: 120))->mustRun();
+        (new Process(['make'], $sourcePath, timeout: 120))->mustRun();
+        (new Process(['make', 'install'], $sourcePath))->mustRun();
+
+        $extensionDir                   = trim((new Process([self::PHP_BINARY, '-r', 'echo ini_get("extension_dir");']))->mustRun()->getOutput());
+        $this->externalExtensionPaths[] = $extensionDir . '/example_pie_extension.so';
+
+        $phpIniPath                = trim((new Process([self::PHP_BINARY, '-r', 'echo php_ini_loaded_file();']))->mustRun()->getOutput());
+        $this->phpIniPath          = $phpIniPath;
+        $this->phpIniContentBackup = file_get_contents($phpIniPath);
+        file_put_contents($phpIniPath, $this->phpIniContentBackup . "\nextension=example_pie_extension\n");
+
+        Assert::same(
+            trim((new Process([self::PHP_BINARY, '-r', 'echo phpversion("example_pie_extension");']))->mustRun()->getOutput()),
+            '0.1.0',
+        );
+
+        $this->runPieCommand(['show']);
+        $this->assertCommandSuccessful();
+        Assert::notContains($this->output, 'asgrim/example-pie-extension');
+
+        $this->workingDirectory = realpath(__DIR__ . '/../assets/example-php-project');
+    }
+
+    #[AfterScenario]
+    public function removeExternallyInstalledExtension(): void
+    {
+        if ($this->phpIniPath !== null && $this->phpIniContentBackup !== null) {
+            file_put_contents($this->phpIniPath, $this->phpIniContentBackup);
+        }
+
+        if ($this->externalExtensionPaths !== []) {
+            (new Process(['rm', '-rf', ...$this->externalExtensionPaths]))->mustRun();
+        }
+
+        $this->phpIniPath             = null;
+        $this->phpIniContentBackup    = null;
+        $this->externalExtensionPaths = [];
     }
 
     #[Given('I am in a PHP project that has missing extensions')]
@@ -562,6 +617,24 @@ class CliContext implements Context
             'asgrim/example-pie-extension',
             '^2.0',
         );
+    }
+
+    #[Then('I should see the outdated extension has not been updated')]
+    public function iShouldSeeTheOutdatedExtensionHasNotBeenUpdated(): void
+    {
+        $this->workingDirectory = null;
+        Assert::notNull($this->output);
+        Assert::contains($this->output, 'ext-example_pie_extension:^2.0 ' . Emoji::WARNING . ' Version 0.1.0 is installed, but does not meet the version requirement');
+        Assert::notSame($this->exitCode, 0);
+
+        Assert::same(
+            trim((new Process([self::PHP_BINARY, '-r', 'echo phpversion("example_pie_extension");']))->mustRun()->getOutput()),
+            '0.1.0',
+        );
+
+        $this->runPieCommand(['show']);
+        $this->assertCommandSuccessful();
+        Assert::notContains($this->output, 'asgrim/example-pie-extension');
     }
 
     #[Then('I should see information on how to select packages for install')]
