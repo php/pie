@@ -22,12 +22,12 @@ final class RecoverFromFailedVerification
     public function __invoke(IOInterface $io, ReleaseMetadata $releaseMetadata, Throwable $verificationFailure): bool
     {
         $io->writeError(sprintf(
-            '<error>%s Failed to verify the pie.phar release %s: %s</error>',
+            '<error>%s Failed to verify the PIE release %s: %s</error>',
             Emoji::CROSS,
             $releaseMetadata->tag,
             $verificationFailure->getMessage(),
         ));
-        $io->writeError('<comment>This means I could not verify that the PHAR we tried to update to was authentic.</comment>');
+        $io->writeError('<comment>This means I could not verify that the PIE release we tried to update to was authentic.</comment>');
         $io->writeError(sprintf(
             '<comment>You can manually download release %s yourself from: %s</comment>',
             $releaseMetadata->tag,

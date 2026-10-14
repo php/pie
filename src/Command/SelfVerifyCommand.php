@@ -4,19 +4,17 @@ declare(strict_types=1);
 
 namespace Php\Pie\Command;
 
+use Composer\Factory;
 use Composer\IO\IOInterface;
-use Composer\IO\NullIO;
-use Php\Pie\ComposerIntegration\PieComposerFactory;
-use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use Php\Pie\File\BinaryFile;
 use Php\Pie\File\FullPathToSelf;
 use Php\Pie\SelfManage\Update\FetchPieReleaseFromGitHub;
+use Php\Pie\SelfManage\Update\PieAssetName;
 use Php\Pie\SelfManage\Update\ReleaseMetadata;
 use Php\Pie\SelfManage\Verify\VerifyPieReleaseUsingAttestation;
 use Php\Pie\Util\Emoji;
 use Php\Pie\Util\PieVersion;
-use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -41,7 +39,6 @@ final class SelfVerifyCommand extends Command
         private readonly FullPathToSelf $fullPathToSelf,
         private readonly IOInterface $io,
         private readonly QuieterConsoleIO $quieterConsoleIo,
-        private readonly ContainerInterface $container,
     ) {
         parent::__construct();
     }
@@ -60,6 +57,8 @@ final class SelfVerifyCommand extends Command
 
     public function execute(InputInterface $input, OutputInterface $output): int
     {
+        CommandHelper::warnPhpConfigOptionsHaveNoEffect($input, $this->io);
+
         if (! PieVersion::isPharBuild()) {
             $this->io->writeError('<comment>Aborting! You are not running a PHAR, cannot self-verify.</comment>');
 
@@ -73,22 +72,18 @@ final class SelfVerifyCommand extends Command
             $this->io->write(sprintf('<comment>No version specified, verifying against the version this PHAR claims to be (%s).</comment>', $expectedVersion));
         }
 
-        $targetPlatform = CommandHelper::determineTargetPlatformFromInputs($input, $this->io);
+        CommandHelper::writeRunningPhpVersion($this->io);
 
         CommandHelper::applyNoCacheOptionIfSet($input, $this->io);
 
-        $composer = PieComposerFactory::createPieComposer(
-            $this->container,
-            PieComposerRequest::noOperation(
-                new NullIO(),
-                $targetPlatform,
-            ),
-        );
+        $composerConfig = Factory::createConfig($this->quieterConsoleIo);
+        $this->quieterConsoleIo->loadConfiguration($composerConfig);
 
         $fetchLatestPieRelease = FetchPieReleaseFromGitHub::factory(
             $this->quieterConsoleIo,
-            $composer->getConfig(),
+            $composerConfig,
             $this->githubApiBaseUrl,
+            PieAssetName::forRunningPie(),
         );
 
         $latestRelease = new ReleaseMetadata($expectedVersion, 'blah');
@@ -96,7 +91,7 @@ final class SelfVerifyCommand extends Command
         $verifyPiePhar = VerifyPieReleaseUsingAttestation::factory(
             $fetchLatestPieRelease,
             $this->quieterConsoleIo,
-            $composer->getConfig(),
+            $composerConfig,
             $this->githubApiBaseUrl,
         );
 

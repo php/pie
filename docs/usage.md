@@ -110,10 +110,7 @@ The PIE is built using [Static PHP](https://static-php.dev/), which builds a
 self-contained PHP executable with the extensions that PIE needs to run, and
 bundles the PHAR as a single distributable executable. Please keep in mind that
 this is **experimental**, and we do not recommend this for production use for
-the time being. Please also note there are some limitations:
-
- - [php/pie#460](https://github.com/php/pie/discussions/460) - all the binary
-   versions have the `pie self-update` feature disabled for now.
+the time being.
 
 If you find the binary releases useful, please leave feedback or upvote on the
 relevant discussions, so we can gauge interest in improving this functionality.
@@ -128,6 +125,7 @@ stable releases can be downloaded from these links:
 | Linux            | amd64 / x86_64   | https://github.com/php/pie/releases/latest/download/pie-Linux-X64       |
 | OS X             | ARM 64 / aarch64 | https://github.com/php/pie/releases/latest/download/pie-macOS-ARM64     |
 | Linux            | ARM 64 / aarch64 | https://github.com/php/pie/releases/latest/download/pie-Linux-ARM64     |
+| Windows          | amd64 / x86_64   | https://github.com/php/pie/releases/latest/download/pie-Windows-X64.exe |
 
 The "nightly" versions of these can be found here:
 
@@ -136,6 +134,7 @@ The "nightly" versions of these can be found here:
 | Linux            | amd64 / x86_64   | https://php.github.io/pie/pie-Linux-X64       |
 | OS X             | ARM 64 / aarch64 | https://php.github.io/pie/pie-macOS-ARM64     |
 | Linux            | ARM 64 / aarch64 | https://php.github.io/pie/pie-Linux-ARM64     |
+| Windows          | amd64 / x86_64   | https://php.github.io/pie/pie-Windows-X64.exe |
 
 We *highly* recommend you verify the file came from the PHP GitHub repository
 before running it, for example:

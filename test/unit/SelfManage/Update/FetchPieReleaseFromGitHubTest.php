@@ -6,7 +6,9 @@ namespace Php\PieUnitTest\SelfManage\Update;
 
 use Composer\Util\Http\Response;
 use Composer\Util\HttpDownloader;
+use Php\Pie\SelfManage\Update\Channel;
 use Php\Pie\SelfManage\Update\FetchPieReleaseFromGitHub;
+use Php\Pie\SelfManage\Update\PieAssetName;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -26,7 +28,7 @@ final class FetchPieReleaseFromGitHubTest extends TestCase
     protected function setUp(): void
     {
         $this->httpDownloader = $this->createMock(HttpDownloader::class);
-        $this->fetcher        = new FetchPieReleaseFromGitHub('https://api.github.com', $this->httpDownloader);
+        $this->fetcher        = new FetchPieReleaseFromGitHub('https://api.github.com', $this->httpDownloader, PieAssetName::Phar);
     }
 
     #[DataProvider('validBranchProvider')]
@@ -87,5 +89,55 @@ final class FetchPieReleaseFromGitHubTest extends TestCase
             'arbitrary'       => ['some-malicious-branch'],
             'almost-main'     => ['main-fix'],
         ];
+    }
+
+    public function testLatestReleaseMetadataSelectsTheExecutableAsset(): void
+    {
+        $response = $this->createMock(Response::class);
+        $response->method('decodeJson')->willReturn([
+            [
+                'tag_name' => '1.5.1',
+                'assets' => [
+                    ['name' => 'pie.phar', 'browser_download_url' => 'https://github.com/php/pie/releases/download/1.5.1/pie.phar'],
+                    ['name' => 'pie-Linux-ARM64', 'browser_download_url' => 'https://github.com/php/pie/releases/download/1.5.1/pie-Linux-ARM64'],
+                    ['name' => 'pie-Linux-X64', 'browser_download_url' => 'https://github.com/php/pie/releases/download/1.5.1/pie-Linux-X64'],
+                    ['name' => 'pie-macOS-ARM64', 'browser_download_url' => 'https://github.com/php/pie/releases/download/1.5.1/pie-macOS-ARM64'],
+                    ['name' => 'pie-Windows-X64.exe', 'browser_download_url' => 'https://github.com/php/pie/releases/download/1.5.1/pie-Windows-X64.exe'],
+                ],
+            ],
+        ]);
+
+        $this->httpDownloader->expects(self::once())
+            ->method('get')
+            ->with('https://api.github.com/repos/php/pie/releases')
+            ->willReturn($response);
+
+        $release = (new FetchPieReleaseFromGitHub('https://api.github.com', $this->httpDownloader, PieAssetName::LinuxX64))
+            ->latestReleaseMetadata(Channel::Stable);
+
+        self::assertSame('1.5.1', $release->tag);
+        self::assertSame('https://github.com/php/pie/releases/download/1.5.1/pie-Linux-X64', $release->downloadUrl);
+    }
+
+    /** @return array<string, array{0: PieAssetName, 1: non-empty-string}> */
+    public static function nightlyDownloadUrlProvider(): array
+    {
+        return [
+            'PHAR' => [PieAssetName::Phar, 'https://php.github.io/pie/pie-nightly.phar'],
+            'Linux x86_64' => [PieAssetName::LinuxX64, 'https://php.github.io/pie/pie-Linux-X64'],
+            'Linux arm64' => [PieAssetName::LinuxArm64, 'https://php.github.io/pie/pie-Linux-ARM64'],
+            'macOS arm64' => [PieAssetName::MacOsArm64, 'https://php.github.io/pie/pie-macOS-ARM64'],
+            'Windows x86_64' => [PieAssetName::WindowsX64, 'https://php.github.io/pie/pie-Windows-X64.exe'],
+        ];
+    }
+
+    #[DataProvider('nightlyDownloadUrlProvider')]
+    public function testNightlyReleaseMetadata(PieAssetName $assetName, string $expectedDownloadUrl): void
+    {
+        $release = (new FetchPieReleaseFromGitHub('https://api.github.com', $this->httpDownloader, $assetName))
+            ->nightlyReleaseMetadata();
+
+        self::assertSame('nightly', $release->tag);
+        self::assertSame($expectedDownloadUrl, $release->downloadUrl);
     }
 }
