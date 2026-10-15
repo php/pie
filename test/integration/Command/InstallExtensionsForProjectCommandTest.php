@@ -11,6 +11,7 @@ use Composer\Package\RootPackage;
 use Composer\Repository\InstalledArrayRepository;
 use Composer\Repository\RepositoryManager;
 use Composer\Semver\Constraint\Constraint;
+use Composer\Semver\Constraint\MatchAllConstraint;
 use Composer\Semver\Constraint\MultiConstraint;
 use Php\Pie\Command\InstallExtensionsForProjectCommand;
 use Php\Pie\ComposerIntegration\MinimalHelperSet;
@@ -101,8 +102,8 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
     {
         $rootPackage = new RootPackage('my/project', '1.2.3.0', '1.2.3');
         $rootPackage->setRequires([
-            'ext-standard' => new Link('my/project', 'ext-standard', new Constraint('=', '*'), Link::TYPE_REQUIRE, '*'),
-            'ext-spl' => new Link('my/project', 'ext-spl', new Constraint('=', '*'), Link::TYPE_REQUIRE, '*'),
+            'ext-standard' => new Link('my/project', 'ext-standard', new MatchAllConstraint(), Link::TYPE_REQUIRE, '*'),
+            'ext-spl' => new Link('my/project', 'ext-spl', new MatchAllConstraint(), Link::TYPE_REQUIRE, '*'),
             'ext-foobar' => new Link('my/project', 'ext-foobar', new MultiConstraint([
                 new Constraint('>=', '1.2.0.0-dev'),
                 new Constraint('<', '2.0.0.0-dev'),
@@ -161,10 +162,10 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
     {
         $rootPackage = new RootPackage('my/project', '1.2.3.0', '1.2.3');
         $rootPackage->setRequires([
-            'ext-standard' => new Link('my/project', 'ext-standard', new Constraint('=', '*'), Link::TYPE_REQUIRE, '*'),
+            'ext-standard' => new Link('my/project', 'ext-standard', new MatchAllConstraint(), Link::TYPE_REQUIRE, '*'),
         ]);
         $rootPackage->setDevRequires([
-            'ext-foobar' => new Link('my/project', 'ext-foobar', new Constraint('=', '*'), Link::TYPE_DEV_REQUIRE, '*'),
+            'ext-foobar' => new Link('my/project', 'ext-foobar', new MatchAllConstraint(), Link::TYPE_DEV_REQUIRE, '*'),
         ]);
         $this->composerFactoryForProject->method('rootPackage')->willReturn($rootPackage);
 
@@ -197,10 +198,10 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
     {
         $rootPackage = new RootPackage('my/project', '1.2.3.0', '1.2.3');
         $rootPackage->setRequires([
-            'ext-standard' => new Link('my/project', 'ext-standard', new Constraint('=', '*'), Link::TYPE_REQUIRE, '*'),
+            'ext-standard' => new Link('my/project', 'ext-standard', new MatchAllConstraint(), Link::TYPE_REQUIRE, '*'),
         ]);
         $rootPackage->setDevRequires([
-            'ext-foobar' => new Link('my/project', 'ext-foobar', new Constraint('=', '*'), Link::TYPE_DEV_REQUIRE, '*'),
+            'ext-foobar' => new Link('my/project', 'ext-foobar', new MatchAllConstraint(), Link::TYPE_DEV_REQUIRE, '*'),
         ]);
         $this->composerFactoryForProject->method('rootPackage')->willReturn($rootPackage);
 
@@ -234,7 +235,7 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
     {
         $rootPackage = new RootPackage('my/project', '1.2.3.0', '1.2.3');
         $rootPackage->setRequires([
-            'ext-standard' => new Link('my/project', 'ext-standard', new Constraint('=', '*'), Link::TYPE_REQUIRE, '*'),
+            'ext-standard' => new Link('my/project', 'ext-standard', new MatchAllConstraint(), Link::TYPE_REQUIRE, '*'),
             'ext-foobar' => new Link('my/project', 'ext-foobar', new MultiConstraint([
                 new Constraint('>=', '1.2.0.0-dev'),
                 new Constraint('<', '2.0.0.0-dev'),

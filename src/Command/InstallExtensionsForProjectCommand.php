@@ -18,6 +18,7 @@ use Php\Pie\ExtensionType;
 use Php\Pie\Installing\InstallForPhpProject\CheckExtensionStatus;
 use Php\Pie\Installing\InstallForPhpProject\ComposerFactoryForProject;
 use Php\Pie\Installing\InstallForPhpProject\DetermineExtensionsRequired;
+use Php\Pie\Installing\InstallForPhpProject\ExtensionInstalledStatus;
 use Php\Pie\Installing\InstallForPhpProject\InstallPiePackageFromPath;
 use Php\Pie\Installing\InstallForPhpProject\InstallSelectedPackage;
 use Php\Pie\Installing\InstallForPhpProject\NoMatchingPackagesFound;
@@ -37,8 +38,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 use Webmozart\Assert\Assert;
 
+use function array_change_key_case;
 use function array_filter;
-use function array_keys;
 use function array_map;
 use function array_values;
 use function count;
@@ -138,7 +139,7 @@ final class InstallExtensionsForProjectCommand extends Command
             ),
         );
 
-        $phpEnabledExtensions = array_map('strtolower', array_keys($targetPlatform->phpBinaryPath->extensions()));
+        $phpEnabledExtensions = array_change_key_case($targetPlatform->phpBinaryPath->extensions());
         $installedPiePackages = $this->installedPiePackages->allPiePackages($pieComposer);
 
         $anyErrorsHappened = false;
@@ -205,7 +206,7 @@ final class InstallExtensionsForProjectCommand extends Command
      * Returns false if any error happened whilst trying to install the extension; returns true if was already
      * installed, or it was successfully installed if needed.
      *
-     * @param list<string>                              $phpEnabledExtensions
+     * @param array<string, string>                     $phpEnabledExtensions
      * @param array<non-empty-string, non-empty-string> $extensionToPackageSelections
      */
     private function handleSingleExtensionRequiredByPhpProject(
@@ -222,8 +223,19 @@ final class InstallExtensionsForProjectCommand extends Command
             ->onlyVerifiedFor($targetPlatform);
 
         // Check if the extension is already installed, if it is, return early.
-        if (($this->checkExtensionStatus)($link, $piePackagesForExtension, $phpEnabledExtensions)) {
+        $installedStatus = ($this->checkExtensionStatus)($link, $piePackagesForExtension, $phpEnabledExtensions);
+        if ($installedStatus === ExtensionInstalledStatus::Installed) {
             return true;
+        }
+
+        // It's not a PIE-enabled extension
+        if ($installedStatus === ExtensionInstalledStatus::ConstraintNotMet && ! $piePackagesForExtension->count()) {
+            $this->io->writeError(sprintf(
+                '<warning>%s didn\'t match the required version constraints, but was not installed by PIE, so PIE will not update this extension automatically.</warning>',
+                $extension->nameWithExtPrefix(),
+            ));
+
+            return false;
         }
 
         try {

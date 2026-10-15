@@ -7,10 +7,10 @@ namespace Php\Pie\ComposerIntegration;
 use Composer\Composer;
 use Composer\Package\CompletePackage;
 use Composer\Package\CompletePackageInterface;
-use Composer\Pcre\Preg;
 use Composer\Repository\PlatformRepository;
 use Composer\Semver\VersionParser;
 use Php\Pie\ExtensionName;
+use Php\Pie\ExtensionVersion;
 use Php\Pie\Platform\InstalledPiePackages;
 use Php\Pie\Platform\PkgConfig;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
@@ -134,27 +134,14 @@ class PhpBinaryPathBasedPlatformRepository extends PlatformRepository
 
     private function packageForExtension(string $name, string $prettyVersion): CompletePackageInterface
     {
-        $extraDescription = '';
-
-        try {
-            $version = $this->versionParser->normalize($prettyVersion);
-        } catch (UnexpectedValueException) {
-            $extraDescription = ' (actual version: ' . $prettyVersion . ')';
-            if (Preg::isMatchStrictGroups('{^(\d+\.\d+\.\d+(?:\.\d+)?)}', $prettyVersion, $match)) {
-                $prettyVersion = $match[1];
-            } else {
-                $prettyVersion = '0';
-            }
-
-            $version = $this->versionParser->normalize($prettyVersion);
-        }
+        $extVersion = ExtensionVersion::parse($prettyVersion);
 
         $package = new CompletePackage(
             'ext-' . str_replace(' ', '-', strtolower($name)),
-            $version,
-            $prettyVersion,
+            $extVersion->normalised,
+            $extVersion->originalOrModified,
         );
-        $package->setDescription('The ' . $name . ' PHP extension' . $extraDescription);
+        $package->setDescription('The ' . $name . ' PHP extension' . ($extVersion->wasModified() ? ' (actual version: ' . $prettyVersion . ')' : ''));
         $package->setType('php-ext');
 
         return $package;
