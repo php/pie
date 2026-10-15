@@ -624,7 +624,9 @@ class CliContext implements Context
     {
         $this->workingDirectory = null;
         Assert::notNull($this->output);
+        Assert::notNull($this->errorOutput);
         Assert::contains($this->output, 'ext-example_pie_extension:^2.0 ' . Emoji::WARNING . ' Version 0.1.0 is installed, but does not meet the version requirement');
+        Assert::contains($this->errorOutput, 'ext-example_pie_extension didn\'t match the required version constraints, but was not installed by PIE, so PIE will not update this extension automatically.');
         Assert::notSame($this->exitCode, 0);
 
         Assert::same(

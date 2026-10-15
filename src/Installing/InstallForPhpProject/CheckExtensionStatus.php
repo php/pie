@@ -11,8 +11,8 @@ use Php\Pie\ExtensionName;
 use Php\Pie\Platform\PiePackageList;
 use Php\Pie\Util\Emoji;
 
+use function array_key_exists;
 use function count;
-use function in_array;
 use function sprintf;
 use function strtolower;
 
@@ -23,47 +23,43 @@ class CheckExtensionStatus
     {
     }
 
-    /**
-     * Check if an extension is installed; returns true if it's installed, but outputs a warning if the version
-     * constraint doesn't match. Returns true of the extension is missing.
-     *
-     * @param list<string> $phpEnabledExtensions
-     */
+    /** @param array<string, string> $phpEnabledExtensions */
     public function __invoke(
         Link $link,
         PiePackageList $piePackagesForExtension,
         array $phpEnabledExtensions,
-    ): bool {
-        $extension              = ExtensionName::normaliseFromString($link->getTarget());
-        $linkRequiresConstraint = $link->getPrettyConstraint();
+    ): ExtensionInstalledStatus {
+        $extension               = ExtensionName::normaliseFromString($link->getTarget());
+        $lowercasedExtensionName = strtolower($extension->name());
+        $linkRequiresConstraint  = $link->getPrettyConstraint();
 
-        $piePackageVersion = null;
+        $installedPieOrExtensionVersion = $phpEnabledExtensions[$lowercasedExtensionName] ?? null;
 
         if (count($piePackagesForExtension) === 1) {
-            $piePackageVersion = $piePackagesForExtension->onlyOne()->version();
+            $installedPieOrExtensionVersion = $piePackagesForExtension->onlyOne()->version();
         }
 
         $piePackageVersionMatchesLinkConstraint = null;
-        if ($piePackageVersion !== null) {
+        if ($installedPieOrExtensionVersion !== null) {
             $piePackageVersionMatchesLinkConstraint = $link
                 ->getConstraint()
                 ->matches(
-                    (new VersionParser())->parseConstraints($piePackageVersion),
+                    (new VersionParser())->parseConstraints($installedPieOrExtensionVersion),
                 );
         }
 
-        if (in_array(strtolower($extension->name()), $phpEnabledExtensions)) {
-            if ($piePackageVersion !== null && $piePackageVersionMatchesLinkConstraint === false) {
+        if (array_key_exists($lowercasedExtensionName, $phpEnabledExtensions)) {
+            if ($installedPieOrExtensionVersion !== null && $piePackageVersionMatchesLinkConstraint === false) {
                 $this->io->write(sprintf(
                     '%s: <comment>%s:%s</comment> %s Version %s is installed, but does not meet the version requirement',
                     $link->getDescription(),
                     $extension->nameWithExtPrefix(),
                     $linkRequiresConstraint,
                     Emoji::WARNING,
-                    $piePackageVersion,
+                    $installedPieOrExtensionVersion,
                 ));
 
-                return true;
+                return ExtensionInstalledStatus::ConstraintNotMet;
             }
 
             $this->io->write(sprintf(
@@ -74,7 +70,7 @@ class CheckExtensionStatus
                 Emoji::GREEN_CHECKMARK,
             ));
 
-            return true;
+            return ExtensionInstalledStatus::Installed;
         }
 
         $this->io->write(sprintf(
@@ -85,6 +81,6 @@ class CheckExtensionStatus
             Emoji::PROHIBITED,
         ));
 
-        return false;
+        return ExtensionInstalledStatus::Missing;
     }
 }
