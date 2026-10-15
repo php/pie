@@ -26,6 +26,7 @@ use Php\Pie\DependencyResolver\ResolvedPackageRequest;
 use Php\Pie\DependencyResolver\UnableToResolveRequirement;
 use Php\Pie\Downloading\DownloadUrlMethod;
 use Php\Pie\ExtensionName;
+use Php\Pie\Installing\InstallForPhpProject\ExtensionToPackageSelections;
 use Php\Pie\Installing\InstallForPhpProject\FindMatchingPackages;
 use Php\Pie\Platform as PiePlatform;
 use Php\Pie\Platform\OperatingSystem;
@@ -796,8 +797,7 @@ final class CommandHelper
         return $restoreWorkingDir;
     }
 
-    /** @return array<non-empty-string, non-empty-string> */
-    public static function determineExtensionToPackageSelections(InputInterface $input): array
+    public static function determineExtensionToPackageSelections(InputInterface $input): ExtensionToPackageSelections
     {
         $extensionToPackageSelections = [];
         $selectionOptions             = $input->getOption(self::OPTION_PACKAGE_SELECTION);
@@ -810,6 +810,6 @@ final class CommandHelper
             $extensionToPackageSelections[ExtensionName::normaliseFromString($extNameString)->name()] = (new RequestedPackageAndVersion($packageSelectionString, null))->package;
         }
 
-        return $extensionToPackageSelections;
+        return ExtensionToPackageSelections::fromArrayMap($extensionToPackageSelections);
     }
 }

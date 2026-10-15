@@ -19,6 +19,7 @@ use Php\Pie\Installing\InstallForPhpProject\CheckExtensionStatus;
 use Php\Pie\Installing\InstallForPhpProject\ComposerFactoryForProject;
 use Php\Pie\Installing\InstallForPhpProject\DetermineExtensionsRequired;
 use Php\Pie\Installing\InstallForPhpProject\ExtensionInstalledStatus;
+use Php\Pie\Installing\InstallForPhpProject\ExtensionToPackageSelections;
 use Php\Pie\Installing\InstallForPhpProject\InstallPiePackageFromPath;
 use Php\Pie\Installing\InstallForPhpProject\InstallSelectedPackage;
 use Php\Pie\Installing\InstallForPhpProject\NoMatchingPackagesFound;
@@ -206,8 +207,7 @@ final class InstallExtensionsForProjectCommand extends Command
      * Returns false if any error happened whilst trying to install the extension; returns true if was already
      * installed, or it was successfully installed if needed.
      *
-     * @param array<string, string>                     $phpEnabledExtensions
-     * @param array<non-empty-string, non-empty-string> $extensionToPackageSelections
+     * @param array<string, string> $phpEnabledExtensions
      */
     private function handleSingleExtensionRequiredByPhpProject(
         Composer $pieComposer,
@@ -215,7 +215,7 @@ final class InstallExtensionsForProjectCommand extends Command
         PiePackageList $installedPiePackages,
         TargetPlatform $targetPlatform,
         array $phpEnabledExtensions,
-        array $extensionToPackageSelections,
+        ExtensionToPackageSelections $extensionToPackageSelections,
     ): RequestedPackageAndVersion|bool {
         $extension               = ExtensionName::normaliseFromString($link->getTarget());
         $piePackagesForExtension = $installedPiePackages
