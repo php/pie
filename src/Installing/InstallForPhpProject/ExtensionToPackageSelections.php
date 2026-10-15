@@ -9,6 +9,7 @@ use Webmozart\Assert\Assert;
 
 use function array_key_exists;
 use function array_keys;
+use function array_merge;
 use function array_values;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
@@ -27,6 +28,11 @@ final class ExtensionToPackageSelections
 
         // @phpstan-ignore argument.type
         return new self($map);
+    }
+
+    public function overrideWith(ExtensionToPackageSelections $overrides): self
+    {
+        return new self(array_merge($this->map, $overrides->map));
     }
 
     public function has(ExtensionName $extension): bool
