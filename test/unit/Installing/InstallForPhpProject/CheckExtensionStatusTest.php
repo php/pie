@@ -108,6 +108,21 @@ final class CheckExtensionStatusTest extends TestCase
         self::assertStringContainsString(Emoji::WARNING, $this->io->getOutput());
     }
 
+    public function testNonPieExtensionPresentWithUnparseableVersion(): void
+    {
+        $link = new Link('my/project', 'ext-foobar', (new VersionParser())->parseConstraints('^2.0'), Link::TYPE_REQUIRE, '^2.0');
+
+        $result = ($this->checkExtensionStatus)(
+            $link,
+            new PiePackageList([]),
+            ['foobar' => '1.2.3-abcdef'],
+        );
+
+        self::assertSame(ExtensionInstalledStatus::ConstraintNotMet, $result);
+        self::assertStringContainsString('Version 1.2.3-abcdef is installed, but does not meet the version requirement', $this->io->getOutput());
+        self::assertStringContainsString(Emoji::WARNING, $this->io->getOutput());
+    }
+
     public function testNonPieExtensionPresentWithNoVersionInfo(): void
     {
         $link = new Link('my/project', 'ext-foobar', (new VersionParser())->parseConstraints('^2.0'), Link::TYPE_REQUIRE, '^2.0');

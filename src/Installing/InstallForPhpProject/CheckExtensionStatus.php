@@ -8,6 +8,7 @@ use Composer\IO\IOInterface;
 use Composer\Package\Link;
 use Composer\Package\Version\VersionParser;
 use Php\Pie\ExtensionName;
+use Php\Pie\ExtensionVersion;
 use Php\Pie\Platform\PiePackageList;
 use Php\Pie\Util\Emoji;
 
@@ -44,7 +45,7 @@ class CheckExtensionStatus
             $piePackageVersionMatchesLinkConstraint = $link
                 ->getConstraint()
                 ->matches(
-                    (new VersionParser())->parseConstraints($installedPieOrExtensionVersion),
+                    (new VersionParser())->parseConstraints(ExtensionVersion::parse($installedPieOrExtensionVersion)->normalised),
                 );
         }
 
