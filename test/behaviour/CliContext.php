@@ -498,17 +498,17 @@ class CliContext implements Context
     public function iAmInAPHPProjectThatHasAnOutdatedExtensionsInstalledWithPie(): void
     {
         // Ensure we have an older example ext, but redis is up to date
-        $this->runPieCommand(['install', 'asgrim/example-pie-extension:^1.0', 'phpredis/phpredis']);
+        $this->runPieCommand(['install', 'asgrim/example-pie-extension:2.0.7', 'phpredis/phpredis']);
         $this->assertCommandSuccessful();
 
         $this->runPieCommand(['show']);
         $this->assertCommandSuccessful();
 
-        // should've been updated from ^1.0 to ^2.0
+        // should've been updated from 2.0.7 to ^2.0.9
         self::assertPackageVersionInstalledInPieShowOutput(
             $this->output,
             'asgrim/example-pie-extension',
-            '^1.0',
+            '2.0.7',
         );
 
         $this->workingDirectory = realpath(__DIR__ . '/../assets/example-php-project');
@@ -612,11 +612,11 @@ class CliContext implements Context
         $this->runPieCommand(['show']);
         $this->assertCommandSuccessful();
 
-        // should've been updated from ^1.0 to ^2.0
+        // should've been updated from 2.0.7 to ^2.0.9
         self::assertPackageVersionInstalledInPieShowOutput(
             $this->output,
             'asgrim/example-pie-extension',
-            '^2.0',
+            '^2.0.9',
         );
     }
 
@@ -626,7 +626,7 @@ class CliContext implements Context
         $this->workingDirectory = null;
         Assert::notNull($this->output);
         Assert::notNull($this->errorOutput);
-        Assert::contains($this->output, 'ext-example_pie_extension:^2.0 ' . Emoji::WARNING . ' Version 0.1.0 is installed, but does not meet the version requirement');
+        Assert::contains($this->output, 'ext-example_pie_extension:^2.0.9 ' . Emoji::WARNING . ' Version 0.1.0 is installed, but does not meet the version requirement');
         Assert::contains($this->errorOutput, 'ext-example_pie_extension didn\'t match the required version constraints, but was not installed by PIE, so PIE will not update this extension automatically.');
         Assert::notSame($this->exitCode, 0);
 
