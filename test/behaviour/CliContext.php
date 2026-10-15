@@ -517,6 +517,10 @@ class CliContext implements Context
     #[Given('I am in a PHP project that has an outdated extension installed externally')]
     public function iAmInAPHPProjectThatHasAnOutdatedExtensionInstalledExternally(): void
     {
+        $phpIniPath                = trim((new Process([self::PHP_BINARY, '-r', 'echo php_ini_loaded_file();']))->mustRun()->getOutput());
+        $this->phpIniPath          = $phpIniPath;
+        $this->phpIniContentBackup = file_get_contents($phpIniPath);
+
         $this->runPieCommand(['install', 'phpredis/phpredis']);
         $this->assertCommandSuccessful();
 
@@ -531,10 +535,7 @@ class CliContext implements Context
         $extensionDir                   = trim((new Process([self::PHP_BINARY, '-r', 'echo ini_get("extension_dir");']))->mustRun()->getOutput());
         $this->externalExtensionPaths[] = $extensionDir . '/example_pie_extension.so';
 
-        $phpIniPath                = trim((new Process([self::PHP_BINARY, '-r', 'echo php_ini_loaded_file();']))->mustRun()->getOutput());
-        $this->phpIniPath          = $phpIniPath;
-        $this->phpIniContentBackup = file_get_contents($phpIniPath);
-        file_put_contents($phpIniPath, $this->phpIniContentBackup . "\nextension=example_pie_extension\n");
+        file_put_contents($phpIniPath, file_get_contents($phpIniPath) . "\nextension=example_pie_extension\n");
 
         Assert::same(
             trim((new Process([self::PHP_BINARY, '-r', 'echo phpversion("example_pie_extension");']))->mustRun()->getOutput()),
