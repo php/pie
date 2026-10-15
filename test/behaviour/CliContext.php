@@ -584,8 +584,6 @@ class CliContext implements Context
             'install',
             '--select',
             'example_pie_extension=asgrim/example-pie-extension',
-            '--select',
-            'redis=phpredis/phpredis',
         ]);
     }
 
@@ -646,9 +644,8 @@ class CliContext implements Context
         Assert::same($this->exitCode, 1);
 
         Assert::notNull($this->errorOutput);
-        Assert::contains($this->errorOutput, 'No package selections were made for ext-redis; you MUST specify a package selection in non-interactive mode');
+        Assert::contains($this->errorOutput, 'No package selections were made for ext-example_pie_extension; you MUST specify a package selection in non-interactive mode');
         Assert::contains($this->errorOutput, '--select=example_pie_extension=asgrim/example-pie-extension');
-        Assert::contains($this->errorOutput, '--select=redis=phpredis/phpredis');
     }
 
     #[Given('I am in a PIE project')]
