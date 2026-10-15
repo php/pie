@@ -23,4 +23,19 @@ final class ExtensionToPackageSelectionsTest extends TestCase
         self::assertFalse($selections->has(ExtensionName::normaliseFromString('baz')));
         self::assertSame('bat/baz', $selections->packageFor(ExtensionName::normaliseFromString('bar')));
     }
+
+    public function testOverrideWith(): void
+    {
+        $selections = ExtensionToPackageSelections::fromArrayMap([
+            'aa' => 'a/a',
+            'bb' => 'b/b',
+        ])->overrideWith(ExtensionToPackageSelections::fromArrayMap([
+            'bb' => 'fork/bfork',
+            'cc' => 'c/c',
+        ]));
+
+        self::assertSame('a/a', $selections->packageFor(ExtensionName::normaliseFromString('aa')));
+        self::assertSame('fork/bfork', $selections->packageFor(ExtensionName::normaliseFromString('bb')));
+        self::assertSame('c/c', $selections->packageFor(ExtensionName::normaliseFromString('cc')));
+    }
 }
