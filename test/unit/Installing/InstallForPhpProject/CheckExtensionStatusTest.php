@@ -167,4 +167,57 @@ final class CheckExtensionStatusTest extends TestCase
         self::assertStringContainsString('Missing', $this->io->getOutput());
         self::assertStringContainsString(Emoji::PROHIBITED, $this->io->getOutput());
     }
+
+    public function testBundledExtensionPresentAndUnconstrained(): void
+    {
+        $link = new Link('my/project', 'ext-json', new MatchAllConstraint(), Link::TYPE_REQUIRE, '*');
+
+        $result = ($this->checkExtensionStatus)(
+            $link,
+            new PiePackageList([]),
+            ['json' => '8.5.11'],
+        );
+
+        self::assertSame(ExtensionInstalledStatus::Installed, $result);
+    }
+
+    public function testBundledExtensionPresentAndMatchesConstraints(): void
+    {
+        $link = new Link('my/project', 'ext-json', (new VersionParser())->parseConstraints('8.5.*'), Link::TYPE_REQUIRE, '8.5.*');
+
+        $result = ($this->checkExtensionStatus)(
+            $link,
+            new PiePackageList([]),
+            ['json' => '8.5.11'],
+        );
+
+        self::assertSame(ExtensionInstalledStatus::Installed, $result);
+    }
+
+    public function testBundledExtensionPresentButDoesNotMatchConstraints(): void
+    {
+        $link = new Link('my/project', 'ext-json', (new VersionParser())->parseConstraints('8.5.*'), Link::TYPE_REQUIRE, '8.5.*');
+
+        $result = ($this->checkExtensionStatus)(
+            $link,
+            new PiePackageList([]),
+            ['json' => '8.4.26'],
+        );
+
+        self::assertSame(ExtensionInstalledStatus::ConstraintNotMet, $result);
+        self::assertStringContainsString('Version 8.4.26 is installed, but does not meet the version requirement', $this->io->getOutput());
+    }
+
+    public function testBundledExtensionNotPresentButIsRequired(): void
+    {
+        $link = new Link('my/project', 'ext-json', new MatchAllConstraint(), Link::TYPE_REQUIRE, '*');
+
+        $result = ($this->checkExtensionStatus)(
+            $link,
+            new PiePackageList([]),
+            [],
+        );
+
+        self::assertSame(ExtensionInstalledStatus::Missing, $result);
+    }
 }
