@@ -1,0 +1,7 @@
+{
+    "apcu": "apcu/apcu",
+    "mcrypt": "pecl/mcrypt",
+    "mongodb": "mongodb/mongodb-extension",
+    "redis": "phpredis/phpredis",
+    "xdebug": "xdebug/xdebug"
+}
