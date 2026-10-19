@@ -80,6 +80,10 @@ final class InstallCommand extends Command
             return self::INVALID;
         }
 
+        if ($installFromLock && CommandHelper::noDev($input)) {
+            $this->io->writeError('<warning>The --no-dev option has no effect when used with --from-lock; all extensions in the lock file will be installed.</warning>');
+        }
+
         if (! $installFromLock && ! $input->getArgument(CommandHelper::ARG_REQUESTED_PACKAGE_AND_VERSION)) {
             return ($this->invokeSubCommand)(
                 $this,
