@@ -810,6 +810,9 @@ final class CommandHelper
             $extensionToPackageSelections[ExtensionName::normaliseFromString($extNameString)->name()] = (new RequestedPackageAndVersion($packageSelectionString, null))->package;
         }
 
-        return ExtensionToPackageSelections::fromArrayMap($extensionToPackageSelections);
+        return ExtensionToPackageSelections::fromReferenceList()
+            // @todo overrideWith a local map, if provided (how to provide?)
+            //       options: config global pie.json, CLI param?
+            ->overrideWith(ExtensionToPackageSelections::fromArrayMap($extensionToPackageSelections));
     }
 }
