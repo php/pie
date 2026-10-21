@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Php\PieIntegrationTest\Command;
 
+use Composer\Util\Platform;
 use InvalidArgumentException;
 use Php\Pie\Command\InstallCommand;
 use Php\Pie\Command\ShowCommand;
@@ -17,9 +18,14 @@ use Symfony\Component\Process\Exception\ProcessFailedException;
 use Webmozart\Assert\Assert;
 
 use function get_loaded_extensions;
+use function getenv;
 use function phpversion;
+use function Safe\putenv;
 use function str_contains;
+use function sys_get_temp_dir;
 
+use const DIRECTORY_SEPARATOR;
+use const PHP_BINARY;
 use const PHP_VERSION_ID;
 
 #[CoversClass(ShowCommand::class)]
@@ -48,6 +54,34 @@ final class ShowCommandTest extends TestCase
                 $outputString,
             );
         }
+    }
+
+    public function testExecuteWithExplicitTargetPhpWhenRunningPhpCannotBeFound(): void
+    {
+        if (Platform::isWindows()) {
+            $targetPhpOption = ['--with-php-path' => PHP_BINARY];
+        } else {
+            try {
+                $phpConfig = Process::run(['which', 'php-config']);
+                Assert::stringNotEmpty($phpConfig);
+            } catch (ProcessFailedException | InvalidArgumentException) {
+                self::markTestSkipped('This test can only run on systems with php-config');
+            }
+
+            $targetPhpOption = ['--with-php-config' => $phpConfig];
+        }
+
+        $originalPhpBinaryEnv = getenv('PHP_BINARY');
+        putenv('PHP_BINARY=' . sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'php-that-does-not-exist');
+
+        try {
+            $this->commandTester->execute($targetPhpOption);
+        } finally {
+            putenv($originalPhpBinaryEnv === false ? 'PHP_BINARY' : 'PHP_BINARY=' . $originalPhpBinaryEnv);
+        }
+
+        $this->commandTester->assertCommandIsSuccessful();
+        self::assertStringContainsString('Target PHP installation:', $this->commandTester->getDisplay());
     }
 
     public function testExecuteWithAvailableConstrainedUpdates(): void
