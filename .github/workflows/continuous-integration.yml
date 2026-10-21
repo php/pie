@@ -141,10 +141,12 @@ jobs:
             libexif-dev \
             libgd-dev \
             libpng-dev \
+            libjpeg-dev \
             libtiff-dev \
             libfreetype-dev \
             libfreetype6 \
             libfontconfig1-dev \
+            fonts-dejavu-core \
             libgmp-dev \
             libssl-dev \
             libsodium-dev \
@@ -197,6 +199,10 @@ jobs:
         run: composer install --ignore-platform-reqs
       - name: Run bundled PHP install test
         run: sudo php test/install-bundled-php-exts.php php-config
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Test bundled GD image formats and FreeType rendering
+        run: sudo php test/install-bundled-gd.php php-config /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
