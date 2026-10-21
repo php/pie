@@ -22,6 +22,7 @@ use function strtr;
 
 use const DIRECTORY_SEPARATOR;
 use const PHP_BUILD_PROVIDER;
+use const PHP_SAPI;
 use const STDIN;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
@@ -135,6 +136,6 @@ class Platform
 
     public static function isRunningStaticPhp(): bool
     {
-        return defined('PHP_BUILD_PROVIDER') && str_contains(PHP_BUILD_PROVIDER, 'static-php-cli');
+        return PHP_SAPI === 'micro' || (defined('PHP_BUILD_PROVIDER') && str_contains(PHP_BUILD_PROVIDER, 'static-php-cli'));
     }
 }
