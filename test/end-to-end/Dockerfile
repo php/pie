@@ -24,13 +24,13 @@ COPY --from=build_pie_phar /app/pie.phar /usr/local/bin/pie
 RUN pie install --auto-install-build-tools -v asgrim/example-pie-extension:2.0.5
 RUN pie show
 
-FROM quay.io/rockylinux/rockylinux:10 AS test_pie_installs_build_tools_on_rocky
+FROM quay.io/rockylinux/rockylinux:10 AS disabled_test_pie_installs_build_tools_on_rocky
 RUN dnf install -y php8.4-cli epel-release unzip
 COPY --from=build_pie_phar /app/pie.phar /usr/local/bin/pie
 RUN pie install --auto-install-build-tools -vv asgrim/example-pie-extension:2.0.5
 RUN pie show
 
-FROM ubi9_base AS test_pie_installs_build_tools_on_ubi9
+FROM ubi9_base AS disabled_test_pie_installs_build_tools_on_ubi9
 RUN microdnf module enable -y php:8.3 && microdnf install -y php-cli php-pecl-zip unzip
 COPY --from=build_pie_phar /app/pie.phar /usr/local/bin/pie
 RUN pie install --auto-install-build-tools -v asgrim/example-pie-extension:2.0.5

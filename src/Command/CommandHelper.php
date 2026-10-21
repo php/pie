@@ -256,8 +256,6 @@ final class CommandHelper
 
     public static function determineTargetPlatformFromInputs(InputInterface $input, IOInterface $io): TargetPlatform
     {
-        $phpBinaryPath = PhpBinaryPath::fromCurrentProcess();
-
         /** @var mixed $withPhpConfig */
         $withPhpConfig          = $input->getOption(self::OPTION_WITH_PHP_CONFIG);
         $specifiedWithPhpConfig = is_string($withPhpConfig) && $withPhpConfig !== '';
@@ -273,12 +271,12 @@ final class CommandHelper
             throw new InvalidArgumentException('The --with-php-path=/path/to/php cannot be used on non-Windows, use --with-php-config=/path/to/php-config instead.');
         }
 
-        if ($specifiedWithPhpConfig) {
-            $phpBinaryPath = PhpBinaryPath::fromPhpConfigExecutable($withPhpConfig);
-        }
-
         if ($specifiedWithPhpPath) {
             $phpBinaryPath = PhpBinaryPath::fromPhpBinaryPath($withPhpPath);
+        } elseif ($specifiedWithPhpConfig) {
+            $phpBinaryPath = PhpBinaryPath::fromPhpConfigExecutable($withPhpConfig);
+        } else {
+            $phpBinaryPath = PhpBinaryPath::fromCurrentProcess();
         }
 
         $makeParallelJobs = null; /** `null` means {@see TargetPlatform} will try to auto-detect */
