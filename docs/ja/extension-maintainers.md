@@ -51,7 +51,7 @@ PIE サポートを追加する最初のステップは、拡張機能リポジ�
 
 ##### `extension-name`
 
-`extension-name` を指定することができ、[\Php\Pie\ExtensionName::VALID_PACKAGE_NAME_REGEX](../src/ExtensionName.php) で定義されている通常の拡張機能名正規表現に準拠する必要があります。`extension-name` が指定されていない場合、`extension-name` は Composer パッケージ名から派生し、ベンダープレフィックスが削除されます。例えば、次の `composer.json` の場合：
+`extension-name` を指定することができ、[\Php\Pie\ExtensionName::VALID_PACKAGE_NAME_REGEX](../../src/ExtensionName.php) で定義されている通常の拡張機能名正規表現に準拠する必要があります。`extension-name` が指定されていない場合、`extension-name` は Composer パッケージ名から派生し、ベンダープレフィックスが削除されます。例えば、次の `composer.json` の場合：
 
 ```json
 {

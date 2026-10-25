@@ -51,7 +51,7 @@ PIE 遵循通常的 [PHP 扩展构建和安装过程](https://www.php.net/manual
 
 ##### `extension-name`
 
-可以指定 `extension-name`，并且必须符合通常的扩展名称正则表达式，该表达式在 [\Php\Pie\ExtensionName::VALID_PACKAGE_NAME_REGEX](../src/ExtensionName.php) 中定义。如果未指定 `extension-name`，则 `extension-name` 将从 Composer 包名称派生，删除供应商前缀。例如，给定一个 `composer.json`：
+可以指定 `extension-name`，并且必须符合通常的扩展名称正则表达式，该表达式在 [\Php\Pie\ExtensionName::VALID_PACKAGE_NAME_REGEX](../../src/ExtensionName.php) 中定义。如果未指定 `extension-name`，则 `extension-name` 将从 Composer 包名称派生，删除供应商前缀。例如，给定一个 `composer.json`：
 
 ```json
 {

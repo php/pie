@@ -37,7 +37,7 @@ sudo apt install gcc make autoconf libtool bison re2c pkg-config php-dev
 - 使用 `gh attestation verify --owner php pie.phar` 验证 PHAR 的来源
 - 然后您可以使用 `php pie.phar <command>` 调用 PIE
 
-更多安装详情可以在 [使用文档](./docs/usage.md) 中找到。
+更多安装详情可以在 [使用文档](./usage.md) 中找到。
 本文档假设您已将 `pie.phar` 移动到您的 `$PATH` 中，例如在非 Windows 系统上为 `/usr/local/bin/pie`。
 
 ## 使用 PIE 安装单个扩展
@@ -104,9 +104,9 @@ requires: example_pie_extension ⚠️  缺失
 # 我是扩展维护者 - 如何添加 PIE 支持？
 
 如果您是想要为您的扩展添加 PIE 支持的扩展维护者，
-请阅读 [扩展维护者文档](./docs/extension-maintainers.md)。
+请阅读 [扩展维护者文档](./extension-maintainers.md)。
 
 ## 更多文档...
 
-PIE 的完整文档可以在 [使用文档](./docs/usage.md) 中找到。
+PIE 的完整文档可以在 [使用文档](./usage.md) 中找到。
 
