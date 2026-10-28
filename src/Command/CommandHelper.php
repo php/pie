@@ -814,8 +814,6 @@ final class CommandHelper
         }
 
         return $fetchReferencePackageMap()
-            // @todo overrideWith a local map, if provided (how to provide?)
-            //       options: config global pie.json, CLI param?
             ->overrideWith(ExtensionToPackageSelections::fromArrayMap($extensionToPackageSelections));
     }
 }
