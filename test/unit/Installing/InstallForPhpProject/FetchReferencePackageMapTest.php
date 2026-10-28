@@ -19,7 +19,9 @@ use PHPUnit\Framework\TestCase;
 use Safe\DateTimeImmutable;
 use Symfony\Component\Clock\MockClock;
 
+use function json_decode;
 use function json_encode;
+use function Safe\file_get_contents;
 
 use const JSON_THROW_ON_ERROR;
 
@@ -223,7 +225,7 @@ final class FetchReferencePackageMapTest extends TestCase
         );
     }
 
-    public function testGetWithErrorAndNoCacheReturnsEmptyMap(): void
+    public function testGetWithErrorAndNoCacheReturnsBundledMap(): void
     {
         $this->pieSettings
             ->method('packageMap')
@@ -246,7 +248,7 @@ final class FetchReferencePackageMapTest extends TestCase
             ->willThrowException(new TransportException('The "' . self::REFERENCE_LIST_URL . '" file could not be downloaded (HTTP/2 404)', 404));
 
         self::assertSame(
-            [],
+            self::bundledMap(),
             ($this->fetcher)()->toArray(),
         );
     }
@@ -309,7 +311,7 @@ final class FetchReferencePackageMapTest extends TestCase
         );
     }
 
-    public function testFetchDisabledAndNoCacheReturnsEmptyMap(): void
+    public function testFetchDisabledAndNoCacheReturnsBundledMap(): void
     {
         Platform::putEnv('PIE_DISABLE_PACKAGE_MAP_FETCH', '1');
 
@@ -323,8 +325,18 @@ final class FetchReferencePackageMapTest extends TestCase
             ->method('get');
 
         self::assertSame(
-            [],
+            self::bundledMap(),
             ($this->fetcher)()->toArray(),
         );
+    }
+
+    /** @return array<array-key, mixed> */
+    private static function bundledMap(): array
+    {
+        $map = json_decode(file_get_contents(__DIR__ . '/../../../../resources/package-map.json'), true, flags: JSON_THROW_ON_ERROR);
+        self::assertIsArray($map);
+        self::assertNotEmpty($map);
+
+        return $map;
     }
 }
