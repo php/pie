@@ -14,11 +14,17 @@ use Php\Pie\Settings;
 use Psr\Clock\ClockInterface;
 use Webmozart\Assert\Assert;
 
+use function json_decode;
+use function Safe\file_get_contents;
+
+use const JSON_THROW_ON_ERROR;
+
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 final class FetchReferencePackageMap
 {
     private const REFERENCE_LIST_URL = 'https://raw.githubusercontent.com/php/pie/HEAD/resources/package-map.json';
     private const TIMEOUT_SECONDS    = 1;
+    private const BUNDLED_MAP_PATH   = __DIR__ . '/../../../resources/package-map.json';
 
     public function __construct(
         private readonly HttpDownloader $httpDownloader,
@@ -37,7 +43,7 @@ final class FetchReferencePackageMap
         }
 
         if ((bool) Platform::getEnv('PIE_DISABLE_PACKAGE_MAP_FETCH')) {
-            return $cached->map ?? ExtensionToPackageSelections::fromArrayMap([]);
+            return $cached->map ?? self::bundledMap();
         }
 
         try {
@@ -52,7 +58,7 @@ final class FetchReferencePackageMap
                 ],
             );
         } catch (TransportException) {
-            return $cached->map ?? ExtensionToPackageSelections::fromArrayMap([]);
+            return $cached->map ?? self::bundledMap();
         }
 
         $expiry = $now->add(new DateInterval('PT' . self::maxAgeSeconds($response) . 'S'));
@@ -74,6 +80,15 @@ final class FetchReferencePackageMap
         }
 
         return $map;
+    }
+
+    private static function bundledMap(): ExtensionToPackageSelections
+    {
+        $decoded = json_decode(file_get_contents(self::BUNDLED_MAP_PATH), true, flags: JSON_THROW_ON_ERROR);
+        Assert::isMap($decoded);
+        Assert::allString($decoded);
+
+        return ExtensionToPackageSelections::fromArrayMap($decoded);
     }
 
     private static function maxAgeSeconds(Response $response): int
