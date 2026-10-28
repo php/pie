@@ -13,8 +13,6 @@ use Safe\Exceptions\DatetimeException;
 
 use function array_key_exists;
 use function file_exists;
-use function is_array;
-use function is_string;
 use function json_decode;
 use function json_encode;
 use function rtrim;
@@ -31,12 +29,11 @@ use const JSON_THROW_ON_ERROR;
  *
  * @phpstan-type PieSettings = array{
  *     channel?: non-empty-string,
- *     package_map?: mixed,
- * }
- * @phpstan-type PackageMapSettings = array{
- *     map: array<non-empty-string, non-empty-string>,
- *     etag: non-empty-string,
- *     expires: non-empty-string,
+ *     package_map?: array{
+ *         map: array<non-empty-string, non-empty-string>,
+ *         etag: non-empty-string,
+ *         expires: non-empty-string,
+ *     },
  * }
  */
 class Settings
@@ -132,7 +129,7 @@ class Settings
     {
         $config = $this->read();
 
-        if (! array_key_exists('package_map', $config) || ! self::isValidPackageMap($config['package_map'])) {
+        if (! array_key_exists('package_map', $config)) {
             return null;
         }
 
@@ -147,28 +144,5 @@ class Settings
             $config['package_map']['etag'],
             $expires,
         );
-    }
-
-    /** @phpstan-assert-if-true PackageMapSettings $packageMap */
-    private static function isValidPackageMap(mixed $packageMap): bool
-    {
-        if (
-            ! is_array($packageMap)
-            || ! is_array($packageMap['map'] ?? null)
-            || ! is_string($packageMap['etag'] ?? null)
-            || $packageMap['etag'] === ''
-            || ! is_string($packageMap['expires'] ?? null)
-            || $packageMap['expires'] === ''
-        ) {
-            return false;
-        }
-
-        foreach ($packageMap['map'] as $extension => $package) {
-            if (! is_string($extension) || $extension === '' || ! is_string($package) || $package === '') {
-                return false;
-            }
-        }
-
-        return true;
     }
 }
