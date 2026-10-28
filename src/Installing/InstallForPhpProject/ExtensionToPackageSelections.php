@@ -12,26 +12,16 @@ use function array_keys;
 use function array_merge;
 use function array_values;
 
-/** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
+/**
+ * @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks
+ *
+ * @immutable
+ */
 final class ExtensionToPackageSelections
 {
-    // @todo real URL
-    private const REFERENCE_LIST_URL = __DIR__ . '/../../../resources/package-map.json';
-
     /** @param array<non-empty-string, non-empty-string> $map */
     private function __construct(private readonly array $map)
     {
-    }
-
-    public static function fromReferenceList(): self
-    {
-        // @todo timeout should be VERY quick; we don't want connectivity holdups
-        // @todo maybe an ENV or CLI param to skip fetching the reference list?
-        // @todo verify attestation/signature of reference list
-        // @todo cache the list locally
-        $x = file_get_contents(self::REFERENCE_LIST_URL);
-        $xx = json_decode($x, true, flags: JSON_THROW_ON_ERROR);
-        return new self($xx);
     }
 
     /** @param array<string, string> $map */
@@ -60,5 +50,11 @@ final class ExtensionToPackageSelections
         Assert::keyExists($this->map, $extension->name());
 
         return $this->map[$extension->name()];
+    }
+
+    /** @return array<non-empty-string, non-empty-string> */
+    public function toArray(): array
+    {
+        return $this->map;
     }
 }

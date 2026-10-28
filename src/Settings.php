@@ -5,10 +5,16 @@ declare(strict_types=1);
 namespace Php\Pie;
 
 use Composer\Json\JsonFile;
+use DateTimeImmutable;
+use Php\Pie\Installing\InstallForPhpProject\CachedPackageMap;
+use Php\Pie\Installing\InstallForPhpProject\ExtensionToPackageSelections;
 use Php\Pie\SelfManage\Update\Channel;
+use Safe\Exceptions\DatetimeException;
 
 use function array_key_exists;
 use function file_exists;
+use function is_array;
+use function is_string;
 use function json_decode;
 use function json_encode;
 use function rtrim;
@@ -25,6 +31,12 @@ use const JSON_THROW_ON_ERROR;
  *
  * @phpstan-type PieSettings = array{
  *     channel?: non-empty-string,
+ *     package_map?: mixed,
+ * }
+ * @phpstan-type PackageMapSettings = array{
+ *     map: array<non-empty-string, non-empty-string>,
+ *     etag: non-empty-string,
+ *     expires: non-empty-string,
  * }
  */
 class Settings
@@ -102,5 +114,61 @@ class Settings
         $config['channel'] = $channel->value;
 
         $this->write($config);
+    }
+
+    public function updatePackageMap(CachedPackageMap $map): void
+    {
+        $config = $this->read();
+
+        $config['package_map'] = [
+            'map' => $map->map->toArray(),
+            'expires' => $map->expiry->format(DateTimeImmutable::ATOM),
+            'etag' => $map->etag,
+        ];
+        $this->write($config);
+    }
+
+    public function packageMap(): CachedPackageMap|null
+    {
+        $config = $this->read();
+
+        if (! array_key_exists('package_map', $config) || ! self::isValidPackageMap($config['package_map'])) {
+            return null;
+        }
+
+        try {
+            $expires = \Safe\DateTimeImmutable::createFromFormat(DateTimeImmutable::ATOM, $config['package_map']['expires']);
+        } catch (DatetimeException) {
+            return null;
+        }
+
+        return new CachedPackageMap(
+            ExtensionToPackageSelections::fromArrayMap($config['package_map']['map']),
+            $config['package_map']['etag'],
+            $expires,
+        );
+    }
+
+    /** @phpstan-assert-if-true PackageMapSettings $packageMap */
+    private static function isValidPackageMap(mixed $packageMap): bool
+    {
+        if (
+            ! is_array($packageMap)
+            || ! is_array($packageMap['map'] ?? null)
+            || ! is_string($packageMap['etag'] ?? null)
+            || $packageMap['etag'] === ''
+            || ! is_string($packageMap['expires'] ?? null)
+            || $packageMap['expires'] === ''
+        ) {
+            return false;
+        }
+
+        foreach ($packageMap['map'] as $extension => $package) {
+            if (! is_string($extension) || $extension === '' || ! is_string($package) || $package === '') {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
