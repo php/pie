@@ -129,16 +129,52 @@ final class SettingsTest extends TestCase
     public static function corruptPackageMapProvider(): array
     {
         return [
+            'expires is not a date' => ['{"package_map": {"map": {"foo": "foo/foo"}, "etag": "\"etag123\"", "expires": "not a date"}}'],
+            'expires is not ATOM format' => ['{"package_map": {"map": {"foo": "foo/foo"}, "etag": "\"etag123\"", "expires": "2026-10-20 15:05:00"}}'],
+        ];
+    }
+
+    /** @return array<non-empty-string, array{non-empty-string}> */
+    public static function invalidPackageMapProvider(): array
+    {
+        return [
             'missing map' => ['{"package_map": {"etag": "\"etag123\"", "expires": "2026-10-20T15:05:00+00:00"}}'],
             'missing etag' => ['{"package_map": {"map": {"foo": "foo/foo"}, "expires": "2026-10-20T15:05:00+00:00"}}'],
             'missing expires' => ['{"package_map": {"map": {"foo": "foo/foo"}, "etag": "\"etag123\""}}'],
-            'expires is not a date' => ['{"package_map": {"map": {"foo": "foo/foo"}, "etag": "\"etag123\"", "expires": "not a date"}}'],
-            'expires is not ATOM format' => ['{"package_map": {"map": {"foo": "foo/foo"}, "etag": "\"etag123\"", "expires": "2026-10-20 15:05:00"}}'],
             'empty package name' => ['{"package_map": {"map": {"foo": ""}, "etag": "\"etag123\"", "expires": "2026-10-20T15:05:00+00:00"}}'],
             'empty extension name' => ['{"package_map": {"map": {"": "foo/foo"}, "etag": "\"etag123\"", "expires": "2026-10-20T15:05:00+00:00"}}'],
             'map is a string' => ['{"package_map": {"map": "foo/foo", "etag": "\"etag123\"", "expires": "2026-10-20T15:05:00+00:00"}}'],
             'etag is a number' => ['{"package_map": {"map": {"foo": "foo/foo"}, "etag": 123, "expires": "2026-10-20T15:05:00+00:00"}}'],
         ];
+    }
+
+    #[DataProvider('invalidPackageMapProvider')]
+    public function testInvalidPackageMapThrowsException(string $settingsJson): void
+    {
+        $workingDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('pie_settings_test', true) . DIRECTORY_SEPARATOR;
+        mkdir($workingDir, recursive: true);
+        file_put_contents($workingDir . 'pie-settings.json', $settingsJson);
+
+        $settings = new Settings($workingDir);
+
+        $this->expectException(JsonValidationException::class);
+        $settings->packageMap();
+    }
+
+    public function testEmptyPackageMapCanBeWrittenAndReadBack(): void
+    {
+        $workingDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('pie_settings_test', true) . DIRECTORY_SEPARATOR;
+        $cached     = new CachedPackageMap(
+            ExtensionToPackageSelections::fromArrayMap([]),
+            '"etag123"',
+            new DateTimeImmutable('2026-10-20 15:05:00', new DateTimeZone('UTC')),
+        );
+
+        (new Settings($workingDir))->updatePackageMap($cached);
+
+        self::assertEquals($cached, (new Settings($workingDir))->packageMap());
+
+        (new Filesystem())->remove($workingDir);
     }
 
     #[DataProvider('corruptPackageMapProvider')]
