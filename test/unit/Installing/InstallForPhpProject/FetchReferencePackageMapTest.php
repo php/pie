@@ -7,6 +7,7 @@ namespace Php\PieUnitTest\Installing\InstallForPhpProject;
 use Composer\Downloader\TransportException;
 use Composer\Util\Http\Response;
 use Composer\Util\HttpDownloader;
+use Composer\Util\Platform;
 use DateTimeZone;
 use Php\Pie\Installing\InstallForPhpProject\CachedPackageMap;
 use Php\Pie\Installing\InstallForPhpProject\ExtensionToPackageSelections;
@@ -45,6 +46,13 @@ final class FetchReferencePackageMapTest extends TestCase
             $this->pieSettings,
             $this->clock,
         );
+    }
+
+    public function tearDown(): void
+    {
+        Platform::clearEnv('PIE_DISABLE_PACKAGE_MAP_FETCH');
+
+        parent::tearDown();
     }
 
     public function testNewDownloadUpdatesCache(): void
@@ -274,6 +282,48 @@ final class FetchReferencePackageMapTest extends TestCase
 
         self::assertSame(
             ['foo' => 'foo/foo'],
+            ($this->fetcher)()->toArray(),
+        );
+    }
+
+    public function testFetchDisabledWithCachedMapUsesExistingMap(): void
+    {
+        Platform::putEnv('PIE_DISABLE_PACKAGE_MAP_FETCH', '1');
+
+        $this->pieSettings
+            ->method('packageMap')
+            ->willReturn(new CachedPackageMap(
+                ExtensionToPackageSelections::fromArrayMap(['foo' => 'foo/foo']),
+                '"etag123"',
+                new DateTimeImmutable('2026-10-20 14:55:00', new DateTimeZone('UTC')),
+            ));
+        $this->pieSettings->expects(self::never())
+            ->method('updatePackageMap');
+
+        $this->httpDownloader->expects(self::never())
+            ->method('get');
+
+        self::assertSame(
+            ['foo' => 'foo/foo'],
+            ($this->fetcher)()->toArray(),
+        );
+    }
+
+    public function testFetchDisabledAndNoCacheReturnsEmptyMap(): void
+    {
+        Platform::putEnv('PIE_DISABLE_PACKAGE_MAP_FETCH', '1');
+
+        $this->pieSettings
+            ->method('packageMap')
+            ->willReturn(null);
+        $this->pieSettings->expects(self::never())
+            ->method('updatePackageMap');
+
+        $this->httpDownloader->expects(self::never())
+            ->method('get');
+
+        self::assertSame(
+            [],
             ($this->fetcher)()->toArray(),
         );
     }

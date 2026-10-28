@@ -8,6 +8,7 @@ use Composer\Downloader\TransportException;
 use Composer\Pcre\Preg;
 use Composer\Util\Http\Response;
 use Composer\Util\HttpDownloader;
+use Composer\Util\Platform;
 use DateInterval;
 use Php\Pie\Settings;
 use Psr\Clock\ClockInterface;
@@ -33,6 +34,10 @@ final class FetchReferencePackageMap
 
         if ($cached !== null && $now < $cached->expiry) {
             return $cached->map;
+        }
+
+        if ((bool) Platform::getEnv('PIE_DISABLE_PACKAGE_MAP_FETCH')) {
+            return $cached->map ?? ExtensionToPackageSelections::fromArrayMap([]);
         }
 
         try {
