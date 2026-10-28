@@ -1,7 +1,16 @@
 {
     "apcu": "apcu/apcu",
+    "imagick": "imagick/imagick",
+    "lzf": "pecl/lzf",
+    "mailparse": "pecl/mailparse",
     "mcrypt": "pecl/mcrypt",
+    "memcached": "php-memcached/php-memcached",
     "mongodb": "mongodb/mongodb-extension",
+    "parallel": "pecl/parallel",
+    "pcov": "pecl/pcov",
     "redis": "phpredis/phpredis",
-    "xdebug": "xdebug/xdebug"
+    "timezonedb": "pecl/timezonedb",
+    "uuid": "pecl/uuid",
+    "xdebug": "xdebug/xdebug",
+    "yaml": "pecl/yaml"
 }
