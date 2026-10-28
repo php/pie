@@ -13,6 +13,8 @@ use Composer\Repository\RepositoryManager;
 use Composer\Semver\Constraint\Constraint;
 use Composer\Semver\Constraint\MatchAllConstraint;
 use Composer\Semver\Constraint\MultiConstraint;
+use Composer\Util\HttpDownloader;
+use DateTimeZone;
 use Php\Pie\Command\InstallExtensionsForProjectCommand;
 use Php\Pie\ComposerIntegration\MinimalHelperSet;
 use Php\Pie\ComposerIntegration\PieJsonEditor;
@@ -20,19 +22,24 @@ use Php\Pie\ComposerIntegration\QuieterConsoleIO;
 use Php\Pie\Container;
 use Php\Pie\DependencyResolver\RequestedPackageAndVersion;
 use Php\Pie\ExtensionType;
+use Php\Pie\Installing\InstallForPhpProject\CachedPackageMap;
 use Php\Pie\Installing\InstallForPhpProject\CheckExtensionStatus;
 use Php\Pie\Installing\InstallForPhpProject\ComposerFactoryForProject;
 use Php\Pie\Installing\InstallForPhpProject\DetermineExtensionsRequired;
+use Php\Pie\Installing\InstallForPhpProject\ExtensionToPackageSelections;
+use Php\Pie\Installing\InstallForPhpProject\FetchReferencePackageMap;
 use Php\Pie\Installing\InstallForPhpProject\FindMatchingPackages;
 use Php\Pie\Installing\InstallForPhpProject\InstallPiePackageFromPath;
 use Php\Pie\Installing\InstallForPhpProject\InstallSelectedPackage;
 use Php\Pie\Installing\InstallForPhpProject\SelectPackageForExtension;
 use Php\Pie\Platform\InstalledPiePackages;
 use Php\Pie\Platform\PiePackageList;
+use Php\Pie\Settings;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
+use Symfony\Component\Clock\MockClock;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Helper\QuestionHelper;
@@ -80,6 +87,14 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
         $this->installPiePackage         = $this->createMock(InstallPiePackageFromPath::class);
         $this->questionHelper            = $this->createMock(QuestionHelper::class);
 
+        $clock    = new MockClock('2026-10-20 15:00:00', new DateTimeZone('UTC'));
+        $settings = $this->createMock(Settings::class);
+        $settings->method('packageMap')->willReturn(new CachedPackageMap(
+            ExtensionToPackageSelections::fromArrayMap([]),
+            '"etag123"',
+            $clock->now()->modify('+1 hour'),
+        ));
+
         Container::testFactory();
         $cmd = new InstallExtensionsForProjectCommand(
             $this->composerFactoryForProject,
@@ -89,6 +104,7 @@ final class InstallExtensionsForProjectCommandTest extends TestCase
             new SelectPackageForExtension($this->findMatchingPackages, Container::testBuffer()),
             $this->installSelectedPackage,
             $this->installPiePackage,
+            new FetchReferencePackageMap($this->createMock(HttpDownloader::class), $settings, $clock),
             $container,
             Container::testBuffer(),
         );

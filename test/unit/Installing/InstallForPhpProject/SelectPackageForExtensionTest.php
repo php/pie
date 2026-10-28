@@ -9,6 +9,7 @@ use Composer\IO\BufferIO;
 use Composer\IO\IOInterface;
 use OutOfRangeException;
 use Php\Pie\ExtensionName;
+use Php\Pie\Installing\InstallForPhpProject\ExtensionToPackageSelections;
 use Php\Pie\Installing\InstallForPhpProject\FindMatchingPackages;
 use Php\Pie\Installing\InstallForPhpProject\NoMatchingPackagesFound;
 use Php\Pie\Installing\InstallForPhpProject\PackageSelectionRequired;
@@ -50,7 +51,7 @@ final class SelectPackageForExtensionTest extends TestCase
         $result = ($this->selectPackageForExtension)(
             $this->extension,
             '^1.0',
-            ['foobar' => 'vendor/foobar'],
+            ExtensionToPackageSelections::fromArrayMap(['foobar' => 'vendor/foobar']),
             $this->pieComposer,
             false,
         );
@@ -67,7 +68,7 @@ final class SelectPackageForExtensionTest extends TestCase
         $result = ($this->selectPackageForExtension)(
             $this->extension,
             '*',
-            ['foobar' => 'vendor/foobar'],
+            ExtensionToPackageSelections::fromArrayMap(['foobar' => 'vendor/foobar']),
             $this->pieComposer,
             false,
         );
@@ -86,7 +87,7 @@ final class SelectPackageForExtensionTest extends TestCase
         ($this->selectPackageForExtension)(
             $this->extension,
             '^1.0',
-            [],
+            ExtensionToPackageSelections::fromArrayMap([]),
             $this->pieComposer,
             false,
         );
@@ -101,7 +102,7 @@ final class SelectPackageForExtensionTest extends TestCase
             ($this->selectPackageForExtension)(
                 $this->extension,
                 '^1.0',
-                [],
+                ExtensionToPackageSelections::fromArrayMap([]),
                 $this->pieComposer,
                 false,
             );
@@ -123,7 +124,7 @@ final class SelectPackageForExtensionTest extends TestCase
         ($this->selectPackageForExtension)(
             $this->extension,
             '^1.0',
-            [],
+            ExtensionToPackageSelections::fromArrayMap([]),
             $this->pieComposer,
             true,
         );
@@ -141,7 +142,7 @@ final class SelectPackageForExtensionTest extends TestCase
         $result = $service(
             $this->extension,
             '^1.0',
-            [],
+            ExtensionToPackageSelections::fromArrayMap([]),
             $this->pieComposer,
             true,
         );
@@ -164,7 +165,7 @@ final class SelectPackageForExtensionTest extends TestCase
         $result = $service(
             $this->extension,
             '^1.0',
-            [],
+            ExtensionToPackageSelections::fromArrayMap([]),
             $this->pieComposer,
             true,
         );

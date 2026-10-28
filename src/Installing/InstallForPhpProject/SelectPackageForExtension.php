@@ -36,21 +36,19 @@ class SelectPackageForExtension
      *    in non-interactive mode (e.g. CI/Docker builds etc), we do NOT install anything, we just tell the user to
      *      provide the appropriate `--select` flags
      *
-     * @param array<non-empty-string, non-empty-string> $extensionToPackageSelections
-     *
      * @throws NoMatchingPackagesFound
      * @throws PackageSelectionRequired
      */
     public function __invoke(
         ExtensionName $extension,
         string $linkRequiresConstraint,
-        array $extensionToPackageSelections,
+        ExtensionToPackageSelections $extensionToPackageSelections,
         Composer $pieComposer,
         bool $isInteractive,
     ): RequestedPackageAndVersion|null {
-        if (array_key_exists($extension->name(), $extensionToPackageSelections)) {
+        if ($extensionToPackageSelections->has($extension)) {
             return new RequestedPackageAndVersion(
-                $extensionToPackageSelections[$extension->name()],
+                $extensionToPackageSelections->packageFor($extension),
                 $this->normaliseConstraint($linkRequiresConstraint),
             );
         }

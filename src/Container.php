@@ -8,6 +8,7 @@ use Composer\Factory;
 use Composer\IO\BufferIO;
 use Composer\IO\ConsoleIO;
 use Composer\IO\IOInterface;
+use Composer\Util\HttpDownloader;
 use Composer\Util\Platform as ComposerPlatform;
 use Illuminate\Container\Container as IlluminateContainer;
 use Php\Pie\Building\Build;
@@ -39,6 +40,7 @@ use Php\Pie\Downloading\PackageReleaseAssets;
 use Php\Pie\File\FullPathToSelf;
 use Php\Pie\Installing\Ini;
 use Php\Pie\Installing\Install;
+use Php\Pie\Installing\InstallForPhpProject\FetchReferencePackageMap;
 use Php\Pie\Installing\Uninstall;
 use Php\Pie\Installing\UninstallUsingUnlink;
 use Php\Pie\Installing\UnixInstall;
@@ -46,6 +48,7 @@ use Php\Pie\Installing\WindowsInstall;
 use Php\Pie\Platform\PackageManager;
 use Php\Pie\SelfManage\BuildTools\CheckAllBuildTools;
 use Psr\Container\ContainerInterface;
+use Symfony\Component\Clock\NativeClock;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Formatter\OutputFormatter;
@@ -211,6 +214,21 @@ final class Container
             CheckAllBuildTools::class,
             static function (): CheckAllBuildTools {
                 return CheckAllBuildTools::buildToolsFactory();
+            },
+        );
+
+        $container->singleton(
+            FetchReferencePackageMap::class,
+            static function (ContainerInterface $container): FetchReferencePackageMap {
+                $io     = $container->get(QuieterConsoleIO::class);
+                $config = Factory::createConfig($io);
+                $io->loadConfiguration($config);
+
+                return new FetchReferencePackageMap(
+                    new HttpDownloader($io, $config),
+                    new Settings(Platform::getPieBaseWorkingDirectory()),
+                    new NativeClock(),
+                );
             },
         );
 

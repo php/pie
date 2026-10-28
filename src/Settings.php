@@ -5,7 +5,11 @@ declare(strict_types=1);
 namespace Php\Pie;
 
 use Composer\Json\JsonFile;
+use DateTimeImmutable;
+use Php\Pie\Installing\InstallForPhpProject\CachedPackageMap;
+use Php\Pie\Installing\InstallForPhpProject\ExtensionToPackageSelections;
 use Php\Pie\SelfManage\Update\Channel;
+use Safe\Exceptions\DatetimeException;
 
 use function array_key_exists;
 use function file_exists;
@@ -25,6 +29,11 @@ use const JSON_THROW_ON_ERROR;
  *
  * @phpstan-type PieSettings = array{
  *     channel?: non-empty-string,
+ *     package_map?: array{
+ *         map: array<non-empty-string, non-empty-string>,
+ *         etag: non-empty-string,
+ *         expires: non-empty-string,
+ *     },
  * }
  */
 class Settings
@@ -102,5 +111,38 @@ class Settings
         $config['channel'] = $channel->value;
 
         $this->write($config);
+    }
+
+    public function updatePackageMap(CachedPackageMap $map): void
+    {
+        $config = $this->read();
+
+        $config['package_map'] = [
+            'map' => $map->map->toArray(),
+            'expires' => $map->expiry->format(DateTimeImmutable::ATOM),
+            'etag' => $map->etag,
+        ];
+        $this->write($config);
+    }
+
+    public function packageMap(): CachedPackageMap|null
+    {
+        $config = $this->read();
+
+        if (! array_key_exists('package_map', $config)) {
+            return null;
+        }
+
+        try {
+            $expires = \Safe\DateTimeImmutable::createFromFormat(DateTimeImmutable::ATOM, $config['package_map']['expires']);
+        } catch (DatetimeException) {
+            return null;
+        }
+
+        return new CachedPackageMap(
+            ExtensionToPackageSelections::fromArrayMap($config['package_map']['map']),
+            $config['package_map']['etag'],
+            $expires,
+        );
     }
 }

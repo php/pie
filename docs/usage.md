@@ -497,13 +497,17 @@ You can specify the missing extensions with:
 
 ```bash
 pie install \
-  --select example_pie_extension=asgrim/example-pie-extension \
-  --select redis=phpredis/phpredis
+  --select example_pie_extension=asgrim/example-pie-extension
 ```
 
 > [!IMPORTANT]
 > The `--allow-non-interactive-project-install` will no longer work. You must
 > provide package selections from PIE 1.5 onwards.
+
+Since PIE 1.6.0+, a map of extensions to package names is automatically updated
+in PIE that will resolve certain well-known and well-used extensions. The map
+is cached in the PIE settings, but this can be opted out by providing the
+`PIE_DISABLE_PACKAGE_MAP_FETCH=1` environment variable.
 
 ### Excluding require-dev extensions
 
