@@ -27,6 +27,7 @@ use Php\Pie\DependencyResolver\UnableToResolveRequirement;
 use Php\Pie\Downloading\DownloadUrlMethod;
 use Php\Pie\ExtensionName;
 use Php\Pie\Installing\InstallForPhpProject\ExtensionToPackageSelections;
+use Php\Pie\Installing\InstallForPhpProject\FetchReferencePackageMap;
 use Php\Pie\Installing\InstallForPhpProject\FindMatchingPackages;
 use Php\Pie\Platform as PiePlatform;
 use Php\Pie\Platform\OperatingSystem;
@@ -797,8 +798,10 @@ final class CommandHelper
         return $restoreWorkingDir;
     }
 
-    public static function determineExtensionToPackageSelections(InputInterface $input): ExtensionToPackageSelections
-    {
+    public static function determineExtensionToPackageSelections(
+        InputInterface $input,
+        FetchReferencePackageMap $fetchReferencePackageMap,
+    ): ExtensionToPackageSelections {
         $extensionToPackageSelections = [];
         $selectionOptions             = $input->getOption(self::OPTION_PACKAGE_SELECTION);
         assert(is_array($selectionOptions));
@@ -810,7 +813,7 @@ final class CommandHelper
             $extensionToPackageSelections[ExtensionName::normaliseFromString($extNameString)->name()] = (new RequestedPackageAndVersion($packageSelectionString, null))->package;
         }
 
-        return ExtensionToPackageSelections::fromReferenceList()
+        return $fetchReferencePackageMap()
             // @todo overrideWith a local map, if provided (how to provide?)
             //       options: config global pie.json, CLI param?
             ->overrideWith(ExtensionToPackageSelections::fromArrayMap($extensionToPackageSelections));

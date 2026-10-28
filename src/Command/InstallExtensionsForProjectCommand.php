@@ -20,6 +20,7 @@ use Php\Pie\Installing\InstallForPhpProject\ComposerFactoryForProject;
 use Php\Pie\Installing\InstallForPhpProject\DetermineExtensionsRequired;
 use Php\Pie\Installing\InstallForPhpProject\ExtensionInstalledStatus;
 use Php\Pie\Installing\InstallForPhpProject\ExtensionToPackageSelections;
+use Php\Pie\Installing\InstallForPhpProject\FetchReferencePackageMap;
 use Php\Pie\Installing\InstallForPhpProject\InstallPiePackageFromPath;
 use Php\Pie\Installing\InstallForPhpProject\InstallSelectedPackage;
 use Php\Pie\Installing\InstallForPhpProject\NoMatchingPackagesFound;
@@ -65,6 +66,7 @@ final class InstallExtensionsForProjectCommand extends Command
         private readonly SelectPackageForExtension $selectPackageForExtension,
         private readonly InstallSelectedPackage $installSelectedPackage,
         private readonly InstallPiePackageFromPath $installPiePackageFromPath,
+        private readonly FetchReferencePackageMap $fetchReferencePackageMap,
         private readonly ContainerInterface $container,
         private readonly IOInterface $io,
     ) {
@@ -109,7 +111,7 @@ final class InstallExtensionsForProjectCommand extends Command
 
     private function handlePhpProject(InputInterface $input, RootPackageInterface $rootPackage, callable $restoreWorkingDir): int
     {
-        $extensionToPackageSelections = CommandHelper::determineExtensionToPackageSelections($input);
+        $extensionToPackageSelections = CommandHelper::determineExtensionToPackageSelections($input, $this->fetchReferencePackageMap);
         $targetPlatform               = CommandHelper::determineTargetPlatformFromInputs($input, $this->io);
         CommandHelper::assertExtensionPathIsConsistent($targetPlatform, $input, $this->io);
 
