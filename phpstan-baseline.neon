@@ -193,12 +193,6 @@ parameters:
 			path: src/SelfManage/Verify/VerifyPieReleaseUsingAttestation.php
 
 		-
-			message: '#^Property Php\\Pie\\SelfManage\\Verify\\VerifyPieReleaseUsingAttestation\:\:\$fallbackVerification is never read, only written\.$#'
-			identifier: property.onlyWritten
-			count: 1
-			path: src/SelfManage/Verify/VerifyPieReleaseUsingAttestation.php
-
-		-
 			message: '#^Strict comparison using \!\=\= between ''@pie_version@'' and ''@pie_version@'' will always evaluate to false\.$#'
 			identifier: notIdentical.alwaysFalse
 			count: 1
