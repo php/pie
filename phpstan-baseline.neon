@@ -229,12 +229,6 @@ parameters:
 			path: src/Installing/Ini/IsExtensionAlreadyInTheIniFile.php
 
 		-
-			message: '#^Parameter \#2 \$array of function array_key_exists expects array, array\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Installing/Ini/IsExtensionAlreadyInTheIniFile.php
-
-		-
 			message: '#^Call to function array_key_exists\(\) with ''downloads'' and array\{name\: string, description\: string\|null, abandoned\?\: string\|true, url\?\: string\} will always evaluate to false\.$#'
 			identifier: function.impossibleType
 			count: 2
@@ -279,12 +273,6 @@ parameters:
 		-
 			message: '#^Dead catch \- Php\\Pie\\SelfManage\\Verify\\GithubCliNotAvailable is never thrown in the try block\.$#'
 			identifier: catch.neverThrown
-			count: 1
-			path: src/SelfManage/Verify/VerifyPieReleaseUsingAttestation.php
-
-		-
-			message: '#^Property Php\\Pie\\SelfManage\\Verify\\VerifyPieReleaseUsingAttestation\:\:\$fallbackVerification is never read, only written\.$#'
-			identifier: property.onlyWritten
 			count: 1
 			path: src/SelfManage/Verify/VerifyPieReleaseUsingAttestation.php
 
