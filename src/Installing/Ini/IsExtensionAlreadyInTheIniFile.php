@@ -33,6 +33,10 @@ class IsExtensionAlreadyInTheIniFile
         foreach ($iniFileContentLines as $line) {
             $lineIni = parse_ini_string($line);
 
+            if ($lineIni === false) {
+                continue;
+            }
+
             if (array_key_exists('extension', $lineIni) && is_string($lineIni['extension']) && $lineIni['extension'] !== '') {
                 $extensions[] = $lineIni['extension'];
             }
