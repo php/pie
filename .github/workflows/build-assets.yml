@@ -69,11 +69,11 @@ jobs:
         with:
           subject-path: '${{ github.workspace }}/pie.phar'
           sbom-path: '${{ github.workspace }}/sbom.json'
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
         with:
           name: pie-${{ github.sha }}.phar
           path: pie.phar
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
         with:
           name: pie-${{ github.sha }}-sbom.json
           path: sbom.json
@@ -171,7 +171,7 @@ jobs:
         with:
           subject-path: ${{ github.workspace }}/pie-${{ runner.os }}-${{ runner.arch }}${{ runner.os == 'Windows' && '.exe' || '' }}
 
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
         with:
           name: pie-${{ github.sha }}-${{ runner.os }}-${{ runner.arch }}.bin
           path: pie-${{ runner.os }}-${{ runner.arch }}${{ runner.os == 'Windows' && '.exe' || '' }}
