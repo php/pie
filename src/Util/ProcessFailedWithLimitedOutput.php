@@ -11,9 +11,7 @@ use function file_put_contents;
 use function sprintf;
 use function strlen;
 use function sys_get_temp_dir;
-use function uniqid;
-
-use const DIRECTORY_SEPARATOR;
+use function tempnam;
 
 class ProcessFailedWithLimitedOutput extends ProcessFailedException
 {
@@ -22,7 +20,11 @@ class ProcessFailedWithLimitedOutput extends ProcessFailedException
         $process = $previous->getProcess();
 
         if (strlen($process->getOutput()) > 5000) {
-            $tempOutputFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('pie_make_output_', true);
+            $tempOutputFile = tempnam(sys_get_temp_dir(), 'pie_make_output_');
+            if ($tempOutputFile === false) {
+                return $previous;
+            }
+
             file_put_contents(
                 $tempOutputFile,
                 sprintf(
