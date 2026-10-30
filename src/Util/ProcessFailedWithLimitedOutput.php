@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace Php\Pie\Util;
 
+use Safe\Exceptions\FilesystemException;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 
 use function Safe\file_put_contents;
+use function Safe\tempnam;
 use function sprintf;
 use function strlen;
 use function sys_get_temp_dir;
-use function uniqid;
-
-use const DIRECTORY_SEPARATOR;
 
 class ProcessFailedWithLimitedOutput extends ProcessFailedException
 {
@@ -22,7 +21,12 @@ class ProcessFailedWithLimitedOutput extends ProcessFailedException
         $process = $previous->getProcess();
 
         if (strlen($process->getOutput()) > 5000) {
-            $tempOutputFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('pie_make_output_', true);
+            try {
+                $tempOutputFile = tempnam(sys_get_temp_dir(), 'pie_make_output_');
+            } catch (FilesystemException) {
+                return $previous;
+            }
+
             file_put_contents(
                 $tempOutputFile,
                 sprintf(
