@@ -1,5 +1,10 @@
 {
     "apcu": "apcu/apcu",
+    "decimal": "php-decimal/ext-decimal",
+    "ev": "osmanov/pecl-ev",
+    "event": "osmanov/pecl-event",
+    "grpc": "grpc/grpc-php-ext",
+    "igbinary": "igbinary/igbinary",
     "imagick": "imagick/imagick",
     "lzf": "pecl/lzf",
     "mailparse": "pecl/mailparse",
@@ -8,9 +13,12 @@
     "mongodb": "mongodb/mongodb-extension",
     "parallel": "pecl/parallel",
     "pcov": "pecl/pcov",
+    "rdkafka": "rdkafka/rdkafka",
     "redis": "phpredis/phpredis",
+    "spx": "noisebynorthwest/php-spx",
     "timezonedb": "pecl/timezonedb",
     "uuid": "pecl/uuid",
+    "uv": "amphp/uv",
     "xdebug": "xdebug/xdebug",
     "yaml": "pecl/yaml"
 }
