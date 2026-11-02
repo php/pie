@@ -25,7 +25,7 @@ jobs:
       # contents:write is required to create the draft release
       contents: write
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           fetch-tags: 'true'
           ref: ${{ github.ref }}
@@ -48,21 +48,21 @@ jobs:
       # contents:write is required to upload the binaries to the release.
       contents: write
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
       - name: Fetch built PHAR from artifacts
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 #v8.0.2
+        uses: actions/download-artifact@v8.0.2
         with:
           name: pie-${{ github.sha }}.phar
       - name: Fetch the executable PIEs from artifacts
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 #v8.0.2
+        uses: actions/download-artifact@v8.0.2
         with:
           path: executable-pie-binaries
           pattern: pie-${{ github.sha }}-*.bin
           merge-multiple: true
       - name: Fetch the PHAR's SBOM from artifacts
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 #v8.0.2
+        uses: actions/download-artifact@v8.0.2
         with:
           name: pie-${{ github.sha }}-sbom.json
       - name: Verify the PHAR and binaries
