@@ -24,16 +24,16 @@ jobs:
           - '8.6'
     steps:
       - name: Setup PHP
-        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 #2.40.0
+        uses: shivammathur/setup-php@2.40.0
         with:
           php-version: ${{ matrix.php-versions }}
           extensions: intl, sodium, zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
-      - uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda #4.0.0
+      - uses: ramsey/composer-install@4.0.0
       - name: GH token (non-Windows)
         if: matrix.operating-system != 'windows-latest'
         run: sudo composer config --global --auth github-oauth.github.com ${{ secrets.GITHUB_TOKEN }}
@@ -62,11 +62,11 @@ jobs:
           - '84'
           - '85'
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
       - name: Test in FreeBSD
-        uses: vmactions/freebsd-vm@c46abacb49f09938ca4e1702d15d836285d694cc #v1.5.9
+        uses: vmactions/freebsd-vm@v1.5.9
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -190,7 +190,7 @@ jobs:
           make -j$(nproc)
           sudo make install
           cd $GITHUB_WORKSPACE
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
       - name: Composer Install
@@ -203,7 +203,7 @@ jobs:
   end-to-end-tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -211,7 +211,7 @@ jobs:
       - run: git fetch --tags --force
       # Ensure some kind of previous tag exists, otherwise box fails
       - run: git describe --tags HEAD || git tag 0.0.0
-      - uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda #4.0.0
+      - uses: ramsey/composer-install@4.0.0
       - name: Run the tests
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -231,7 +231,7 @@ jobs:
           - '8.5'
           #- '8.6' @todo behaviour tests depend on stable releases currently
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -239,7 +239,7 @@ jobs:
       - run: git fetch --tags --force
       # Ensure some kind of previous tag exists, otherwise box fails
       - run: git describe --tags HEAD || git tag 0.0.0
-      - uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda #4.0.0
+      - uses: ramsey/composer-install@4.0.0
       - name: Build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -253,16 +253,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup PHP
-        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 #2.40.0
+        uses: shivammathur/setup-php@2.40.0
         with:
           php-version: 8.1
           extensions: intl, sodium, zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
-      - uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda #4.0.0
+      - uses: ramsey/composer-install@4.0.0
       - name: Run PHPCS
         run: vendor/bin/phpcs
 
@@ -270,16 +270,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup PHP
-        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 #2.40.0
+        uses: shivammathur/setup-php@2.40.0
         with:
           php-version: 8.5
           extensions: intl, sodium, zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
-      - uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda #4.0.0
+      - uses: ramsey/composer-install@4.0.0
       - name: Validate the composer configuration
         run: composer validate --strict
       - name: Run phpstan
@@ -289,17 +289,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup PHP
-        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 #2.40.0
+        uses: shivammathur/setup-php@2.40.0
         with:
           php-version: 8.4
           extensions: intl, sodium, zip
           tools: infection
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
-      - uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda #4.0.0
+      - uses: ramsey/composer-install@4.0.0
       - name: Run infection
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -308,12 +308,24 @@ jobs:
   zizmor:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
-      - uses: zizmorcore/zizmor-action@85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e #v0.7.1
+      - uses: zizmorcore/zizmor-action@v0.8.0
         with:
           advanced-security: false
+          version: 1.32.0rc1
+
+  verify-actions-lockfile:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - run: gh extension install github/gh-actions-lock --pin v0.4.1
+      - run: gh actions-lock --verify
 
   build-assets:
     needs:
