@@ -42,6 +42,12 @@ COPY --from=build_pie_phar /app/pie.phar /usr/local/bin/pie
 RUN pie install --auto-install-build-tools -v asgrim/example-pie-extension:2.0.5
 RUN pie show
 
+FROM ubuntu_base AS test_pie_runs_with_ext_psr_loaded
+RUN apt-get update && apt-get install -y php-cli php8.5-psr
+RUN php -m | grep -x psr
+COPY --from=build_pie_phar /app/pie.phar /usr/local/bin/pie
+RUN pie show
+
 FROM homebrew_base AS homebrew_base_with_pie
 RUN brew update && brew install php
 COPY --from=build_pie_phar /app/pie.phar /usr/local/bin/pie
