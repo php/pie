@@ -3,6 +3,7 @@
     "output": "pie.phar",
     "git": "pie_version",
     "stub": "phar-stub.php",
+    "check-requirements": false,
     "force-autodiscovery": true,
     "directories": [
         "resources"
