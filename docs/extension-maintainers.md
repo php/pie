@@ -387,35 +387,44 @@ We are adding libraries and improving this feature over time. If the automatic
 install of a system dependency that is supported below in your package manager
 is NOT working, then please [report a bug](https://github.com/php/pie/issues).
 
-| Library       | Checked by PIE | Auto-installs in   |
-|---------------|----------------|--------------------|
-| lib-curl      | ✅              | apt, apk, dnf, yum |
-| lib-enchant   | ✅              | ❌                  |
-| lib-enchant-2 | ✅              | ❌                  |
-| lib-sodium    | ✅              | apt, apk, dnf, yum |
-| lib-ffi       | ✅              | apt, apk, dnf, yum |
-| lib-xslt      | ✅              | apt, apk, dnf, yum |
-| lib-zip       | ✅              | apt, apk, dnf, yum |
-| lib-png       | ✅              | ❌                  |
-| lib-avif      | ✅              | ❌                  |
-| lib-webp      | ✅              | ❌                  |
-| lib-jpeg      | ✅              | apt, apk, dnf, yum |
-| lib-xpm       | ✅              | ❌                  |
-| lib-freetype2 | ✅              | ❌                  |
-| lib-gdlib     | ✅              | ❌                  |
-| lib-gmp       | ✅              | ❌                  |
-| lib-gpgme     | ✅              | apt, apk, dnf, yum |
-| lib-pam       | ✅              | apt, apk, dnf, yum |
-| lib-sasl      | ✅              | ❌                  |
-| lib-onig      | ✅              | ❌                  |
-| lib-odbc      | ✅              | ❌                  |
-| lib-capstone  | ✅              | ❌                  |
-| lib-pcre      | ✅              | ❌                  |
-| lib-edit      | ✅              | ❌                  |
-| lib-snmp      | ✅              | ❌                  |
-| lib-argon2    | ✅              | ❌                  |
-| lib-uriparser | ✅              | ❌                  |
-| lib-exslt     | ✅              | ❌                  |
+| Library         | Checked by PIE | Auto-installs in |
+|-----------------|----------------|------------------|
+| lib-curl        | ✅              | apt, apk, dn     |
+| lib-enchant     | ✅              | ❌                |
+| lib-enchant-2   | ✅              | ❌                |
+| lib-sodium      | ✅              | apt, apk, dnf    |
+| lib-ffi         | ✅              | apt, apk, dnf    |
+| lib-xslt        | ✅              | apt, apk, dnf    |
+| lib-zip         | ✅              | apt, apk, dnf    |
+| lib-png         | ✅              | ❌                |
+| lib-avif        | ✅              | ❌                |
+| lib-webp        | ✅              | ❌                |
+| lib-jpeg        | ✅              | apt, apk, dnf    |
+| lib-xpm         | ✅              | ❌                |
+| lib-freetype2   | ✅              | ❌                |
+| lib-gdlib       | ✅              | ❌                |
+| lib-gmp         | ✅              | ❌                |
+| lib-gpgme       | ✅              | apt, apk, dnf    |
+| lib-pam         | ✅              | apt, apk, dnf    |
+| lib-sasl        | ✅              | apt, apk, dnf    |
+| lib-onig        | ✅              | ❌                |
+| lib-odbc        | ✅              | ❌                |
+| lib-capstone    | ✅              | ❌                |
+| lib-pcre        | ✅              | ❌                |
+| lib-edit        | ✅              | ❌                |
+| lib-snmp        | ✅              | ❌                |
+| lib-argon2      | ✅              | ❌                |
+| lib-uriparser   | ✅              | ❌                |
+| lib-exslt       | ✅              | ❌                |
+| lib-yaml        | ✅              | apt, apk, dnf    |
+| lib-uv          | ✅              | apt, apk, dnf    |
+| lib-uuid        | ✅              | apt, apk, dnf    |
+| lib-rdkafka     | ✅              | apt, apk, dnf    |
+| lib-zlib        | ✅              | apt, apk, dnf    |
+| lib-memcached   | ✅              | apt, apk, dnf    |
+| lib-imagemagick | ✅              | apt, apk, dnf    |
+| lib-event       | ✅              | apt, apk, dnf    |
+| lib-openssl     | ✅              | apt, apk, dnf    |
 
 #### Checking the extension will work
 

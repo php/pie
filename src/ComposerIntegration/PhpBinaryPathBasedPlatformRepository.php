@@ -64,6 +64,15 @@ class PhpBinaryPathBasedPlatformRepository extends PlatformRepository
         'argon2' => 'libargon2',
         'uriparser' => 'liburiparser',
         'exslt' => 'libexslt',
+        'yaml' => 'yaml-0.1',
+        'uv' => 'libuv',
+        'uuid' => 'uuid',
+        'rdkafka' => 'rdkafka',
+        'zlib' => 'zlib',
+        'memcached' => 'libmemcached',
+        'imagemagick' => 'MagickWand',
+        'event' => 'libevent',
+        'openssl' => 'openssl',
     ];
 
     private VersionParser $versionParser;
