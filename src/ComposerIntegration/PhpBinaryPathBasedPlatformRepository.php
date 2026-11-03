@@ -68,6 +68,7 @@ class PhpBinaryPathBasedPlatformRepository extends PlatformRepository
         'uv' => 'libuv',
         'uuid' => 'uuid',
         'rdkafka' => 'rdkafka',
+        'zlib' => 'zlib',
     ];
 
     private VersionParser $versionParser;

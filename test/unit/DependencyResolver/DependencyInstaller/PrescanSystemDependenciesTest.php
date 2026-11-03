@@ -438,6 +438,11 @@ final class PrescanSystemDependenciesTest extends TestCase
             'rdkafka with dnf' => ['rdkafka', PackageManager::Dnf, 'pkgconfig(rdkafka)'],
             'rdkafka with microdnf' => ['rdkafka', PackageManager::Microdnf, 'pkgconfig(rdkafka)'],
             'rdkafka with yum' => ['rdkafka', PackageManager::Yum, 'pkgconfig(rdkafka)'],
+            'zlib with apt' => ['zlib', PackageManager::Apt, 'zlib1g-dev'],
+            'zlib with apk' => ['zlib', PackageManager::Apk, 'zlib-dev'],
+            'zlib with dnf' => ['zlib', PackageManager::Dnf, 'pkgconfig(zlib)'],
+            'zlib with microdnf' => ['zlib', PackageManager::Microdnf, 'pkgconfig(zlib)'],
+            'zlib with yum' => ['zlib', PackageManager::Yum, 'pkgconfig(zlib)'],
         ];
     }
 

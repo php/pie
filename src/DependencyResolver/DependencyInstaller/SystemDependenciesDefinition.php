@@ -104,6 +104,13 @@ class SystemDependenciesDefinition
                 PackageManager::Microdnf->value => 'pkgconfig(rdkafka)',
                 PackageManager::Yum->value => 'pkgconfig(rdkafka)',
             ],
+            'zlib' => [
+                PackageManager::Apt->value => 'zlib1g-dev',
+                PackageManager::Apk->value => 'zlib-dev',
+                PackageManager::Dnf->value => 'pkgconfig(zlib)',
+                PackageManager::Microdnf->value => 'pkgconfig(zlib)',
+                PackageManager::Yum->value => 'pkgconfig(zlib)',
+            ],
         ]);
     }
 }
