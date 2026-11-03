@@ -7,6 +7,7 @@ namespace Php\PieUnitTest\ComposerIntegration\Listeners;
 use Composer\Composer;
 use Composer\DependencyResolver\Operation\UpdateOperation;
 use Composer\DependencyResolver\Transaction;
+use Composer\Downloader\TransportException;
 use Composer\EventDispatcher\EventDispatcher;
 use Composer\Installer\InstallerEvent;
 use Composer\Installer\InstallerEvents;
@@ -514,6 +515,64 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
         );
         self::assertSame(DownloadUrlMethod::ComposerDefaultDownload, DownloadUrlMethod::fromComposerPackage($composerPackage));
         self::assertSame('zip', $composerPackage->getDistType());
+    }
+
+    public function testFallsBackToComposerDefaultWhenGithubAuthenticationFails(): void
+    {
+        $composerPackage = new CompletePackage('foo/bar', '1.2.3.0', '1.2.3');
+        $composerPackage->setDistType('zip');
+        $composerPackage->setDistUrl('https://example.com/git-archive-zip-url');
+        $composerPackage->setPhpExt([
+            'extension-name' => 'foobar',
+            'download-url-method' => ['pre-packaged-source', 'composer-default'],
+        ]);
+
+        $installerEvent = new InstallerEvent(
+            InstallerEvents::PRE_OPERATIONS_EXEC,
+            $this->composer,
+            $this->io,
+            false,
+            true,
+            new Transaction([], [$composerPackage]),
+        );
+
+        $packageReleaseAssets = $this->createMock(PackageReleaseAssets::class);
+        $packageReleaseAssets
+            ->expects(self::once())
+            ->method('findMatchingReleaseAsset')
+            ->with(self::anything(), self::anything(), self::anything(), DownloadUrlMethod::PrePackagedSourceDownload)
+            ->willThrowException(new TransportException('Could not authenticate against github.com', 401));
+
+        $this->container
+            ->method('get')
+            ->with(PackageReleaseAssets::class)
+            ->willReturn($packageReleaseAssets);
+
+        (new OverrideDownloadUrlInstallListener(
+            $this->composer,
+            $this->io,
+            $this->container,
+            new PieComposerRequest(
+                $this->createMock(IOInterface::class),
+                new TargetPlatform(
+                    OperatingSystem::NonWindows,
+                    OperatingSystemFamily::Linux,
+                    PhpBinaryPath::fromCurrentProcess(),
+                    Architecture::x86_64,
+                    ThreadSafetyMode::NonThreadSafe,
+                    1,
+                    WindowsCompiler::VC15,
+                    null,
+                ),
+                [new RequestedPackageAndVersion('foo/bar', '^1.1')],
+                PieOperation::Install,
+                [],
+                false,
+            ),
+        ))($installerEvent);
+
+        self::assertSame(DownloadUrlMethod::ComposerDefaultDownload, DownloadUrlMethod::fromComposerPackage($composerPackage));
+        self::assertSame('https://example.com/git-archive-zip-url', $composerPackage->getDistUrl());
     }
 
     public function testPrePackagedBinaryMethodIsIgnoredWhenConfigureOptionsArePassed(): void
