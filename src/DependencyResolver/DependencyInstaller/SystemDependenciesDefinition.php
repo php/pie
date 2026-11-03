@@ -83,6 +83,13 @@ class SystemDependenciesDefinition
                 PackageManager::Microdnf->value => 'pkgconfig(yaml-0.1)',
                 PackageManager::Yum->value => 'pkgconfig(yaml-0.1)',
             ],
+            'uv' => [
+                PackageManager::Apt->value => 'libuv1-dev',
+                PackageManager::Apk->value => 'libuv-dev',
+                PackageManager::Dnf->value => 'pkgconfig(libuv)',
+                PackageManager::Microdnf->value => 'pkgconfig(libuv)',
+                PackageManager::Yum->value => 'pkgconfig(libuv)',
+            ],
         ]);
     }
 }

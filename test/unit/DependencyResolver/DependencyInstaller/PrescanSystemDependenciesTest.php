@@ -423,6 +423,11 @@ final class PrescanSystemDependenciesTest extends TestCase
             'yaml with dnf' => ['yaml', PackageManager::Dnf, 'pkgconfig(yaml-0.1)'],
             'yaml with microdnf' => ['yaml', PackageManager::Microdnf, 'pkgconfig(yaml-0.1)'],
             'yaml with yum' => ['yaml', PackageManager::Yum, 'pkgconfig(yaml-0.1)'],
+            'uv with apt' => ['uv', PackageManager::Apt, 'libuv1-dev'],
+            'uv with apk' => ['uv', PackageManager::Apk, 'libuv-dev'],
+            'uv with dnf' => ['uv', PackageManager::Dnf, 'pkgconfig(libuv)'],
+            'uv with microdnf' => ['uv', PackageManager::Microdnf, 'pkgconfig(libuv)'],
+            'uv with yum' => ['uv', PackageManager::Yum, 'pkgconfig(libuv)'],
         ];
     }
 

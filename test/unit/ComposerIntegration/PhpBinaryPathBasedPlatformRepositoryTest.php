@@ -222,6 +222,7 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
             'uriparser' => ['uriparser', 'liburiparser', '0.9.7'],
             'exslt' => ['exslt', 'libexslt', '0.8.21'],
             'yaml' => ['yaml', 'yaml-0.1', '0.2.5'],
+            'uv' => ['uv', 'libuv', '1.48.0'],
         ];
     }
 
@@ -283,6 +284,7 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
                 ['uriparser', 'liburiparser'],
                 ['exslt', 'libexslt'],
                 ['yaml', 'yaml-0.1'],
+                ['uv', 'libuv'],
             ],
             static function (array $pkg): bool {
                 try {
