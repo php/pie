@@ -111,6 +111,13 @@ class SystemDependenciesDefinition
                 PackageManager::Microdnf->value => 'pkgconfig(zlib)',
                 PackageManager::Yum->value => 'pkgconfig(zlib)',
             ],
+            'sasl' => [
+                PackageManager::Apt->value => 'libsasl2-dev',
+                PackageManager::Apk->value => 'cyrus-sasl-dev',
+                PackageManager::Dnf->value => 'pkgconfig(libsasl2)',
+                PackageManager::Microdnf->value => 'pkgconfig(libsasl2)',
+                PackageManager::Yum->value => 'pkgconfig(libsasl2)',
+            ],
         ]);
     }
 }

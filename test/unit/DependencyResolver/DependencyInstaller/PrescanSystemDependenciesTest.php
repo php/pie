@@ -443,6 +443,11 @@ final class PrescanSystemDependenciesTest extends TestCase
             'zlib with dnf' => ['zlib', PackageManager::Dnf, 'pkgconfig(zlib)'],
             'zlib with microdnf' => ['zlib', PackageManager::Microdnf, 'pkgconfig(zlib)'],
             'zlib with yum' => ['zlib', PackageManager::Yum, 'pkgconfig(zlib)'],
+            'sasl with apt' => ['sasl', PackageManager::Apt, 'libsasl2-dev'],
+            'sasl with apk' => ['sasl', PackageManager::Apk, 'cyrus-sasl-dev'],
+            'sasl with dnf' => ['sasl', PackageManager::Dnf, 'pkgconfig(libsasl2)'],
+            'sasl with microdnf' => ['sasl', PackageManager::Microdnf, 'pkgconfig(libsasl2)'],
+            'sasl with yum' => ['sasl', PackageManager::Yum, 'pkgconfig(libsasl2)'],
         ];
     }
 
