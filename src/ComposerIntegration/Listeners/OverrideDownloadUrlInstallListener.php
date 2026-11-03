@@ -12,6 +12,7 @@ use Composer\Installer\InstallerEvent;
 use Composer\Installer\InstallerEvents;
 use Composer\IO\IOInterface;
 use Composer\Package\CompletePackageInterface;
+use Composer\Package\Package as ComposerPackage;
 use Composer\Util\HttpDownloader;
 use Php\Pie\ComposerIntegration\PieComposerRequest;
 use Php\Pie\ComposerIntegration\PieOperation;
@@ -155,6 +156,10 @@ class OverrideDownloadUrlInstallListener
 
                     $this->composerRequest->pieOutput->write('Found prebuilt archive: ' . $matchedReleaseAsset->url);
                     $composerPackage->setDistUrl($matchedReleaseAsset->url);
+                    $composerPackage->setDistMirrors(null);
+                    if ($composerPackage instanceof ComposerPackage) {
+                        $composerPackage->setDistSha1Checksum(null);
+                    }
 
                     $composerPackage->setTransportOptions(array_merge_recursive(
                         $composerPackage->getTransportOptions(),

@@ -390,6 +390,139 @@ final class OverrideDownloadUrlInstallListenerTest extends TestCase
         self::assertSame('tar', $composerPackage->getDistType());
     }
 
+    public function testPreferredDistMirrorDoesNotReplaceReleaseAssetUrl(): void
+    {
+        $composerPackage = new CompletePackage('foo/bar', '1.2.3.0', '1.2.3');
+        $composerPackage->setDistType('zip');
+        $composerPackage->setDistUrl('https://example.com/git-archive-zip-url');
+        $composerPackage->setDistReference('abc123');
+        $composerPackage->setDistMirrors([
+            [
+                'url' => 'https://mirror.example.com/dists/%package%/%version%/r%reference%.%type%',
+                'preferred' => true,
+            ],
+        ]);
+        $composerPackage->setPhpExt([
+            'extension-name' => 'foobar',
+            'download-url-method' => 'pre-packaged-source',
+        ]);
+
+        $installerEvent = new InstallerEvent(
+            InstallerEvents::PRE_OPERATIONS_EXEC,
+            $this->composer,
+            $this->io,
+            false,
+            true,
+            new Transaction([], [$composerPackage]),
+        );
+
+        $packageReleaseAssets = $this->createMock(PackageReleaseAssets::class);
+        $packageReleaseAssets
+            ->expects(self::once())
+            ->method('findMatchingReleaseAsset')
+            ->willReturn(new MatchedReleaseAsset(
+                'https://api.github.com/repos/foo/bar/releases/assets/22222',
+                'php_foobar-1.2.3-src.tgz',
+            ));
+
+        $this->container
+            ->method('get')
+            ->with(PackageReleaseAssets::class)
+            ->willReturn($packageReleaseAssets);
+
+        (new OverrideDownloadUrlInstallListener(
+            $this->composer,
+            $this->io,
+            $this->container,
+            new PieComposerRequest(
+                $this->createMock(IOInterface::class),
+                new TargetPlatform(
+                    OperatingSystem::NonWindows,
+                    OperatingSystemFamily::Linux,
+                    PhpBinaryPath::fromCurrentProcess(),
+                    Architecture::x86_64,
+                    ThreadSafetyMode::NonThreadSafe,
+                    1,
+                    WindowsCompiler::VC15,
+                    null,
+                ),
+                [new RequestedPackageAndVersion('foo/bar', '^1.1')],
+                PieOperation::Install,
+                [],
+                false,
+            ),
+        ))($installerEvent);
+
+        self::assertSame(
+            ['https://api.github.com/repos/foo/bar/releases/assets/22222'],
+            $composerPackage->getDistUrls(),
+        );
+    }
+
+    public function testRepositoryShasumIsNotUsedForReleaseAsset(): void
+    {
+        $composerPackage = new CompletePackage('foo/bar', '1.2.3.0', '1.2.3');
+        $composerPackage->setDistType('zip');
+        $composerPackage->setDistUrl('https://example.com/git-archive-zip-url');
+        $composerPackage->setDistSha1Checksum('da39a3ee5e6b4b0d3255bfef95601890afd80709');
+        $composerPackage->setPhpExt([
+            'extension-name' => 'foobar',
+            'download-url-method' => 'pre-packaged-source',
+        ]);
+
+        $installerEvent = new InstallerEvent(
+            InstallerEvents::PRE_OPERATIONS_EXEC,
+            $this->composer,
+            $this->io,
+            false,
+            true,
+            new Transaction([], [$composerPackage]),
+        );
+
+        $packageReleaseAssets = $this->createMock(PackageReleaseAssets::class);
+        $packageReleaseAssets
+            ->expects(self::once())
+            ->method('findMatchingReleaseAsset')
+            ->willReturn(new MatchedReleaseAsset(
+                'https://api.github.com/repos/foo/bar/releases/assets/22222',
+                'php_foobar-1.2.3-src.tgz',
+            ));
+
+        $this->container
+            ->method('get')
+            ->with(PackageReleaseAssets::class)
+            ->willReturn($packageReleaseAssets);
+
+        (new OverrideDownloadUrlInstallListener(
+            $this->composer,
+            $this->io,
+            $this->container,
+            new PieComposerRequest(
+                $this->createMock(IOInterface::class),
+                new TargetPlatform(
+                    OperatingSystem::NonWindows,
+                    OperatingSystemFamily::Linux,
+                    PhpBinaryPath::fromCurrentProcess(),
+                    Architecture::x86_64,
+                    ThreadSafetyMode::NonThreadSafe,
+                    1,
+                    WindowsCompiler::VC15,
+                    null,
+                ),
+                [new RequestedPackageAndVersion('foo/bar', '^1.1')],
+                PieOperation::Install,
+                [],
+                false,
+            ),
+        ))($installerEvent);
+
+        self::assertSame(
+            'https://api.github.com/repos/foo/bar/releases/assets/22222',
+            $composerPackage->getDistUrl(),
+        );
+        self::assertNull($composerPackage->getDistSha1Checksum());
+    }
+
     public function testDistUrlIsUpdatedForPrePackagedTgzBinaryWhenBinaryIsFound(): void
     {
         $composerPackage = new CompletePackage('foo/bar', '1.2.3.0', '1.2.3');
