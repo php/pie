@@ -190,6 +190,61 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
         );
     }
 
+    /** @return array<non-empty-string, array{0: non-empty-string, 1: non-empty-string, 2: non-empty-string}> */
+    public static function librariesDetectedUsingPkgConfig(): array
+    {
+        return [
+            'curl' => ['curl', 'libcurl', '8.12.1'],
+            'enchant' => ['enchant', 'enchant', '1.6.0'],
+            'enchant-2' => ['enchant-2', 'enchant-2', '2.3.3'],
+            'sodium' => ['sodium', 'libsodium', '1.0.18'],
+            'ffi' => ['ffi', 'libffi', '3.4.6'],
+            'xslt' => ['xslt', 'libxslt', '1.1.39'],
+            'zip' => ['zip', 'libzip', '1.10.1'],
+            'png' => ['png', 'libpng', '1.6.43'],
+            'avif' => ['avif', 'libavif', '1.0.4'],
+            'webp' => ['webp', 'libwebp', '1.3.2'],
+            'jpeg' => ['jpeg', 'libjpeg', '2.1.5'],
+            'xpm' => ['xpm', 'xpm', '3.5.17'],
+            'freetype2' => ['freetype2', 'freetype2', '26.1.20'],
+            'gdlib' => ['gdlib', 'gdlib', '2.3.3'],
+            'gmp' => ['gmp', 'gmp', '6.3.0'],
+            'gpgme' => ['gpgme', 'gpgme', '1.18.0'],
+            'pam' => ['pam', 'pam', '1.5.3'],
+            'sasl' => ['sasl', 'libsasl2', '2.1.28'],
+            'onig' => ['onig', 'oniguruma', '6.9.9'],
+            'odbc' => ['odbc', 'libiodbc', '3.52.16'],
+            'capstone' => ['capstone', 'capstone', '4.0.2'],
+            'pcre' => ['pcre', 'libpcre2-8', '10.42'],
+            'edit' => ['edit', 'libedit', '3.1'],
+            'snmp' => ['snmp', 'netsnmp', '5.9.4'],
+            'argon2' => ['argon2', 'libargon2', '20190702'],
+            'uriparser' => ['uriparser', 'liburiparser', '0.9.7'],
+            'exslt' => ['exslt', 'libexslt', '0.8.21'],
+            'yaml' => ['yaml', 'yaml-0.1', '0.2.5'],
+        ];
+    }
+
+    #[DataProvider('librariesDetectedUsingPkgConfig')]
+    public function testLibraryIsDetectedUsingPkgConfig(string $alias, string $pkgConfigName, string $version): void
+    {
+        $installedPiePackages = $this->createMock(InstalledPiePackages::class);
+        $installedPiePackages->method('allPiePackages')->willReturn(new PiePackageList([]));
+
+        $phpBinaryPath = $this->createMock(PhpBinaryPath::class);
+        $phpBinaryPath->method('version')->willReturn('8.1.0');
+        $phpBinaryPath->method('extensions')->willReturn([]);
+
+        $pkgConfig = $this->createMock(PkgConfig::class);
+        $pkgConfig->method('versionsOf')->willReturn([$pkgConfigName => $version]);
+
+        $platformRepository = new PhpBinaryPathBasedPlatformRepository($phpBinaryPath, $this->createMock(Composer::class), $installedPiePackages, $pkgConfig, []);
+
+        $lib = $platformRepository->findPackage('lib-' . $alias, '*');
+        self::assertNotNull($lib);
+        self::assertSame($version, $lib->getPrettyVersion());
+    }
+
     /** @return array<non-empty-string, array{0: non-empty-string}> */
     public static function installedLibraries(): array
     {
@@ -227,6 +282,7 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
                 ['argon2', 'libargon2'],
                 ['uriparser', 'liburiparser'],
                 ['exslt', 'libexslt'],
+                ['yaml', 'yaml-0.1'],
             ],
             static function (array $pkg): bool {
                 try {

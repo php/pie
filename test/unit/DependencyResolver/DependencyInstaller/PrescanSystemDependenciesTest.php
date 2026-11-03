@@ -30,9 +30,12 @@ use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
 use Php\Pie\Platform\ThreadSafetyMode;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Output\StreamOutput;
+
+use function implode;
 
 #[CoversClass(PrescanSystemDependencies::class)]
 final class PrescanSystemDependenciesTest extends TestCase
@@ -369,5 +372,86 @@ final class PrescanSystemDependenciesTest extends TestCase
         self::assertStringContainsString('You are not running in interactive mode, and you did not provide the --auto-install-system-dependencies flag.', $outputString);
         self::assertStringContainsString('You may need to run: echo "fake installing libbar-dev"', $outputString);
         self::assertStringNotContainsString('Need to install missing system dependencies', $outputString);
+    }
+
+    /** @return array<non-empty-string, array{0: non-empty-string, 1: PackageManager, 2: non-empty-string}> */
+    public static function defaultDefinitions(): array
+    {
+        return [
+            'sodium with apt' => ['sodium', PackageManager::Apt, 'libsodium-dev'],
+            'sodium with apk' => ['sodium', PackageManager::Apk, 'libsodium-dev'],
+            'sodium with dnf' => ['sodium', PackageManager::Dnf, 'pkgconfig(libsodium)'],
+            'sodium with microdnf' => ['sodium', PackageManager::Microdnf, 'pkgconfig(libsodium)'],
+            'sodium with yum' => ['sodium', PackageManager::Yum, 'pkgconfig(libsodium)'],
+            'jpeg with apt' => ['jpeg', PackageManager::Apt, 'libjpeg-dev'],
+            'jpeg with apk' => ['jpeg', PackageManager::Apk, 'libjpeg-turbo-dev'],
+            'jpeg with dnf' => ['jpeg', PackageManager::Dnf, 'pkgconfig(libjpeg)'],
+            'jpeg with microdnf' => ['jpeg', PackageManager::Microdnf, 'pkgconfig(libjpeg)'],
+            'jpeg with yum' => ['jpeg', PackageManager::Yum, 'pkgconfig(libjpeg)'],
+            'zip with apt' => ['zip', PackageManager::Apt, 'libzip-dev'],
+            'zip with apk' => ['zip', PackageManager::Apk, 'libzip-dev'],
+            'zip with dnf' => ['zip', PackageManager::Dnf, 'pkgconfig(libzip)'],
+            'zip with microdnf' => ['zip', PackageManager::Microdnf, 'pkgconfig(libzip)'],
+            'zip with yum' => ['zip', PackageManager::Yum, 'pkgconfig(libzip)'],
+            'xslt with apt' => ['xslt', PackageManager::Apt, 'libxslt1-dev'],
+            'xslt with apk' => ['xslt', PackageManager::Apk, 'libxslt-dev'],
+            'xslt with dnf' => ['xslt', PackageManager::Dnf, 'pkgconfig(libxslt)'],
+            'xslt with microdnf' => ['xslt', PackageManager::Microdnf, 'pkgconfig(libxslt)'],
+            'xslt with yum' => ['xslt', PackageManager::Yum, 'pkgconfig(libxslt)'],
+            'ffi with apt' => ['ffi', PackageManager::Apt, 'libffi-dev'],
+            'ffi with apk' => ['ffi', PackageManager::Apk, 'libffi-dev'],
+            'ffi with dnf' => ['ffi', PackageManager::Dnf, 'pkgconfig(libffi)'],
+            'ffi with microdnf' => ['ffi', PackageManager::Microdnf, 'pkgconfig(libffi)'],
+            'ffi with yum' => ['ffi', PackageManager::Yum, 'pkgconfig(libffi)'],
+            'curl with apt' => ['curl', PackageManager::Apt, 'libcurl4-openssl-dev'],
+            'curl with apk' => ['curl', PackageManager::Apk, 'curl-dev'],
+            'curl with dnf' => ['curl', PackageManager::Dnf, 'pkgconfig(libcurl)'],
+            'curl with microdnf' => ['curl', PackageManager::Microdnf, 'pkgconfig(libcurl)'],
+            'curl with yum' => ['curl', PackageManager::Yum, 'pkgconfig(libcurl)'],
+            'gpgme with apt' => ['gpgme', PackageManager::Apt, 'libgpgme-dev'],
+            'gpgme with apk' => ['gpgme', PackageManager::Apk, 'gpgme-dev'],
+            'gpgme with dnf' => ['gpgme', PackageManager::Dnf, 'pkgconfig(gpgme)'],
+            'gpgme with microdnf' => ['gpgme', PackageManager::Microdnf, 'pkgconfig(gpgme)'],
+            'gpgme with yum' => ['gpgme', PackageManager::Yum, 'pkgconfig(gpgme)'],
+            'pam with apt' => ['pam', PackageManager::Apt, 'libpam0g-dev'],
+            'pam with apk' => ['pam', PackageManager::Apk, 'linux-pam-dev'],
+            'pam with dnf' => ['pam', PackageManager::Dnf, 'pkgconfig(pam)'],
+            'pam with microdnf' => ['pam', PackageManager::Microdnf, 'pkgconfig(pam)'],
+            'pam with yum' => ['pam', PackageManager::Yum, 'pkgconfig(pam)'],
+            'yaml with apt' => ['yaml', PackageManager::Apt, 'libyaml-dev'],
+            'yaml with apk' => ['yaml', PackageManager::Apk, 'yaml-dev'],
+            'yaml with dnf' => ['yaml', PackageManager::Dnf, 'pkgconfig(yaml-0.1)'],
+            'yaml with microdnf' => ['yaml', PackageManager::Microdnf, 'pkgconfig(yaml-0.1)'],
+            'yaml with yum' => ['yaml', PackageManager::Yum, 'pkgconfig(yaml-0.1)'],
+        ];
+    }
+
+    #[DataProvider('defaultDefinitions')]
+    public function testDefaultDefinitionProposesSystemPackageForMissingLibrary(string $alias, PackageManager $packageManager, string $expectedSystemPackage): void
+    {
+        $scanner = new PrescanSystemDependencies(
+            $this->dependencyResolver,
+            $this->fetchDependencyStatuses,
+            SystemDependenciesDefinition::default(),
+            $packageManager,
+            $this->io,
+        );
+
+        $request         = new RequestedPackageAndVersion('foo/foo', null);
+        $composerPackage = new CompletePackage('foo/foo', '1.0.0.0', '1.0.0');
+        $this->dependencyResolver->method('__invoke')
+            ->willReturn(new ResolvedPackageRequest(Package::fromComposerCompletePackage($composerPackage), $request));
+
+        $this->fetchDependencyStatuses->method('__invoke')
+            ->willReturn([
+                new DependencyStatus('lib-' . $alias, (new VersionParser())->parseConstraints('*'), null),
+            ]);
+
+        ($scanner)($this->composer, $this->targetPlatform, $this->platformRepository, $request, false);
+
+        self::assertStringContainsString(
+            'You may need to run: ' . implode(' ', $packageManager->installCommand([$expectedSystemPackage])),
+            $this->io->getOutput(),
+        );
     }
 }

@@ -76,6 +76,13 @@ class SystemDependenciesDefinition
                 PackageManager::Microdnf->value => 'pkgconfig(pam)',
                 PackageManager::Yum->value => 'pkgconfig(pam)',
             ],
+            'yaml' => [
+                PackageManager::Apt->value => 'libyaml-dev',
+                PackageManager::Apk->value => 'yaml-dev',
+                PackageManager::Dnf->value => 'pkgconfig(yaml-0.1)',
+                PackageManager::Microdnf->value => 'pkgconfig(yaml-0.1)',
+                PackageManager::Yum->value => 'pkgconfig(yaml-0.1)',
+            ],
         ]);
     }
 }

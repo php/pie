@@ -64,6 +64,7 @@ class PhpBinaryPathBasedPlatformRepository extends PlatformRepository
         'argon2' => 'libargon2',
         'uriparser' => 'liburiparser',
         'exslt' => 'libexslt',
+        'yaml' => 'yaml-0.1',
     ];
 
     private VersionParser $versionParser;
