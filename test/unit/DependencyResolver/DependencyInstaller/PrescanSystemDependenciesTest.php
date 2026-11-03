@@ -433,6 +433,11 @@ final class PrescanSystemDependenciesTest extends TestCase
             'uuid with dnf' => ['uuid', PackageManager::Dnf, 'pkgconfig(uuid)'],
             'uuid with microdnf' => ['uuid', PackageManager::Microdnf, 'pkgconfig(uuid)'],
             'uuid with yum' => ['uuid', PackageManager::Yum, 'pkgconfig(uuid)'],
+            'rdkafka with apt' => ['rdkafka', PackageManager::Apt, 'librdkafka-dev'],
+            'rdkafka with apk' => ['rdkafka', PackageManager::Apk, 'librdkafka-dev'],
+            'rdkafka with dnf' => ['rdkafka', PackageManager::Dnf, 'pkgconfig(rdkafka)'],
+            'rdkafka with microdnf' => ['rdkafka', PackageManager::Microdnf, 'pkgconfig(rdkafka)'],
+            'rdkafka with yum' => ['rdkafka', PackageManager::Yum, 'pkgconfig(rdkafka)'],
         ];
     }
 

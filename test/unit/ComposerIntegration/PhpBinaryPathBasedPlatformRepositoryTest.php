@@ -224,6 +224,7 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
             'yaml' => ['yaml', 'yaml-0.1', '0.2.5'],
             'uv' => ['uv', 'libuv', '1.48.0'],
             'uuid' => ['uuid', 'uuid', '2.39.3'],
+            'rdkafka' => ['rdkafka', 'rdkafka', '2.3.0'],
         ];
     }
 
@@ -287,6 +288,7 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
                 ['yaml', 'yaml-0.1'],
                 ['uv', 'libuv'],
                 ['uuid', 'uuid'],
+                ['rdkafka', 'rdkafka'],
             ],
             static function (array $pkg): bool {
                 try {

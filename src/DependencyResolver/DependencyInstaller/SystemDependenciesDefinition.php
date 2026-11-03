@@ -97,6 +97,13 @@ class SystemDependenciesDefinition
                 PackageManager::Microdnf->value => 'pkgconfig(uuid)',
                 PackageManager::Yum->value => 'pkgconfig(uuid)',
             ],
+            'rdkafka' => [
+                PackageManager::Apt->value => 'librdkafka-dev',
+                PackageManager::Apk->value => 'librdkafka-dev',
+                PackageManager::Dnf->value => 'pkgconfig(rdkafka)',
+                PackageManager::Microdnf->value => 'pkgconfig(rdkafka)',
+                PackageManager::Yum->value => 'pkgconfig(rdkafka)',
+            ],
         ]);
     }
 }
