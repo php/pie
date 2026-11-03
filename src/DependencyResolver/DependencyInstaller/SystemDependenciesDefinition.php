@@ -139,6 +139,13 @@ class SystemDependenciesDefinition
                 PackageManager::Microdnf->value => 'pkgconfig(libevent)',
                 PackageManager::Yum->value => 'pkgconfig(libevent)',
             ],
+            'openssl' => [
+                PackageManager::Apt->value => 'libssl-dev',
+                PackageManager::Apk->value => 'openssl-dev',
+                PackageManager::Dnf->value => 'pkgconfig(openssl)',
+                PackageManager::Microdnf->value => 'pkgconfig(openssl)',
+                PackageManager::Yum->value => 'pkgconfig(openssl)',
+            ],
         ]);
     }
 }

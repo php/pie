@@ -229,6 +229,7 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
             'memcached' => ['memcached', 'libmemcached', '1.1.4'],
             'imagemagick' => ['imagemagick', 'MagickWand', '6.9.12'],
             'event' => ['event', 'libevent', '2.1.12-stable'],
+            'openssl' => ['openssl', 'openssl', '3.0.13'],
         ];
     }
 
@@ -297,6 +298,7 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
                 ['memcached', 'libmemcached'],
                 ['imagemagick', 'MagickWand'],
                 ['event', 'libevent'],
+                ['openssl', 'openssl'],
             ],
             static function (array $pkg): bool {
                 try {

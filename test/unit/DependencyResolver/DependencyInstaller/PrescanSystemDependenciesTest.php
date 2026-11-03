@@ -463,6 +463,11 @@ final class PrescanSystemDependenciesTest extends TestCase
             'event with dnf' => ['event', PackageManager::Dnf, 'pkgconfig(libevent)'],
             'event with microdnf' => ['event', PackageManager::Microdnf, 'pkgconfig(libevent)'],
             'event with yum' => ['event', PackageManager::Yum, 'pkgconfig(libevent)'],
+            'openssl with apt' => ['openssl', PackageManager::Apt, 'libssl-dev'],
+            'openssl with apk' => ['openssl', PackageManager::Apk, 'openssl-dev'],
+            'openssl with dnf' => ['openssl', PackageManager::Dnf, 'pkgconfig(openssl)'],
+            'openssl with microdnf' => ['openssl', PackageManager::Microdnf, 'pkgconfig(openssl)'],
+            'openssl with yum' => ['openssl', PackageManager::Yum, 'pkgconfig(openssl)'],
         ];
     }
 
