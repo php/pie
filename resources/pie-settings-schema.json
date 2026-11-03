@@ -13,6 +13,21 @@
                 "preview",
                 "stable"
             ]
+        },
+        "package_map": {
+            "type": "object",
+            "description": "Cached copy of the reference extension-to-package map",
+            "required": ["map", "etag", "expires"],
+            "properties": {
+                "map": {
+                    "type": ["object", "array"],
+                    "maxItems": 0,
+                    "patternProperties": {"^.+$": {"type": "string", "minLength": 1}},
+                    "additionalProperties": false
+                },
+                "etag": {"type": "string", "minLength": 1},
+                "expires": {"type": "string", "minLength": 1}
+            }
         }
     }
 }
