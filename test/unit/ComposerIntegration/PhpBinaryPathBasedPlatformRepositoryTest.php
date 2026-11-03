@@ -223,6 +223,7 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
             'exslt' => ['exslt', 'libexslt', '0.8.21'],
             'yaml' => ['yaml', 'yaml-0.1', '0.2.5'],
             'uv' => ['uv', 'libuv', '1.48.0'],
+            'uuid' => ['uuid', 'uuid', '2.39.3'],
         ];
     }
 
@@ -285,6 +286,7 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
                 ['exslt', 'libexslt'],
                 ['yaml', 'yaml-0.1'],
                 ['uv', 'libuv'],
+                ['uuid', 'uuid'],
             ],
             static function (array $pkg): bool {
                 try {

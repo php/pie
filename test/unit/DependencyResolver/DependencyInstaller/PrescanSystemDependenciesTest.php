@@ -428,6 +428,11 @@ final class PrescanSystemDependenciesTest extends TestCase
             'uv with dnf' => ['uv', PackageManager::Dnf, 'pkgconfig(libuv)'],
             'uv with microdnf' => ['uv', PackageManager::Microdnf, 'pkgconfig(libuv)'],
             'uv with yum' => ['uv', PackageManager::Yum, 'pkgconfig(libuv)'],
+            'uuid with apt' => ['uuid', PackageManager::Apt, 'uuid-dev'],
+            'uuid with apk' => ['uuid', PackageManager::Apk, 'util-linux-dev'],
+            'uuid with dnf' => ['uuid', PackageManager::Dnf, 'pkgconfig(uuid)'],
+            'uuid with microdnf' => ['uuid', PackageManager::Microdnf, 'pkgconfig(uuid)'],
+            'uuid with yum' => ['uuid', PackageManager::Yum, 'pkgconfig(uuid)'],
         ];
     }
 

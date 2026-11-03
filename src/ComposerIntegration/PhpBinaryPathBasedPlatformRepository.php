@@ -66,6 +66,7 @@ class PhpBinaryPathBasedPlatformRepository extends PlatformRepository
         'exslt' => 'libexslt',
         'yaml' => 'yaml-0.1',
         'uv' => 'libuv',
+        'uuid' => 'uuid',
     ];
 
     private VersionParser $versionParser;

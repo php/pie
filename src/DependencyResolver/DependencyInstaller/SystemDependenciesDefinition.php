@@ -90,6 +90,13 @@ class SystemDependenciesDefinition
                 PackageManager::Microdnf->value => 'pkgconfig(libuv)',
                 PackageManager::Yum->value => 'pkgconfig(libuv)',
             ],
+            'uuid' => [
+                PackageManager::Apt->value => 'uuid-dev',
+                PackageManager::Apk->value => 'util-linux-dev',
+                PackageManager::Dnf->value => 'pkgconfig(uuid)',
+                PackageManager::Microdnf->value => 'pkgconfig(uuid)',
+                PackageManager::Yum->value => 'pkgconfig(uuid)',
+            ],
         ]);
     }
 }
