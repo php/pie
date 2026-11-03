@@ -226,6 +226,7 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
             'uuid' => ['uuid', 'uuid', '2.39.3'],
             'rdkafka' => ['rdkafka', 'rdkafka', '2.3.0'],
             'zlib' => ['zlib', 'zlib', '1.3'],
+            'memcached' => ['memcached', 'libmemcached', '1.1.4'],
         ];
     }
 
@@ -291,6 +292,7 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
                 ['uuid', 'uuid'],
                 ['rdkafka', 'rdkafka'],
                 ['zlib', 'zlib'],
+                ['memcached', 'libmemcached'],
             ],
             static function (array $pkg): bool {
                 try {

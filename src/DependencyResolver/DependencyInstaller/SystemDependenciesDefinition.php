@@ -118,6 +118,13 @@ class SystemDependenciesDefinition
                 PackageManager::Microdnf->value => 'pkgconfig(libsasl2)',
                 PackageManager::Yum->value => 'pkgconfig(libsasl2)',
             ],
+            'memcached' => [
+                PackageManager::Apt->value => 'libmemcached-dev',
+                PackageManager::Apk->value => 'libmemcached-dev',
+                PackageManager::Dnf->value => 'pkgconfig(libmemcached)',
+                PackageManager::Microdnf->value => 'pkgconfig(libmemcached)',
+                PackageManager::Yum->value => 'pkgconfig(libmemcached)',
+            ],
         ]);
     }
 }

@@ -448,6 +448,11 @@ final class PrescanSystemDependenciesTest extends TestCase
             'sasl with dnf' => ['sasl', PackageManager::Dnf, 'pkgconfig(libsasl2)'],
             'sasl with microdnf' => ['sasl', PackageManager::Microdnf, 'pkgconfig(libsasl2)'],
             'sasl with yum' => ['sasl', PackageManager::Yum, 'pkgconfig(libsasl2)'],
+            'memcached with apt' => ['memcached', PackageManager::Apt, 'libmemcached-dev'],
+            'memcached with apk' => ['memcached', PackageManager::Apk, 'libmemcached-dev'],
+            'memcached with dnf' => ['memcached', PackageManager::Dnf, 'pkgconfig(libmemcached)'],
+            'memcached with microdnf' => ['memcached', PackageManager::Microdnf, 'pkgconfig(libmemcached)'],
+            'memcached with yum' => ['memcached', PackageManager::Yum, 'pkgconfig(libmemcached)'],
         ];
     }
 
