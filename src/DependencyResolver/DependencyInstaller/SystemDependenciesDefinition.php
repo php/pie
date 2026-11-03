@@ -132,6 +132,13 @@ class SystemDependenciesDefinition
                 PackageManager::Microdnf->value => 'pkgconfig(MagickWand)',
                 PackageManager::Yum->value => 'pkgconfig(MagickWand)',
             ],
+            'event' => [
+                PackageManager::Apt->value => 'libevent-dev',
+                PackageManager::Apk->value => 'libevent-dev',
+                PackageManager::Dnf->value => 'pkgconfig(libevent)',
+                PackageManager::Microdnf->value => 'pkgconfig(libevent)',
+                PackageManager::Yum->value => 'pkgconfig(libevent)',
+            ],
         ]);
     }
 }

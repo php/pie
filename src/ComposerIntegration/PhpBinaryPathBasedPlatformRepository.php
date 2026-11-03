@@ -71,6 +71,7 @@ class PhpBinaryPathBasedPlatformRepository extends PlatformRepository
         'zlib' => 'zlib',
         'memcached' => 'libmemcached',
         'imagemagick' => 'MagickWand',
+        'event' => 'libevent',
     ];
 
     private VersionParser $versionParser;

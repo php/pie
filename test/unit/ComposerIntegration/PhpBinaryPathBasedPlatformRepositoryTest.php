@@ -228,6 +228,7 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
             'zlib' => ['zlib', 'zlib', '1.3'],
             'memcached' => ['memcached', 'libmemcached', '1.1.4'],
             'imagemagick' => ['imagemagick', 'MagickWand', '6.9.12'],
+            'event' => ['event', 'libevent', '2.1.12-stable'],
         ];
     }
 
@@ -295,6 +296,7 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
                 ['zlib', 'zlib'],
                 ['memcached', 'libmemcached'],
                 ['imagemagick', 'MagickWand'],
+                ['event', 'libevent'],
             ],
             static function (array $pkg): bool {
                 try {

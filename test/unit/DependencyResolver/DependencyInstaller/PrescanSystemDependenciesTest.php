@@ -458,6 +458,11 @@ final class PrescanSystemDependenciesTest extends TestCase
             'imagemagick with dnf' => ['imagemagick', PackageManager::Dnf, 'pkgconfig(MagickWand)'],
             'imagemagick with microdnf' => ['imagemagick', PackageManager::Microdnf, 'pkgconfig(MagickWand)'],
             'imagemagick with yum' => ['imagemagick', PackageManager::Yum, 'pkgconfig(MagickWand)'],
+            'event with apt' => ['event', PackageManager::Apt, 'libevent-dev'],
+            'event with apk' => ['event', PackageManager::Apk, 'libevent-dev'],
+            'event with dnf' => ['event', PackageManager::Dnf, 'pkgconfig(libevent)'],
+            'event with microdnf' => ['event', PackageManager::Microdnf, 'pkgconfig(libevent)'],
+            'event with yum' => ['event', PackageManager::Yum, 'pkgconfig(libevent)'],
         ];
     }
 
