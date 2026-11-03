@@ -227,6 +227,7 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
             'rdkafka' => ['rdkafka', 'rdkafka', '2.3.0'],
             'zlib' => ['zlib', 'zlib', '1.3'],
             'memcached' => ['memcached', 'libmemcached', '1.1.4'],
+            'imagemagick' => ['imagemagick', 'MagickWand', '6.9.12'],
         ];
     }
 
@@ -293,6 +294,7 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
                 ['rdkafka', 'rdkafka'],
                 ['zlib', 'zlib'],
                 ['memcached', 'libmemcached'],
+                ['imagemagick', 'MagickWand'],
             ],
             static function (array $pkg): bool {
                 try {

@@ -453,6 +453,11 @@ final class PrescanSystemDependenciesTest extends TestCase
             'memcached with dnf' => ['memcached', PackageManager::Dnf, 'pkgconfig(libmemcached)'],
             'memcached with microdnf' => ['memcached', PackageManager::Microdnf, 'pkgconfig(libmemcached)'],
             'memcached with yum' => ['memcached', PackageManager::Yum, 'pkgconfig(libmemcached)'],
+            'imagemagick with apt' => ['imagemagick', PackageManager::Apt, 'libmagickwand-dev'],
+            'imagemagick with apk' => ['imagemagick', PackageManager::Apk, 'imagemagick-dev'],
+            'imagemagick with dnf' => ['imagemagick', PackageManager::Dnf, 'pkgconfig(MagickWand)'],
+            'imagemagick with microdnf' => ['imagemagick', PackageManager::Microdnf, 'pkgconfig(MagickWand)'],
+            'imagemagick with yum' => ['imagemagick', PackageManager::Yum, 'pkgconfig(MagickWand)'],
         ];
     }
 

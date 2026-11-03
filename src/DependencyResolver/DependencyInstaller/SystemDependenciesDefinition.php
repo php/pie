@@ -125,6 +125,13 @@ class SystemDependenciesDefinition
                 PackageManager::Microdnf->value => 'pkgconfig(libmemcached)',
                 PackageManager::Yum->value => 'pkgconfig(libmemcached)',
             ],
+            'imagemagick' => [
+                PackageManager::Apt->value => 'libmagickwand-dev',
+                PackageManager::Apk->value => 'imagemagick-dev',
+                PackageManager::Dnf->value => 'pkgconfig(MagickWand)',
+                PackageManager::Microdnf->value => 'pkgconfig(MagickWand)',
+                PackageManager::Yum->value => 'pkgconfig(MagickWand)',
+            ],
         ]);
     }
 }

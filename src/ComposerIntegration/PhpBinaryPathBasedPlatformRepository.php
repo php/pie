@@ -70,6 +70,7 @@ class PhpBinaryPathBasedPlatformRepository extends PlatformRepository
         'rdkafka' => 'rdkafka',
         'zlib' => 'zlib',
         'memcached' => 'libmemcached',
+        'imagemagick' => 'MagickWand',
     ];
 
     private VersionParser $versionParser;
