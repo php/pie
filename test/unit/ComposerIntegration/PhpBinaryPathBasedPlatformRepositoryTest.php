@@ -230,6 +230,7 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
             'imagemagick' => ['imagemagick', 'MagickWand', '6.9.12'],
             'event' => ['event', 'libevent', '2.1.12-stable'],
             'openssl' => ['openssl', 'openssl', '3.0.13'],
+            'ssh2' => ['ssh2', 'libssh2', '1.11.0'],
         ];
     }
 
@@ -299,6 +300,7 @@ final class PhpBinaryPathBasedPlatformRepositoryTest extends TestCase
                 ['imagemagick', 'MagickWand'],
                 ['event', 'libevent'],
                 ['openssl', 'openssl'],
+                ['ssh2', 'libssh2'],
             ],
             static function (array $pkg): bool {
                 try {

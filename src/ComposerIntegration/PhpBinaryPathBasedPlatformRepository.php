@@ -73,6 +73,7 @@ class PhpBinaryPathBasedPlatformRepository extends PlatformRepository
         'imagemagick' => 'MagickWand',
         'event' => 'libevent',
         'openssl' => 'openssl',
+        'ssh2' => 'libssh2',
     ];
 
     private VersionParser $versionParser;

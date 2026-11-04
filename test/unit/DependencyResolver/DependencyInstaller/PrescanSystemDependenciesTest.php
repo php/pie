@@ -468,6 +468,11 @@ final class PrescanSystemDependenciesTest extends TestCase
             'openssl with dnf' => ['openssl', PackageManager::Dnf, 'pkgconfig(openssl)'],
             'openssl with microdnf' => ['openssl', PackageManager::Microdnf, 'pkgconfig(openssl)'],
             'openssl with yum' => ['openssl', PackageManager::Yum, 'pkgconfig(openssl)'],
+            'ssh2 with apt' => ['ssh2', PackageManager::Apt, 'libssh2-1-dev'],
+            'ssh2 with apk' => ['ssh2', PackageManager::Apk, 'libssh2-dev'],
+            'ssh2 with dnf' => ['ssh2', PackageManager::Dnf, 'pkgconfig(libssh2)'],
+            'ssh2 with microdnf' => ['ssh2', PackageManager::Microdnf, 'pkgconfig(libssh2)'],
+            'ssh2 with yum' => ['ssh2', PackageManager::Yum, 'pkgconfig(libssh2)'],
         ];
     }
 
