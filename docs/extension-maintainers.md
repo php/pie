@@ -425,6 +425,7 @@ is NOT working, then please [report a bug](https://github.com/php/pie/issues).
 | lib-imagemagick | ✅              | apt, apk, dnf    |
 | lib-event       | ✅              | apt, apk, dnf    |
 | lib-openssl     | ✅              | apt, apk, dnf    |
+| lib-ssh2        | ✅              | apt, apk, dnf    |
 
 #### Checking the extension will work
 

@@ -146,6 +146,13 @@ class SystemDependenciesDefinition
                 PackageManager::Microdnf->value => 'pkgconfig(openssl)',
                 PackageManager::Yum->value => 'pkgconfig(openssl)',
             ],
+            'ssh2' => [
+                PackageManager::Apt->value => 'libssh2-1-dev',
+                PackageManager::Apk->value => 'libssh2-dev',
+                PackageManager::Dnf->value => 'pkgconfig(libssh2)',
+                PackageManager::Microdnf->value => 'pkgconfig(libssh2)',
+                PackageManager::Yum->value => 'pkgconfig(libssh2)',
+            ],
         ]);
     }
 }
