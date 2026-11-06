@@ -38,6 +38,7 @@ class BundledPhpExtensionsRepository extends ArrayRepository
      *     os-families?: non-empty-list<OperatingSystemFamily>,
      *     type?: ExtensionType,
      *     priority?: int,
+     *     configure-options?: list<array{name: non-empty-string, description: string, needs-value: bool}>,
      * }>
      */
     private static array $bundledPhpExtensions = [
@@ -69,7 +70,22 @@ class BundledPhpExtensionsRepository extends ArrayRepository
                 'lib-ffi' => '*',
             ],
         ],
-        // ['name' => 'gd'], // build failure - ext/gd/gd.c:79:11: fatal error: ft2build.h: No such file or directory
+        [
+            'name' => 'gd',
+            'require' => ['php' => '>= 7.4.0'],
+            'configure-options' => [
+                [
+                    'name' => 'with-jpeg',
+                    'description' => 'Enable JPEG support in bundled GD',
+                    'needs-value' => false,
+                ],
+                [
+                    'name' => 'with-freetype',
+                    'description' => 'Enable FreeType support in bundled GD',
+                    'needs-value' => false,
+                ],
+            ],
+        ],
         ['name' => 'gettext'],
         ['name' => 'gmp'],
         ['name' => 'iconv'],
@@ -257,6 +273,10 @@ class BundledPhpExtensionsRepository extends ArrayRepository
 
                 if (array_key_exists('priority', $extension)) {
                     $phpExt['priority'] = $extension['priority'];
+                }
+
+                if (array_key_exists('configure-options', $extension)) {
+                    $phpExt['configure-options'] = $extension['configure-options'];
                 }
 
                 $package->setPhpExt($phpExt);

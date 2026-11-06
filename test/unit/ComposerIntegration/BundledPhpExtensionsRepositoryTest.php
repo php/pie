@@ -6,6 +6,7 @@ namespace Php\PieUnitTest\ComposerIntegration;
 
 use Composer\Package\CompletePackageInterface;
 use Php\Pie\ComposerIntegration\BundledPhpExtensionsRepository;
+use Php\Pie\ConfigureOption;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\ExtensionName;
@@ -22,6 +23,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 
+use function array_map;
 use function Safe\mkdir;
 use function Safe\realpath;
 use function sys_get_temp_dir;
@@ -46,6 +48,7 @@ final class BundledPhpExtensionsRepositoryTest extends TestCase
             ['php/enchant'],
             ['php/exif'],
             ['php/ffi'],
+            ['php/gd'],
             ['php/gettext'],
             ['php/gmp'],
             ['php/iconv'],
@@ -109,6 +112,38 @@ final class BundledPhpExtensionsRepositoryTest extends TestCase
         self::assertNotNull($package);
         self::assertSame($packageName, $package->getName());
         self::assertSame('8.1.0', $package->getPrettyVersion());
+    }
+
+    public function testGdExposesOptionalJpegAndFreeTypeFlags(): void
+    {
+        $phpBinary = $this->createMock(PhpBinaryPath::class);
+        $phpBinary->method('version')->willReturn('8.1.0');
+
+        $repository = BundledPhpExtensionsRepository::forTargetPlatform(
+            new TargetPlatform(
+                OperatingSystem::NonWindows,
+                OperatingSystemFamily::Linux,
+                $phpBinary,
+                Architecture::x86_64,
+                ThreadSafetyMode::NonThreadSafe,
+                1,
+                null,
+                null,
+            ),
+        );
+
+        $composerPackage = $repository->findPackage('php/gd', '8.1.0');
+        self::assertInstanceOf(CompletePackageInterface::class, $composerPackage);
+
+        $package = Package::fromComposerCompletePackage($composerPackage);
+
+        self::assertSame(
+            [['with-jpeg', false], ['with-freetype', false]],
+            array_map(
+                static fn (ConfigureOption $option): array => [$option->name, $option->needsValue],
+                $package->configureOptions(),
+            ),
+        );
     }
 
     public function testMakeCommandForXmlReader(): void
