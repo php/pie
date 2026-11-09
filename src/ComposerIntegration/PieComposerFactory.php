@@ -16,8 +16,17 @@ use Php\Pie\ComposerIntegration\Listeners\OverrideDownloadUrlInstallListener;
 use Php\Pie\ComposerIntegration\Listeners\RemoveUnrelatedInstallOperations;
 use Php\Pie\ExtensionType;
 use Php\Pie\Platform;
+use Php\Pie\Platform\TargetPlatform;
+use Php\Pie\Util\PieVersion;
 use Psr\Container\ContainerInterface;
 use Webmozart\Assert\Assert;
+
+use function sprintf;
+use function strtoupper;
+
+use const PHP_MAJOR_VERSION;
+use const PHP_MINOR_VERSION;
+use const PHP_RELEASE_VERSION;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 class PieComposerFactory extends Factory
@@ -63,6 +72,10 @@ class PieComposerFactory extends Factory
             true,
         );
 
+        $composer->getLoop()->getHttpDownloader()->setOptions([
+            'http' => ['header' => ['user-agent' => 'User-Agent: ' . self::userAgent($composerRequest->targetPlatform)]],
+        ]);
+
         $composer
             ->getRepositoryManager()
             ->addRepository(BundledPhpExtensionsRepository::forTargetPlatform(
@@ -76,6 +89,20 @@ class PieComposerFactory extends Factory
         $io->loadConfiguration($composer->getConfig());
 
         return $composer;
+    }
+
+    private static function userAgent(TargetPlatform $targetPlatform): string
+    {
+        return sprintf(
+            'PIE/%s (%s; %s; Target-PHP %s %s; Runner-PHP %s; %s)',
+            PieVersion::get(),
+            $targetPlatform->operatingSystemFamily->value,
+            $targetPlatform->architecture->name,
+            $targetPlatform->phpBinaryPath->version(),
+            strtoupper($targetPlatform->threadSafety->asShort()),
+            PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION . '.' . PHP_RELEASE_VERSION,
+            Platform::isRunningStaticPhp() ? 'static-php' : 'phar',
+        );
     }
 
     protected function purgePackages(InstalledRepositoryInterface $repo, Installer\InstallationManager $im): void

@@ -13,8 +13,10 @@ into your project or library.
 
 ## Prerequisites
 
-You will need PHP 8.1 or newer to run PIE, but PIE can install an extension to
-any other installed PHP version.
+PIE comes in two flavours. Primarily, a PHAR file that we recommend for most
+cases, but requires PHP 8.1. Alternatively, we publish a self-contained
+executable version of PIE for Linux (amd64/arm64), OSX (arm64), and
+Windows (amd64).
 
 On Linux/OSX, if any build tools needed are missing, PIE will ask if you would
 like to automatically install them first (as of PIE 1.4.0).
