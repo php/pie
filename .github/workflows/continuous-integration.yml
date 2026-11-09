@@ -107,6 +107,7 @@ jobs:
           run: |
             export PATH="/usr/local/bin:/usr/local/sbin:$PATH"
             composer config --global --auth github-oauth.github.com "$GITHUB_TOKEN"
+            git config --global --add safe.directory "$PWD"
             composer install
             vendor/bin/phpunit
 
