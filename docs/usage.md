@@ -103,17 +103,14 @@ CMD ["php", "-r", "example_pie_extension_test();"]
 If the extension you would like to install needs additional libraries or other
 dependencies, then these must be installed beforehand too.
 
-### Executable PIE (Experimental)
+### Executable PIE
 
-As of 1.4.0 an **experimental** executable (binary) version of PIE is included.
+Whilst we recommend using the PHAR, as of 1.4.0 an executable (binary) version
+of PIE is included that will work even with old versions of PHP.
+
 The PIE is built using [Static PHP](https://static-php.dev/), which builds a
 self-contained PHP executable with the extensions that PIE needs to run, and
-bundles the PHAR as a single distributable executable. Please keep in mind that
-this is **experimental**, and we do not recommend this for production use for
-the time being.
-
-If you find the binary releases useful, please leave feedback or upvote on the
-relevant discussions, so we can gauge interest in improving this functionality.
+bundles the PHAR as a single distributable executable.
 
 The stable versions of the executables can be found by navigating to the
 [relevant release](https://github.com/php/pie/releases), and finding the
