@@ -84,6 +84,14 @@ RUN apk add php php-phar php-mbstring php-iconv php-openssl bzip2-dev libbz2 bui
 COPY --from=build_pie_phar /app/pie.phar /usr/local/bin/pie
 RUN pie install -v --auto-install-system-dependencies --force php/sodium
 
+FROM alpine_base AS test_pie_installs_bundled_gd_against_php_with_gd_features_on_alpine
+RUN apk add php php-phar php-mbstring php-iconv php-openssl build-base autoconf libtool pkgconf php85-dev \
+    freetype-dev libjpeg-turbo-dev libpng-dev libwebp-dev libavif-dev libxpm-dev
+RUN grep -x '#define HAVE_GD_FREETYPE 1' "$(php-config --include-dir)/main/php_config.h"
+COPY --from=build_pie_phar /app/pie.phar /usr/local/bin/pie
+RUN pie install -v --force php/gd
+RUN LD_BIND_NOW=1 php -m | grep -x gd
+
 FROM fedora_base AS test_pie_installs_system_deps_on_fedora
 RUN dnf install -y php php-pecl-zip unzip gcc make autoconf bison re2c libtool php-devel
 COPY --from=build_pie_phar /app/pie.phar /usr/local/bin/pie
