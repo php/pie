@@ -25,8 +25,10 @@ use function array_map;
 use function count;
 use function implode;
 use function in_array;
+use function Safe\preg_match;
 use function Safe\realpath;
 use function sprintf;
+use function str_starts_with;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 class BundledPhpExtensionsRepository extends ArrayRepository
@@ -294,6 +296,59 @@ class BundledPhpExtensionsRepository extends ArrayRepository
         } catch (ProcessFailedException $processFailed) {
             throw new RuntimeException('Unable to find re2c on the system', previous: $processFailed);
         }
+    }
+
+    /**
+     * @param list<non-empty-string> $configureOptions
+     *
+     * @return list<non-empty-string>
+     */
+    public static function augmentConfigureOptionsForPhpBundledExtensions(
+        array $configureOptions,
+        DownloadedPackage $downloadedPackage,
+        TargetPlatform $targetPlatform,
+    ): array {
+        if ($downloadedPackage->package->name() !== 'php/gd') {
+            return $configureOptions;
+        }
+
+        $phpConfigHeader = $targetPlatform->phpBinaryPath->phpConfigHeader();
+        if ($phpConfigHeader === null) {
+            return $configureOptions;
+        }
+
+        $gdFeatureDefinesToConfigureOptions = [
+            'HAVE_GD_FREETYPE' => '--with-freetype',
+            'HAVE_GD_JPG' => '--with-jpeg',
+            'HAVE_GD_XPM' => '--with-xpm',
+            'HAVE_GD_WEBP' => '--with-webp',
+            'HAVE_GD_AVIF' => '--with-avif',
+        ];
+
+        foreach ($gdFeatureDefinesToConfigureOptions as $define => $configureOption) {
+            if (
+                ! preg_match('/^#define ' . $define . ' 1$/m', $phpConfigHeader)
+                || self::hasConfigureOption($configureOptions, $configureOption)
+            ) {
+                continue;
+            }
+
+            $configureOptions[] = $configureOption;
+        }
+
+        return $configureOptions;
+    }
+
+    /** @param list<non-empty-string> $configureOptions */
+    private static function hasConfigureOption(array $configureOptions, string $configureOption): bool
+    {
+        foreach ($configureOptions as $existingConfigureOption) {
+            if ($existingConfigureOption === $configureOption || str_starts_with($existingConfigureOption, $configureOption . '=')) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

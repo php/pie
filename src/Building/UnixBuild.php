@@ -100,6 +100,11 @@ final class UnixBuild implements Build
         $io->write('<info>phpize complete</info>.');
 
         $configureOptions = $this->withDetectedLibdirOption($configureOptions, $targetPlatform);
+        $configureOptions = BundledPhpExtensionsRepository::augmentConfigureOptionsForPhpBundledExtensions(
+            $configureOptions,
+            $downloadedPackage,
+            $targetPlatform,
+        );
 
         $phpConfigPath = $targetPlatform->phpBinaryPath->phpConfigPath();
         if ($phpConfigPath !== null) {
