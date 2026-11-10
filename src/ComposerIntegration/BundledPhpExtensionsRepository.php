@@ -86,6 +86,21 @@ class BundledPhpExtensionsRepository extends ArrayRepository
                     'description' => 'Enable FreeType support in bundled GD',
                     'needs-value' => false,
                 ],
+                [
+                    'name' => 'with-xpm',
+                    'description' => 'Enable XPM support in bundled GD',
+                    'needs-value' => false,
+                ],
+                [
+                    'name' => 'with-webp',
+                    'description' => 'Enable WebP support in bundled GD',
+                    'needs-value' => false,
+                ],
+                [
+                    'name' => 'with-avif',
+                    'description' => 'Enable AVIF support in bundled GD',
+                    'needs-value' => false,
+                ],
             ],
         ],
         ['name' => 'gettext'],

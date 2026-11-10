@@ -115,7 +115,7 @@ final class BundledPhpExtensionsRepositoryTest extends TestCase
         self::assertSame('8.1.0', $package->getPrettyVersion());
     }
 
-    public function testGdExposesOptionalJpegAndFreeTypeFlags(): void
+    public function testGdExposesOptionalFeatureFlags(): void
     {
         $phpBinary = $this->createMock(PhpBinaryPath::class);
         $phpBinary->method('version')->willReturn('8.1.0');
@@ -139,7 +139,7 @@ final class BundledPhpExtensionsRepositoryTest extends TestCase
         $package = Package::fromComposerCompletePackage($composerPackage);
 
         self::assertSame(
-            [['with-jpeg', false], ['with-freetype', false]],
+            [['with-jpeg', false], ['with-freetype', false], ['with-xpm', false], ['with-webp', false], ['with-avif', false]],
             array_map(
                 static fn (ConfigureOption $option): array => [$option->name, $option->needsValue],
                 $package->configureOptions(),
