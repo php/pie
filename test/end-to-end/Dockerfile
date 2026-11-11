@@ -64,6 +64,10 @@ FROM homebrew_base_with_pie AS test_pie_installs_extension_using_pcre_with_brew
 RUN pie install --auto-install-build-tools -v apcu/apcu
 RUN php -m | grep -i apcu
 
+FROM homebrew_base_with_pie AS test_pie_installs_bundled_gd_against_php_with_gd_features_with_brew
+RUN grep -x '#define HAVE_GD_FREETYPE 1' "$(php-config --include-dir)/main/php_config.h"
+RUN pie install --auto-install-build-tools --force -v php/gd
+
 FROM ubuntu_base AS test_pie_installs_system_deps_on_ubuntu
 RUN apt-get update && apt install -y unzip curl wget gcc make autoconf libtool bison re2c pkg-config libzip-dev libssl-dev libonig-dev
 RUN mkdir -p /opt/php \
@@ -85,6 +89,14 @@ FROM alpine_base AS test_pie_installs_system_deps_on_alpine
 RUN apk add php php-phar php-mbstring php-iconv php-openssl bzip2-dev libbz2 build-base autoconf bison re2c libtool php85-dev
 COPY --from=build_pie_phar /app/pie.phar /usr/local/bin/pie
 RUN pie install -v --auto-install-system-dependencies --force php/sodium
+
+FROM alpine_base AS test_pie_installs_bundled_gd_against_php_with_gd_features_on_alpine
+RUN apk add php php-phar php-mbstring php-iconv php-openssl build-base autoconf libtool pkgconf php85-dev \
+    freetype-dev libjpeg-turbo-dev libpng-dev libwebp-dev libavif-dev libxpm-dev
+RUN grep -x '#define HAVE_GD_FREETYPE 1' "$(php-config --include-dir)/main/php_config.h"
+COPY --from=build_pie_phar /app/pie.phar /usr/local/bin/pie
+RUN pie install -v --force php/gd
+RUN LD_BIND_NOW=1 php -m | grep -x gd
 
 FROM fedora_base AS test_pie_installs_system_deps_on_fedora
 RUN dnf install -y php php-pecl-zip unzip gcc make autoconf bison re2c libtool php-devel

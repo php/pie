@@ -142,6 +142,7 @@ jobs:
             libexif-dev \
             libgd-dev \
             libpng-dev \
+            libjpeg-dev \
             libtiff-dev \
             libfreetype-dev \
             libfreetype6 \

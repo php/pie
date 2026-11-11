@@ -36,6 +36,7 @@ use function is_dir;
 use function is_executable;
 use function ltrim;
 use function rtrim;
+use function Safe\file_get_contents;
 use function Safe\mkdir;
 use function Safe\preg_match;
 use function Safe\preg_replace;
@@ -211,6 +212,22 @@ class PhpBinaryPath
         $configureOptions = self::cleanWarningAndDeprecationsFromOutput(Process::run([$this->phpConfigPath, '--configure-options']));
 
         return self::libdirFromConfigureOptions($configureOptions);
+    }
+
+    public function phpConfigHeader(): string|null
+    {
+        if ($this->phpConfigPath === null) {
+            return null;
+        }
+
+        $includeDir = self::cleanWarningAndDeprecationsFromOutput(Process::run([$this->phpConfigPath, '--include-dir']));
+
+        $phpConfigHeaderPath = $includeDir . DIRECTORY_SEPARATOR . 'main' . DIRECTORY_SEPARATOR . 'php_config.h';
+        if ($includeDir === '' || ! file_exists($phpConfigHeaderPath)) {
+            return null;
+        }
+
+        return file_get_contents($phpConfigHeaderPath);
     }
 
     /** @return non-empty-string|null */

@@ -25,8 +25,10 @@ use function array_map;
 use function count;
 use function implode;
 use function in_array;
+use function Safe\preg_match;
 use function Safe\realpath;
 use function sprintf;
+use function str_starts_with;
 
 /** @internal This is not public API for PIE, so should not be depended upon unless you accept the risk of BC breaks */
 class BundledPhpExtensionsRepository extends ArrayRepository
@@ -38,6 +40,7 @@ class BundledPhpExtensionsRepository extends ArrayRepository
      *     os-families?: non-empty-list<OperatingSystemFamily>,
      *     type?: ExtensionType,
      *     priority?: int,
+     *     configure-options?: list<array{name: non-empty-string, description: string, needs-value: bool}>,
      * }>
      */
     private static array $bundledPhpExtensions = [
@@ -69,7 +72,37 @@ class BundledPhpExtensionsRepository extends ArrayRepository
                 'lib-ffi' => '*',
             ],
         ],
-        // ['name' => 'gd'], // build failure - ext/gd/gd.c:79:11: fatal error: ft2build.h: No such file or directory
+        [
+            'name' => 'gd',
+            'require' => ['php' => '>= 7.4.0'],
+            'configure-options' => [
+                [
+                    'name' => 'with-jpeg',
+                    'description' => 'Enable JPEG support in bundled GD',
+                    'needs-value' => false,
+                ],
+                [
+                    'name' => 'with-freetype',
+                    'description' => 'Enable FreeType support in bundled GD',
+                    'needs-value' => false,
+                ],
+                [
+                    'name' => 'with-xpm',
+                    'description' => 'Enable XPM support in bundled GD',
+                    'needs-value' => false,
+                ],
+                [
+                    'name' => 'with-webp',
+                    'description' => 'Enable WebP support in bundled GD',
+                    'needs-value' => false,
+                ],
+                [
+                    'name' => 'with-avif',
+                    'description' => 'Enable AVIF support in bundled GD',
+                    'needs-value' => false,
+                ],
+            ],
+        ],
         ['name' => 'gettext'],
         ['name' => 'gmp'],
         ['name' => 'iconv'],
@@ -259,6 +292,10 @@ class BundledPhpExtensionsRepository extends ArrayRepository
                     $phpExt['priority'] = $extension['priority'];
                 }
 
+                if (array_key_exists('configure-options', $extension)) {
+                    $phpExt['configure-options'] = $extension['configure-options'];
+                }
+
                 $package->setPhpExt($phpExt);
 
                 return $package;
@@ -274,6 +311,59 @@ class BundledPhpExtensionsRepository extends ArrayRepository
         } catch (ProcessFailedException $processFailed) {
             throw new RuntimeException('Unable to find re2c on the system', previous: $processFailed);
         }
+    }
+
+    /**
+     * @param list<non-empty-string> $configureOptions
+     *
+     * @return list<non-empty-string>
+     */
+    public static function augmentConfigureOptionsForPhpBundledExtensions(
+        array $configureOptions,
+        DownloadedPackage $downloadedPackage,
+        TargetPlatform $targetPlatform,
+    ): array {
+        if ($downloadedPackage->package->name() !== 'php/gd') {
+            return $configureOptions;
+        }
+
+        $phpConfigHeader = $targetPlatform->phpBinaryPath->phpConfigHeader();
+        if ($phpConfigHeader === null) {
+            return $configureOptions;
+        }
+
+        $gdFeatureDefinesToConfigureOptions = [
+            'HAVE_GD_FREETYPE' => '--with-freetype',
+            'HAVE_GD_JPG' => '--with-jpeg',
+            'HAVE_GD_XPM' => '--with-xpm',
+            'HAVE_GD_WEBP' => '--with-webp',
+            'HAVE_GD_AVIF' => '--with-avif',
+        ];
+
+        foreach ($gdFeatureDefinesToConfigureOptions as $define => $configureOption) {
+            if (
+                ! preg_match('/^#define ' . $define . ' 1$/m', $phpConfigHeader)
+                || self::hasConfigureOption($configureOptions, $configureOption)
+            ) {
+                continue;
+            }
+
+            $configureOptions[] = $configureOption;
+        }
+
+        return $configureOptions;
+    }
+
+    /** @param list<non-empty-string> $configureOptions */
+    private static function hasConfigureOption(array $configureOptions, string $configureOption): bool
+    {
+        foreach ($configureOptions as $existingConfigureOption) {
+            if ($existingConfigureOption === $configureOption || str_starts_with($existingConfigureOption, $configureOption . '=')) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

@@ -155,6 +155,47 @@ final class PhpBinaryPathTest extends TestCase
         unlink($tmpSh);
     }
 
+    public function testPhpConfigHeaderIsReadFromPhpConfigIncludeDir(): void
+    {
+        if (Platform::isWindows()) {
+            self::markTestSkipped('Bash script does not run on Windows.');
+        }
+
+        $includeDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('pie_php_config_header_test', true);
+        mkdir($includeDir . DIRECTORY_SEPARATOR . 'main', recursive: true);
+        file_put_contents($includeDir . DIRECTORY_SEPARATOR . 'main' . DIRECTORY_SEPARATOR . 'php_config.h', "#define HAVE_GD_FREETYPE 1\n");
+
+        $tmpSh = tempnam(sys_get_temp_dir(), uniqid('pie_php_config_header_test'));
+        file_put_contents($tmpSh, "#!/usr/bin/env bash\necho \"" . $includeDir . "\";\n");
+        chmod($tmpSh, 0777);
+
+        $phpBinary = $this->createPartialMock(PhpBinaryPath::class, []);
+        (new ReflectionMethod($phpBinary, '__construct'))->invoke($phpBinary, $tmpSh, $tmpSh, PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION, PHP_VERSION);
+
+        self::assertSame("#define HAVE_GD_FREETYPE 1\n", $phpBinary->phpConfigHeader());
+        unlink($tmpSh);
+    }
+
+    public function testPhpConfigHeaderIsNullWhenHeaderDoesNotExist(): void
+    {
+        if (Platform::isWindows()) {
+            self::markTestSkipped('Bash script does not run on Windows.');
+        }
+
+        $includeDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('pie_php_config_header_test', true);
+        mkdir($includeDir, recursive: true);
+
+        $tmpSh = tempnam(sys_get_temp_dir(), uniqid('pie_php_config_header_test'));
+        file_put_contents($tmpSh, "#!/usr/bin/env bash\necho \"" . $includeDir . "\";\n");
+        chmod($tmpSh, 0777);
+
+        $phpBinary = $this->createPartialMock(PhpBinaryPath::class, []);
+        (new ReflectionMethod($phpBinary, '__construct'))->invoke($phpBinary, $tmpSh, $tmpSh, PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION, PHP_VERSION);
+
+        self::assertNull($phpBinary->phpConfigHeader());
+        unlink($tmpSh);
+    }
+
     public function testVersionDetailsAreReadCorrectlyWhenSurroundedByWarningsAndDeprecations(): void
     {
         if (Platform::isWindows()) {

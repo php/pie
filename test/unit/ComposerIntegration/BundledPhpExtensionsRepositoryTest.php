@@ -6,6 +6,7 @@ namespace Php\PieUnitTest\ComposerIntegration;
 
 use Composer\Package\CompletePackageInterface;
 use Php\Pie\ComposerIntegration\BundledPhpExtensionsRepository;
+use Php\Pie\ConfigureOption;
 use Php\Pie\DependencyResolver\Package;
 use Php\Pie\Downloading\DownloadedPackage;
 use Php\Pie\ExtensionName;
@@ -22,8 +23,10 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 
+use function array_map;
 use function Safe\mkdir;
 use function Safe\realpath;
+use function substr;
 use function sys_get_temp_dir;
 use function uniqid;
 
@@ -46,6 +49,7 @@ final class BundledPhpExtensionsRepositoryTest extends TestCase
             ['php/enchant'],
             ['php/exif'],
             ['php/ffi'],
+            ['php/gd'],
             ['php/gettext'],
             ['php/gmp'],
             ['php/iconv'],
@@ -111,6 +115,38 @@ final class BundledPhpExtensionsRepositoryTest extends TestCase
         self::assertSame('8.1.0', $package->getPrettyVersion());
     }
 
+    public function testGdExposesOptionalFeatureFlags(): void
+    {
+        $phpBinary = $this->createMock(PhpBinaryPath::class);
+        $phpBinary->method('version')->willReturn('8.1.0');
+
+        $repository = BundledPhpExtensionsRepository::forTargetPlatform(
+            new TargetPlatform(
+                OperatingSystem::NonWindows,
+                OperatingSystemFamily::Linux,
+                $phpBinary,
+                Architecture::x86_64,
+                ThreadSafetyMode::NonThreadSafe,
+                1,
+                null,
+                null,
+            ),
+        );
+
+        $composerPackage = $repository->findPackage('php/gd', '8.1.0');
+        self::assertInstanceOf(CompletePackageInterface::class, $composerPackage);
+
+        $package = Package::fromComposerCompletePackage($composerPackage);
+
+        self::assertSame(
+            [['with-jpeg', false], ['with-freetype', false], ['with-xpm', false], ['with-webp', false], ['with-avif', false]],
+            array_map(
+                static fn (ConfigureOption $option): array => [$option->name, $option->needsValue],
+                $package->configureOptions(),
+            ),
+        );
+    }
+
     public function testMakeCommandForXmlReader(): void
     {
         $phpPath       = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('pie_test_bundled_', true);
@@ -158,6 +194,67 @@ final class BundledPhpExtensionsRepositoryTest extends TestCase
                         null,
                     ),
                     realpath($domPath),
+                ),
+            ),
+        );
+    }
+
+    /** @return array<non-empty-string, array{non-empty-string, string|null, list<non-empty-string>, list<non-empty-string>}> */
+    public static function configureOptionsForPhpConfigHeader(): array
+    {
+        $allGdFeatures = "#define HAVE_GD_AVIF 1\n#define HAVE_GD_FREETYPE 1\n#define HAVE_GD_JPG 1\n#define HAVE_GD_PNG 1\n#define HAVE_GD_WEBP 1\n#define HAVE_GD_XPM 1\n";
+
+        return [
+            'gd with all features' => ['php/gd', $allGdFeatures, [], ['--with-freetype', '--with-jpeg', '--with-xpm', '--with-webp', '--with-avif']],
+            'gd with only freetype' => ['php/gd', "#define HAVE_GD_FREETYPE 1\n", [], ['--with-freetype']],
+            'gd with undefined freetype' => ['php/gd', "/* #undef HAVE_GD_FREETYPE */\n", [], []],
+            'gd keeps existing options first' => ['php/gd', "#define HAVE_GD_FREETYPE 1\n", ['--with-libdir=lib64'], ['--with-libdir=lib64', '--with-freetype']],
+            'gd does not duplicate user flag' => ['php/gd', "#define HAVE_GD_FREETYPE 1\n#define HAVE_GD_JPG 1\n", ['--with-freetype'], ['--with-freetype', '--with-jpeg']],
+            'gd does not override user flag value' => ['php/gd', "#define HAVE_GD_JPG 1\n", ['--with-jpeg=/opt/jpeg'], ['--with-jpeg=/opt/jpeg']],
+            'gd without php_config.h' => ['php/gd', null, [], []],
+            'other bundled extension' => ['php/exif', $allGdFeatures, [], []],
+        ];
+    }
+
+    /**
+     * @param non-empty-string       $packageName
+     * @param list<non-empty-string> $configureOptions
+     * @param list<non-empty-string> $expectedConfigureOptions
+     */
+    #[DataProvider('configureOptionsForPhpConfigHeader')]
+    public function testConfigureOptionsAreDetectedFromPhpConfigHeader(
+        string $packageName,
+        string|null $phpConfigHeader,
+        array $configureOptions,
+        array $expectedConfigureOptions,
+    ): void {
+        $phpBinary = $this->createMock(PhpBinaryPath::class);
+        $phpBinary->method('phpConfigHeader')->willReturn($phpConfigHeader);
+
+        self::assertSame(
+            $expectedConfigureOptions,
+            BundledPhpExtensionsRepository::augmentConfigureOptionsForPhpBundledExtensions(
+                $configureOptions,
+                DownloadedPackage::fromPackageAndExtractedPath(
+                    new Package(
+                        $this->createMock(CompletePackageInterface::class),
+                        ExtensionType::PhpModule,
+                        ExtensionName::normaliseFromString(substr($packageName, 4)),
+                        $packageName,
+                        '1.2.3',
+                        null,
+                    ),
+                    '/path/to/ext',
+                ),
+                new TargetPlatform(
+                    OperatingSystem::NonWindows,
+                    OperatingSystemFamily::Linux,
+                    $phpBinary,
+                    Architecture::x86_64,
+                    ThreadSafetyMode::NonThreadSafe,
+                    1,
+                    null,
+                    null,
                 ),
             ),
         );
