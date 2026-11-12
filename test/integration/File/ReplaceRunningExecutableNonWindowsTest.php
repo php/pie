@@ -46,7 +46,8 @@ final class ReplaceRunningExecutableNonWindowsTest extends TestCase
     {
         $this->path = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('pie_test_replace_running_executable_', true);
         mkdir($this->path);
-        $this->executable = $this->path . DIRECTORY_SEPARATOR . 'pie';
+        // new ubuntu rust coreutils doesn't like it not being called sleep
+        $this->executable = $this->path . DIRECTORY_SEPARATOR . 'sleep';
         copy('/bin/sleep', $this->executable);
         chmod($this->executable, 0755);
 
