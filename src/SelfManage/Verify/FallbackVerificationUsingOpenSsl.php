@@ -77,6 +77,7 @@ final class FallbackVerificationUsingOpenSsl implements VerifyPiePhar
                 self::ATTESTATION_CERTIFICATE_EXPECTED_EXTENSION_VALUES,
                 $expectedCertificateIdentity,
                 self::OIDC_ISSUER,
+                'https://slsa.dev/provenance/v1',
             )->verify($bundles, $file);
         } catch (FailedToVerifyArtifact $failedToVerifyArtifact) {
             throw FailedToVerifyRelease::fromAttestationException($failedToVerifyArtifact);

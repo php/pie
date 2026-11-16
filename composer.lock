@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1a25ec1e582c156a74e0bada32bb48ef",
+    "content-hash": "90c5538a68ac278421c71903007b79b5",
     "packages": [
         {
             "name": "composer/ca-bundle",
@@ -149,16 +149,16 @@
         },
         {
             "name": "composer/composer",
-            "version": "2.11.1",
+            "version": "2.11.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/composer/composer.git",
-                "reference": "472b418967419c6124edd91dc6310a3bec091dae"
+                "reference": "12c820dbc3f030954b1d09f5884fcf1e9d29d6cb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/composer/composer/zipball/472b418967419c6124edd91dc6310a3bec091dae",
-                "reference": "472b418967419c6124edd91dc6310a3bec091dae",
+                "url": "https://api.github.com/repos/composer/composer/zipball/12c820dbc3f030954b1d09f5884fcf1e9d29d6cb",
+                "reference": "12c820dbc3f030954b1d09f5884fcf1e9d29d6cb",
                 "shasum": ""
             },
             "require": {
@@ -248,7 +248,7 @@
                 "irc": "ircs://irc.libera.chat:6697/composer",
                 "issues": "https://github.com/composer/composer/issues",
                 "security": "https://github.com/composer/composer/security/policy",
-                "source": "https://github.com/composer/composer/tree/2.11.1"
+                "source": "https://github.com/composer/composer/tree/2.11.2"
             },
             "funding": [
                 {
@@ -260,7 +260,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-10-30T13:52:10+00:00"
+            "time": "2026-11-10T09:09:37+00:00"
         },
         {
             "name": "composer/metadata-minifier",
@@ -2849,16 +2849,16 @@
         },
         {
             "name": "thephpf/attestation",
-            "version": "0.0.8",
+            "version": "0.0.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ThePHPF/attestation.git",
-                "reference": "4b9aa7aa317e5092290176a174308fde085c3cf9"
+                "reference": "a07f28a28cff04e5b70a831b2cf2760dfe494f7f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ThePHPF/attestation/zipball/4b9aa7aa317e5092290176a174308fde085c3cf9",
-                "reference": "4b9aa7aa317e5092290176a174308fde085c3cf9",
+                "url": "https://api.github.com/repos/ThePHPF/attestation/zipball/a07f28a28cff04e5b70a831b2cf2760dfe494f7f",
+                "reference": "a07f28a28cff04e5b70a831b2cf2760dfe494f7f",
                 "shasum": ""
             },
             "require": {
@@ -2906,7 +2906,7 @@
             "description": "A PHP library to aid in verifying artifact attestations",
             "support": {
                 "issues": "https://github.com/ThePHPF/attestation/issues",
-                "source": "https://github.com/ThePHPF/attestation/tree/0.0.8"
+                "source": "https://github.com/ThePHPF/attestation/tree/0.0.9"
             },
             "funding": [
                 {
@@ -2918,7 +2918,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2026-09-13T19:02:47+00:00"
+            "time": "2026-11-16T20:37:01+00:00"
         },
         {
             "name": "webmozart/assert",
@@ -3669,16 +3669,16 @@
         },
         {
             "name": "opis/json-schema",
-            "version": "2.6.1",
+            "version": "2.6.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opis/json-schema.git",
-                "reference": "7d8685a78db131eb6a1571cc7b4db8f4b59e8628"
+                "reference": "b87b424da3fbeaab09567910fda48dc88d9dcbd8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opis/json-schema/zipball/7d8685a78db131eb6a1571cc7b4db8f4b59e8628",
-                "reference": "7d8685a78db131eb6a1571cc7b4db8f4b59e8628",
+                "url": "https://api.github.com/repos/opis/json-schema/zipball/b87b424da3fbeaab09567910fda48dc88d9dcbd8",
+                "reference": "b87b424da3fbeaab09567910fda48dc88d9dcbd8",
                 "shasum": ""
             },
             "require": {
@@ -3728,9 +3728,9 @@
             ],
             "support": {
                 "issues": "https://github.com/opis/json-schema/issues",
-                "source": "https://github.com/opis/json-schema/tree/2.6.1"
+                "source": "https://github.com/opis/json-schema/tree/2.6.2"
             },
-            "time": "2026-11-06T04:25:16+00:00"
+            "time": "2026-11-08T08:09:42+00:00"
         },
         {
             "name": "opis/string",
@@ -4090,11 +4090,11 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "2.3.5",
+            "version": "2.3.6",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/645a1bd6bead15fc1b8474137467961d0fa30a79",
-                "reference": "645a1bd6bead15fc1b8474137467961d0fa30a79",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/00cedebb76cc82c1592414fa4f616cefdccda16f",
+                "reference": "00cedebb76cc82c1592414fa4f616cefdccda16f",
                 "shasum": ""
             },
             "require": {
@@ -4150,20 +4150,20 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-11-03T12:14:22+00:00"
+            "time": "2026-11-15T19:58:26+00:00"
         },
         {
             "name": "phpstan/phpstan-phpunit",
-            "version": "2.1.1",
+            "version": "2.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan-phpunit.git",
-                "reference": "8d16b8478e523a47f8c02e83bce8981b5b5a3b03"
+                "reference": "ffff35d4f96c4642d7f41a3515d90afa0f58be62"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan-phpunit/zipball/8d16b8478e523a47f8c02e83bce8981b5b5a3b03",
-                "reference": "8d16b8478e523a47f8c02e83bce8981b5b5a3b03",
+                "url": "https://api.github.com/repos/phpstan/phpstan-phpunit/zipball/ffff35d4f96c4642d7f41a3515d90afa0f58be62",
+                "reference": "ffff35d4f96c4642d7f41a3515d90afa0f58be62",
                 "shasum": ""
             },
             "require": {
@@ -4206,9 +4206,9 @@
             ],
             "support": {
                 "issues": "https://github.com/phpstan/phpstan-phpunit/issues",
-                "source": "https://github.com/phpstan/phpstan-phpunit/tree/2.1.1"
+                "source": "https://github.com/phpstan/phpstan-phpunit/tree/2.1.2"
             },
-            "time": "2026-10-06T18:12:32+00:00"
+            "time": "2026-11-12T15:27:53+00:00"
         },
         {
             "name": "phpstan/phpstan-webmozart-assert",
@@ -4584,16 +4584,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "10.5.66",
+            "version": "10.5.67",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "747c9889613d0b3ffa08b74272e50ed3b8fa6d72"
+                "reference": "1f3e67dd433817bddfc64afab63977cc4b011374"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/747c9889613d0b3ffa08b74272e50ed3b8fa6d72",
-                "reference": "747c9889613d0b3ffa08b74272e50ed3b8fa6d72",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/1f3e67dd433817bddfc64afab63977cc4b011374",
+                "reference": "1f3e67dd433817bddfc64afab63977cc4b011374",
                 "shasum": ""
             },
             "require": {
@@ -4665,7 +4665,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/10.5.66"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/10.5.67"
             },
             "funding": [
                 {
@@ -4673,7 +4673,7 @@
                     "type": "other"
                 }
             ],
-            "time": "2026-10-05T05:46:26+00:00"
+            "time": "2026-11-13T11:07:03+00:00"
         },
         {
             "name": "sebastian/cli-parser",
