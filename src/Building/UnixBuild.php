@@ -22,6 +22,7 @@ use Symfony\Component\Process\Process as SymfonyProcess;
 use function count;
 use function file_exists;
 use function implode;
+use function max;
 use function Safe\rename;
 use function sprintf;
 use function str_starts_with;
@@ -80,6 +81,14 @@ final class UnixBuild implements Build
     ): BinaryFile {
         $outputCallback = Process::outputCallbackForVerbosity($io, IOInterface::VERBOSE);
 
+        $sourceDateEpoch = Platform::getEnv('SOURCE_DATE_EPOCH');
+        if ($sourceDateEpoch === false) {
+            $releaseDate     = $downloadedPackage->package->composerPackage()->getReleaseDate();
+            $sourceDateEpoch = (string) max(0, $releaseDate?->getTimestamp() ?? 0);
+        }
+
+        $buildEnv = ['SOURCE_DATE_EPOCH' => $sourceDateEpoch];
+
         $phpizePath = $targetPlatform->phpizePath ?? PhpizePath::guessFrom($targetPlatform->phpBinaryPath);
 
         /**
@@ -95,6 +104,7 @@ final class UnixBuild implements Build
             $downloadedPackage,
             $io,
             $outputCallback,
+            $buildEnv,
         );
 
         $io->write('<info>phpize complete</info>.');
@@ -111,13 +121,13 @@ final class UnixBuild implements Build
             $configureOptions[] = '--with-php-config=' . $phpConfigPath;
         }
 
-        $this->configure($downloadedPackage, $targetPlatform, $configureOptions, $io, $outputCallback);
+        $this->configure($downloadedPackage, $targetPlatform, $configureOptions, $io, $outputCallback, $buildEnv);
 
         $optionsOutput = count($configureOptions) ? ' with options: ' . implode(' ', $configureOptions) : '.';
         $io->write('<info>Configure complete</info>' . $optionsOutput);
 
         try {
-            $this->make($targetPlatform, $downloadedPackage, $io, $outputCallback);
+            $this->make($targetPlatform, $downloadedPackage, $io, $outputCallback, $buildEnv);
         } catch (ProcessFailedException $p) {
             throw ProcessFailedWithLimitedOutput::fromProcessFailedException($p);
         }
@@ -186,12 +196,16 @@ final class UnixBuild implements Build
         }
     }
 
-    /** @param callable(SymfonyProcess::ERR|SymfonyProcess::OUT, string): void|null $outputCallback */
+    /**
+     * @param callable(SymfonyProcess::ERR|SymfonyProcess::OUT, string): void|null $outputCallback
+     * @param array<string, string>                                                $buildEnv
+     */
     private function phpize(
         PhpizePath $phpize,
         DownloadedPackage $downloadedPackage,
         IOInterface $io,
         callable|null $outputCallback,
+        array $buildEnv,
     ): void {
         $phpizeCommand = [$phpize->phpizeBinaryPath];
 
@@ -206,12 +220,14 @@ final class UnixBuild implements Build
             $phpizeCommand,
             $downloadedPackage->extractedSourcePath,
             outputCallback: $outputCallback,
+            env: $buildEnv,
         );
     }
 
     /**
      * @param list<non-empty-string>                                               $configureOptions
      * @param callable(SymfonyProcess::ERR|SymfonyProcess::OUT, string): void|null $outputCallback
+     * @param array<string, string>                                                $buildEnv
      */
     private function configure(
         DownloadedPackage $downloadedPackage,
@@ -219,13 +235,13 @@ final class UnixBuild implements Build
         array $configureOptions,
         IOInterface $io,
         callable|null $outputCallback,
+        array $buildEnv,
     ): void {
         $configureCommand = ['./configure', ...$configureOptions];
-        $configureEnv     = null;
 
         $pcreCompilerFlags = PcreCompilerFlags::forTargetPlatform($targetPlatform);
         if ($pcreCompilerFlags !== null) {
-            $configureEnv = ['CPPFLAGS' => trim(Platform::getEnv('CPPFLAGS') . ' ' . $pcreCompilerFlags)];
+            $buildEnv['CPPFLAGS'] = trim(Platform::getEnv('CPPFLAGS') . ' ' . $pcreCompilerFlags);
 
             $io->write(
                 '<comment>PHP uses an external PCRE library, adding to CPPFLAGS: ' . $pcreCompilerFlags . '</comment>',
@@ -242,16 +258,20 @@ final class UnixBuild implements Build
             $configureCommand,
             $downloadedPackage->extractedSourcePath,
             outputCallback: $outputCallback,
-            env: $configureEnv,
+            env: $buildEnv,
         );
     }
 
-    /** @param callable(SymfonyProcess::ERR|SymfonyProcess::OUT, string): void|null $outputCallback */
+    /**
+     * @param callable(SymfonyProcess::ERR|SymfonyProcess::OUT, string): void|null $outputCallback
+     * @param array<string, string>                                                $buildEnv
+     */
     private function make(
         TargetPlatform $targetPlatform,
         DownloadedPackage $downloadedPackage,
         IOInterface $io,
         callable|null $outputCallback,
+        array $buildEnv,
     ): void {
         $makeCommand = [MakePath::guess()];
 
@@ -275,6 +295,7 @@ final class UnixBuild implements Build
             $makeCommand,
             $downloadedPackage->extractedSourcePath,
             outputCallback: $outputCallback,
+            env: $buildEnv,
         );
     }
 

@@ -17,11 +17,15 @@ use Php\Pie\ExtensionType;
 use Php\Pie\Platform\TargetPhp\PhpBinaryPath;
 use Php\Pie\Platform\TargetPlatform;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use Safe\DateTimeImmutable;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
 
 use function dirname;
+
+use const PHP_BINARY;
 
 #[CoversClass(UnixBuild::class)]
 final class UnixBuildTest extends TestCase
@@ -32,7 +36,18 @@ final class UnixBuildTest extends TestCase
     private const TEST_PREBUILT_PATH_VALID                = __DIR__ . '/../../assets/pre-packaged-binary-examples/valid';
     private const TEST_PREBUILT_PATH_INVALID              = __DIR__ . '/../../assets/pre-packaged-binary-examples/invalid';
 
-    public function testUnixSourceBuildCanBuildExtension(): void
+    /** @return array<string, array{string|null, string|null, string}> */
+    public static function sourceDateEpochCases(): array
+    {
+        return [
+            'release timestamp' => [null, '2023-11-14T22:13:20+00:00', '22:13:20'],
+            'missing release timestamp' => [null, null, '00:00:00'],
+            'caller override' => ['1', '2023-11-14T22:13:20+00:00', '00:00:01'],
+        ];
+    }
+
+    #[DataProvider('sourceDateEpochCases')]
+    public function testUnixSourceBuildCanBuildExtension(string|null $sourceDateEpoch, string|null $releaseDate, string $expectedBuildTime): void
     {
         if (Platform::isWindows()) {
             self::markTestSkipped('Unix build test cannot be run on Windows');
@@ -44,6 +59,9 @@ final class UnixBuildTest extends TestCase
         $composerPackage
             ->method('getExtra')
             ->willReturn([self::COMPOSER_PACKAGE_EXTRA_KEY => DownloadUrlMethod::ComposerDefaultDownload->value]);
+        $composerPackage
+            ->method('getReleaseDate')
+            ->willReturn($releaseDate === null ? null : new DateTimeImmutable($releaseDate));
 
         $downloadedPackage = DownloadedPackage::fromPackageAndExtractedPath(
             new Package(
@@ -57,15 +75,34 @@ final class UnixBuildTest extends TestCase
             self::TEST_EXTENSION_PATH,
         );
 
-        $unixBuilder = new UnixBuild();
-        $builtBinary = $unixBuilder->__invoke(
-            $downloadedPackage,
-            TargetPlatform::fromPhpBinaryPath(PhpBinaryPath::fromCurrentProcess(), null, null),
-            ['--enable-pie_test_ext'],
-            $output,
-        );
+        $originalSourceDateEpoch = Platform::getEnv('SOURCE_DATE_EPOCH');
+        try {
+            if ($sourceDateEpoch === null) {
+                Platform::clearEnv('SOURCE_DATE_EPOCH');
+            } else {
+                Platform::putEnv('SOURCE_DATE_EPOCH', $sourceDateEpoch);
+            }
 
-        self::assertNotEmpty($builtBinary);
+            $builtBinary = (new UnixBuild())->__invoke(
+                $downloadedPackage,
+                TargetPlatform::fromPhpBinaryPath(PhpBinaryPath::fromCurrentProcess(), null, null),
+                ['--enable-pie_test_ext'],
+                $output,
+            );
+
+            self::assertSame($sourceDateEpoch ?? false, Platform::getEnv('SOURCE_DATE_EPOCH'));
+        } finally {
+            if ($originalSourceDateEpoch === false) {
+                Platform::clearEnv('SOURCE_DATE_EPOCH');
+            } else {
+                Platform::putEnv('SOURCE_DATE_EPOCH', $originalSourceDateEpoch);
+            }
+        }
+
+        $extensionInfo = (new Process([PHP_BINARY, '-n', '-d', 'extension=' . $builtBinary->filePath, '--ri', 'pie_test_ext']))
+            ->mustRun()
+            ->getOutput();
+        self::assertStringContainsString('Build time => ' . $expectedBuildTime, $extensionInfo);
 
         $outputString = $output->getOutput();
 

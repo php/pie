@@ -201,7 +201,7 @@ parameters:
 		-
 			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertNotEmpty\(\) with Php\\Pie\\File\\BinaryFile will always evaluate to true\.$#'
 			identifier: staticMethod.alreadyNarrowedType
-			count: 2
+			count: 1
 			path: test/integration/Building/UnixBuildTest.php
 
 		-
