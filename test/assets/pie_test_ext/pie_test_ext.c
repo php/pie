@@ -41,6 +41,7 @@ PHP_MINFO_FUNCTION(pie_test_ext)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "pie_test_ext support", "enabled");
+	php_info_print_table_row(2, "Build time", __TIME__);
 	php_info_print_table_end();
 }
 /* }}} */
