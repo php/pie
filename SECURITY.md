@@ -6,9 +6,9 @@ The following versions will receive security updates.
 
 | Version | Notes                                    | Security updates   |
 |---------|------------------------------------------|--------------------|
-| 1.5.x   | Stable, **recommended**                  | :white_check_mark: |
-| 1.4.x   | Old stable, upgrade soon                 | :white_check_mark: |
-| < 1.4   | No security updates, upgrade immediately | :x:                |
+| 1.6.x   | Stable, **recommended**                  | :white_check_mark: |
+| 1.5.x   | Old stable, upgrade soon                 | :white_check_mark: |
+| < 1.5   | No security updates, upgrade immediately | :x:                |
 
 ## Reporting a Vulnerability
 
