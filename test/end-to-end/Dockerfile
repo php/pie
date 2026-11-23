@@ -61,6 +61,8 @@ RUN pie install --auto-install-build-tools -v asgrim/example-pie-extension:2.0.5
 RUN pie show
 
 FROM homebrew_base_with_pie AS test_pie_installs_extension_using_pcre_with_brew
+# apcu 5.1.28 does not compile against PHP 8.6; unpin once a release supports it
+RUN brew install php@8.5 && brew unlink php && brew link --force --overwrite php@8.5
 RUN pie install --auto-install-build-tools -v apcu/apcu
 RUN php -m | grep -i apcu
 
