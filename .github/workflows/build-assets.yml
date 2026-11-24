@@ -6,7 +6,7 @@
 #      contents: read
 #      id-token: write
 #      attestations: write
-#    uses: ./.github/workflows/build-assets.yml
+#    uses: $/.github/workflows/build-assets.yml
 
 name: "Build the PIE assets"
 
