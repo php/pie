@@ -131,15 +131,22 @@ final class ResolveDependencyWithComposer implements DependencyResolver
             ));
         }
 
-        if ($buildProvider === 'Debian') {
-            $identifiedBuildProvider = true;
-            $this->io->write(sprintf(
-                '<comment>%sYou should probably use "apt install php%s-%s" or "apt install php-%s" (or similar) instead</comment>',
-                $note,
-                $targetPlatform->phpBinaryPath->majorMinorVersion(),
-                $piePackage->extensionName()->name(),
-                $piePackage->extensionName()->name(),
-            ));
+        $aptProviders = [
+            'Debian',
+            'Ubuntu',
+        ];
+        foreach ($aptProviders as $aptProvider) {
+            if ($buildProvider === $aptProvider) {
+                $identifiedBuildProvider = true;
+                $this->io->write(sprintf(
+                    '<comment>%sYou should probably use "apt install php%s-%s" or "apt install php-%s" (or similar) instead</comment>',
+                    $note,
+                    $targetPlatform->phpBinaryPath->majorMinorVersion(),
+                    $piePackage->extensionName()->name(),
+                    $piePackage->extensionName()->name(),
+                ));
+                break;
+            }
         }
 
         $rpmProviders = [
