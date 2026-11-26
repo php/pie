@@ -28,7 +28,6 @@ use function explode;
 use function file_exists;
 use function implode;
 use function is_array;
-use function is_string;
 use function Safe\parse_url;
 use function str_contains;
 use function str_starts_with;
@@ -157,7 +156,7 @@ final class Package
             return $this->name;
         }
 
-        if (! is_array($parsed) || ! array_key_exists('path', $parsed) || ! is_string($parsed['path'])) {
+        if (! array_key_exists('path', $parsed)) {
             return $this->name;
         }
 

@@ -44,7 +44,6 @@ class RemoveIniEntryWithFileGetContents implements RemoveIniEntry
         if ($additionalIniDirectory !== null && file_exists($additionalIniDirectory) && is_dir($additionalIniDirectory)) {
             $filenames = scandir($additionalIniDirectory);
             Assert::isList($filenames);
-            Assert::allString($filenames);
             $allIniFiles = array_merge(
                 array_map(
                     static function (string $path) use ($additionalIniDirectory): string {
