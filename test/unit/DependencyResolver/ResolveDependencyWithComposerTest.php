@@ -510,7 +510,7 @@ final class ResolveDependencyWithComposerTest extends TestCase
     {
         return [
             'Docker' => ['https://github.com/docker-library/php'],
-            'Debian/Ubuntu' => ['Debian'],
+            'Debian/Ubuntu' => ['Debian', 'Ubuntu'],
             'Remi Repo' => ['Remi\'s RPM repository <https://rpms.remirepo.net/> #StandWithUkraine'],
             'Brew' => ['Homebrew'],
         ];

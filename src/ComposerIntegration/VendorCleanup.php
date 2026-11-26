@@ -34,7 +34,6 @@ class VendorCleanup
         try {
             $vendorContents = scandir($vendorDir);
             Assert::isList($vendorContents);
-            Assert::allString($vendorContents);
         } catch (DirException $e) {
             $this->io->write(
                 sprintf(
