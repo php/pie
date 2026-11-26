@@ -20,3 +20,47 @@ updates:
       composer:
         patterns:
           - "*"
+  - package-ecosystem: "github-actions"
+    directory: /
+    target-branch: "1.6.x"
+    schedule:
+      interval: "monthly"
+    cooldown:
+      default-days: 7
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+  - package-ecosystem: "composer"
+    directory: /
+    target-branch: "1.6.x"
+    schedule:
+      interval: "monthly"
+    cooldown:
+      default-days: 7
+    groups:
+      composer:
+        patterns:
+          - "*"
+  - package-ecosystem: "github-actions"
+    directory: /
+    target-branch: "1.5.x"
+    schedule:
+      interval: "monthly"
+    cooldown:
+      default-days: 7
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+  - package-ecosystem: "composer"
+    directory: /
+    target-branch: "1.5.x"
+    schedule:
+      interval: "monthly"
+    cooldown:
+      default-days: 7
+    groups:
+      composer:
+        patterns:
+          - "*"
